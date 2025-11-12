@@ -10,30 +10,48 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const animationRef = useRef(null);
 
-  // 构建节点数据结构
+  // 构建节点数据结构 - 使用层级布局而非随机位置
   useEffect(() => {
     if (!tags || tags.length === 0) return;
 
     const nodeMap = new Map();
     const newNodes = [];
+    const levelGroups = new Map();
 
-    // 创建节点
-    tags.forEach((tag, index) => {
+    // 按深度分组
+    tags.forEach(tag => {
+      if (!levelGroups.has(tag.depth)) {
+        levelGroups.set(tag.depth, []);
+      }
+      levelGroups.get(tag.depth).push(tag);
+    });
+
+    // 计算布局
+    const maxDepth = Math.max(...tags.map(t => t.depth));
+    const verticalSpacing = 120;
+    const horizontalSpacing = 150;
+
+    tags.forEach(tag => {
+      const levelTags = levelGroups.get(tag.depth);
+      const indexInLevel = levelTags.indexOf(tag);
+      const levelWidth = levelTags.length * horizontalSpacing;
+      
       const node = {
         id: tag.id,
         tag: tag,
-        x: Math.random() * 800 + 100,
-        y: Math.random() * 600 + 100,
+        x: 500 + (indexInLevel - levelTags.length / 2) * horizontalSpacing + (Math.random() - 0.5) * 20,
+        y: 200 + tag.depth * verticalSpacing + (Math.random() - 0.5) * 20,
         vx: 0,
         vy: 0,
-        radius: 20 + tag.depth * 5,
+        radius: 20,
       };
       nodeMap.set(tag.id, node);
       newNodes.push(node);
     });
 
-    // 建立连接关系
+    // 建立父子关系
     tags.forEach(tag => {
       const node = nodeMap.get(tag.id);
       if (tag.parent_path) {
@@ -47,55 +65,119 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
     setNodes(newNodes);
   }, [tags]);
 
-  // 力导向算法
+  // 优化的力导向算法
   useEffect(() => {
     if (nodes.length === 0) return;
 
+    let frameCount = 0;
+    const maxFrames = 300; // 限制动画帧数
+
     const animate = () => {
-      const newNodes = [...nodes];
+      frameCount++;
       
+      // 在一定帧数后停止动画
+      if (frameCount > maxFrames) {
+        cancelAnimationFrame(animationRef.current);
+        return;
+      }
+
+      const newNodes = [...nodes];
+      let totalEnergy = 0;
+
       // 应用力
       newNodes.forEach((node, i) => {
         let fx = 0, fy = 0;
 
-        // 中心引力
-        const centerX = 500;
-        const centerY = 400;
-        fx += (centerX - node.x) * 0.001;
-        fy += (centerY - node.y) * 0.001;
+        // 1. 父子吸引力（最强）
+        if (node.parent) {
+          const dx = node.parent.x - node.x;
+          const dy = node.parent.y - node.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const targetDist = 100; // 目标距离
+          const force = (dist - targetDist) * 0.03; // 弹簧力
+          fx += (dx / dist) * force;
+          fy += (dy / dist) * force;
+        }
 
-        // 节点间排斥力
+        // 2. 节点排斥力（中等）
         newNodes.forEach((other, j) => {
           if (i === j) return;
           const dx = node.x - other.x;
           const dy = node.y - other.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const force = (node.radius + other.radius + 50) / dist;
-          fx += dx * force * 0.1;
-          fy += dy * force * 0.1;
+          const distSq = dx * dx + dy * dy;
+          const dist = Math.sqrt(distSq) || 1;
+          
+          if (dist < 150) { // 只在近距离时排斥
+            const force = 800 / distSq;
+            fx += (dx / dist) * force;
+            fy += (dy / dist) * force;
+          }
         });
 
-        // 父子连接吸引力
-        if (node.parent) {
-          const dx = node.parent.x - node.x;
-          const dy = node.parent.y - node.y;
-          fx += dx * 0.05;
-          fy += dy * 0.05;
+        // 3. 同层节点水平排列
+        const sameDepthNodes = newNodes.filter(n => n.tag.depth === node.tag.depth && n.id !== node.id);
+        sameDepthNodes.forEach(other => {
+          const dx = node.x - other.x;
+          const dy = node.y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          
+          // 水平方向排斥更强
+          if (Math.abs(dx) < 120) {
+            fx += (dx / dist) * 0.5;
+          }
+          // 垂直方向拉回同层
+          if (Math.abs(dy) > 10) {
+            fy -= dy * 0.01;
+          }
+        });
+
+        // 4. 轻微的中心引力（防止飘走）
+        const centerX = 500;
+        const centerY = 400;
+        const toCenterDist = Math.sqrt((node.x - centerX) ** 2 + (node.y - centerY) ** 2);
+        if (toCenterDist > 400) { // 只在远离中心时生效
+          fx += (centerX - node.x) * 0.001;
+          fy += (centerY - node.y) * 0.001;
         }
 
-        // 更新速度和位置
-        node.vx = (node.vx + fx) * 0.85;
-        node.vy = (node.vy + fy) * 0.85;
+        // 应用阻尼（关键：防止震荡）
+        const damping = 0.7;
+        node.vx = (node.vx + fx) * damping;
+        node.vy = (node.vy + fy) * damping;
+
+        // 限制最大速度
+        const maxSpeed = 5;
+        const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+        if (speed > maxSpeed) {
+          node.vx = (node.vx / speed) * maxSpeed;
+          node.vy = (node.vy / speed) * maxSpeed;
+        }
+
+        // 更新位置
         node.x += node.vx;
         node.y += node.vy;
+
+        totalEnergy += speed;
       });
 
+      // 如果系统能量很低，停止动画
+      if (totalEnergy < 0.1) {
+        cancelAnimationFrame(animationRef.current);
+        return;
+      }
+
       setNodes(newNodes);
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    const interval = setInterval(animate, 30);
-    return () => clearInterval(interval);
-  }, [nodes]);
+    animationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [nodes.length]); // 只在节点数量变化时重启
 
   // 绘制
   useEffect(() => {

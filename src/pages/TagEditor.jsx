@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 import { 
   ChevronRight, ChevronDown, Plus, 
   Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X, MoveUp,
-  List, Network, CheckSquare, Square, Lock, Unlock
+  List, Network, CheckSquare, Square, Lock, Unlock, Download, Upload
 } from "lucide-react";
 import GraphView from "../components/tagEditor/GraphView";
-import ImportExport from "../components/tagEditor/ImportExport";
 
 export default function TagEditor() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,6 +26,8 @@ export default function TagEditor() {
   const [viewMode, setViewMode] = useState('tree');
   const [selectedTags, setSelectedTags] = useState(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -63,34 +64,87 @@ export default function TagEditor() {
     },
   });
 
+  // 导入导出功能
+  const exportToJSON = () => {
+    const data = JSON.stringify(tags, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gameplaytags_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportError(null);
+
+    try {
+      const text = await file.text();
+      const importedTags = JSON.parse(text);
+
+      const existingPaths = new Set(tags.map(t => t.full_path));
+      const toCreate = importedTags.filter(tag => !existingPaths.has(tag.full_path));
+
+      if (toCreate.length === 0) {
+        setImportError('没有找到新的标签需要导入');
+        setImporting(false);
+        return;
+      }
+
+      const creates = toCreate.map(tag => 
+        base44.entities.GameplayTag.create({
+          name: tag.name,
+          full_path: tag.full_path,
+          parent_path: tag.parent_path || "",
+          depth: tag.depth || 0,
+          category: tag.category || "other",
+          description: tag.description || "",
+          is_locked: tag.is_locked || false,
+          usage_count: 0,
+        })
+      );
+
+      await Promise.all(creates);
+      queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
+      alert(`成功导入 ${toCreate.length} 个标签`);
+    } catch (err) {
+      setImportError(err.message);
+    } finally {
+      setImporting(false);
+      e.target.value = '';
+    }
+  };
+
   // 键盘快捷键
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ctrl+N: 新建标签
       if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
         document.querySelector('input[placeholder*="输入标签路径"]')?.focus();
       }
       
-      // F2: 重命名选中的标签
       if (e.key === 'F2' && selectedTag) {
         e.preventDefault();
         handleRename(selectedTag);
       }
       
-      // Delete: 删除选中的标签
       if (e.key === 'Delete' && selectedTag && !editingTag) {
         e.preventDefault();
         handleDelete(selectedTag);
       }
       
-      // Ctrl+S: 保存更改
       if (e.ctrlKey && e.key === 's' && hasUnsavedChanges) {
         e.preventDefault();
         handleSaveChanges();
       }
       
-      // Escape: 取消编辑/退出多选模式
       if (e.key === 'Escape') {
         if (editingTag) {
           setEditingTag(null);
@@ -100,7 +154,6 @@ export default function TagEditor() {
         }
       }
 
-      // Ctrl+A: 全选（多选模式下）
       if (e.ctrlKey && e.key === 'a' && isMultiSelectMode) {
         e.preventDefault();
         setSelectedTags(new Set(localTags.map(t => t.id)));
@@ -271,7 +324,6 @@ export default function TagEditor() {
     setContextMenu(null);
   };
 
-  // 批量操作
   const handleBatchDelete = async () => {
     if (selectedTags.size === 0) return;
     if (!window.confirm(`确定要删除 ${selectedTags.size} 个标签吗？`)) return;
@@ -533,13 +585,11 @@ export default function TagEditor() {
             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-yellow-500" />
           )}
 
-          {/* 分类颜色指示器 */}
           <div 
             className="w-1 h-4 rounded-full flex-shrink-0"
             style={{ backgroundColor: getCategoryColor(node.category) }}
           />
           
-          {/* 多选模式复选框 */}
           {isMultiSelectMode && (
             <div onClick={(e) => e.stopPropagation()}>
               {isMultiSelected ? 
@@ -567,7 +617,6 @@ export default function TagEditor() {
 
           <FolderTree className="w-4 h-4 text-[#ffd700] flex-shrink-0" />
 
-          {/* 锁定图标 */}
           {node.is_locked && (
             <Lock className="w-3 h-3 text-red-400 flex-shrink-0" />
           )}
@@ -630,6 +679,38 @@ export default function TagEditor() {
             <Network className="w-3 h-3 mr-1" />
             图形
           </Button>
+        </div>
+
+        {/* 导入/导出 */}
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exportToJSON}
+            className="h-6 px-2 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+            title="导出为 JSON"
+          >
+            <Download className="w-3 h-3" />
+          </Button>
+          <label>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              disabled={importing}
+              className="hidden"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+              disabled={importing}
+              onClick={(e) => e.currentTarget.previousElementSibling.click()}
+              title="导入 JSON"
+            >
+              <Upload className="w-3 h-3" />
+            </Button>
+          </label>
         </div>
 
         {/* 批量操作模式 */}
@@ -716,7 +797,6 @@ export default function TagEditor() {
           />
         </div>
 
-        {/* 快捷键提示 */}
         <div className="text-xs text-gray-500">
           Ctrl+N 新建 | F2 重命名 | Del 删除 | Ctrl+S 保存
         </div>
@@ -790,17 +870,8 @@ export default function TagEditor() {
               </div>
             </div>
 
-            {/* 右侧详情面板和工具 */}
-            <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4 space-y-4">
-              {/* 导入/导出 */}
-              <ImportExport
-                tags={tags}
-                onImportComplete={() => {
-                  queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
-                }}
-              />
-
-              {/* 标签详情 */}
+            {/* 右侧详情面板 */}
+            <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4">
               {selectedTag && (
                 <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
                   <div className="mb-4">
@@ -897,7 +968,6 @@ export default function TagEditor() {
             </div>
           </>
         ) : (
-          /* 图形视图 */
           <GraphView
             tags={localTags}
             onSelectTag={setSelectedTag}
