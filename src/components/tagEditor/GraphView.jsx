@@ -236,6 +236,28 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     };
   }, [isSimulating, nodes.length, filteredEdges, draggedNode]);
 
+  // 绘制箭头的通用函数
+  const drawArrow = (ctx, fromX, fromY, toX, toY, color, scale) => {
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const angle = Math.atan2(dy, dx);
+    const arrowSize = 10 / scale;
+    
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(
+      toX - arrowSize * Math.cos(angle - Math.PI / 6),
+      toY - arrowSize * Math.sin(angle - Math.PI / 6)
+    );
+    ctx.lineTo(
+      toX - arrowSize * Math.cos(angle + Math.PI / 6),
+      toY - arrowSize * Math.sin(angle + Math.PI / 6)
+    );
+    ctx.closePath();
+    ctx.fill();
+  };
+
   // 绘制
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -290,57 +312,62 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       const targetNode = nodes.find(n => n.id === edge.target);
       if (!sourceNode || !targetNode) return;
 
+      // 计算连线的起点和终点（考虑节点大小，避免箭头被节点覆盖）
+      const dx = targetNode.x - sourceNode.x;
+      const dy = targetNode.y - sourceNode.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < 1) return;
+      
+      // 缩短连线，使其不进入节点内部
+      const sourceRadius = sourceNode.height / 2;
+      const targetRadius = targetNode.height / 2;
+      const shortenStart = sourceRadius + 5;
+      const shortenEnd = targetRadius + 5;
+      
+      const startX = sourceNode.x + (dx / distance) * shortenStart;
+      const startY = sourceNode.y + (dy / distance) * shortenStart;
+      const endX = targetNode.x - (dx / distance) * shortenEnd;
+      const endY = targetNode.y - (dy / distance) * shortenEnd;
+
       ctx.beginPath();
-      ctx.moveTo(sourceNode.x, sourceNode.y);
-      ctx.lineTo(targetNode.x, targetNode.y);
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
 
       // 根据类型设置样式
+      let edgeColor;
       if (edge.type === 'hierarchy') {
-        ctx.strokeStyle = '#4a4a4a';
-        ctx.lineWidth = 2 / scale;
+        edgeColor = '#4a4a4a';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2.5 / scale;
         ctx.setLineDash([]);
       } else if (edge.type === 'required') {
-        ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 1.5 / scale;
-        ctx.setLineDash([5 / scale, 5 / scale]);
+        edgeColor = '#4ade80';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([6 / scale, 4 / scale]);
       } else if (edge.type === 'blocked') {
-        ctx.strokeStyle = '#f87171';
-        ctx.lineWidth = 1.5 / scale;
-        ctx.setLineDash([5 / scale, 5 / scale]);
+        edgeColor = '#f87171';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([6 / scale, 4 / scale]);
       } else if (edge.type === 'attached') {
-        ctx.strokeStyle = '#60a5fa';
-        ctx.lineWidth = 1.5 / scale;
-        ctx.setLineDash([5 / scale, 5 / scale]);
+        edgeColor = '#60a5fa';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([6 / scale, 4 / scale]);
       } else if (edge.type === 'removed') {
-        ctx.strokeStyle = '#fb923c';
-        ctx.lineWidth = 1.5 / scale;
-        ctx.setLineDash([5 / scale, 5 / scale]);
+        edgeColor = '#fb923c';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([6 / scale, 4 / scale]);
       }
       
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 箭头（只有层级关系显示箭头）
-      if (edge.type === 'hierarchy') {
-        const dx = targetNode.x - sourceNode.x;
-        const dy = targetNode.y - sourceNode.y;
-        const angle = Math.atan2(dy, dx);
-        const arrowSize = 8 / scale;
-        
-        ctx.fillStyle = '#4a4a4a';
-        ctx.beginPath();
-        ctx.moveTo(targetNode.x, targetNode.y);
-        ctx.lineTo(
-          targetNode.x - arrowSize * Math.cos(angle - Math.PI / 6),
-          targetNode.y - arrowSize * Math.sin(angle - Math.PI / 6)
-        );
-        ctx.lineTo(
-          targetNode.x - arrowSize * Math.cos(angle + Math.PI / 6),
-          targetNode.y - arrowSize * Math.sin(angle + Math.PI / 6)
-        );
-        ctx.closePath();
-        ctx.fill();
-      }
+      // 绘制箭头（所有类型的边都显示箭头）
+      drawArrow(ctx, startX, startY, endX, endY, edgeColor, scale);
     });
 
     // 绘制节点（胶囊/标签形状）
@@ -661,7 +688,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 className="border-gray-500"
               />
               <span className="text-xs text-gray-300">父子关系</span>
-              <div className="ml-auto w-6 h-0.5 bg-[#4a4a4a]" />
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 bg-[#4a4a4a]" />
+                <div className="text-gray-400">▶</div>
+              </div>
             </label>
             
             <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
@@ -671,7 +701,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 className="border-gray-500"
               />
               <span className="text-xs text-gray-300">必需关系</span>
-              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-green-400" />
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-green-400" />
+                <div className="text-green-400">▶</div>
+              </div>
             </label>
             
             <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
@@ -681,7 +714,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 className="border-gray-500"
               />
               <span className="text-xs text-gray-300">阻止关系</span>
-              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-red-400" />
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-red-400" />
+                <div className="text-red-400">▶</div>
+              </div>
             </label>
             
             <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
@@ -691,7 +727,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 className="border-gray-500"
               />
               <span className="text-xs text-gray-300">附加关系</span>
-              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-blue-400" />
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-blue-400" />
+                <div className="text-blue-400">▶</div>
+              </div>
             </label>
             
             <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
@@ -701,7 +740,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 className="border-gray-500"
               />
               <span className="text-xs text-gray-300">移除关系</span>
-              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-orange-400" />
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-orange-400" />
+                <div className="text-orange-400">▶</div>
+              </div>
             </label>
           </div>
         </div>
@@ -720,7 +762,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           <div>• <span className="text-white">拖动节点</span>调整位置</div>
           <div>• <span className="text-white">拖动空白</span>移动视图</div>
           <div>• <span className="text-white">滚轮</span>缩放画布</div>
-          <div>• <span className="text-white">过滤按钮</span>控制关系显示</div>
+          <div>• <span className="text-white">箭头</span>表示关系方向</div>
         </div>
         {hoveredNode && (
           <div className="mt-2 pt-2 border-t border-[#3d3d3d]">
