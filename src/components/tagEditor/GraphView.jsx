@@ -24,6 +24,8 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     blocked: true,       // 阻止关系
     attached: false,     // 附加关系
     removed: false,      // 移除关系
+    disabled_if: false,  // 禁用条件
+    remove_if: false,    // 移除条件
   });
   
   // 力学模拟参数
@@ -123,6 +125,34 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
               source: tag.id,
               target: removeTag.id,
               type: 'removed'
+            });
+          }
+        });
+      }
+
+      // 禁用条件关系
+      if (tag.disabled_if_tags && tag.disabled_if_tags.tags) {
+        tag.disabled_if_tags.tags.forEach(disabledPath => {
+          const disabledTag = tags.find(t => t.full_path === disabledPath);
+          if (disabledTag) {
+            initialEdges.push({
+              source: tag.id,
+              target: disabledTag.id,
+              type: 'disabled_if'
+            });
+          }
+        });
+      }
+
+      // 移除条件关系
+      if (tag.remove_if_tags && tag.remove_if_tags.tags) {
+        tag.remove_if_tags.tags.forEach(removeIfPath => {
+          const removeIfTag = tags.find(t => t.full_path === removeIfPath);
+          if (removeIfTag) {
+            initialEdges.push({
+              source: tag.id,
+              target: removeIfTag.id,
+              type: 'remove_if'
             });
           }
         });
@@ -361,6 +391,16 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         ctx.strokeStyle = edgeColor;
         ctx.lineWidth = 2 / scale;
         ctx.setLineDash([6 / scale, 4 / scale]);
+      } else if (edge.type === 'disabled_if') {
+        edgeColor = '#fbbf24';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([3 / scale, 3 / scale]);
+      } else if (edge.type === 'remove_if') {
+        edgeColor = '#a78bfa';
+        ctx.strokeStyle = edgeColor;
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([3 / scale, 3 / scale]);
       }
       
       ctx.stroke();
@@ -400,15 +440,16 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       ctx.lineTo(x + radius, y + node.height);
       ctx.closePath();
 
-      ctx.fillStyle = isSelected ? '#094771' : '#252526';
+      // 白底
+      ctx.fillStyle = isSelected ? '#e0f2fe' : '#ffffff';
       ctx.fill();
 
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
 
       // 边框
-      ctx.strokeStyle = isSelected ? '#0e639c' : isHovered || isDragged ? '#3d3d3d' : '#2d2d2d';
-      ctx.lineWidth = (isSelected ? 3 : 2) / scale;
+      ctx.strokeStyle = isSelected ? '#0e639c' : isHovered || isDragged ? '#3d3d3d' : '#cccccc';
+      ctx.lineWidth = (isSelected ? 3 : 1.5) / scale;
       ctx.stroke();
 
       // 分类色条（左侧半圆部分）
@@ -420,8 +461,8 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       ctx.closePath();
       ctx.fill();
 
-      // 节点文字
-      ctx.fillStyle = '#ffffff';
+      // 节点文字（黑色）
+      ctx.fillStyle = '#000000';
       ctx.font = `bold ${12 / scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -496,12 +537,17 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
 
     const clickedNode = getNodeAtPosition(x, y);
 
-    if (clickedNode) {
-      setDraggedNode(clickedNode);
-      onSelectTag(clickedNode.tag);
-    } else {
+    if (e.button === 2) {
+      // 右键：拖动画布
+      e.preventDefault();
       setIsDraggingCanvas(true);
       setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    } else if (e.button === 0) {
+      // 左键：选中或拖动节点
+      if (clickedNode) {
+        setDraggedNode(clickedNode);
+        onSelectTag(clickedNode.tag);
+      }
     }
   };
 
@@ -534,6 +580,10 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
   const handleMouseUp = () => {
     setIsDraggingCanvas(false);
     setDraggedNode(null);
+  };
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
   };
 
   const handleWheel = (e) => {
@@ -599,12 +649,13 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           draggedNode ? 'cursor-grabbing' : 
           isDraggingCanvas ? 'cursor-grabbing' : 
           hoveredNode ? 'cursor-pointer' : 
-          'cursor-grab'
+          'cursor-default'
         }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onContextMenu={handleContextMenu}
         onWheel={handleWheel}
       />
       
@@ -745,6 +796,32 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
                 <div className="text-orange-400">▶</div>
               </div>
             </label>
+
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.disabled_if}
+                onCheckedChange={() => toggleFilter('disabled_if')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">禁用条件</span>
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-yellow-400" />
+                <div className="text-yellow-400">▶</div>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.remove_if}
+                onCheckedChange={() => toggleFilter('remove_if')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">移除条件</span>
+              <div className="ml-auto flex items-center gap-1">
+                <div className="w-6 h-0.5 border-t border-dashed border-purple-400" />
+                <div className="text-purple-400">▶</div>
+              </div>
+            </label>
           </div>
         </div>
       )}
@@ -759,8 +836,8 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           </span>
         </div>
         <div className="space-y-1">
-          <div>• <span className="text-white">拖动节点</span>调整位置</div>
-          <div>• <span className="text-white">拖动空白</span>移动视图</div>
+          <div>• <span className="text-white">左键拖动</span>节点调整位置</div>
+          <div>• <span className="text-white">右键拖动</span>移动画布视图</div>
           <div>• <span className="text-white">滚轮</span>缩放画布</div>
           <div>• <span className="text-white">箭头</span>表示关系方向</div>
         </div>
