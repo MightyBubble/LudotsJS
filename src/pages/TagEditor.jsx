@@ -18,7 +18,7 @@ export default function TagEditor() {
   const [editValue, setEditValue] = useState("");
   const [draggedTag, setDraggedTag] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
-  const [pendingChanges, setPendingChanges] = useState({});
+  const [localTags, setLocalTags] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const queryClient = useQueryClient();
@@ -28,6 +28,12 @@ export default function TagEditor() {
     queryFn: () => base44.entities.GameplayTag.list(),
     initialData: [],
   });
+
+  // 初始化本地标签数据
+  useEffect(() => {
+    setLocalTags(tags);
+    setHasUnsavedChanges(false);
+  }, [tags]);
 
   const createTagMutation = useMutation({
     mutationFn: (tagData) => base44.entities.GameplayTag.create(tagData),
@@ -40,7 +46,6 @@ export default function TagEditor() {
     mutationFn: ({ id, data }) => base44.entities.GameplayTag.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
-      setEditingTag(null);
     },
   });
 
@@ -84,24 +89,42 @@ export default function TagEditor() {
     });
   };
 
-  // 应用待保存的更改到标签数据
-  const getEffectiveTags = useMemo(() => {
+  // 递归更新子节点路径
+  const updateChildrenPaths = (tags, oldParentPath, newParentPath) => {
     return tags.map(tag => {
-      const change = pendingChanges[tag.id];
-      return change ? { ...tag, ...change } : tag;
+      if (tag.full_path === oldParentPath) {
+        return tag;
+      }
+      
+      if (tag.full_path.startsWith(oldParentPath + '.')) {
+        const suffix = tag.full_path.substring(oldParentPath.length);
+        const newFullPath = newParentPath + suffix;
+        const newDepth = newFullPath.split('.').length - 1;
+        const parts = newFullPath.split('.');
+        const newParentPathForTag = parts.slice(0, -1).join('.');
+        
+        return {
+          ...tag,
+          full_path: newFullPath,
+          parent_path: newParentPathForTag,
+          depth: newDepth,
+        };
+      }
+      
+      return tag;
     });
-  }, [tags, pendingChanges]);
+  };
 
   // 构建树形结构
   const tagTree = useMemo(() => {
     const tree = [];
     const tagMap = {};
 
-    getEffectiveTags.forEach(tag => {
+    localTags.forEach(tag => {
       tagMap[tag.full_path] = { ...tag, children: [] };
     });
 
-    getEffectiveTags.forEach(tag => {
+    localTags.forEach(tag => {
       if (!tag.parent_path || tag.parent_path === "") {
         tree.push(tagMap[tag.full_path]);
       } else {
@@ -113,7 +136,7 @@ export default function TagEditor() {
     });
 
     return tree;
-  }, [getEffectiveTags]);
+  }, [localTags]);
 
   // 搜索过滤
   const filterTree = (nodes, query) => {
@@ -196,7 +219,7 @@ export default function TagEditor() {
     setContextMenu(null);
   };
 
-  // 拖拽处理 - 只更新内存状态
+  // 拖拽处理
   const handleDragStart = (e, tag) => {
     e.dataTransfer.effectAllowed = 'move';
     setDraggedTag(tag);
@@ -204,26 +227,35 @@ export default function TagEditor() {
 
   const handleDragOver = (e, tag) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
     
-    if (draggedTag && tag) {
-      if (tag.full_path.startsWith(draggedTag.full_path + '.') || tag.id === draggedTag.id) {
-        e.dataTransfer.dropEffect = 'none';
-        return;
-      }
+    if (!draggedTag || !tag) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
     }
     
+    // 不能拖到自己
+    if (tag.id === draggedTag.id) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
+    }
+    
+    // 不能拖到自己的子级
+    if (tag.full_path.startsWith(draggedTag.full_path + '.')) {
+      e.dataTransfer.dropEffect = 'none';
+      return;
+    }
+    
+    e.dataTransfer.dropEffect = 'move';
     setDropTarget(tag);
   };
 
-  const handleDragLeave = (e) => {
-    if (e.currentTarget === e.target) {
-      setDropTarget(null);
-    }
+  const handleDragLeave = () => {
+    setDropTarget(null);
   };
 
   const handleDrop = (e, targetTag) => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!draggedTag || !targetTag || draggedTag.id === targetTag.id) {
       setDraggedTag(null);
@@ -231,51 +263,75 @@ export default function TagEditor() {
       return;
     }
 
+    // 不能拖到自己的子级
     if (targetTag.full_path.startsWith(draggedTag.full_path + '.')) {
       setDraggedTag(null);
       setDropTarget(null);
       return;
     }
 
-    // 只更新内存状态，不写数据库
+    // 更新标签到新父级
     const newParentPath = targetTag.full_path;
     const newFullPath = `${newParentPath}.${draggedTag.name}`;
     const newDepth = newFullPath.split('.').length - 1;
 
-    setPendingChanges(prev => ({
-      ...prev,
-      [draggedTag.id]: {
-        parent_path: newParentPath,
-        full_path: newFullPath,
-        depth: newDepth,
+    // 更新本地数据
+    let updatedTags = localTags.map(tag => {
+      if (tag.id === draggedTag.id) {
+        return {
+          ...tag,
+          parent_path: newParentPath,
+          full_path: newFullPath,
+          depth: newDepth,
+        };
       }
-    }));
+      return tag;
+    });
 
+    // 递归更新所有子节点
+    updatedTags = updateChildrenPaths(updatedTags, draggedTag.full_path, newFullPath);
+
+    setLocalTags(updatedTags);
     setHasUnsavedChanges(true);
     setExpandedNodes(prev => new Set([...prev, targetTag.full_path]));
-    
     setDraggedTag(null);
     setDropTarget(null);
   };
 
   const handleDropToRoot = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!draggedTag) return;
 
-    // 只更新内存状态
+    // 如果已经是根级，不做任何事
+    if (!draggedTag.parent_path || draggedTag.parent_path === "") {
+      setDraggedTag(null);
+      setDropTarget(null);
+      return;
+    }
+
+    // 移动到根级
     const newFullPath = draggedTag.name;
     const newDepth = 0;
 
-    setPendingChanges(prev => ({
-      ...prev,
-      [draggedTag.id]: {
-        parent_path: "",
-        full_path: newFullPath,
-        depth: newDepth,
+    // 更新本地数据
+    let updatedTags = localTags.map(tag => {
+      if (tag.id === draggedTag.id) {
+        return {
+          ...tag,
+          parent_path: "",
+          full_path: newFullPath,
+          depth: newDepth,
+        };
       }
-    }));
+      return tag;
+    });
 
+    // 递归更新所有子节点
+    updatedTags = updateChildrenPaths(updatedTags, draggedTag.full_path, newFullPath);
+
+    setLocalTags(updatedTags);
     setHasUnsavedChanges(true);
     setDraggedTag(null);
     setDropTarget(null);
@@ -283,18 +339,35 @@ export default function TagEditor() {
 
   // 保存所有更改
   const handleSaveChanges = async () => {
-    const updates = Object.entries(pendingChanges).map(([id, data]) => 
-      updateTagMutation.mutateAsync({ id, data })
+    // 找出所有被修改的标签
+    const modifiedTags = localTags.filter(localTag => {
+      const originalTag = tags.find(t => t.id === localTag.id);
+      if (!originalTag) return false;
+      
+      return localTag.full_path !== originalTag.full_path ||
+             localTag.parent_path !== originalTag.parent_path ||
+             localTag.depth !== originalTag.depth;
+    });
+
+    // 批量更新
+    const updates = modifiedTags.map(tag => 
+      updateTagMutation.mutateAsync({
+        id: tag.id,
+        data: {
+          full_path: tag.full_path,
+          parent_path: tag.parent_path,
+          depth: tag.depth,
+        }
+      })
     );
     
     await Promise.all(updates);
-    setPendingChanges({});
     setHasUnsavedChanges(false);
   };
 
   // 撤销更改
   const handleDiscardChanges = () => {
-    setPendingChanges({});
+    setLocalTags(tags);
     setHasUnsavedChanges(false);
   };
 
@@ -311,7 +384,13 @@ export default function TagEditor() {
     const isEditing = editingTag === node.id;
     const isDragTarget = dropTarget?.id === node.id;
     const isDragging = draggedTag?.id === node.id;
-    const hasChange = !!pendingChanges[node.id];
+    
+    // 检查是否被修改
+    const originalTag = tags.find(t => t.id === node.id);
+    const isModified = originalTag && (
+      node.full_path !== originalTag.full_path ||
+      node.parent_path !== originalTag.parent_path
+    );
 
     return (
       <div key={node.id}>
@@ -325,23 +404,27 @@ export default function TagEditor() {
           onDragOver={(e) => handleDragOver(e, node)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node)}
-          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer group ${
+          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer group relative ${
             isSelected ? 'bg-[#094771]' : ''
-          } ${isDragTarget ? 'bg-[#0e639c] border-l-2 border-blue-400' : ''} ${
+          } ${isDragTarget ? 'bg-[#0e639c]' : ''} ${
             isDragging ? 'opacity-40' : ''
-          } ${hasChange ? 'border-l-2 border-yellow-600' : ''}`}
+          }`}
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onClick={() => setSelectedTag(node)}
           onContextMenu={(e) => handleContextMenu(e, node)}
         >
-          <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+          {isModified && (
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-yellow-500" />
+          )}
+          
+          <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
           
           <button
             onClick={(e) => {
               e.stopPropagation();
               if (hasChildren) toggleNode(node.full_path);
             }}
-            className="w-4 h-4 flex items-center justify-center hover:bg-[#3d3d3d]"
+            className="w-4 h-4 flex items-center justify-center hover:bg-[#3d3d3d] flex-shrink-0"
           >
             {hasChildren && (
               isExpanded ? 
@@ -350,7 +433,7 @@ export default function TagEditor() {
             )}
           </button>
 
-          <FolderTree className="w-4 h-4 text-[#ffd700]" />
+          <FolderTree className="w-4 h-4 text-[#ffd700] flex-shrink-0" />
 
           {isEditing ? (
             <Input
@@ -362,10 +445,11 @@ export default function TagEditor() {
                 if (e.key === 'Escape') setEditingTag(null);
               }}
               autoFocus
-              className="h-5 text-sm bg-[#2d2d2d] border-[#094771] text-white px-1"
+              className="h-5 text-sm bg-[#2d2d2d] border-[#094771] text-white px-1 flex-1"
+              onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            <span className={`text-sm select-none ${hasChange ? 'text-yellow-400' : 'text-gray-200'}`}>
+            <span className={`text-sm select-none ${isModified ? 'text-yellow-400' : 'text-gray-200'}`}>
               {node.name}
             </span>
           )}
@@ -448,7 +532,7 @@ export default function TagEditor() {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              使用 . 分隔自动创建层级，拖拽调整后点保存
+              拖拽标签调整层级，拖到空白处移至根级
             </p>
           </div>
 
@@ -457,7 +541,9 @@ export default function TagEditor() {
             className="flex-1 overflow-auto"
             onDragOver={(e) => {
               e.preventDefault();
-              e.dataTransfer.dropEffect = 'move';
+              if (draggedTag) {
+                e.dataTransfer.dropEffect = 'move';
+              }
             }}
             onDrop={handleDropToRoot}
           >
@@ -476,10 +562,10 @@ export default function TagEditor() {
 
           {/* 统计信息 */}
           <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
-            总计: {tags.length} 个标签
-            {Object.keys(pendingChanges).length > 0 && (
+            总计: {localTags.length} 个标签
+            {hasUnsavedChanges && (
               <span className="ml-3 text-yellow-400">
-                {Object.keys(pendingChanges).length} 个待保存
+                • 有未保存的更改
               </span>
             )}
           </div>
