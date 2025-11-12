@@ -1,18 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { ZoomIn, ZoomOut, Maximize2, Grid3x3, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function GraphView({ tags, onSelectTag, selectedTag, categories }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const [nodes, setNodes] = useState([]);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [draggedNode, setDraggedNode] = useState(null);
-  const [dragNodeOffset, setDragNodeOffset] = useState({ x: 0, y: 0 });
-  const animationRef = useRef(null);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [layoutType, setLayoutType] = useState('hierarchical'); // 'hierarchical' or 'tree'
 
   // 获取分类颜色
   const getCategoryColor = (categoryKey) => {
@@ -20,175 +18,134 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     return category?.color || '#94a3b8';
   };
 
-  // 力导向参数
-  const PARAMS = {
-    stiffness: 400.0,
-    repulsion: 400.0,
-    damping: 0.5,
-    minEnergyThreshold: 0.01,
-    maxSpeed: 10
-  };
+  // 构建层级结构（学习 React Flow 的层级布局）
+  const hierarchicalLayout = useMemo(() => {
+    if (!tags || tags.length === 0) return { nodes: [], edges: [] };
 
-  // 初始化节点
-  useEffect(() => {
-    if (!tags || tags.length === 0) return;
-
-    const nodeMap = new Map();
-    const newNodes = [];
-
+    // 按深度分组
+    const levelGroups = {};
     tags.forEach(tag => {
-      const node = {
-        id: tag.id,
-        tag: tag,
-        x: Math.random() * 800 + 100,
-        y: Math.random() * 600 + 100,
-        vx: 0,
-        vy: 0,
-        mass: 1.0,
-        radius: 20,
-        fixed: false,
-      };
-      nodeMap.set(tag.id, node);
-      newNodes.push(node);
+      const level = tag.depth || 0;
+      if (!levelGroups[level]) levelGroups[level] = [];
+      levelGroups[level].push(tag);
     });
 
-    newNodes.forEach(node => {
-      if (node.tag.parent_path) {
-        const parent = tags.find(t => t.full_path === node.tag.parent_path);
-        if (parent) {
-          node.parent = nodeMap.get(parent.id);
-        }
-      }
-    });
+    const maxLevel = Math.max(...Object.keys(levelGroups).map(Number));
+    const nodes = [];
+    const edges = [];
 
-    setNodes(newNodes);
-  }, [tags]);
+    // 计算每层的布局
+    Object.keys(levelGroups).forEach(level => {
+      const levelTags = levelGroups[level];
+      const levelNum = parseInt(level);
+      
+      // 水平间距
+      const horizontalSpacing = 200;
+      const verticalSpacing = 120;
+      
+      // 计算该层的起始 X 坐标（居中）
+      const totalWidth = (levelTags.length - 1) * horizontalSpacing;
+      const startX = 400 - totalWidth / 2;
+      
+      levelTags.forEach((tag, index) => {
+        const x = startX + index * horizontalSpacing;
+        const y = 100 + levelNum * verticalSpacing;
+        
+        nodes.push({
+          id: tag.id,
+          tag: tag,
+          x: x,
+          y: y,
+          width: 160,
+          height: 60
+        });
 
-  // Springy力导向算法
-  useEffect(() => {
-    if (nodes.length === 0) return;
-
-    let lastTime = Date.now();
-    
-    const simulate = () => {
-      const currentTime = Date.now();
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
-      lastTime = currentTime;
-
-      const newNodes = [...nodes];
-      let totalKineticEnergy = 0;
-
-      newNodes.forEach(node => {
-        if (node.fixed) return;
-        node.fx = 0;
-        node.fy = 0;
-      });
-
-      // 弹簧力
-      newNodes.forEach(node => {
-        if (node.fixed || !node.parent) return;
-        
-        const parent = node.parent;
-        const dx = parent.x - node.x;
-        const dy = parent.y - node.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < 0.01) return;
-        
-        const restLength = 100;
-        const force = PARAMS.stiffness * (distance - restLength);
-        
-        const fx = (force * dx) / distance;
-        const fy = (force * dy) / distance;
-        
-        node.fx += fx;
-        node.fy += fy;
-        
-        if (!parent.fixed) {
-          parent.fx -= fx;
-          parent.fy -= fy;
-        }
-      });
-
-      // 排斥力
-      for (let i = 0; i < newNodes.length; i++) {
-        const node1 = newNodes[i];
-        if (node1.fixed) continue;
-        
-        for (let j = i + 1; j < newNodes.length; j++) {
-          const node2 = newNodes[j];
-          
-          const dx = node2.x - node1.x;
-          const dy = node2.y - node1.y;
-          const distanceSq = dx * dx + dy * dy;
-          const distance = Math.sqrt(distanceSq);
-          
-          if (distance < 0.01) continue;
-          
-          const force = PARAMS.repulsion / distanceSq;
-          
-          const fx = (force * dx) / distance;
-          const fy = (force * dy) / distance;
-          
-          node1.fx -= fx;
-          node1.fy -= fy;
-          
-          if (!node2.fixed) {
-            node2.fx += fx;
-            node2.fy += fy;
+        // 创建边
+        if (tag.parent_path) {
+          const parent = tags.find(t => t.full_path === tag.parent_path);
+          if (parent) {
+            edges.push({
+              source: parent.id,
+              target: tag.id
+            });
           }
         }
-      }
+      });
+    });
 
-      // 更新速度和位置
-      newNodes.forEach(node => {
-        if (node.fixed) return;
-        
-        const ax = node.fx / node.mass;
-        const ay = node.fy / node.mass;
-        
-        node.vx = (node.vx + ax * dt) * (1 - PARAMS.damping);
-        node.vy = (node.vy + ay * dt) * (1 - PARAMS.damping);
-        
-        const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
-        if (speed > PARAMS.maxSpeed) {
-          node.vx = (node.vx / speed) * PARAMS.maxSpeed;
-          node.vy = (node.vy / speed) * PARAMS.maxSpeed;
-        }
-        
-        node.x += node.vx * dt;
-        node.y += node.vy * dt;
-        
-        totalKineticEnergy += 0.5 * node.mass * (node.vx * node.vx + node.vy * node.vy);
+    return { nodes, edges };
+  }, [tags]);
+
+  // 树形布局（更紧凑）
+  const treeLayout = useMemo(() => {
+    if (!tags || tags.length === 0) return { nodes: [], edges: [] };
+
+    const nodes = [];
+    const edges = [];
+    const nodeMap = new Map();
+
+    // 构建树结构
+    const roots = tags.filter(t => !t.parent_path || t.parent_path === '');
+    
+    // 计算每个节点的子节点数（用于分配空间）
+    const getSubtreeWidth = (tag) => {
+      const children = tags.filter(t => t.parent_path === tag.full_path);
+      if (children.length === 0) return 1;
+      return children.reduce((sum, child) => sum + getSubtreeWidth(child), 0);
+    };
+
+    // 递归布局
+    const layoutNode = (tag, x, y, availableWidth) => {
+      nodes.push({
+        id: tag.id,
+        tag: tag,
+        x: x,
+        y: y,
+        width: 140,
+        height: 50
       });
 
-      const meanEnergy = totalKineticEnergy / newNodes.length;
-      
-      setNodes(newNodes);
-      
-      if (meanEnergy > PARAMS.minEnergyThreshold) {
-        animationRef.current = requestAnimationFrame(simulate);
-      } else {
-        animationRef.current = setTimeout(() => {
-          animationRef.current = requestAnimationFrame(simulate);
-        }, 500);
-      }
+      nodeMap.set(tag.id, { x, y });
+
+      const children = tags.filter(t => t.parent_path === tag.full_path);
+      if (children.length === 0) return;
+
+      // 计算子节点布局
+      const childY = y + 100;
+      let currentX = x - availableWidth / 2;
+
+      children.forEach(child => {
+        const childWidth = getSubtreeWidth(child);
+        const childSpace = (availableWidth * childWidth) / children.reduce((sum, c) => sum + getSubtreeWidth(c), 0);
+        const childX = currentX + childSpace / 2;
+
+        // 创建边
+        edges.push({
+          source: tag.id,
+          target: child.id
+        });
+
+        layoutNode(child, childX, childY, childSpace * 0.9);
+        currentX += childSpace;
+      });
     };
 
-    animationRef.current = requestAnimationFrame(simulate);
-    
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        clearTimeout(animationRef.current);
-      }
-    };
-  }, [nodes.length]);
+    // 布局根节点
+    const rootSpacing = 300;
+    roots.forEach((root, index) => {
+      const rootX = 400 + (index - roots.length / 2 + 0.5) * rootSpacing;
+      layoutNode(root, rootX, 80, 280);
+    });
 
-  // 绘制
+    return { nodes, edges };
+  }, [tags]);
+
+  const layout = layoutType === 'hierarchical' ? hierarchicalLayout : treeLayout;
+
+  // 绘制（学习 React Flow 的渲染风格）
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || nodes.length === 0) return;
+    if (!canvas || !layout.nodes.length) return;
 
     const ctx = canvas.getContext('2d');
     const container = containerRef.current;
@@ -199,76 +156,171 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     ctx.save();
     ctx.translate(offset.x + canvas.width / 2, offset.y + canvas.height / 2);
     ctx.scale(scale, scale);
-    ctx.translate(-500, -400);
+    ctx.translate(-400, -400);
 
-    // 绘制连接线
-    ctx.strokeStyle = '#4a4a4a';
-    ctx.lineWidth = 2;
-    nodes.forEach(node => {
-      if (node.parent) {
-        ctx.beginPath();
-        ctx.moveTo(node.x, node.y);
-        ctx.lineTo(node.parent.x, node.parent.y);
-        ctx.stroke();
-      }
+    // 绘制网格背景（学习 React Flow 的网格）
+    ctx.strokeStyle = '#2d2d2d';
+    ctx.lineWidth = 1;
+    const gridSize = 20;
+    const startX = Math.floor((-offset.x / scale - canvas.width / 2) / gridSize) * gridSize;
+    const startY = Math.floor((-offset.y / scale - canvas.height / 2) / gridSize) * gridSize;
+    const endX = startX + canvas.width / scale + gridSize * 2;
+    const endY = startY + canvas.height / scale + gridSize * 2;
+
+    for (let x = startX; x < endX; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, startY);
+      ctx.lineTo(x, endY);
+      ctx.stroke();
+    }
+    for (let y = startY; y < endY; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
+      ctx.stroke();
+    }
+
+    // 绘制边（平滑曲线，学习 React Flow 的贝塞尔曲线）
+    layout.edges.forEach(edge => {
+      const sourceNode = layout.nodes.find(n => n.id === edge.source);
+      const targetNode = layout.nodes.find(n => n.id === edge.target);
+      if (!sourceNode || !targetNode) return;
+
+      const startX = sourceNode.x;
+      const startY = sourceNode.y + sourceNode.height / 2;
+      const endX = targetNode.x;
+      const endY = targetNode.y - targetNode.height / 2;
+
+      // 贝塞尔曲线控制点
+      const cp1y = startY + (endY - startY) * 0.5;
+      const cp2y = endY - (endY - startY) * 0.5;
+
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.bezierCurveTo(startX, cp1y, endX, cp2y, endX, endY);
+      ctx.strokeStyle = '#4a4a4a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 箭头
+      const arrowSize = 8;
+      ctx.fillStyle = '#4a4a4a';
+      ctx.beginPath();
+      ctx.moveTo(endX, endY);
+      ctx.lineTo(endX - arrowSize / 2, endY - arrowSize);
+      ctx.lineTo(endX + arrowSize / 2, endY - arrowSize);
+      ctx.closePath();
+      ctx.fill();
     });
 
-    // 绘制节点
-    nodes.forEach(node => {
+    // 绘制节点（圆角矩形，学习 React Flow 的节点样式）
+    layout.nodes.forEach(node => {
       const isSelected = selectedTag?.id === node.id;
-      const isDragging = draggedNode?.id === node.id;
+      const isHovered = hoveredNode?.id === node.id;
       
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      
-      ctx.fillStyle = getCategoryColor(node.tag.category_key);
-      ctx.fill();
+      const x = node.x - node.width / 2;
+      const y = node.y - node.height / 2;
+      const radius = 8;
 
-      if (isSelected || isDragging) {
-        ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-      } else {
-        ctx.strokeStyle = '#2d2d2d';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+      // 阴影
+      if (isHovered || isSelected) {
+        ctx.shadowColor = 'rgba(14, 99, 156, 0.5)';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
       }
 
+      // 节点背景
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + node.width - radius, y);
+      ctx.quadraticCurveTo(x + node.width, y, x + node.width, y + radius);
+      ctx.lineTo(x + node.width, y + node.height - radius);
+      ctx.quadraticCurveTo(x + node.width, y + node.height, x + node.width - radius, y + node.height);
+      ctx.lineTo(x + radius, y + node.height);
+      ctx.quadraticCurveTo(x, y + node.height, x, y + node.height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+
+      ctx.fillStyle = isSelected ? '#094771' : '#252526';
+      ctx.fill();
+
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+
+      // 边框
+      ctx.strokeStyle = isSelected ? '#0e639c' : isHovered ? '#3d3d3d' : '#2d2d2d';
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.stroke();
+
+      // 分类色条
+      const categoryColor = getCategoryColor(node.tag.category_key);
+      ctx.fillStyle = categoryColor;
+      ctx.fillRect(x, y, 4, node.height);
+
+      // 节点文字
       ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+      ctx.font = 'bold 13px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(node.tag.name, node.x, node.y);
+      
+      const text = node.tag.name;
+      const maxWidth = node.width - 20;
+      let displayText = text;
+      
+      // 文字截断
+      if (ctx.measureText(text).width > maxWidth) {
+        let truncated = text;
+        while (ctx.measureText(truncated + '...').width > maxWidth && truncated.length > 0) {
+          truncated = truncated.slice(0, -1);
+        }
+        displayText = truncated + '...';
+      }
+      
+      ctx.fillText(displayText, node.x, node.y - 8);
+
+      // 子标题
+      ctx.fillStyle = '#888888';
+      ctx.font = '10px sans-serif';
+      const depth = `Level ${node.tag.depth}`;
+      ctx.fillText(depth, node.x, node.y + 8);
+
+      // 锁定图标
+      if (node.tag.is_locked) {
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('🔒', x + node.width - 15, y + 15);
+      }
     });
 
     ctx.restore();
-  }, [nodes, scale, offset, selectedTag, draggedNode, categories]);
+  }, [layout, scale, offset, selectedTag, hoveredNode, categories]);
 
   // 鼠标交互
+  const getNodeAtPosition = (x, y) => {
+    const canvas = canvasRef.current;
+    const canvasX = (x - canvas.width / 2 - offset.x) / scale + 400;
+    const canvasY = (y - canvas.height / 2 - offset.y) / scale + 400;
+
+    return layout.nodes.find(node => {
+      const nodeX = node.x - node.width / 2;
+      const nodeY = node.y - node.height / 2;
+      return canvasX >= nodeX && canvasX <= nodeX + node.width &&
+             canvasY >= nodeY && canvasY <= nodeY + node.height;
+    });
+  };
+
   const handleMouseDown = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - canvas.width / 2 - offset.x) / scale + 500;
-    const y = (e.clientY - rect.top - canvas.height / 2 - offset.y) / scale + 400;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const clickedNode = nodes.find(node => {
-      const dx = x - node.x;
-      const dy = y - node.y;
-      return Math.sqrt(dx * dx + dy * dy) < node.radius;
-    });
+    const clickedNode = getNodeAtPosition(x, y);
 
     if (clickedNode) {
       onSelectTag(clickedNode.tag);
-      setDraggedNode(clickedNode);
-      setDragNodeOffset({ x: x - clickedNode.x, y: y - clickedNode.y });
-      
-      setNodes(prevNodes => 
-        prevNodes.map(node => 
-          node.id === clickedNode.id 
-            ? { ...node, fixed: true, vx: 0, vy: 0 }
-            : node
-        )
-      );
     } else {
       setIsDraggingCanvas(true);
       setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
@@ -278,18 +330,13 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
   const handleMouseMove = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - canvas.width / 2 - offset.x) / scale + 500;
-    const y = (e.clientY - rect.top - canvas.height / 2 - offset.y) / scale + 400;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    if (draggedNode) {
-      setNodes(prevNodes => 
-        prevNodes.map(node => 
-          node.id === draggedNode.id 
-            ? { ...node, x: x - dragNodeOffset.x, y: y - dragNodeOffset.y }
-            : node
-        )
-      );
-    } else if (isDraggingCanvas) {
+    const hoveredNode = getNodeAtPosition(x, y);
+    setHoveredNode(hoveredNode || null);
+
+    if (isDraggingCanvas) {
       setOffset({
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y,
@@ -298,23 +345,13 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
   };
 
   const handleMouseUp = () => {
-    if (draggedNode) {
-      setNodes(prevNodes => 
-        prevNodes.map(node => 
-          node.id === draggedNode.id 
-            ? { ...node, fixed: false }
-            : node
-        )
-      );
-      setDraggedNode(null);
-    }
     setIsDraggingCanvas(false);
   };
 
   const handleWheel = (e) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    setScale(s => Math.min(Math.max(s * delta, 0.1), 3));
+    setScale(s => Math.min(Math.max(s * delta, 0.3), 2));
   };
 
   const resetView = () => {
@@ -322,11 +359,44 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     setOffset({ x: 0, y: 0 });
   };
 
+  const zoomToFit = () => {
+    if (!layout.nodes.length) return;
+
+    const minX = Math.min(...layout.nodes.map(n => n.x - n.width / 2));
+    const maxX = Math.max(...layout.nodes.map(n => n.x + n.width / 2));
+    const minY = Math.min(...layout.nodes.map(n => n.y - n.height / 2));
+    const maxY = Math.max(...layout.nodes.map(n => n.y + n.height / 2));
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    const canvas = canvasRef.current;
+    const scaleX = (canvas.width * 0.8) / width;
+    const scaleY = (canvas.height * 0.8) / height;
+    const newScale = Math.min(scaleX, scaleY, 1);
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    setScale(newScale);
+    setOffset({
+      x: (canvas.width / 2 - centerX * newScale),
+      y: (canvas.height / 2 - centerY * newScale)
+    });
+  };
+
+  useEffect(() => {
+    // 初始化时自动适配
+    if (layout.nodes.length > 0) {
+      setTimeout(zoomToFit, 100);
+    }
+  }, [layout.nodes.length]);
+
   return (
     <div ref={containerRef} className="relative w-full h-full bg-[#1e1e1e]">
       <canvas
         ref={canvasRef}
-        className={`w-full h-full ${draggedNode ? 'cursor-grabbing' : isDraggingCanvas ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`w-full h-full ${isDraggingCanvas ? 'cursor-grabbing' : hoveredNode ? 'cursor-pointer' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -334,38 +404,84 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         onWheel={handleWheel}
       />
       
-      <div className="absolute top-4 right-4 flex gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setScale(s => Math.min(s * 1.2, 3))}
-          className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-200"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setScale(s => Math.max(s * 0.8, 0.1))}
-          className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-200"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={resetView}
-          className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-200"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </Button>
+      {/* 控制面板 */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <div className="bg-[#2d2d2d] border border-[#3d3d3d] rounded p-1 flex flex-col gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setScale(s => Math.min(s * 1.2, 2))}
+            className="h-8 w-8 p-0 hover:bg-[#3d3d3d] text-gray-200"
+            title="放大"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setScale(s => Math.max(s * 0.8, 0.3))}
+            className="h-8 w-8 p-0 hover:bg-[#3d3d3d] text-gray-200"
+            title="缩小"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={zoomToFit}
+            className="h-8 w-8 p-0 hover:bg-[#3d3d3d] text-gray-200"
+            title="适配视图"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* 布局切换 */}
+        <div className="bg-[#2d2d2d] border border-[#3d3d3d] rounded p-1 flex flex-col gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setLayoutType('hierarchical')}
+            className={`h-8 w-8 p-0 hover:bg-[#3d3d3d] ${layoutType === 'hierarchical' ? 'bg-[#0e639c] text-white' : 'text-gray-200'}`}
+            title="层级布局"
+          >
+            <Layers className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setLayoutType('tree')}
+            className={`h-8 w-8 p-0 hover:bg-[#3d3d3d] ${layoutType === 'tree' ? 'bg-[#0e639c] text-white' : 'text-gray-200'}`}
+            title="树形布局"
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="absolute bottom-4 left-4 bg-[#2d2d2d] border border-[#3d3d3d] rounded p-3 text-xs text-gray-400">
-        • 拖动节点调整位置<br />
-        • 拖动空白处移动视图<br />
-        • 滚轮缩放<br />
-        • 点击节点查看详情
+      {/* 提示信息 */}
+      <div className="absolute bottom-4 left-4 bg-[#2d2d2d] border border-[#3d3d3d] rounded p-3 text-xs text-gray-400 max-w-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-2 h-2 rounded-full bg-blue-400" />
+          <span className="font-semibold text-white">图形视图</span>
+        </div>
+        <div className="space-y-1">
+          <div>• 点击节点查看详情</div>
+          <div>• 拖动空白处移动视图</div>
+          <div>• 滚轮缩放</div>
+          <div>• 彩色条表示分类</div>
+        </div>
+        {hoveredNode && (
+          <div className="mt-2 pt-2 border-t border-[#3d3d3d]">
+            <div className="font-semibold text-white">{hoveredNode.tag.name}</div>
+            <div className="text-gray-500 font-mono text-xs">{hoveredNode.tag.full_path}</div>
+          </div>
+        )}
+      </div>
+
+      {/* 缩放比例 */}
+      <div className="absolute bottom-4 right-4 bg-[#2d2d2d] border border-[#3d3d3d] rounded px-3 py-1 text-xs text-gray-400">
+        {Math.round(scale * 100)}%
       </div>
     </div>
   );
