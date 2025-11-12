@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function GraphView({ tags, onSelectTag, selectedTag }) {
+export default function GraphView({ tags, onSelectTag, selectedTag, categories }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [nodes, setNodes] = useState([]);
@@ -14,13 +14,19 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
   const [dragNodeOffset, setDragNodeOffset] = useState({ x: 0, y: 0 });
   const animationRef = useRef(null);
 
-  // 力导向参数 - 参考经典Springy算法
+  // 获取分类颜色
+  const getCategoryColor = (categoryKey) => {
+    const category = categories.find(c => c.key === categoryKey);
+    return category?.color || '#94a3b8';
+  };
+
+  // 力导向参数
   const PARAMS = {
-    stiffness: 400.0,        // 弹簧刚度
-    repulsion: 400.0,        // 节点间排斥力
-    damping: 0.5,            // 阻尼系数
-    minEnergyThreshold: 0.01, // 最小能量阈值
-    maxSpeed: 10             // 最大速度限制
+    stiffness: 400.0,
+    repulsion: 400.0,
+    damping: 0.5,
+    minEnergyThreshold: 0.01,
+    maxSpeed: 10
   };
 
   // 初始化节点
@@ -30,7 +36,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
     const nodeMap = new Map();
     const newNodes = [];
 
-    // 创建节点并随机初始化位置
     tags.forEach(tag => {
       const node = {
         id: tag.id,
@@ -47,7 +52,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
       newNodes.push(node);
     });
 
-    // 建立父子边关系
     newNodes.forEach(node => {
       if (node.tag.parent_path) {
         const parent = tags.find(t => t.full_path === node.tag.parent_path);
@@ -68,21 +72,19 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
     
     const simulate = () => {
       const currentTime = Date.now();
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.05); // 限制时间步长
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.05);
       lastTime = currentTime;
 
       const newNodes = [...nodes];
       let totalKineticEnergy = 0;
 
-      // 1. 计算所有力
       newNodes.forEach(node => {
         if (node.fixed) return;
-        
         node.fx = 0;
         node.fy = 0;
       });
 
-      // 2. 弹簧力（连接的节点之间）
+      // 弹簧力
       newNodes.forEach(node => {
         if (node.fixed || !node.parent) return;
         
@@ -93,8 +95,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
         
         if (distance < 0.01) return;
         
-        // Hooke's Law: F = -k * (distance - restLength)
-        const restLength = 100; // 理想距离
+        const restLength = 100;
         const force = PARAMS.stiffness * (distance - restLength);
         
         const fx = (force * dx) / distance;
@@ -109,7 +110,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
         }
       });
 
-      // 3. 排斥力（所有节点对之间）
+      // 排斥力
       for (let i = 0; i < newNodes.length; i++) {
         const node1 = newNodes[i];
         if (node1.fixed) continue;
@@ -124,7 +125,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
           
           if (distance < 0.01) continue;
           
-          // Coulomb's Law: F = k / distance^2
           const force = PARAMS.repulsion / distanceSq;
           
           const fx = (force * dx) / distance;
@@ -140,33 +140,28 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
         }
       }
 
-      // 4. 更新速度和位置
+      // 更新速度和位置
       newNodes.forEach(node => {
         if (node.fixed) return;
         
-        // v = v + (F/m - damping*v) * dt
         const ax = node.fx / node.mass;
         const ay = node.fy / node.mass;
         
         node.vx = (node.vx + ax * dt) * (1 - PARAMS.damping);
         node.vy = (node.vy + ay * dt) * (1 - PARAMS.damping);
         
-        // 速度限制
         const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
         if (speed > PARAMS.maxSpeed) {
           node.vx = (node.vx / speed) * PARAMS.maxSpeed;
           node.vy = (node.vy / speed) * PARAMS.maxSpeed;
         }
         
-        // 更新位置
         node.x += node.vx * dt;
         node.y += node.vy * dt;
         
-        // 计算总动能
         totalKineticEnergy += 0.5 * node.mass * (node.vx * node.vx + node.vy * node.vy);
       });
 
-      // 5. 如果系统稳定（能量很低），降低更新频率
       const meanEnergy = totalKineticEnergy / newNodes.length;
       
       setNodes(newNodes);
@@ -174,7 +169,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
       if (meanEnergy > PARAMS.minEnergyThreshold) {
         animationRef.current = requestAnimationFrame(simulate);
       } else {
-        // 系统稳定，降低到每秒2帧
         animationRef.current = setTimeout(() => {
           animationRef.current = requestAnimationFrame(simulate);
         }, 500);
@@ -227,8 +221,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
       ctx.beginPath();
       ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
       
-      // 使用tag的color字段，如果没有则使用默认灰色
-      ctx.fillStyle = node.tag.color || '#94a3b8';
+      ctx.fillStyle = getCategoryColor(node.tag.category_key);
       ctx.fill();
 
       if (isSelected || isDragging) {
@@ -249,7 +242,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
     });
 
     ctx.restore();
-  }, [nodes, scale, offset, selectedTag, draggedNode]);
+  }, [nodes, scale, offset, selectedTag, draggedNode, categories]);
 
   // 鼠标交互
   const handleMouseDown = (e) => {
@@ -341,7 +334,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
         onWheel={handleWheel}
       />
       
-      {/* 控制按钮 */}
       <div className="absolute top-4 right-4 flex gap-2">
         <Button
           size="sm"
@@ -369,7 +361,6 @@ export default function GraphView({ tags, onSelectTag, selectedTag }) {
         </Button>
       </div>
 
-      {/* 操作提示 */}
       <div className="absolute bottom-4 left-4 bg-[#2d2d2d] border border-[#3d3d3d] rounded p-3 text-xs text-gray-400">
         • 拖动节点调整位置<br />
         • 拖动空白处移动视图<br />
