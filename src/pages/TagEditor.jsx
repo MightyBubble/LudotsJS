@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  ChevronRight, ChevronDown, Plus, X, 
-  Search, Trash2, Edit3, Copy, FolderTree
+  ChevronRight, ChevronDown, Plus, 
+  Search, Trash2, Edit3, Copy, FolderTree, GripVertical
 } from "lucide-react";
 
 export default function TagEditor() {
@@ -16,6 +16,8 @@ export default function TagEditor() {
   const [contextMenu, setContextMenu] = useState(null);
   const [editingTag, setEditingTag] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [draggedTag, setDraggedTag] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -185,6 +187,92 @@ export default function TagEditor() {
     setContextMenu(null);
   };
 
+  // 拖拽处理
+  const handleDragStart = (e, tag) => {
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggedTag(tag);
+  };
+
+  const handleDragOver = (e, tag) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    // 不能拖到自己或自己的子级
+    if (draggedTag && tag) {
+      if (tag.full_path.startsWith(draggedTag.full_path + '.') || tag.id === draggedTag.id) {
+        e.dataTransfer.dropEffect = 'none';
+        return;
+      }
+    }
+    
+    setDropTarget(tag);
+  };
+
+  const handleDragLeave = (e) => {
+    if (e.currentTarget === e.target) {
+      setDropTarget(null);
+    }
+  };
+
+  const handleDrop = async (e, targetTag) => {
+    e.preventDefault();
+    
+    if (!draggedTag || !targetTag || draggedTag.id === targetTag.id) {
+      setDraggedTag(null);
+      setDropTarget(null);
+      return;
+    }
+
+    // 不能拖到自己的子级
+    if (targetTag.full_path.startsWith(draggedTag.full_path + '.')) {
+      setDraggedTag(null);
+      setDropTarget(null);
+      return;
+    }
+
+    // 更新标签的父级
+    const newParentPath = targetTag.full_path;
+    const newFullPath = `${newParentPath}.${draggedTag.name}`;
+    const newDepth = newFullPath.split('.').length - 1;
+
+    await updateTagMutation.mutateAsync({
+      id: draggedTag.id,
+      data: {
+        parent_path: newParentPath,
+        full_path: newFullPath,
+        depth: newDepth,
+      }
+    });
+
+    // 展开目标节点
+    setExpandedNodes(prev => new Set([...prev, targetTag.full_path]));
+    
+    setDraggedTag(null);
+    setDropTarget(null);
+  };
+
+  const handleDropToRoot = async (e) => {
+    e.preventDefault();
+    
+    if (!draggedTag) return;
+
+    // 移动到根级
+    const newFullPath = draggedTag.name;
+    const newDepth = 0;
+
+    await updateTagMutation.mutateAsync({
+      id: draggedTag.id,
+      data: {
+        parent_path: "",
+        full_path: newFullPath,
+        depth: newDepth,
+      }
+    });
+
+    setDraggedTag(null);
+    setDropTarget(null);
+  };
+
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
     document.addEventListener('click', handleClick);
@@ -196,17 +284,32 @@ export default function TagEditor() {
     const hasChildren = node.children && node.children.length > 0;
     const isSelected = selectedTag?.id === node.id;
     const isEditing = editingTag === node.id;
+    const isDragTarget = dropTarget?.id === node.id;
+    const isDragging = draggedTag?.id === node.id;
 
     return (
       <div key={node.id}>
         <div
-          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer ${
+          draggable={!isEditing}
+          onDragStart={(e) => handleDragStart(e, node)}
+          onDragEnd={() => {
+            setDraggedTag(null);
+            setDropTarget(null);
+          }}
+          onDragOver={(e) => handleDragOver(e, node)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, node)}
+          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer group ${
             isSelected ? 'bg-[#094771]' : ''
+          } ${isDragTarget ? 'bg-[#0e639c] border-l-2 border-blue-400' : ''} ${
+            isDragging ? 'opacity-40' : ''
           }`}
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onClick={() => setSelectedTag(node)}
           onContextMenu={(e) => handleContextMenu(e, node)}
         >
+          <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+          
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -293,12 +396,19 @@ export default function TagEditor() {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              使用 . 分隔自动创建层级结构
+              使用 . 分隔自动创建层级，拖拽标签可调整层级
             </p>
           </div>
 
           {/* 树形列表 */}
-          <div className="flex-1 overflow-auto">
+          <div 
+            className="flex-1 overflow-auto"
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            }}
+            onDrop={handleDropToRoot}
+          >
             {isLoading ? (
               <div className="p-4 text-sm text-gray-500">加载中...</div>
             ) : filteredTree.length === 0 ? (
@@ -315,6 +425,7 @@ export default function TagEditor() {
           {/* 统计信息 */}
           <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
             总计: {tags.length} 个标签
+            {draggedTag && <span className="ml-3 text-blue-400">拖拽到目标位置或根区域</span>}
           </div>
         </div>
 
