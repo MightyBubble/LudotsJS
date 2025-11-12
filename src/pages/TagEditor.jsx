@@ -8,11 +8,159 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ChevronRight, ChevronDown, Plus,
   Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X, MoveUp,
-  List, Network, CheckSquare, Square, Lock, Unlock, Download, Upload, Palette, Settings
+  List, Network, CheckSquare, Square, Lock, Unlock, Download, Upload, Palette, Settings,
+  Shield, Ban, Link, Trash, Power, Eraser
 } from "lucide-react";
 import GraphView from "../components/tagEditor/GraphView";
 import CategoryManager from "../components/tagEditor/CategoryManager";
-import TagRulesEditor, { ValidationRules } from "../components/tagEditor/TagRulesEditor";
+
+// 简单规则组件
+function SimpleRuleSection({ type, icon, title, description, color, tags, inputValue, onAddTag, onRemoveTag, onInputChange, allTags, currentTagId }) {
+  return (
+    <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
+      <div className="flex items-start gap-2 mb-2">
+        <div className={`mt-0.5 ${color}`}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <h4 className="text-sm font-semibold text-white">{title}</h4>
+          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-2">
+        {tags.map((t, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
+          >
+            <span className="text-gray-300 font-mono">{t}</span>
+            <button
+              onClick={() => onRemoveTag(index)}
+              className="text-gray-500 hover:text-red-400 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+        {tags.length === 0 && (
+          <div className="text-xs text-gray-600 italic py-1">未设置</div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onAddTag();
+          }}
+          placeholder="输入标签路径"
+          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+          list={`${type}-suggestions`}
+        />
+        <datalist id={`${type}-suggestions`}>
+          {allTags
+            .filter(t => t.id !== currentTagId)
+            .map(t => (
+              <option key={t.id} value={t.full_path} />
+            ))}
+        </datalist>
+        <Button
+          size="sm"
+          onClick={onAddTag}
+          className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// 条件规则组件
+function ConditionalRuleSection({ type, icon, title, description, color, config, inputValue, onAddTag, onRemoveTag, onInputChange, onMatchModeChange, allTags, currentTagId }) {
+  return (
+    <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
+      <div className="flex items-start gap-2 mb-2">
+        <div className={`mt-0.5 ${color}`}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <h4 className="text-sm font-semibold text-white">{title}</h4>
+          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+        </div>
+      </div>
+
+      <div className="mb-2">
+        <label className="text-xs text-gray-400 mb-1 block">匹配模式</label>
+        <Select
+          value={config.match_mode || "any"}
+          onValueChange={onMatchModeChange}
+        >
+          <SelectTrigger className="h-7 bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+            <SelectItem value="any" className="text-white hover:bg-[#3d3d3d] text-xs">
+              Any（满足任一即可）
+            </SelectItem>
+            <SelectItem value="all" className="text-white hover:bg-[#3d3d3d] text-xs">
+              All（需满足全部）
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1 mb-2">
+        {config.tags.map((t, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
+          >
+            <span className="text-gray-300 font-mono">{t}</span>
+            <button
+              onClick={() => onRemoveTag(index)}
+              className="text-gray-500 hover:text-red-400 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+        {config.tags.length === 0 && (
+          <div className="text-xs text-gray-600 italic py-1">未设置</div>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onAddTag();
+          }}
+          placeholder="输入标签路径"
+          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+          list={`${type}-suggestions-cond`}
+        />
+        <datalist id={`${type}-suggestions-cond`}>
+          {allTags
+            .filter(t => t.id !== currentTagId)
+            .map(t => (
+              <option key={t.id} value={t.full_path} />
+            ))}
+        </datalist>
+        <Button
+          size="sm"
+          onClick={onAddTag}
+          className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function TagEditor() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +180,16 @@ export default function TagEditor() {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  // Removed detailsTab state as per changes
+
+  // 规则输入状态
+  const [ruleInputs, setRuleInputs] = useState({
+    required: "",
+    blocked: "",
+    attached: "",
+    removed: "",
+    disabled_if: "",
+    remove_if: "",
+  });
 
   const queryClient = useQueryClient();
 
@@ -80,9 +237,82 @@ export default function TagEditor() {
     return category?.color || '#94a3b8';
   };
 
-  const getCategoryName = (categoryKey) => {
-    const category = categories.find(c => c.key === categoryKey);
-    return category?.name || categoryKey;
+  // 规则更新处理
+  const handleAddTag = (type, value) => {
+    if (!value.trim() || !selectedTag) return;
+
+    const updates = {};
+
+    if (type === 'required') {
+      updates.required_tags = [...(selectedTag.required_tags || []), value.trim()];
+    } else if (type === 'blocked') {
+      updates.blocked_tags = [...(selectedTag.blocked_tags || []), value.trim()];
+    } else if (type === 'attached') {
+      updates.attached_tags = [...(selectedTag.attached_tags || []), value.trim()];
+    } else if (type === 'removed') {
+      updates.removed_tags = [...(selectedTag.removed_tags || []), value.trim()];
+    } else if (type === 'disabled_if') {
+      const current = selectedTag.disabled_if_tags || { tags: [], match_mode: "any" };
+      updates.disabled_if_tags = {
+        ...current,
+        tags: [...current.tags, value.trim()]
+      };
+    } else if (type === 'remove_if') {
+      const current = selectedTag.remove_if_tags || { tags: [], match_mode: "any" };
+      updates.remove_if_tags = {
+        ...current,
+        tags: [...current.tags, value.trim()]
+      };
+    }
+
+    updateTagMutation.mutate({ id: selectedTag.id, data: updates });
+    setRuleInputs({ ...ruleInputs, [type]: "" });
+  };
+
+  const handleRemoveTag = (type, index) => {
+    if (!selectedTag) return;
+
+    const updates = {};
+
+    if (type === 'required') {
+      updates.required_tags = (selectedTag.required_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'blocked') {
+      updates.blocked_tags = (selectedTag.blocked_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'attached') {
+      updates.attached_tags = (selectedTag.attached_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'removed') {
+      updates.removed_tags = (selectedTag.removed_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'disabled_if') {
+      const current = selectedTag.disabled_if_tags || { tags: [], match_mode: "any" };
+      updates.disabled_if_tags = {
+        ...current,
+        tags: current.tags.filter((_, i) => i !== index)
+      };
+    } else if (type === 'remove_if') {
+      const current = selectedTag.remove_if_tags || { tags: [], match_mode: "any" };
+      updates.remove_if_tags = {
+        ...current,
+        tags: current.tags.filter((_, i) => i !== index)
+      };
+    }
+
+    updateTagMutation.mutate({ id: selectedTag.id, data: updates });
+  };
+
+  const handleMatchModeChange = (type, mode) => {
+    if (!selectedTag) return;
+
+    const updates = {};
+
+    if (type === 'disabled_if') {
+      const current = selectedTag.disabled_if_tags || { tags: [], match_mode: "any" };
+      updates.disabled_if_tags = { ...current, match_mode: mode };
+    } else if (type === 'remove_if') {
+      const current = selectedTag.remove_if_tags || { tags: [], match_mode: "any" };
+      updates.remove_if_tags = { ...current, match_mode: mode };
+    }
+
+    updateTagMutation.mutate({ id: selectedTag.id, data: updates });
   };
 
   // 导入导出功能
@@ -535,14 +765,6 @@ export default function TagEditor() {
     setHasUnsavedChanges(false);
   };
 
-  const handleUpdateTagRules = async (rules) => {
-    if (!selectedTag) return;
-    await updateTagMutation.mutateAsync({
-      id: selectedTag.id,
-      data: rules
-    });
-  };
-
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
     document.addEventListener('click', handleClick);
@@ -960,82 +1182,162 @@ export default function TagEditor() {
                     </div>
                   </div>
 
-                  {/* 左右两栏布局 */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* 左栏：基本信息 + 验证规则 */}
-                    <div className="space-y-4">
-                      {/* 基本信息 - 仅可编辑字段 */}
-                      <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                        <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
-                          基本信息
-                        </h3>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">分类</label>
-                            <Select
-                              value={selectedTag.category_key || "other"}
-                              onValueChange={(value) => {
-                                updateTagMutation.mutate({
-                                  id: selectedTag.id,
-                                  data: { category_key: value }
-                                });
-                              }}
-                            >
-                              <SelectTrigger className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                                {categories.map(cat => (
-                                  <SelectItem key={cat.key} value={cat.key} className="text-white hover:bg-[#3d3d3d]">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-3 h-3 rounded" style={{ backgroundColor: cat.color }} />
-                                      <span>{cat.name}</span>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">描述</label>
-                            <Input
-                              value={selectedTag.description || ""}
-                              onChange={(e) => {
-                                updateTagMutation.mutate({
-                                  id: selectedTag.id,
-                                  data: { description: e.target.value }
-                                });
-                              }}
-                              placeholder="添加描述..."
-                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
-                            />
-                          </div>
-                        </div>
+                  {/* 基本信息 */}
+                  <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
+                    <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
+                      基本信息
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">分类</label>
+                        <Select
+                          value={selectedTag.category_key || "other"}
+                          onValueChange={(value) => {
+                            updateTagMutation.mutate({
+                              id: selectedTag.id,
+                              data: { category_key: value }
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                            {categories.map(cat => (
+                              <SelectItem key={cat.key} value={cat.key} className="text-white hover:bg-[#3d3d3d]">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded" style={{ backgroundColor: cat.color }} />
+                                  <span>{cat.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      {/* 验证规则 */}
-                      <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                        <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
-                          验证规则
-                        </h3>
-                        <ValidationRules
-                          tag={selectedTag}
-                          allTags={localTags}
-                          onUpdate={handleUpdateTagRules}
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">描述</label>
+                        <Input
+                          value={selectedTag.description || ""}
+                          onChange={(e) => {
+                            updateTagMutation.mutate({
+                              id: selectedTag.id,
+                              data: { description: e.target.value }
+                            });
+                          }}
+                          placeholder="添加描述..."
+                          className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
                         />
                       </div>
                     </div>
+                  </div>
 
-                    {/* 右栏：行为规则 */}
-                    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded overflow-auto">
-                      <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
-                        行为规则
-                      </h3>
-                      <TagRulesEditor
-                        tag={selectedTag}
+                  {/* 三栏规则布局 */}
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* 第一栏：验证规则 */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-gray-300 px-1">验证规则</h3>
+
+                      <SimpleRuleSection
+                        type="required"
+                        icon={<Shield className="w-4 h-4" />}
+                        title="必需标签"
+                        description="附加前必须存在"
+                        color="text-green-400"
+                        tags={selectedTag.required_tags || []}
+                        inputValue={ruleInputs.required}
+                        onAddTag={() => handleAddTag('required', ruleInputs.required)}
+                        onRemoveTag={(index) => handleRemoveTag('required', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, required: value })}
                         allTags={localTags}
-                        onUpdate={handleUpdateTagRules}
+                        currentTagId={selectedTag.id}
+                      />
+
+                      <SimpleRuleSection
+                        type="blocked"
+                        icon={<Ban className="w-4 h-4" />}
+                        title="阻止标签"
+                        description="附加前不能存在"
+                        color="text-red-400"
+                        tags={selectedTag.blocked_tags || []}
+                        inputValue={ruleInputs.blocked}
+                        onAddTag={() => handleAddTag('blocked', ruleInputs.blocked)}
+                        onRemoveTag={(index) => handleRemoveTag('blocked', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, blocked: value })}
+                        allTags={localTags}
+                        currentTagId={selectedTag.id}
+                      />
+                    </div>
+
+                    {/* 第二栏：附加移除 */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-gray-300 px-1">附加移除</h3>
+
+                      <SimpleRuleSection
+                        type="attached"
+                        icon={<Link className="w-4 h-4" />}
+                        title="附加标签"
+                        description="附加后同步添加"
+                        color="text-blue-400"
+                        tags={selectedTag.attached_tags || []}
+                        inputValue={ruleInputs.attached}
+                        onAddTag={() => handleAddTag('attached', ruleInputs.attached)}
+                        onRemoveTag={(index) => handleRemoveTag('attached', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, attached: value })}
+                        allTags={localTags}
+                        currentTagId={selectedTag.id}
+                      />
+
+                      <SimpleRuleSection
+                        type="removed"
+                        icon={<Trash className="w-4 h-4" />}
+                        title="移除标签"
+                        description="附加后从目标移除"
+                        color="text-orange-400"
+                        tags={selectedTag.removed_tags || []}
+                        inputValue={ruleInputs.removed}
+                        onAddTag={() => handleAddTag('removed', ruleInputs.removed)}
+                        onRemoveTag={(index) => handleRemoveTag('removed', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, removed: value })}
+                        allTags={localTags}
+                        currentTagId={selectedTag.id}
+                      />
+                    </div>
+
+                    {/* 第三栏：条件规则 */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-gray-300 px-1">禁用移除条件</h3>
+
+                      <ConditionalRuleSection
+                        type="disabled_if"
+                        icon={<Power className="w-4 h-4" />}
+                        title="禁用条件"
+                        description="目标有这些标签时禁用"
+                        color="text-yellow-400"
+                        config={selectedTag.disabled_if_tags || { tags: [], match_mode: "any" }}
+                        inputValue={ruleInputs.disabled_if}
+                        onAddTag={() => handleAddTag('disabled_if', ruleInputs.disabled_if)}
+                        onRemoveTag={(index) => handleRemoveTag('disabled_if', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, disabled_if: value })}
+                        onMatchModeChange={(mode) => handleMatchModeChange('disabled_if', mode)}
+                        allTags={localTags}
+                        currentTagId={selectedTag.id}
+                      />
+
+                      <ConditionalRuleSection
+                        type="remove_if"
+                        icon={<Eraser className="w-4 h-4" />}
+                        title="移除条件"
+                        description="目标有这些标签时移除"
+                        color="text-purple-400"
+                        config={selectedTag.remove_if_tags || { tags: [], match_mode: "any" }}
+                        inputValue={ruleInputs.remove_if}
+                        onAddTag={() => handleAddTag('remove_if', ruleInputs.remove_if)}
+                        onRemoveTag={(index) => handleRemoveTag('remove_if', index)}
+                        onInputChange={(value) => setRuleInputs({ ...ruleInputs, remove_if: value })}
+                        onMatchModeChange={(mode) => handleMatchModeChange('remove_if', mode)}
+                        allTags={localTags}
+                        currentTagId={selectedTag.id}
                       />
                     </div>
                   </div>
