@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   ChevronRight, ChevronDown, Plus, 
-  Search, Trash2, Edit3, Copy, FolderTree, GripVertical
+  Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X
 } from "lucide-react";
 
 export default function TagEditor() {
@@ -18,6 +18,8 @@ export default function TagEditor() {
   const [editValue, setEditValue] = useState("");
   const [draggedTag, setDraggedTag] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -76,23 +78,30 @@ export default function TagEditor() {
     }
     
     setNewTagPath("");
-    // 展开新创建的路径
     parts.forEach((_, i) => {
       const path = parts.slice(0, i + 1).join('.');
       setExpandedNodes(prev => new Set([...prev, path]));
     });
   };
 
+  // 应用待保存的更改到标签数据
+  const getEffectiveTags = useMemo(() => {
+    return tags.map(tag => {
+      const change = pendingChanges[tag.id];
+      return change ? { ...tag, ...change } : tag;
+    });
+  }, [tags, pendingChanges]);
+
   // 构建树形结构
   const tagTree = useMemo(() => {
     const tree = [];
     const tagMap = {};
 
-    tags.forEach(tag => {
+    getEffectiveTags.forEach(tag => {
       tagMap[tag.full_path] = { ...tag, children: [] };
     });
 
-    tags.forEach(tag => {
+    getEffectiveTags.forEach(tag => {
       if (!tag.parent_path || tag.parent_path === "") {
         tree.push(tagMap[tag.full_path]);
       } else {
@@ -104,7 +113,7 @@ export default function TagEditor() {
     });
 
     return tree;
-  }, [tags]);
+  }, [getEffectiveTags]);
 
   // 搜索过滤
   const filterTree = (nodes, query) => {
@@ -187,7 +196,7 @@ export default function TagEditor() {
     setContextMenu(null);
   };
 
-  // 拖拽处理
+  // 拖拽处理 - 只更新内存状态
   const handleDragStart = (e, tag) => {
     e.dataTransfer.effectAllowed = 'move';
     setDraggedTag(tag);
@@ -197,7 +206,6 @@ export default function TagEditor() {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     
-    // 不能拖到自己或自己的子级
     if (draggedTag && tag) {
       if (tag.full_path.startsWith(draggedTag.full_path + '.') || tag.id === draggedTag.id) {
         e.dataTransfer.dropEffect = 'none';
@@ -214,7 +222,7 @@ export default function TagEditor() {
     }
   };
 
-  const handleDrop = async (e, targetTag) => {
+  const handleDrop = (e, targetTag) => {
     e.preventDefault();
     
     if (!draggedTag || !targetTag || draggedTag.id === targetTag.id) {
@@ -223,54 +231,71 @@ export default function TagEditor() {
       return;
     }
 
-    // 不能拖到自己的子级
     if (targetTag.full_path.startsWith(draggedTag.full_path + '.')) {
       setDraggedTag(null);
       setDropTarget(null);
       return;
     }
 
-    // 更新标签的父级
+    // 只更新内存状态，不写数据库
     const newParentPath = targetTag.full_path;
     const newFullPath = `${newParentPath}.${draggedTag.name}`;
     const newDepth = newFullPath.split('.').length - 1;
 
-    await updateTagMutation.mutateAsync({
-      id: draggedTag.id,
-      data: {
+    setPendingChanges(prev => ({
+      ...prev,
+      [draggedTag.id]: {
         parent_path: newParentPath,
         full_path: newFullPath,
         depth: newDepth,
       }
-    });
+    }));
 
-    // 展开目标节点
+    setHasUnsavedChanges(true);
     setExpandedNodes(prev => new Set([...prev, targetTag.full_path]));
     
     setDraggedTag(null);
     setDropTarget(null);
   };
 
-  const handleDropToRoot = async (e) => {
+  const handleDropToRoot = (e) => {
     e.preventDefault();
     
     if (!draggedTag) return;
 
-    // 移动到根级
+    // 只更新内存状态
     const newFullPath = draggedTag.name;
     const newDepth = 0;
 
-    await updateTagMutation.mutateAsync({
-      id: draggedTag.id,
-      data: {
+    setPendingChanges(prev => ({
+      ...prev,
+      [draggedTag.id]: {
         parent_path: "",
         full_path: newFullPath,
         depth: newDepth,
       }
-    });
+    }));
 
+    setHasUnsavedChanges(true);
     setDraggedTag(null);
     setDropTarget(null);
+  };
+
+  // 保存所有更改
+  const handleSaveChanges = async () => {
+    const updates = Object.entries(pendingChanges).map(([id, data]) => 
+      updateTagMutation.mutateAsync({ id, data })
+    );
+    
+    await Promise.all(updates);
+    setPendingChanges({});
+    setHasUnsavedChanges(false);
+  };
+
+  // 撤销更改
+  const handleDiscardChanges = () => {
+    setPendingChanges({});
+    setHasUnsavedChanges(false);
   };
 
   useEffect(() => {
@@ -286,6 +311,7 @@ export default function TagEditor() {
     const isEditing = editingTag === node.id;
     const isDragTarget = dropTarget?.id === node.id;
     const isDragging = draggedTag?.id === node.id;
+    const hasChange = !!pendingChanges[node.id];
 
     return (
       <div key={node.id}>
@@ -303,7 +329,7 @@ export default function TagEditor() {
             isSelected ? 'bg-[#094771]' : ''
           } ${isDragTarget ? 'bg-[#0e639c] border-l-2 border-blue-400' : ''} ${
             isDragging ? 'opacity-40' : ''
-          }`}
+          } ${hasChange ? 'border-l-2 border-yellow-600' : ''}`}
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onClick={() => setSelectedTag(node)}
           onContextMenu={(e) => handleContextMenu(e, node)}
@@ -339,7 +365,9 @@ export default function TagEditor() {
               className="h-5 text-sm bg-[#2d2d2d] border-[#094771] text-white px-1"
             />
           ) : (
-            <span className="text-sm text-gray-200 select-none">{node.name}</span>
+            <span className={`text-sm select-none ${hasChange ? 'text-yellow-400' : 'text-gray-200'}`}>
+              {node.name}
+            </span>
           )}
         </div>
 
@@ -357,6 +385,30 @@ export default function TagEditor() {
       {/* 顶部工具栏 */}
       <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <span className="text-sm font-semibold text-gray-300">GameplayTag 编辑器</span>
+        
+        {hasUnsavedChanges && (
+          <div className="flex items-center gap-2 ml-4">
+            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="text-xs text-yellow-400">有未保存的更改</span>
+            <Button
+              size="sm"
+              onClick={handleSaveChanges}
+              className="h-6 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs"
+            >
+              <Save className="w-3 h-3 mr-1" />
+              保存
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleDiscardChanges}
+              variant="outline"
+              className="h-6 px-3 border-[#3d3d3d] hover:bg-[#2d2d2d] text-xs"
+            >
+              <X className="w-3 h-3 mr-1" />
+              撤销
+            </Button>
+          </div>
+        )}
         
         <div className="flex-1" />
 
@@ -396,7 +448,7 @@ export default function TagEditor() {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              使用 . 分隔自动创建层级，拖拽标签可调整层级
+              使用 . 分隔自动创建层级，拖拽调整后点保存
             </p>
           </div>
 
@@ -425,7 +477,11 @@ export default function TagEditor() {
           {/* 统计信息 */}
           <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
             总计: {tags.length} 个标签
-            {draggedTag && <span className="ml-3 text-blue-400">拖拽到目标位置或根区域</span>}
+            {Object.keys(pendingChanges).length > 0 && (
+              <span className="ml-3 text-yellow-400">
+                {Object.keys(pendingChanges).length} 个待保存
+              </span>
+            )}
           </div>
         </div>
 
