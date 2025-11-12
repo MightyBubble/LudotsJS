@@ -233,6 +233,7 @@ export default function TagEditor() {
   });
 
   const getCategoryColor = (categoryKey) => {
+    if (!categories || !Array.isArray(categories)) return '#94a3b8';
     const category = categories.find(c => c.key === categoryKey);
     return category?.color || '#94a3b8';
   };
