@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import GraphView from "../components/tagEditor/GraphView";
 import ImportExport from "../components/tagEditor/ImportExport";
-import AdvancedFilter from "../components/tagEditor/AdvancedFilter";
 
 export default function TagEditor() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,15 +24,9 @@ export default function TagEditor() {
   const [localTags, setLocalTags] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isDraggingOverRoot, setIsDraggingOverRoot] = useState(false);
-  const [viewMode, setViewMode] = useState('tree'); // 'tree' or 'graph'
+  const [viewMode, setViewMode] = useState('tree');
   const [selectedTags, setSelectedTags] = useState(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
-  const [filters, setFilters] = useState({
-    category: 'all',
-    depth: 'all',
-    isLocked: 'all',
-    minUsage: 0,
-  });
 
   const queryClient = useQueryClient();
 
@@ -197,37 +190,12 @@ export default function TagEditor() {
   }, [localTags]);
 
   const filterTree = (nodes, query) => {
-    if (!query && filters.category === 'all' && filters.depth === 'all' && 
-        filters.isLocked === 'all' && filters.minUsage === 0) {
+    if (!query) {
       return nodes;
     }
     
     return nodes.filter(node => {
-      // 文本搜索
-      const textMatch = !query || node.full_path.toLowerCase().includes(query.toLowerCase());
-      
-      // 分类筛选
-      const categoryMatch = filters.category === 'all' || node.category === filters.category;
-      
-      // 层级筛选
-      let depthMatch = filters.depth === 'all';
-      if (!depthMatch) {
-        if (filters.depth === '4+') {
-          depthMatch = node.depth >= 4;
-        } else {
-          depthMatch = node.depth === parseInt(filters.depth);
-        }
-      }
-      
-      // 锁定状态筛选
-      const lockedMatch = filters.isLocked === 'all' || 
-                         (filters.isLocked === 'true' && node.is_locked) ||
-                         (filters.isLocked === 'false' && !node.is_locked);
-      
-      // 使用次数筛选
-      const usageMatch = (node.usage_count || 0) >= filters.minUsage;
-      
-      const matches = textMatch && categoryMatch && depthMatch && lockedMatch && usageMatch;
+      const matches = node.full_path.toLowerCase().includes(query.toLowerCase());
       const childMatches = node.children && filterTree(node.children, query).length > 0;
       return matches || childMatches;
     });
@@ -235,7 +203,7 @@ export default function TagEditor() {
 
   const filteredTree = useMemo(() => {
     return filterTree(tagTree, searchQuery);
-  }, [tagTree, searchQuery, filters]);
+  }, [tagTree, searchQuery]);
 
   const toggleNode = (path) => {
     setExpandedNodes(prev => {
@@ -741,7 +709,7 @@ export default function TagEditor() {
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
-            placeholder="搜索标签... (Ctrl+F)"
+            placeholder="搜索标签..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-7 pl-8 w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
@@ -794,7 +762,7 @@ export default function TagEditor() {
                   <div className="p-4 text-sm text-gray-500">加载中...</div>
                 ) : filteredTree.length === 0 ? (
                   <div className="p-4 text-sm text-gray-500">
-                    {searchQuery || filters.category !== 'all' ? '没有匹配的标签' : '暂无标签，输入路径创建'}
+                    {searchQuery ? '没有匹配的标签' : '暂无标签，输入路径创建'}
                   </div>
                 ) : (
                   <>
@@ -824,18 +792,6 @@ export default function TagEditor() {
 
             {/* 右侧详情面板和工具 */}
             <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4 space-y-4">
-              {/* 高级筛选 */}
-              <AdvancedFilter
-                filters={filters}
-                onFilterChange={setFilters}
-                onClearFilters={() => setFilters({
-                  category: 'all',
-                  depth: 'all',
-                  isLocked: 'all',
-                  minUsage: 0,
-                })}
-              />
-
               {/* 导入/导出 */}
               <ImportExport
                 tags={tags}
