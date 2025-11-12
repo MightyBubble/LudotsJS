@@ -29,7 +29,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
       </div>
 
       <div className="space-y-1 mb-2">
-        {tags.map((t, index) => (
+        {(tags || []).map((t, index) => (
           <div
             key={index}
             className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
@@ -43,7 +43,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
             </button>
           </div>
         ))}
-        {tags.length === 0 && (
+        {(!tags || tags.length === 0) && (
           <div className="text-xs text-gray-600 italic py-1">未设置</div>
         )}
       </div>
@@ -60,7 +60,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
           list={`${type}-suggestions`}
         />
         <datalist id={`${type}-suggestions`}>
-          {allTags
+          {(allTags || [])
             .filter(t => t.id !== currentTagId)
             .map(t => (
               <option key={t.id} value={t.full_path} />
@@ -80,6 +80,8 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
 
 // 条件规则组件
 function ConditionalRuleSection({ type, icon, title, description, color, config, inputValue, onAddTag, onRemoveTag, onInputChange, onMatchModeChange, allTags, currentTagId }) {
+  const safeConfig = config || { tags: [], match_mode: "any" };
+  
   return (
     <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
       <div className="flex items-start gap-2 mb-2">
@@ -95,7 +97,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
       <div className="mb-2">
         <label className="text-xs text-gray-400 mb-1 block">匹配模式</label>
         <Select
-          value={config.match_mode || "any"}
+          value={safeConfig.match_mode || "any"}
           onValueChange={onMatchModeChange}
         >
           <SelectTrigger className="h-7 bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs">
@@ -113,7 +115,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
       </div>
 
       <div className="space-y-1 mb-2">
-        {config.tags.map((t, index) => (
+        {(safeConfig.tags || []).map((t, index) => (
           <div
             key={index}
             className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
@@ -127,7 +129,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
             </button>
           </div>
         ))}
-        {config.tags.length === 0 && (
+        {(!safeConfig.tags || safeConfig.tags.length === 0) && (
           <div className="text-xs text-gray-600 italic py-1">未设置</div>
         )}
       </div>
@@ -144,7 +146,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
           list={`${type}-suggestions-cond`}
         />
         <datalist id={`${type}-suggestions-cond`}>
-          {allTags
+          {(allTags || [])
             .filter(t => t.id !== currentTagId)
             .map(t => (
               <option key={t.id} value={t.full_path} />
@@ -1238,7 +1240,7 @@ export default function TagEditor() {
                         title="必需标签"
                         description="附加前必须存在"
                         color="text-green-400"
-                        tags={selectedTag.required_tags || []}
+                        tags={selectedTag.required_tags}
                         inputValue={ruleInputs.required}
                         onAddTag={() => handleAddTag('required', ruleInputs.required)}
                         onRemoveTag={(index) => handleRemoveTag('required', index)}
@@ -1253,7 +1255,7 @@ export default function TagEditor() {
                         title="阻止标签"
                         description="附加前不能存在"
                         color="text-red-400"
-                        tags={selectedTag.blocked_tags || []}
+                        tags={selectedTag.blocked_tags}
                         inputValue={ruleInputs.blocked}
                         onAddTag={() => handleAddTag('blocked', ruleInputs.blocked)}
                         onRemoveTag={(index) => handleRemoveTag('blocked', index)}
@@ -1273,7 +1275,7 @@ export default function TagEditor() {
                         title="附加标签"
                         description="附加后同步添加"
                         color="text-blue-400"
-                        tags={selectedTag.attached_tags || []}
+                        tags={selectedTag.attached_tags}
                         inputValue={ruleInputs.attached}
                         onAddTag={() => handleAddTag('attached', ruleInputs.attached)}
                         onRemoveTag={(index) => handleRemoveTag('attached', index)}
@@ -1288,7 +1290,7 @@ export default function TagEditor() {
                         title="移除标签"
                         description="附加后从目标移除"
                         color="text-orange-400"
-                        tags={selectedTag.removed_tags || []}
+                        tags={selectedTag.removed_tags}
                         inputValue={ruleInputs.removed}
                         onAddTag={() => handleAddTag('removed', ruleInputs.removed)}
                         onRemoveTag={(index) => handleRemoveTag('removed', index)}
@@ -1308,7 +1310,7 @@ export default function TagEditor() {
                         title="禁用条件"
                         description="目标有这些标签时禁用"
                         color="text-yellow-400"
-                        config={selectedTag.disabled_if_tags || { tags: [], match_mode: "any" }}
+                        config={selectedTag.disabled_if_tags}
                         inputValue={ruleInputs.disabled_if}
                         onAddTag={() => handleAddTag('disabled_if', ruleInputs.disabled_if)}
                         onRemoveTag={(index) => handleRemoveTag('disabled_if', index)}
@@ -1324,7 +1326,7 @@ export default function TagEditor() {
                         title="移除条件"
                         description="目标有这些标签时移除"
                         color="text-purple-400"
-                        config={selectedTag.remove_if_tags || { tags: [], match_mode: "any" }}
+                        config={selectedTag.remove_if_tags}
                         inputValue={ruleInputs.remove_if}
                         onAddTag={() => handleAddTag('remove_if', ruleInputs.remove_if)}
                         onRemoveTag={(index) => handleRemoveTag('remove_if', index)}
