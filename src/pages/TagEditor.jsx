@@ -1,30 +1,21 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  Plus, Search, Grid3x3, List, GitBranch, 
-  Download, Upload, Filter, Sparkles
+  ChevronRight, ChevronDown, Plus, X, 
+  Search, Trash2, Edit3, Copy, FolderTree
 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import TagTree from "../components/tags/TagTree";
-import TagListView from "../components/tags/TagListView";
-import TagDetailPanel from "../components/tags/TagDetailPanel";
-import TagSearchBar from "../components/tags/TagSearchBar";
-import BulkOperationsPanel from "../components/tags/BulkOperationsPanel";
-import TagCreationDialog from "../components/tags/TagCreationDialog";
-import TagStatsCards from "../components/tags/TagStatsCards";
 
 export default function TagEditor() {
-  const [viewMode, setViewMode] = useState("tree"); // tree, list, card
-  const [selectedTag, setSelectedTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showBulkOps, setShowBulkOps] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [newTagPath, setNewTagPath] = useState("");
+  const [expandedNodes, setExpandedNodes] = useState(new Set());
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [editingTag, setEditingTag] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -38,7 +29,6 @@ export default function TagEditor() {
     mutationFn: (tagData) => base44.entities.GameplayTag.create(tagData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
-      setShowCreateDialog(false);
     },
   });
 
@@ -46,6 +36,7 @@ export default function TagEditor() {
     mutationFn: ({ id, data }) => base44.entities.GameplayTag.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
+      setEditingTag(null);
     },
   });
 
@@ -56,6 +47,39 @@ export default function TagEditor() {
       setSelectedTag(null);
     },
   });
+
+  // 自动解析路径并创建所有层级标签
+  const createTagsFromPath = async (fullPath) => {
+    if (!fullPath || !fullPath.trim()) return;
+
+    const parts = fullPath.split('.');
+    const existingPaths = new Set(tags.map(t => t.full_path));
+    
+    for (let i = 0; i < parts.length; i++) {
+      const currentPath = parts.slice(0, i + 1).join('.');
+      
+      if (!existingPaths.has(currentPath)) {
+        const parentPath = i > 0 ? parts.slice(0, i).join('.') : "";
+        
+        await createTagMutation.mutateAsync({
+          name: parts[i],
+          full_path: currentPath,
+          parent_path: parentPath,
+          depth: i,
+          category: "other",
+          usage_count: 0,
+          is_locked: false,
+        });
+      }
+    }
+    
+    setNewTagPath("");
+    // 展开新创建的路径
+    parts.forEach((_, i) => {
+      const path = parts.slice(0, i + 1).join('.');
+      setExpandedNodes(prev => new Set([...prev, path]));
+    });
+  };
 
   // 构建树形结构
   const tagTree = useMemo(() => {
@@ -80,184 +104,334 @@ export default function TagEditor() {
     return tree;
   }, [tags]);
 
-  // 搜索和过滤
-  const filteredTags = useMemo(() => {
-    let result = tags;
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(tag => 
-        tag.full_path.toLowerCase().includes(query) ||
-        tag.name.toLowerCase().includes(query) ||
-        tag.description?.toLowerCase().includes(query)
-      );
-    }
-
-    if (filterCategory !== "all") {
-      result = result.filter(tag => tag.category === filterCategory);
-    }
-
-    return result;
-  }, [tags, searchQuery, filterCategory]);
-
-  const handleCreateTag = (tagData) => {
-    createTagMutation.mutate(tagData);
+  // 搜索过滤
+  const filterTree = (nodes, query) => {
+    if (!query) return nodes;
+    
+    return nodes.filter(node => {
+      const matches = node.full_path.toLowerCase().includes(query.toLowerCase());
+      const childMatches = node.children && filterTree(node.children, query).length > 0;
+      return matches || childMatches;
+    });
   };
 
-  const handleUpdateTag = (id, data) => {
-    updateTagMutation.mutate({ id, data });
+  const filteredTree = useMemo(() => {
+    return filterTree(tagTree, searchQuery);
+  }, [tagTree, searchQuery]);
+
+  const toggleNode = (path) => {
+    setExpandedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
   };
 
-  const handleDeleteTag = (id) => {
-    if (window.confirm("确定要删除这个标签吗？")) {
-      deleteTagMutation.mutate(id);
+  const handleContextMenu = (e, tag) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      tag: tag,
+    });
+  };
+
+  const handleRename = (tag) => {
+    setEditingTag(tag.id);
+    setEditValue(tag.name);
+    setContextMenu(null);
+  };
+
+  const handleSaveRename = async (tag) => {
+    if (editValue && editValue !== tag.name) {
+      const newFullPath = tag.parent_path 
+        ? `${tag.parent_path}.${editValue}`
+        : editValue;
+      
+      await updateTagMutation.mutateAsync({
+        id: tag.id,
+        data: {
+          name: editValue,
+          full_path: newFullPath,
+        }
+      });
     }
+    setEditingTag(null);
   };
 
-  const handleExport = () => {
-    const dataStr = JSON.stringify(tags, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'gameplay-tags.json';
-    link.click();
+  const handleDelete = async (tag) => {
+    if (window.confirm(`删除 "${tag.full_path}" 吗？`)) {
+      await deleteTagMutation.mutate(tag.id);
+    }
+    setContextMenu(null);
+  };
+
+  const handleDuplicate = async (tag) => {
+    const newName = `${tag.name}_Copy`;
+    const newFullPath = tag.parent_path 
+      ? `${tag.parent_path}.${newName}`
+      : newName;
+    
+    await createTagMutation.mutateAsync({
+      ...tag,
+      id: undefined,
+      name: newName,
+      full_path: newFullPath,
+    });
+    setContextMenu(null);
+  };
+
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  const renderNode = (node, level = 0) => {
+    const isExpanded = expandedNodes.has(node.full_path);
+    const hasChildren = node.children && node.children.length > 0;
+    const isSelected = selectedTag?.id === node.id;
+    const isEditing = editingTag === node.id;
+
+    return (
+      <div key={node.id}>
+        <div
+          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer ${
+            isSelected ? 'bg-[#094771]' : ''
+          }`}
+          style={{ paddingLeft: `${level * 16 + 8}px` }}
+          onClick={() => setSelectedTag(node)}
+          onContextMenu={(e) => handleContextMenu(e, node)}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (hasChildren) toggleNode(node.full_path);
+            }}
+            className="w-4 h-4 flex items-center justify-center hover:bg-[#3d3d3d]"
+          >
+            {hasChildren && (
+              isExpanded ? 
+                <ChevronDown className="w-3 h-3 text-gray-400" /> : 
+                <ChevronRight className="w-3 h-3 text-gray-400" />
+            )}
+          </button>
+
+          <FolderTree className="w-4 h-4 text-[#ffd700]" />
+
+          {isEditing ? (
+            <Input
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => handleSaveRename(node)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSaveRename(node);
+                if (e.key === 'Escape') setEditingTag(null);
+              }}
+              autoFocus
+              className="h-5 text-sm bg-[#2d2d2d] border-[#094771] text-white px-1"
+            />
+          ) : (
+            <span className="text-sm text-gray-200 select-none">{node.name}</span>
+          )}
+        </div>
+
+        {isExpanded && hasChildren && (
+          <div>
+            {node.children.map(child => renderNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
       {/* 顶部工具栏 */}
-      <div className="glass-effect border-b border-white/10 px-6 py-4">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-purple-400" />
-              标签编辑器
-            </h1>
-          </div>
+      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+        <span className="text-sm font-semibold text-gray-300">GameplayTag 编辑器</span>
+        
+        <div className="flex-1" />
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <TagSearchBar 
-              value={searchQuery}
-              onChange={setSearchQuery}
-              filterCategory={filterCategory}
-              onFilterChange={setFilterCategory}
-            />
-
-            <Tabs value={viewMode} onValueChange={setViewMode}>
-              <TabsList className="bg-white/5 border border-white/10">
-                <TabsTrigger value="tree" className="data-[state=active]:bg-purple-500">
-                  <GitBranch className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="list" className="data-[state=active]:bg-purple-500">
-                  <List className="w-4 h-4" />
-                </TabsTrigger>
-                <TabsTrigger value="card" className="data-[state=active]:bg-purple-500">
-                  <Grid3x3 className="w-4 h-4" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <Button
-              onClick={() => setShowBulkOps(!showBulkOps)}
-              variant="outline"
-              className="border-white/20 hover:bg-white/10 text-white"
-            >
-              <Filter className="w-4 h-4 mr-2" />
-              批量操作
-            </Button>
-
-            <Button
-              onClick={handleExport}
-              variant="outline"
-              className="border-white/20 hover:bg-white/10 text-white"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              导出
-            </Button>
-
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-purple-500/30"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              创建标签
-            </Button>
-          </div>
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Input
+            placeholder="搜索标签..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-7 pl-8 w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          />
         </div>
-
-        <TagStatsCards tags={tags} className="mt-4" />
       </div>
 
-      {/* 主要内容区域 */}
+      {/* 主要内容区 */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 左侧：标签浏览器 */}
-        <div className="w-96 border-r border-white/10 glass-effect overflow-auto">
-          {viewMode === "tree" && (
-            <TagTree
-              tags={tagTree}
-              selectedTag={selectedTag}
-              onSelectTag={setSelectedTag}
-              onCreateChild={(parent) => setShowCreateDialog(true)}
-            />
-          )}
-          {viewMode === "list" && (
-            <TagListView
-              tags={filteredTags}
-              selectedTag={selectedTag}
-              onSelectTag={setSelectedTag}
-              selectedTags={selectedTags}
-              onToggleSelect={(tag) => {
-                setSelectedTags(prev => 
-                  prev.includes(tag.id) 
-                    ? prev.filter(id => id !== tag.id)
-                    : [...prev, tag.id]
-                );
-              }}
-            />
-          )}
+        {/* 左侧树形视图 */}
+        <div className="w-96 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
+          {/* 添加标签输入框 */}
+          <div className="p-3 border-b border-[#3d3d3d]">
+            <div className="flex gap-2">
+              <Input
+                placeholder="输入标签路径 (例: Ability.Combat.Skill)"
+                value={newTagPath}
+                onChange={(e) => setNewTagPath(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') createTagsFromPath(newTagPath);
+                }}
+                className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+              />
+              <Button
+                size="sm"
+                onClick={() => createTagsFromPath(newTagPath)}
+                className="h-8 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              使用 . 分隔自动创建层级结构
+            </p>
+          </div>
+
+          {/* 树形列表 */}
+          <div className="flex-1 overflow-auto">
+            {isLoading ? (
+              <div className="p-4 text-sm text-gray-500">加载中...</div>
+            ) : filteredTree.length === 0 ? (
+              <div className="p-4 text-sm text-gray-500">
+                {searchQuery ? '没有匹配的标签' : '暂无标签，输入路径创建'}
+              </div>
+            ) : (
+              <div className="py-2">
+                {filteredTree.map(node => renderNode(node))}
+              </div>
+            )}
+          </div>
+
+          {/* 统计信息 */}
+          <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
+            总计: {tags.length} 个标签
+          </div>
         </div>
 
-        {/* 中间：详情面板 */}
-        <div className="flex-1 overflow-auto">
+        {/* 右侧详情面板 */}
+        <div className="flex-1 bg-[#1e1e1e] overflow-auto">
           {selectedTag ? (
-            <TagDetailPanel
-              tag={selectedTag}
-              onUpdate={handleUpdateTag}
-              onDelete={handleDeleteTag}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-                  <GitBranch className="w-12 h-12 text-purple-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">选择一个标签</h3>
-                <p className="text-gray-400">从左侧选择一个标签查看详情</p>
+            <div className="p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-white mb-1">
+                  {selectedTag.name}
+                </h2>
+                <p className="text-sm text-gray-400">{selectedTag.full_path}</p>
               </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">完整路径</label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={selectedTag.full_path}
+                      readOnly
+                      className="flex-1 h-8 bg-[#252526] border-[#3d3d3d] text-sm text-white"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedTag.full_path);
+                      }}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">父级路径</label>
+                  <Input
+                    value={selectedTag.parent_path || "(根级)"}
+                    readOnly
+                    className="h-8 bg-[#252526] border-[#3d3d3d] text-sm text-gray-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">层级深度</label>
+                  <Input
+                    value={selectedTag.depth}
+                    readOnly
+                    className="h-8 bg-[#252526] border-[#3d3d3d] text-sm text-gray-400"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRename(selectedTag)}
+                    className="border-[#3d3d3d] hover:bg-[#2d2d2d]"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    重命名
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDelete(selectedTag)}
+                    className="border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    删除
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">
+              选择一个标签查看详情
             </div>
           )}
         </div>
-
-        {/* 右侧：批量操作面板 */}
-        {showBulkOps && (
-          <BulkOperationsPanel
-            selectedTags={selectedTags}
-            allTags={tags}
-            onClose={() => setShowBulkOps(false)}
-            onRefresh={() => queryClient.invalidateQueries({ queryKey: ['gameplayTags'] })}
-          />
-        )}
       </div>
 
-      {/* 创建标签对话框 */}
-      {showCreateDialog && (
-        <TagCreationDialog
-          onClose={() => setShowCreateDialog(false)}
-          onCreate={handleCreateTag}
-          existingTags={tags}
-          parentTag={selectedTag}
-        />
+      {/* 右键菜单 */}
+      {contextMenu && (
+        <div
+          className="fixed bg-[#2d2d2d] border border-[#3d3d3d] shadow-lg rounded z-50 py-1"
+          style={{ 
+            left: contextMenu.x, 
+            top: contextMenu.y,
+            minWidth: '160px'
+          }}
+        >
+          <button
+            onClick={() => handleRename(contextMenu.tag)}
+            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#094771] flex items-center gap-2"
+          >
+            <Edit3 className="w-4 h-4" />
+            重命名
+          </button>
+          <button
+            onClick={() => handleDuplicate(contextMenu.tag)}
+            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#094771] flex items-center gap-2"
+          >
+            <Copy className="w-4 h-4" />
+            复制
+          </button>
+          <div className="h-px bg-[#3d3d3d] my-1" />
+          <button
+            onClick={() => handleDelete(contextMenu.tag)}
+            className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-[#5a1e1e] flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            删除
+          </button>
+        </div>
       )}
     </div>
   );
