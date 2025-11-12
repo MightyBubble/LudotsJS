@@ -27,7 +27,6 @@ export default function TagEditor() {
   const [selectedTags, setSelectedTags] = useState(new Set());
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -83,7 +82,6 @@ export default function TagEditor() {
     if (!file) return;
 
     setImporting(true);
-    setImportError(null);
 
     try {
       const text = await file.text();
@@ -93,7 +91,7 @@ export default function TagEditor() {
       const toCreate = importedTags.filter(tag => !existingPaths.has(tag.full_path));
 
       if (toCreate.length === 0) {
-        setImportError('没有找到新的标签需要导入');
+        alert('没有找到新的标签需要导入');
         setImporting(false);
         return;
       }
@@ -115,7 +113,7 @@ export default function TagEditor() {
       queryClient.invalidateQueries({ queryKey: ['gameplayTags'] });
       alert(`成功导入 ${toCreate.length} 个标签`);
     } catch (err) {
-      setImportError(err.message);
+      alert(`导入失败: ${err.message}`);
     } finally {
       setImporting(false);
       e.target.value = '';
@@ -665,7 +663,7 @@ export default function TagEditor() {
             size="sm"
             variant={viewMode === 'tree' ? 'default' : 'ghost'}
             onClick={() => setViewMode('tree')}
-            className={`h-6 px-3 text-xs ${viewMode === 'tree' ? 'bg-[#0e639c]' : ''}`}
+            className={`h-6 px-3 text-xs ${viewMode === 'tree' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
           >
             <List className="w-3 h-3 mr-1" />
             树形
@@ -674,7 +672,7 @@ export default function TagEditor() {
             size="sm"
             variant={viewMode === 'graph' ? 'default' : 'ghost'}
             onClick={() => setViewMode('graph')}
-            className={`h-6 px-3 text-xs ${viewMode === 'graph' ? 'bg-[#0e639c]' : ''}`}
+            className={`h-6 px-3 text-xs ${viewMode === 'graph' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
           >
             <Network className="w-3 h-3 mr-1" />
             图形
@@ -687,7 +685,7 @@ export default function TagEditor() {
             size="sm"
             variant="outline"
             onClick={exportToJSON}
-            className="h-6 px-2 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+            className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
             title="导出为 JSON"
           >
             <Download className="w-3 h-3" />
@@ -703,7 +701,7 @@ export default function TagEditor() {
             <Button
               size="sm"
               variant="outline"
-              className="h-6 px-2 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+              className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
               disabled={importing}
               onClick={(e) => e.currentTarget.previousElementSibling.click()}
               title="导入 JSON"
@@ -724,7 +722,7 @@ export default function TagEditor() {
                 setSelectedTags(new Set());
               }
             }}
-            className={`h-6 px-3 text-xs ${isMultiSelectMode ? 'bg-[#0e639c]' : 'border-[#3d3d3d]'}`}
+            className={`h-6 px-3 text-xs ${isMultiSelectMode ? 'bg-[#0e639c] text-white' : 'bg-[#2d2d2d] border-[#3d3d3d] text-gray-300'}`}
           >
             {isMultiSelectMode ? <CheckSquare className="w-3 h-3 mr-1" /> : <Square className="w-3 h-3 mr-1" />}
             批量操作
@@ -740,14 +738,14 @@ export default function TagEditor() {
             <Button
               size="sm"
               onClick={() => handleBatchLock(true)}
-              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs"
+              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
               <Lock className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={() => handleBatchLock(false)}
-              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs"
+              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
               <Unlock className="w-3 h-3" />
             </Button>
@@ -777,7 +775,7 @@ export default function TagEditor() {
               size="sm"
               onClick={handleDiscardChanges}
               variant="outline"
-              className="h-6 px-3 border-[#3d3d3d] hover:bg-[#2d2d2d] text-xs"
+              className="h-6 px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
               <X className="w-3 h-3 mr-1" />
               撤销
@@ -893,7 +891,7 @@ export default function TagEditor() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-8 border-[#3d3d3d] hover:bg-[#2d2d2d]"
+                          className="h-8 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
                           onClick={() => {
                             navigator.clipboard.writeText(selectedTag.full_path);
                           }}
@@ -947,7 +945,7 @@ export default function TagEditor() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleRename(selectedTag)}
-                        className="border-[#3d3d3d] hover:bg-[#2d2d2d]"
+                        className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
                       >
                         <Edit3 className="w-4 h-4 mr-2" />
                         重命名
@@ -956,7 +954,7 @@ export default function TagEditor() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDelete(selectedTag)}
-                        className="border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
+                        className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         删除
