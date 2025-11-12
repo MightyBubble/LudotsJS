@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   ChevronRight, ChevronDown, Plus, 
-  Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X
+  Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X, MoveUp
 } from "lucide-react";
 
 export default function TagEditor() {
@@ -20,6 +20,7 @@ export default function TagEditor() {
   const [dropTarget, setDropTarget] = useState(null);
   const [localTags, setLocalTags] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isDraggingOverRoot, setIsDraggingOverRoot] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -298,9 +299,30 @@ export default function TagEditor() {
     setDropTarget(null);
   };
 
+  const handleRootDragOver = (e) => {
+    e.preventDefault();
+    if (draggedTag) {
+      e.dataTransfer.dropEffect = 'move';
+      setIsDraggingOverRoot(true);
+    }
+  };
+
+  const handleRootDragLeave = (e) => {
+    // 只在真正离开容器时清除
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDraggingOverRoot(false);
+    }
+  };
+
   const handleDropToRoot = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    setIsDraggingOverRoot(false);
     
     if (!draggedTag) return;
 
@@ -400,6 +422,7 @@ export default function TagEditor() {
           onDragEnd={() => {
             setDraggedTag(null);
             setDropTarget(null);
+            setIsDraggingOverRoot(false);
           }}
           onDragOver={(e) => handleDragOver(e, node)}
           onDragLeave={handleDragLeave}
@@ -532,19 +555,15 @@ export default function TagEditor() {
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              拖拽标签调整层级，拖到空白处移至根级
+              拖拽标签调整层级，拖到下方空白区域移至根级
             </p>
           </div>
 
           {/* 树形列表 */}
           <div 
-            className="flex-1 overflow-auto"
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (draggedTag) {
-                e.dataTransfer.dropEffect = 'move';
-              }
-            }}
+            className="flex-1 overflow-auto relative"
+            onDragOver={handleRootDragOver}
+            onDragLeave={handleRootDragLeave}
             onDrop={handleDropToRoot}
           >
             {isLoading ? (
@@ -554,9 +573,19 @@ export default function TagEditor() {
                 {searchQuery ? '没有匹配的标签' : '暂无标签，输入路径创建'}
               </div>
             ) : (
-              <div className="py-2">
-                {filteredTree.map(node => renderNode(node))}
-              </div>
+              <>
+                <div className="py-2">
+                  {filteredTree.map(node => renderNode(node))}
+                </div>
+                
+                {/* 根级拖放区域提示 */}
+                {draggedTag && isDraggingOverRoot && (
+                  <div className="sticky bottom-0 left-0 right-0 mt-4 mx-3 mb-3 p-4 border-2 border-dashed border-blue-500 bg-[#0e639c]/20 rounded flex items-center justify-center gap-2">
+                    <MoveUp className="w-5 h-5 text-blue-400" />
+                    <span className="text-sm text-blue-300 font-medium">松开鼠标移至根级</span>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
