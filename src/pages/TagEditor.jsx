@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import GraphView from "../components/tagEditor/GraphView";
 import CategoryManager from "../components/tagEditor/CategoryManager";
-import TagRulesEditor from "../components/tagEditor/TagRulesEditor";
+import TagRulesEditor, { ValidationRules } from "../components/tagEditor/TagRulesEditor";
 
 export default function TagEditor() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -903,130 +903,145 @@ export default function TagEditor() {
 
                   {/* 左右两栏布局 */}
                   <div className="grid grid-cols-2 gap-4">
-                    {/* 左栏：基本信息 */}
-                    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                      <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
-                        基本信息
-                      </h3>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs text-gray-400 mb-1 block">完整路径</label>
-                          <div className="flex gap-2">
+                    {/* 左栏：基本信息 + 验证规则 */}
+                    <div className="space-y-4">
+                      {/* 基本信息 */}
+                      <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
+                        <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
+                          基本信息
+                        </h3>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">完整路径</label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={selectedTag.full_path}
+                                readOnly
+                                className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(selectedTag.full_path);
+                                }}
+                              >
+                                <Copy className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">父级路径</label>
                             <Input
-                              value={selectedTag.full_path}
+                              value={selectedTag.parent_path || "(根级)"}
                               readOnly
-                              className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
                             />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs text-gray-400 mb-1 block">层级深度</label>
+                              <Input
+                                value={selectedTag.depth}
+                                readOnly
+                                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-400 mb-1 block">使用次数</label>
+                              <Input
+                                value={selectedTag.usage_count || 0}
+                                readOnly
+                                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">分类</label>
+                            <Select
+                              value={selectedTag.category_key || "other"}
+                              onValueChange={(value) => {
+                                updateTagMutation.mutate({
+                                  id: selectedTag.id,
+                                  data: { category_key: value }
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                {categories.map(cat => (
+                                  <SelectItem key={cat.key} value={cat.key} className="text-white hover:bg-[#3d3d3d]">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-3 h-3 rounded" style={{ backgroundColor: cat.color }} />
+                                      <span>{cat.name}</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">描述</label>
+                            <Input
+                              value={selectedTag.description || ""}
+                              onChange={(e) => {
+                                updateTagMutation.mutate({
+                                  id: selectedTag.id,
+                                  data: { description: e.target.value }
+                                });
+                              }}
+                              placeholder="添加描述..."
+                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                            />
+                          </div>
+
+                          <div className="flex gap-2 pt-4">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-8 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-                              onClick={() => {
-                                navigator.clipboard.writeText(selectedTag.full_path);
-                              }}
+                              onClick={() => handleRename(selectedTag)}
+                              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
                             >
-                              <Copy className="w-4 h-4" />
+                              <Edit3 className="w-4 h-4 mr-2" />
+                              重命名
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(selectedTag)}
+                              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              删除
                             </Button>
                           </div>
                         </div>
+                      </div>
 
-                        <div>
-                          <label className="text-xs text-gray-400 mb-1 block">父级路径</label>
-                          <Input
-                            value={selectedTag.parent_path || "(根级)"}
-                            readOnly
-                            className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">层级深度</label>
-                            <Input
-                              value={selectedTag.depth}
-                              readOnly
-                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">使用次数</label>
-                            <Input
-                              value={selectedTag.usage_count || 0}
-                              readOnly
-                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs text-gray-400 mb-1 block">分类</label>
-                          <Select
-                            value={selectedTag.category_key || "other"}
-                            onValueChange={(value) => {
-                              updateTagMutation.mutate({
-                                id: selectedTag.id,
-                                data: { category_key: value }
-                              });
-                            }}
-                          >
-                            <SelectTrigger className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                              {categories.map(cat => (
-                                <SelectItem key={cat.key} value={cat.key} className="text-white hover:bg-[#3d3d3d]">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded" style={{ backgroundColor: cat.color }} />
-                                    <span>{cat.name}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs text-gray-400 mb-1 block">描述</label>
-                          <Input
-                            value={selectedTag.description || ""}
-                            onChange={(e) => {
-                              updateTagMutation.mutate({
-                                id: selectedTag.id,
-                                data: { description: e.target.value }
-                              });
-                            }}
-                            placeholder="添加描述..."
-                            className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
-                          />
-                        </div>
-
-                        <div className="flex gap-2 pt-4">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRename(selectedTag)}
-                            className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-                          >
-                            <Edit3 className="w-4 h-4 mr-2" />
-                            重命名
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(selectedTag)}
-                            className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            删除
-                          </Button>
-                        </div>
+                      {/* 验证规则 */}
+                      <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
+                        <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
+                          验证规则
+                        </h3>
+                        <ValidationRules
+                          tag={selectedTag}
+                          allTags={localTags}
+                          onUpdate={handleUpdateTagRules}
+                        />
                       </div>
                     </div>
 
-                    {/* Right Column: Tag Rules */}
+                    {/* 右栏：行为规则 */}
                     <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded overflow-auto">
                       <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
-                        标签规则
+                        行为规则
                       </h3>
                       <TagRulesEditor
                         tag={selectedTag}
