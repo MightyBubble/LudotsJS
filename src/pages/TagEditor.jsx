@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,7 +32,7 @@ export default function TagEditor() {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [detailsTab, setDetailsTab] = useState('basic'); // basic, rules
+  // Removed detailsTab state as per changes
 
   const queryClient = useQueryClient();
 
@@ -888,7 +889,7 @@ export default function TagEditor() {
               </div>
             </div>
 
-            {/* 右侧详情面板 */}
+            {/* 右侧详情面板 - 左右两栏布局 */}
             <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4">
               {selectedTag ? (
                 <div className="space-y-4">
@@ -900,33 +901,13 @@ export default function TagEditor() {
                     <p className="text-sm text-gray-400">{selectedTag.full_path}</p>
                   </div>
 
-                  {/* 标签页切换 */}
-                  <div className="flex gap-2 border-b border-[#3d3d3d]">
-                    <button
-                      onClick={() => setDetailsTab('basic')}
-                      className={`px-4 py-2 text-sm font-medium transition-colors ${
-                        detailsTab === 'basic'
-                          ? 'text-white border-b-2 border-blue-500'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      基本信息
-                    </button>
-                    <button
-                      onClick={() => setDetailsTab('rules')}
-                      className={`px-4 py-2 text-sm font-medium transition-colors ${
-                        detailsTab === 'rules'
-                          ? 'text-white border-b-2 border-blue-500'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      标签规则
-                    </button>
-                  </div>
-
-                  {/* 内容区 */}
-                  <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                    {detailsTab === 'basic' ? (
+                  {/* 左右两栏布局 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 左栏：基本信息 */}
+                    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
+                      <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
+                        基本信息
+                      </h3>
                       <div className="space-y-3">
                         <div>
                           <label className="text-xs text-gray-400 mb-1 block">完整路径</label>
@@ -1040,13 +1021,19 @@ export default function TagEditor() {
                           </Button>
                         </div>
                       </div>
-                    ) : (
+                    </div>
+
+                    {/* Right Column: Tag Rules */}
+                    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded overflow-auto">
+                      <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
+                        标签规则
+                      </h3>
                       <TagRulesEditor
                         tag={selectedTag}
                         allTags={localTags}
                         onUpdate={handleUpdateTagRules}
                       />
-                    )}
+                    </div>
                   </div>
                 </div>
               ) : (
