@@ -427,10 +427,11 @@ export default function TagEditor() {
           onDragOver={(e) => handleDragOver(e, node)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node)}
-          className={`flex items-center gap-1 py-1 px-2 hover:bg-[#2d2d2d] cursor-pointer group relative ${
-            isSelected ? 'bg-[#094771]' : ''
-          } ${isDragTarget ? 'bg-[#0e639c]' : ''} ${
-            isDragging ? 'opacity-40' : ''
+          className={`flex items-center gap-1 py-1 px-2 cursor-pointer group relative ${
+            isDragging ? 'opacity-40' : 
+            isSelected ? 'bg-[#094771]' : 
+            isDragTarget ? 'bg-[#0e639c]' : 
+            'hover:bg-[#2d2d2d]'
           }`}
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onClick={() => setSelectedTag(node)}
