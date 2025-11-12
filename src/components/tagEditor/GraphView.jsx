@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
-import { ZoomIn, ZoomOut, Maximize2, Play, Pause, RotateCcw } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Play, Pause, RotateCcw, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function GraphView({ tags, onSelectTag, selectedTag, categories }) {
   const canvasRef = useRef(null);
@@ -14,6 +15,16 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
   const [hoveredNode, setHoveredNode] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
   const [isSimulating, setIsSimulating] = useState(true);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  
+  // 关系过滤选项
+  const [relationFilters, setRelationFilters] = useState({
+    hierarchy: true,     // 父子关系
+    required: true,      // 必需关系
+    blocked: true,       // 阻止关系
+    attached: false,     // 附加关系
+    removed: false,      // 移除关系
+  });
   
   // 力学模拟参数
   const [nodes, setNodes] = useState([]);
@@ -41,7 +52,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         vx: 0,
         vy: 0,
         width: 140,
-        height: 50,
+        height: 40,
         mass: 1
       };
     });
@@ -49,17 +60,19 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     // 初始化边
     const initialEdges = [];
     tags.forEach(tag => {
+      // 父子关系
       if (tag.parent_path) {
         const parent = tags.find(t => t.full_path === tag.parent_path);
         if (parent) {
           initialEdges.push({
             source: parent.id,
-            target: tag.id
+            target: tag.id,
+            type: 'hierarchy'
           });
         }
       }
 
-      // 添加规则关系边（虚线）
+      // 必需关系
       if (tag.required_tags) {
         tag.required_tags.forEach(reqPath => {
           const reqTag = tags.find(t => t.full_path === reqPath);
@@ -73,6 +86,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         });
       }
 
+      // 阻止关系
       if (tag.blocked_tags) {
         tag.blocked_tags.forEach(blockPath => {
           const blockTag = tags.find(t => t.full_path === blockPath);
@@ -85,11 +99,44 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           }
         });
       }
+
+      // 附加关系
+      if (tag.attached_tags) {
+        tag.attached_tags.forEach(attachPath => {
+          const attachTag = tags.find(t => t.full_path === attachPath);
+          if (attachTag) {
+            initialEdges.push({
+              source: tag.id,
+              target: attachTag.id,
+              type: 'attached'
+            });
+          }
+        });
+      }
+
+      // 移除关系
+      if (tag.removed_tags) {
+        tag.removed_tags.forEach(removePath => {
+          const removeTag = tags.find(t => t.full_path === removePath);
+          if (removeTag) {
+            initialEdges.push({
+              source: tag.id,
+              target: removeTag.id,
+              type: 'removed'
+            });
+          }
+        });
+      }
     });
 
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [tags]);
+
+  // 过滤后的边
+  const filteredEdges = useMemo(() => {
+    return edges.filter(edge => relationFilters[edge.type]);
+  }, [edges, relationFilters]);
 
   // 力学模拟
   useEffect(() => {
@@ -121,7 +168,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         }
 
         // 2. 引力（连接的节点之间有弹簧引力）
-        edges.forEach(edge => {
+        filteredEdges.forEach(edge => {
           const source = newNodes.find(n => n.id === edge.source);
           const target = newNodes.find(n => n.id === edge.target);
           if (!source || !target) return;
@@ -133,7 +180,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           if (distance < 1) return;
 
           // 理想距离
-          const idealDistance = edge.type ? 100 : 150;
+          const idealDistance = edge.type === 'hierarchy' ? 150 : 100;
           
           // 胡克定律：F = k * (x - x0)
           const springForce = 0.01 * (distance - idealDistance);
@@ -187,7 +234,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isSimulating, nodes.length, edges, draggedNode]);
+  }, [isSimulating, nodes.length, filteredEdges, draggedNode]);
 
   // 绘制
   useEffect(() => {
@@ -205,25 +252,40 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     ctx.scale(scale, scale);
     ctx.translate(-400, -400);
 
-    // 绘制网格背景
+    // 绘制无限网格背景
     ctx.strokeStyle = '#2d2d2d';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1 / scale;
     const gridSize = 20;
-    for (let x = 0; x < 800; x += gridSize) {
+    
+    // 计算当前可见区域
+    const viewX = (- offset.x - canvas.width / 2) / scale + 400;
+    const viewY = (- offset.y - canvas.height / 2) / scale + 400;
+    const viewWidth = canvas.width / scale;
+    const viewHeight = canvas.height / scale;
+    
+    const startX = Math.floor((viewX) / gridSize) * gridSize;
+    const startY = Math.floor((viewY) / gridSize) * gridSize;
+    const endX = startX + viewWidth + gridSize;
+    const endY = startY + viewHeight + gridSize;
+
+    // 绘制垂直线
+    for (let x = startX; x <= endX; x += gridSize) {
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, 800);
+      ctx.moveTo(x, startY);
+      ctx.lineTo(x, endY);
       ctx.stroke();
     }
-    for (let y = 0; y < 800; y += gridSize) {
+    
+    // 绘制水平线
+    for (let y = startY; y <= endY; y += gridSize) {
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(800, y);
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
       ctx.stroke();
     }
 
     // 绘制边
-    edges.forEach(edge => {
+    filteredEdges.forEach(edge => {
       const sourceNode = nodes.find(n => n.id === edge.source);
       const targetNode = nodes.find(n => n.id === edge.target);
       if (!sourceNode || !targetNode) return;
@@ -232,29 +294,38 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       ctx.moveTo(sourceNode.x, sourceNode.y);
       ctx.lineTo(targetNode.x, targetNode.y);
 
-      if (edge.type === 'required') {
+      // 根据类型设置样式
+      if (edge.type === 'hierarchy') {
+        ctx.strokeStyle = '#4a4a4a';
+        ctx.lineWidth = 2 / scale;
+        ctx.setLineDash([]);
+      } else if (edge.type === 'required') {
         ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.5 / scale;
+        ctx.setLineDash([5 / scale, 5 / scale]);
       } else if (edge.type === 'blocked') {
         ctx.strokeStyle = '#f87171';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
-      } else {
-        ctx.strokeStyle = '#4a4a4a';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([]);
+        ctx.lineWidth = 1.5 / scale;
+        ctx.setLineDash([5 / scale, 5 / scale]);
+      } else if (edge.type === 'attached') {
+        ctx.strokeStyle = '#60a5fa';
+        ctx.lineWidth = 1.5 / scale;
+        ctx.setLineDash([5 / scale, 5 / scale]);
+      } else if (edge.type === 'removed') {
+        ctx.strokeStyle = '#fb923c';
+        ctx.lineWidth = 1.5 / scale;
+        ctx.setLineDash([5 / scale, 5 / scale]);
       }
       
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 箭头
-      if (!edge.type) {
+      // 箭头（只有层级关系显示箭头）
+      if (edge.type === 'hierarchy') {
         const dx = targetNode.x - sourceNode.x;
         const dy = targetNode.y - sourceNode.y;
         const angle = Math.atan2(dy, dx);
-        const arrowSize = 8;
+        const arrowSize = 8 / scale;
         
         ctx.fillStyle = '#4a4a4a';
         ctx.beginPath();
@@ -272,7 +343,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       }
     });
 
-    // 绘制节点
+    // 绘制节点（胶囊/标签形状）
     nodes.forEach(node => {
       const isSelected = selectedTag?.id === node.id;
       const isHovered = hoveredNode?.id === node.id;
@@ -280,27 +351,26 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
       
       const x = node.x - node.width / 2;
       const y = node.y - node.height / 2;
-      const radius = 8;
+      const radius = node.height / 2; // 两端半圆
 
       // 阴影
       if (isHovered || isSelected || isDragged) {
         ctx.shadowColor = 'rgba(14, 99, 156, 0.5)';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 15 / scale;
         ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 4;
+        ctx.shadowOffsetY = 4 / scale;
       }
 
-      // 节点背景
+      // 绘制胶囊形状
       ctx.beginPath();
-      ctx.moveTo(x + radius, y);
+      // 左半圆
+      ctx.arc(x + radius, y + radius, radius, Math.PI / 2, Math.PI * 3 / 2);
+      // 上边
       ctx.lineTo(x + node.width - radius, y);
-      ctx.quadraticCurveTo(x + node.width, y, x + node.width, y + radius);
-      ctx.lineTo(x + node.width, y + node.height - radius);
-      ctx.quadraticCurveTo(x + node.width, y + node.height, x + node.width - radius, y + node.height);
+      // 右半圆
+      ctx.arc(x + node.width - radius, y + radius, radius, Math.PI * 3 / 2, Math.PI / 2);
+      // 下边
       ctx.lineTo(x + radius, y + node.height);
-      ctx.quadraticCurveTo(x, y + node.height, x, y + node.height - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
       ctx.closePath();
 
       ctx.fillStyle = isSelected ? '#094771' : '#252526';
@@ -311,22 +381,26 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
 
       // 边框
       ctx.strokeStyle = isSelected ? '#0e639c' : isHovered || isDragged ? '#3d3d3d' : '#2d2d2d';
-      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.lineWidth = (isSelected ? 3 : 2) / scale;
       ctx.stroke();
 
-      // 分类色条
+      // 分类色条（左侧半圆部分）
       const categoryColor = getCategoryColor(node.tag.category_key);
       ctx.fillStyle = categoryColor;
-      ctx.fillRect(x, y, 4, node.height);
+      ctx.beginPath();
+      ctx.arc(x + radius, y + radius, radius - 2 / scale, Math.PI / 2, Math.PI * 3 / 2);
+      ctx.lineTo(x + radius, y + node.height - 2 / scale);
+      ctx.closePath();
+      ctx.fill();
 
       // 节点文字
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px sans-serif';
+      ctx.font = `bold ${12 / scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
       const text = node.tag.name;
-      const maxWidth = node.width - 20;
+      const maxWidth = node.width - 30;
       let displayText = text;
       
       if (ctx.measureText(text).width > maxWidth) {
@@ -337,17 +411,18 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
         displayText = truncated + '...';
       }
       
-      ctx.fillText(displayText, node.x, node.y - 6);
+      ctx.fillText(displayText, node.x, node.y);
 
-      // 子标题
-      ctx.fillStyle = '#888888';
-      ctx.font = '9px sans-serif';
-      const depth = `Level ${node.tag.depth}`;
-      ctx.fillText(depth, node.x, node.y + 8);
+      // 锁定图标
+      if (node.tag.is_locked) {
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = `${12 / scale}px sans-serif`;
+        ctx.fillText('🔒', x + node.width - 10 / scale, y + 10 / scale);
+      }
     });
 
     ctx.restore();
-  }, [nodes, edges, scale, offset, selectedTag, hoveredNode, draggedNode, categories]);
+  }, [nodes, filteredEdges, scale, offset, selectedTag, hoveredNode, draggedNode, categories]);
 
   // 鼠标交互
   const getNodeAtPosition = (x, y) => {
@@ -356,10 +431,33 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     const canvasY = (y - canvas.height / 2 - offset.y) / scale + 400;
 
     return nodes.find(node => {
-      const nodeX = node.x - node.width / 2;
-      const nodeY = node.y - node.height / 2;
-      return canvasX >= nodeX && canvasX <= nodeX + node.width &&
-             canvasY >= nodeY && canvasY <= nodeY + node.height;
+      const dx = canvasX - node.x;
+      const dy = canvasY - node.y;
+      
+      // 胶囊形状碰撞检测
+      const halfWidth = node.width / 2;
+      const halfHeight = node.height / 2;
+      
+      // 中间矩形区域
+      if (Math.abs(dx) <= halfWidth - halfHeight && Math.abs(dy) <= halfHeight) {
+        return true;
+      }
+      
+      // 左半圆
+      if (dx < -(halfWidth - halfHeight)) {
+        const circleX = node.x - (halfWidth - halfHeight);
+        const dist = Math.sqrt((canvasX - circleX) ** 2 + (canvasY - node.y) ** 2);
+        return dist <= halfHeight;
+      }
+      
+      // 右半圆
+      if (dx > (halfWidth - halfHeight)) {
+        const circleX = node.x + (halfWidth - halfHeight);
+        const dist = Math.sqrt((canvasX - circleX) ** 2 + (canvasY - node.y) ** 2);
+        return dist <= halfHeight;
+      }
+      
+      return false;
     });
   };
 
@@ -459,6 +557,13 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
     });
   };
 
+  const toggleFilter = (filterKey) => {
+    setRelationFilters(prev => ({
+      ...prev,
+      [filterKey]: !prev[filterKey]
+    }));
+  };
+
   return (
     <div ref={containerRef} className="relative w-full h-full bg-[#1e1e1e]">
       <canvas
@@ -529,7 +634,78 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
             <RotateCcw className="w-4 h-4" />
           </Button>
         </div>
+
+        {/* 关系过滤 */}
+        <div className="bg-[#2d2d2d] border border-[#3d3d3d] rounded p-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setShowFilterPanel(!showFilterPanel)}
+            className={`h-8 w-8 p-0 hover:bg-[#3d3d3d] ${showFilterPanel ? 'text-blue-400' : 'text-gray-200'}`}
+            title="过滤关系"
+          >
+            <Filter className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
+
+      {/* 关系过滤面板 */}
+      {showFilterPanel && (
+        <div className="absolute top-4 right-20 bg-[#2d2d2d] border border-[#3d3d3d] rounded p-3 min-w-[200px]">
+          <div className="text-sm font-semibold text-white mb-3">关系类型</div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.hierarchy}
+                onCheckedChange={() => toggleFilter('hierarchy')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">父子关系</span>
+              <div className="ml-auto w-6 h-0.5 bg-[#4a4a4a]" />
+            </label>
+            
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.required}
+                onCheckedChange={() => toggleFilter('required')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">必需关系</span>
+              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-green-400" />
+            </label>
+            
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.blocked}
+                onCheckedChange={() => toggleFilter('blocked')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">阻止关系</span>
+              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-red-400" />
+            </label>
+            
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.attached}
+                onCheckedChange={() => toggleFilter('attached')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">附加关系</span>
+              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-blue-400" />
+            </label>
+            
+            <label className="flex items-center gap-2 cursor-pointer hover:bg-[#3d3d3d] p-1 rounded">
+              <Checkbox
+                checked={relationFilters.removed}
+                onCheckedChange={() => toggleFilter('removed')}
+                className="border-gray-500"
+              />
+              <span className="text-xs text-gray-300">移除关系</span>
+              <div className="ml-auto w-6 h-0.5 border-t border-dashed border-orange-400" />
+            </label>
+          </div>
+        </div>
+      )}
 
       {/* 提示信息 */}
       <div className="absolute bottom-4 left-4 bg-[#2d2d2d] border border-[#3d3d3d] rounded p-3 text-xs text-gray-400 max-w-xs">
@@ -544,8 +720,7 @@ export default function GraphView({ tags, onSelectTag, selectedTag, categories }
           <div>• <span className="text-white">拖动节点</span>调整位置</div>
           <div>• <span className="text-white">拖动空白</span>移动视图</div>
           <div>• <span className="text-white">滚轮</span>缩放画布</div>
-          <div>• <span className="text-green-400">绿色虚线</span>必需关系</div>
-          <div>• <span className="text-red-400">红色虚线</span>阻止关系</div>
+          <div>• <span className="text-white">过滤按钮</span>控制关系显示</div>
         </div>
         {hoveredNode && (
           <div className="mt-2 pt-2 border-t border-[#3d3d3d]">
