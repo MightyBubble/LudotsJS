@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  ChevronRight, ChevronDown, Plus, 
+import {
+  ChevronRight, ChevronDown, Plus,
   Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X, MoveUp,
   List, Network, CheckSquare, Square, Lock, Unlock, Download, Upload, Palette, Settings
 } from "lucide-react";
@@ -80,6 +80,11 @@ export default function TagEditor() {
     return category?.color || '#94a3b8';
   };
 
+  const getCategoryName = (categoryKey) => {
+    const category = categories.find(c => c.key === categoryKey);
+    return category?.name || categoryKey;
+  };
+
   // 导入导出功能
   const exportToJSON = () => {
     const data = JSON.stringify(tags, null, 2);
@@ -113,7 +118,7 @@ export default function TagEditor() {
         return;
       }
 
-      const creates = toCreate.map(tag => 
+      const creates = toCreate.map(tag =>
         base44.entities.GameplayTag.create({
           name: tag.name,
           full_path: tag.full_path,
@@ -144,22 +149,22 @@ export default function TagEditor() {
         e.preventDefault();
         document.querySelector('input[placeholder*="输入标签路径"]')?.focus();
       }
-      
+
       if (e.key === 'F2' && selectedTag) {
         e.preventDefault();
         handleRename(selectedTag);
       }
-      
+
       if (e.key === 'Delete' && selectedTag && !editingTag) {
         e.preventDefault();
         handleDelete(selectedTag);
       }
-      
+
       if (e.ctrlKey && e.key === 's' && hasUnsavedChanges) {
         e.preventDefault();
         handleSaveChanges();
       }
-      
+
       if (e.key === 'Escape') {
         if (editingTag) {
           setEditingTag(null);
@@ -184,13 +189,13 @@ export default function TagEditor() {
 
     const parts = fullPath.split('.');
     const existingPaths = new Set(tags.map(t => t.full_path));
-    
+
     for (let i = 0; i < parts.length; i++) {
       const currentPath = parts.slice(0, i + 1).join('.');
-      
+
       if (!existingPaths.has(currentPath)) {
         const parentPath = i > 0 ? parts.slice(0, i).join('.') : "";
-        
+
         await createTagMutation.mutateAsync({
           name: parts[i],
           full_path: currentPath,
@@ -202,7 +207,7 @@ export default function TagEditor() {
         });
       }
     }
-    
+
     setNewTagPath("");
     parts.forEach((_, i) => {
       const path = parts.slice(0, i + 1).join('.');
@@ -215,14 +220,14 @@ export default function TagEditor() {
       if (tag.full_path === oldParentPath) {
         return tag;
       }
-      
+
       if (tag.full_path.startsWith(oldParentPath + '.')) {
         const suffix = tag.full_path.substring(oldParentPath.length);
         const newFullPath = newParentPath + suffix;
         const newDepth = newFullPath.split('.').length - 1;
         const parts = newFullPath.split('.');
         const newParentPathForTag = parts.slice(0, -1).join('.');
-        
+
         return {
           ...tag,
           full_path: newFullPath,
@@ -230,7 +235,7 @@ export default function TagEditor() {
           depth: newDepth,
         };
       }
-      
+
       return tag;
     });
   };
@@ -261,7 +266,7 @@ export default function TagEditor() {
     if (!query) {
       return nodes;
     }
-    
+
     return nodes.filter(node => {
       const matches = node.full_path.toLowerCase().includes(query.toLowerCase());
       const childMatches = node.children && filterTree(node.children, query).length > 0;
@@ -302,10 +307,10 @@ export default function TagEditor() {
 
   const handleSaveRename = async (tag) => {
     if (editValue && editValue !== tag.name) {
-      const newFullPath = tag.parent_path 
+      const newFullPath = tag.parent_path
         ? `${tag.parent_path}.${editValue}`
         : editValue;
-      
+
       await updateTagMutation.mutateAsync({
         id: tag.id,
         data: {
@@ -326,10 +331,10 @@ export default function TagEditor() {
 
   const handleDuplicate = async (tag) => {
     const newName = `${tag.name}_Copy`;
-    const newFullPath = tag.parent_path 
+    const newFullPath = tag.parent_path
       ? `${tag.parent_path}.${newName}`
       : newName;
-    
+
     await createTagMutation.mutateAsync({
       ...tag,
       id: undefined,
@@ -352,7 +357,7 @@ export default function TagEditor() {
   const handleBatchLock = async (lock) => {
     if (selectedTags.size === 0) return;
 
-    const updates = Array.from(selectedTags).map(id => 
+    const updates = Array.from(selectedTags).map(id =>
       updateTagMutation.mutateAsync({
         id,
         data: { is_locked: lock }
@@ -380,22 +385,22 @@ export default function TagEditor() {
 
   const handleDragOver = (e, tag) => {
     e.preventDefault();
-    
+
     if (!draggedTag || !tag) {
       e.dataTransfer.dropEffect = 'none';
       return;
     }
-    
+
     if (tag.id === draggedTag.id) {
       e.dataTransfer.dropEffect = 'none';
       return;
     }
-    
+
     if (tag.full_path.startsWith(draggedTag.full_path + '.')) {
       e.dataTransfer.dropEffect = 'none';
       return;
     }
-    
+
     e.dataTransfer.dropEffect = 'move';
     setDropTarget(tag);
   };
@@ -407,7 +412,7 @@ export default function TagEditor() {
   const handleDrop = (e, targetTag) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!draggedTag || !targetTag || draggedTag.id === targetTag.id) {
       setDraggedTag(null);
       setDropTarget(null);
@@ -457,7 +462,7 @@ export default function TagEditor() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
       setIsDraggingOverRoot(false);
     }
@@ -466,9 +471,9 @@ export default function TagEditor() {
   const handleDropToRoot = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setIsDraggingOverRoot(false);
-    
+
     if (!draggedTag) return;
 
     if (!draggedTag.parent_path || draggedTag.parent_path === "") {
@@ -504,13 +509,13 @@ export default function TagEditor() {
     const modifiedTags = localTags.filter(localTag => {
       const originalTag = tags.find(t => t.id === localTag.id);
       if (!originalTag) return false;
-      
+
       return localTag.full_path !== originalTag.full_path ||
              localTag.parent_path !== originalTag.parent_path ||
              localTag.depth !== originalTag.depth;
     });
 
-    const updates = modifiedTags.map(tag => 
+    const updates = modifiedTags.map(tag =>
       updateTagMutation.mutateAsync({
         id: tag.id,
         data: {
@@ -520,7 +525,7 @@ export default function TagEditor() {
         }
       })
     );
-    
+
     await Promise.all(updates);
     setHasUnsavedChanges(false);
   };
@@ -552,7 +557,7 @@ export default function TagEditor() {
     const isDragTarget = dropTarget?.id === node.id;
     const isDragging = draggedTag?.id === node.id;
     const isMultiSelected = selectedTags.has(node.id);
-    
+
     const originalTag = tags.find(t => t.id === node.id);
     const isModified = originalTag && (
       node.full_path !== originalTag.full_path ||
@@ -573,9 +578,9 @@ export default function TagEditor() {
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node)}
           className={`flex items-center gap-1 py-1 px-2 cursor-pointer group relative ${
-            isDragging ? 'opacity-40' : 
-            isSelected ? 'bg-[#094771]' : 
-            isDragTarget ? 'bg-[#0e639c]' : 
+            isDragging ? 'opacity-40' :
+            isSelected ? 'bg-[#094771]' :
+            isDragTarget ? 'bg-[#0e639c]' :
             isMultiSelected ? 'bg-[#0e639c]/50' :
             'hover:bg-[#2d2d2d]'
           }`}
@@ -593,22 +598,22 @@ export default function TagEditor() {
             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-yellow-500" />
           )}
 
-          <div 
+          <div
             className="w-1 h-4 rounded-full flex-shrink-0"
             style={{ backgroundColor: getCategoryColor(node.category_key) }}
           />
-          
+
           {isMultiSelectMode && (
             <div onClick={(e) => e.stopPropagation()}>
-              {isMultiSelected ? 
+              {isMultiSelected ?
                 <CheckSquare className="w-4 h-4 text-blue-400" onClick={() => toggleTagSelection(node.id)} /> :
                 <Square className="w-4 h-4 text-gray-600" onClick={() => toggleTagSelection(node.id)} />
               }
             </div>
           )}
-          
+
           <GripVertical className="w-3 h-3 text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-          
+
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -617,8 +622,8 @@ export default function TagEditor() {
             className="w-4 h-4 flex items-center justify-center hover:bg-[#3d3d3d] flex-shrink-0"
           >
             {hasChildren && (
-              isExpanded ? 
-                <ChevronDown className="w-3 h-3 text-gray-400" /> : 
+              isExpanded ?
+                <ChevronDown className="w-3 h-3 text-gray-400" /> :
                 <ChevronRight className="w-3 h-3 text-gray-400" />
             )}
           </button>
@@ -666,7 +671,7 @@ export default function TagEditor() {
       {/* 顶部工具栏 */}
       <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <span className="text-sm font-semibold text-gray-300">GameplayTag 编辑器</span>
-        
+
         {/* 视图切换 */}
         <div className="flex gap-1 ml-4 bg-[#1e1e1e] rounded p-1">
           <Button
@@ -779,7 +784,7 @@ export default function TagEditor() {
             </Button>
           </div>
         )}
-        
+
         {hasUnsavedChanges && (
           <div className="flex items-center gap-2 ml-4">
             <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
@@ -803,7 +808,7 @@ export default function TagEditor() {
             </Button>
           </div>
         )}
-        
+
         <div className="flex-1" />
 
         <div className="relative">
@@ -851,7 +856,7 @@ export default function TagEditor() {
                 </p>
               </div>
 
-              <div 
+              <div
                 className="flex-1 overflow-auto relative"
                 onDragOver={handleRootDragOver}
                 onDragLeave={handleRootDragLeave}
@@ -868,7 +873,7 @@ export default function TagEditor() {
                     <div className="py-2">
                       {filteredTree.map(node => renderNode(node))}
                     </div>
-                    
+
                     {draggedTag && isDraggingOverRoot && (
                       <div className="sticky bottom-0 left-0 right-0 mt-4 mx-3 mb-3 p-4 border-2 border-dashed border-blue-500 bg-[#0e639c]/20 rounded flex items-center justify-center gap-2">
                         <MoveUp className="w-5 h-5 text-blue-400" />
@@ -889,77 +894,82 @@ export default function TagEditor() {
               </div>
             </div>
 
-            {/* 右侧详情面板 - 左右两栏布局 */}
+            {/* 右侧详情面板 */}
             <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4">
               {selectedTag ? (
                 <div className="space-y-4">
-                  {/* 标签头部 */}
+                  {/* 标签头部 - 包含描述性信息和操作按钮 */}
                   <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                    <h2 className="text-lg font-semibold text-white mb-1">
-                      {selectedTag.name}
-                    </h2>
-                    <p className="text-sm text-gray-400">{selectedTag.full_path}</p>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h2 className="text-lg font-semibold text-white mb-1">
+                          {selectedTag.name}
+                        </h2>
+                        <p className="text-sm text-gray-400">{selectedTag.full_path}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRename(selectedTag)}
+                          className="h-7 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+                        >
+                          <Edit3 className="w-3 h-3 mr-1" />
+                          重命名
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(selectedTag)}
+                          className="h-7 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          删除
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* 描述性信息 */}
+                    <div className="grid grid-cols-3 gap-4 pt-3 border-t border-[#3d3d3d]">
+                      <div>
+                        <div className="text-xs text-gray-400 mb-1">完整路径</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-200 font-mono break-all">{selectedTag.full_path}</span>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(selectedTag.full_path)}
+                            className="text-gray-500 hover:text-gray-300 transition-colors"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-400 mb-1">父级路径</div>
+                        <span className="text-sm text-gray-200 break-all">{selectedTag.parent_path || "(根级)"}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">层级深度</div>
+                          <span className="text-sm text-gray-200">{selectedTag.depth}</span>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-400 mb-1">使用次数</div>
+                          <span className="text-sm text-gray-200">{selectedTag.usage_count || 0}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* 左右两栏布局 */}
                   <div className="grid grid-cols-2 gap-4">
                     {/* 左栏：基本信息 + 验证规则 */}
                     <div className="space-y-4">
-                      {/* 基本信息 */}
+                      {/* 基本信息 - 仅可编辑字段 */}
                       <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
                         <h3 className="text-sm font-semibold text-gray-300 mb-3 border-b border-[#3d3d3d] pb-2">
                           基本信息
                         </h3>
                         <div className="space-y-3">
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">完整路径</label>
-                            <div className="flex gap-2">
-                              <Input
-                                value={selectedTag.full_path}
-                                readOnly
-                                className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
-                              />
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(selectedTag.full_path);
-                                }}
-                              >
-                                <Copy className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="text-xs text-gray-400 mb-1 block">父级路径</label>
-                            <Input
-                              value={selectedTag.parent_path || "(根级)"}
-                              readOnly
-                              className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs text-gray-400 mb-1 block">层级深度</label>
-                              <Input
-                                value={selectedTag.depth}
-                                readOnly
-                                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs text-gray-400 mb-1 block">使用次数</label>
-                              <Input
-                                value={selectedTag.usage_count || 0}
-                                readOnly
-                                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-gray-400"
-                              />
-                            </div>
-                          </div>
-
                           <div>
                             <label className="text-xs text-gray-400 mb-1 block">分类</label>
                             <Select
@@ -1000,27 +1010,6 @@ export default function TagEditor() {
                               placeholder="添加描述..."
                               className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
                             />
-                          </div>
-
-                          <div className="flex gap-2 pt-4">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleRename(selectedTag)}
-                              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-                            >
-                              <Edit3 className="w-4 h-4 mr-2" />
-                              重命名
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDelete(selectedTag)}
-                              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              删除
-                            </Button>
                           </div>
                         </div>
                       </div>
@@ -1078,8 +1067,8 @@ export default function TagEditor() {
       {contextMenu && (
         <div
           className="fixed bg-[#2d2d2d] border border-[#3d3d3d] shadow-lg rounded z-50 py-1"
-          style={{ 
-            left: contextMenu.x, 
+          style={{
+            left: contextMenu.x,
             top: contextMenu.y,
             minWidth: '160px'
           }}

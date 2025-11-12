@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, Shield, Ban, Trash, Power, Eraser } from "lucide-react";
+import { Plus, X, Shield, Ban, Trash, Power, Eraser, Link } from "lucide-react";
 
 // 简单规则组件（用于左侧）
 export function ValidationRules({ tag, allTags, onUpdate }) {
@@ -134,12 +134,14 @@ export function ValidationRules({ tag, allTags, onUpdate }) {
 // 条件规则组件（用于右侧）
 export default function TagRulesEditor({ tag, allTags, onUpdate }) {
   const [rules, setRules] = useState({
+    attached_tags: tag.attached_tags || [],
     removed_tags: tag.removed_tags || [],
     disabled_if_tags: tag.disabled_if_tags || { tags: [], match_mode: "any" },
     remove_if_tags: tag.remove_if_tags || { tags: [], match_mode: "any" },
   });
 
   const [newTag, setNewTag] = useState({
+    attached: "",
     removed: "",
     disabled_if: "",
     remove_if: "",
@@ -150,7 +152,9 @@ export default function TagRulesEditor({ tag, allTags, onUpdate }) {
     
     let updated = { ...rules };
     
-    if (type === 'removed') {
+    if (type === 'attached') {
+      updated.attached_tags = [...rules.attached_tags, value.trim()];
+    } else if (type === 'removed') {
       updated.removed_tags = [...rules.removed_tags, value.trim()];
     } else if (type === 'disabled_if') {
       updated.disabled_if_tags = {
@@ -172,7 +176,9 @@ export default function TagRulesEditor({ tag, allTags, onUpdate }) {
   const removeTag = (type, index) => {
     let updated = { ...rules };
     
-    if (type === 'removed') {
+    if (type === 'attached') {
+      updated.attached_tags = rules.attached_tags.filter((_, i) => i !== index);
+    } else if (type === 'removed') {
       updated.removed_tags = rules.removed_tags.filter((_, i) => i !== index);
     } else if (type === 'disabled_if') {
       updated.disabled_if_tags = {
@@ -356,6 +362,16 @@ export default function TagRulesEditor({ tag, allTags, onUpdate }) {
 
   return (
     <div className="space-y-3">
+      <SimpleRuleSection
+        type="attached"
+        icon={<Link className="w-4 h-4" />}
+        title="附加标签 (Attached Tags)"
+        description="附加此标签后，同步添加这些标签"
+        color="text-blue-400"
+        tags={rules.attached_tags}
+        inputValue={newTag.attached}
+      />
+
       <SimpleRuleSection
         type="removed"
         icon={<Trash className="w-4 h-4" />}
