@@ -103,6 +103,7 @@ export default function TagEditor() {
           parent_path: tag.parent_path || "",
           depth: tag.depth || 0,
           category: tag.category || "other",
+          color: tag.color || "#94a3b8",
           description: tag.description || "",
           is_locked: tag.is_locked || false,
           usage_count: 0,
@@ -180,6 +181,7 @@ export default function TagEditor() {
           parent_path: parentPath,
           depth: i,
           category: "other",
+          color: "#94a3b8",
           usage_count: 0,
           is_locked: false,
         });
@@ -519,21 +521,6 @@ export default function TagEditor() {
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      ability: '#60a5fa',
-      state: '#34d399',
-      effect: '#f472b6',
-      item: '#fbbf24',
-      event: '#a78bfa',
-      ui: '#fb923c',
-      audio: '#22d3ee',
-      gameplay: '#4ade80',
-      other: '#94a3b8',
-    };
-    return colors[category] || '#94a3b8';
-  };
-
   const renderNode = (node, level = 0) => {
     const isExpanded = expandedNodes.has(node.full_path);
     const hasChildren = node.children && node.children.length > 0;
@@ -585,7 +572,7 @@ export default function TagEditor() {
 
           <div 
             className="w-1 h-4 rounded-full flex-shrink-0"
-            style={{ backgroundColor: getCategoryColor(node.category) }}
+            style={{ backgroundColor: node.color || '#94a3b8' }}
           />
           
           {isMultiSelectMode && (
@@ -930,14 +917,35 @@ export default function TagEditor() {
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">分类</label>
+                      <label className="text-xs text-gray-400 mb-1 block">颜色</label>
                       <div className="flex items-center gap-2">
-                        <div 
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: getCategoryColor(selectedTag.category) }}
+                        <input
+                          type="color"
+                          value={selectedTag.color || '#94a3b8'}
+                          onChange={(e) => {
+                            updateTagMutation.mutate({
+                              id: selectedTag.id,
+                              data: { color: e.target.value }
+                            });
+                          }}
+                          className="w-10 h-8 rounded cursor-pointer bg-[#1e1e1e] border border-[#3d3d3d]"
                         />
-                        <span className="text-sm text-gray-200">{selectedTag.category}</span>
+                        <Input
+                          value={selectedTag.color || '#94a3b8'}
+                          onChange={(e) => {
+                            updateTagMutation.mutate({
+                              id: selectedTag.id,
+                              data: { color: e.target.value }
+                            });
+                          }}
+                          className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                        />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">分类</label>
+                      <span className="text-sm text-gray-200">{selectedTag.category}</span>
                     </div>
 
                     <div className="flex gap-2 pt-4">
