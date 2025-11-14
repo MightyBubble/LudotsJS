@@ -24,7 +24,8 @@ function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
     green: "text-green-300",
     blue: "text-blue-300",
     red: "text-red-300",
-    orange: "text-orange-300"
+    orange: "text-orange-300",
+    purple: "text-purple-300"
   }[color] || "text-gray-300";
 
   return (
@@ -123,6 +124,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
               <Input
                 value={editData.effect_name}
                 onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })}
+                placeholder="例如：木头燃烧"
                 className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
               />
             </div>
@@ -131,6 +133,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
               <Input
                 value={editData.triggering_effect_tag_path}
                 onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })}
+                placeholder="例如：Effect.Fire.Burn"
                 className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
                 list="tags-datalist"
               />
@@ -151,6 +154,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             <Textarea
               value={editData.description || ""}
               onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+              placeholder="描述此效果规则..."
               className="bg-[#1e1e1e] border-[#3d3d3d] text-white"
               rows={2}
             />
@@ -165,24 +169,19 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
 
             <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
               <div className="flex items-center gap-2 mb-3">
-                <ArrowRight className="w-4 h-4 text-green-400" />
-                <h4 className="text-sm font-semibold text-white">效果结果</h4>
+                <ArrowRight className="w-4 h-4 text-yellow-400" />
+                <h4 className="text-sm font-semibold text-white">产生的后续效果标签</h4>
               </div>
+              <p className="text-xs text-gray-400 mb-3">
+                这些标签会被添加到目标上，并由标签自身的规则（attached_tags/removed_tags等）进一步处理
+              </p>
 
               <TagListEditor
-                title="添加到目标的标签"
-                tags={editData.result_tags_to_add}
-                onChange={(tags) => setEditData({ ...editData, result_tags_to_add: tags })}
+                title="后续效果标签列表"
+                tags={editData.resulting_effect_tags}
+                onChange={(tags) => setEditData({ ...editData, resulting_effect_tags: tags })}
                 allTags={tags}
-                color="green"
-              />
-
-              <TagListEditor
-                title="从目标移除的标签"
-                tags={editData.result_tags_to_remove}
-                onChange={(tags) => setEditData({ ...editData, result_tags_to_remove: tags })}
-                allTags={tags}
-                color="orange"
+                color="purple"
               />
             </div>
           </div>
@@ -248,7 +247,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             <p className="text-sm text-gray-400 ml-7 mb-3">{effect.description}</p>
           )}
 
-          <div className="ml-7 grid grid-cols-4 gap-4 text-sm">
+          <div className="ml-7 grid grid-cols-3 gap-4 text-sm">
             <div>
               <div className="text-xs text-gray-500 mb-1">触发标签</div>
               <div className="flex items-center gap-1">
@@ -272,16 +271,12 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             </div>
 
             <div>
-              <div className="text-xs text-gray-500 mb-1">添加标签</div>
-              <div className="text-green-300">
-                {effect.result_tags_to_add?.length || 0} 个
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-gray-500 mb-1">移除标签</div>
-              <div className="text-orange-300">
-                {effect.result_tags_to_remove?.length || 0} 个
+              <div className="text-xs text-gray-500 mb-1">产生后续效果</div>
+              <div className="flex items-center gap-1">
+                <ArrowRight className="w-3 h-3 text-yellow-400" />
+                <span className="text-yellow-300">
+                  {effect.resulting_effect_tags?.length || 0} 个标签
+                </span>
               </div>
             </div>
           </div>
@@ -324,30 +319,26 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
                 </div>
               )}
 
-              {/* 效果结果详情 */}
+              {/* 后续效果详情 */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <ArrowRight className="w-4 h-4 text-green-400" />
-                  <h4 className="text-sm font-semibold text-white">效果结果</h4>
+                  <ArrowRight className="w-4 h-4 text-yellow-400" />
+                  <h4 className="text-sm font-semibold text-white">产生的后续效果标签</h4>
                 </div>
-                <div className="space-y-2 text-xs">
-                  {effect.result_tags_to_add?.length > 0 && (
-                    <div>
-                      <span className="text-gray-500">添加: </span>
-                      {effect.result_tags_to_add.map((tag, i) => (
-                        <span key={i} className="text-green-300 font-mono">{tag}{i < effect.result_tags_to_add.length - 1 ? ', ' : ''}</span>
-                      ))}
-                    </div>
-                  )}
-                  {effect.result_tags_to_remove?.length > 0 && (
-                    <div>
-                      <span className="text-gray-500">移除: </span>
-                      {effect.result_tags_to_remove.map((tag, i) => (
-                        <span key={i} className="text-orange-300 font-mono">{tag}{i < effect.result_tags_to_remove.length - 1 ? ', ' : ''}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {effect.resulting_effect_tags && effect.resulting_effect_tags.length > 0 ? (
+                  <div className="space-y-1 text-xs">
+                    {effect.resulting_effect_tags.map((tag, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="text-purple-300 font-mono">{tag}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500">未配置后续效果</p>
+                )}
+                <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-[#3d3d3d]">
+                  💡 这些标签会被添加到目标上，并由标签自身的规则进一步处理
+                </p>
               </div>
             </div>
           )}
@@ -459,8 +450,7 @@ export default function InteractionEffectsPage() {
     description: "",
     triggering_effect_tag_path: "",
     target_object_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-    result_tags_to_add: [],
-    result_tags_to_remove: [],
+    resulting_effect_tags: [],
     priority: 0,
     is_active: true
   };
@@ -470,8 +460,8 @@ export default function InteractionEffectsPage() {
       {/* 顶部工具栏 */}
       <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Zap className="w-5 h-5 text-purple-400" />
-        <span className="text-sm font-semibold text-gray-300">交互效果编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个效果</span>
+        <span className="text-sm font-semibold text-gray-300">交互效果编辑器（条件映射）</span>
+        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个映射规则</span>
         
         <div className="flex-1" />
 
@@ -491,13 +481,28 @@ export default function InteractionEffectsPage() {
           className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white"
         >
           <Plus className="w-4 h-4 mr-1" />
-          新建效果
+          新建映射
         </Button>
       </div>
 
       {/* 效果列表 */}
       <div className="flex-1 overflow-auto p-4">
         <div className="max-w-6xl mx-auto space-y-3">
+          {/* 说明提示 */}
+          <div className="p-3 bg-[#1e3d3d] border border-[#2d5d5d] rounded text-sm text-gray-300 mb-4">
+            <div className="flex items-start gap-2">
+              <span className="text-cyan-400">💡</span>
+              <div>
+                <div className="font-semibold mb-1">两级效果系统</div>
+                <div className="text-xs text-gray-400 space-y-1">
+                  <div>1. <span className="text-white">条件映射</span>：效果标签 + 目标条件 → 产生后续效果标签</div>
+                  <div>2. <span className="text-white">标签规则</span>：后续效果标签利用自身的 attached_tags / removed_tags 等规则来修改目标</div>
+                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn + 目标有 Material.Wood → 产生 Status.Burning 标签 → Status.Burning 的规则会进一步添加/移除其他标签</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {creatingNew && (
             <EffectCard
               effect={newEffectTemplate}
@@ -511,8 +516,8 @@ export default function InteractionEffectsPage() {
           {filteredEffects.length === 0 && !creatingNew ? (
             <div className="text-center py-16 text-gray-500">
               <Zap className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <div className="text-lg mb-2">暂无效果</div>
-              <div className="text-sm">点击右上角"新建效果"开始创建</div>
+              <div className="text-lg mb-2">暂无效果映射</div>
+              <div className="text-sm">点击右上角"新建映射"开始创建</div>
             </div>
           ) : (
             filteredEffects.map(effect => (
