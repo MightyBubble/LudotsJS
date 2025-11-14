@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -55,6 +55,30 @@ export default function Layout({ children, currentPageName }) {
         >
           <Zap className="w-4 h-4" />
           标签模拟器
+        </Link>
+
+        <Link
+          to={createPageUrl("UnlockableCommands")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "UnlockableCommands"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <KeyRound className="w-4 h-4" />
+          指令解锁器
+        </Link>
+
+        <Link
+          to={createPageUrl("InteractionEffects")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "InteractionEffects"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          效果编辑器
         </Link>
       </div>
 
