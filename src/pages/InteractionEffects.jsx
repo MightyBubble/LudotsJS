@@ -3,387 +3,38 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Edit3, Trash2, X, Save, Zap } from "lucide-react";
 
-// 效果ID列表编辑器
-function EffectIdListEditor({ effectIds, onChange }) {
-  const [inputValue, setInputValue] = useState("");
-
-  const addEffectId = () => {
-    if (!inputValue.trim()) return;
-    onChange([...(effectIds || []), inputValue.trim()]);
-    setInputValue("");
-  };
-
-  const removeEffectId = (index) => {
-    onChange((effectIds || []).filter((_, i) => i !== index));
-  };
-
+// 标签输入组件
+function TagInput({ value, onChange, onKeyDown }) {
   return (
-    <div>
-      <div className="space-y-1 mb-1">
-        {(effectIds || []).map((effectId, idx) => (
-          <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
-            <span className="text-gray-300 font-mono">{effectId}</span>
-            <button onClick={() => removeEffectId(idx)} className="text-gray-500 hover:text-red-400">
+    <Input
+      value={value}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      placeholder="标签路径"
+      className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
+      list="tags-datalist"
+    />
+  );
+}
+
+// 标签列表显示
+function TagList({ tags, onRemove, canEdit }) {
+  if (!tags || tags.length === 0) return <span className="text-gray-600 text-xs">-</span>;
+  
+  return (
+    <div className="space-y-0.5">
+      {tags.map((tag, idx) => (
+        <div key={idx} className="flex items-center gap-1">
+          <span className="text-xs text-gray-300 font-mono">{tag}</span>
+          {canEdit && (
+            <button onClick={() => onRemove(idx)} className="text-gray-500 hover:text-red-400">
               <X className="w-3 h-3" />
             </button>
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-1">
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addEffectId()}
-          placeholder="效果ID"
-          className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
-        />
-        <Button size="sm" onClick={addEffectId} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
-          <Plus className="w-3 h-3" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// 标签条件编辑器
-function TagConditionEditor({ title, conditions, onChange, allTags }) {
-  const safeConditions = conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
-  
-  const [inputs, setInputs] = useState({
-    has_any: "",
-    has_all: "",
-    not_has: ""
-  });
-
-  const addTag = (type, value) => {
-    if (!value.trim()) return;
-    
-    const updated = { ...safeConditions };
-    if (type === 'has_any') {
-      updated.has_any_tags = [...(updated.has_any_tags || []), value.trim()];
-    } else if (type === 'has_all') {
-      updated.has_all_tags = [...(updated.has_all_tags || []), value.trim()];
-    } else if (type === 'not_has') {
-      updated.not_has_tags = [...(updated.not_has_tags || []), value.trim()];
-    }
-    
-    onChange(updated);
-    setInputs({ ...inputs, [type]: "" });
-  };
-
-  const removeTag = (type, index) => {
-    const updated = { ...safeConditions };
-    if (type === 'has_any') {
-      updated.has_any_tags = (updated.has_any_tags || []).filter((_, i) => i !== index);
-    } else if (type === 'has_all') {
-      updated.has_all_tags = (updated.has_all_tags || []).filter((_, i) => i !== index);
-    } else if (type === 'not_has') {
-      updated.not_has_tags = (updated.not_has_tags || []).filter((_, i) => i !== index);
-    }
-    onChange(updated);
-  };
-
-  return (
-    <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
-      <h4 className="text-xs font-semibold text-gray-300 mb-2">{title}</h4>
-
-      <div className="mb-2">
-        <label className="text-xs text-gray-500 mb-1 block">Has Any</label>
-        <div className="space-y-1 mb-1">
-          {(safeConditions.has_any_tags || []).map((tag, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
-              <span className="text-gray-300 font-mono">{tag}</span>
-              <button onClick={() => removeTag('has_any', idx)} className="text-gray-500 hover:text-red-400">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-1">
-          <Input
-            value={inputs.has_any}
-            onChange={(e) => setInputs({ ...inputs, has_any: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && addTag('has_any', inputs.has_any)}
-            placeholder="标签路径"
-            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
-            list="tags-datalist"
-          />
-          <Button size="sm" onClick={() => addTag('has_any', inputs.has_any)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="mb-2">
-        <label className="text-xs text-gray-500 mb-1 block">Has All</label>
-        <div className="space-y-1 mb-1">
-          {(safeConditions.has_all_tags || []).map((tag, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
-              <span className="text-gray-300 font-mono">{tag}</span>
-              <button onClick={() => removeTag('has_all', idx)} className="text-gray-500 hover:text-red-400">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-1">
-          <Input
-            value={inputs.has_all}
-            onChange={(e) => setInputs({ ...inputs, has_all: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && addTag('has_all', inputs.has_all)}
-            placeholder="标签路径"
-            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
-            list="tags-datalist"
-          />
-          <Button size="sm" onClick={() => addTag('has_all', inputs.has_all)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <label className="text-xs text-gray-500 mb-1 block">Not Has</label>
-        <div className="space-y-1 mb-1">
-          {(safeConditions.not_has_tags || []).map((tag, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
-              <span className="text-gray-300 font-mono">{tag}</span>
-              <button onClick={() => removeTag('not_has', idx)} className="text-gray-500 hover:text-red-400">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-1">
-          <Input
-            value={inputs.not_has}
-            onChange={(e) => setInputs({ ...inputs, not_has: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && addTag('not_has', inputs.not_has)}
-            placeholder="标签路径"
-            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
-            list="tags-datalist"
-          />
-          <Button size="sm" onClick={() => addTag('not_has', inputs.not_has)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-
-      <datalist id="tags-datalist">
-        {allTags.map(t => <option key={t.id} value={t.full_path} />)}
-      </datalist>
-    </div>
-  );
-}
-
-// 效果卡片组件
-function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCancelEdit }) {
-  const [editData, setEditData] = useState(effect);
-
-  if (isEditing) {
-    return (
-      <div className="p-3 bg-[#252526] border border-[#0e639c] rounded">
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">效果名称 *</label>
-              <Input
-                value={editData.effect_name}
-                onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })}
-                placeholder="例如：木头燃烧"
-                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">触发效果ID *</label>
-              <Input
-                value={editData.triggering_effect_tag_path}
-                onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })}
-                placeholder="例如：Effect.Fire.Burn"
-                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">优先级</label>
-              <Input
-                type="number"
-                value={editData.priority}
-                onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })}
-                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-400 mb-1 block">描述</label>
-            <Textarea
-              value={editData.description || ""}
-              onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-              placeholder="描述此效果规则..."
-              className="bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
-              rows={2}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2">
-            <TagConditionEditor
-              title="发起者条件"
-              conditions={editData.interactor_conditions}
-              onChange={(conditions) => setEditData({ ...editData, interactor_conditions: conditions })}
-              allTags={tags}
-            />
-
-            <TagConditionEditor
-              title="目标条件"
-              conditions={editData.target_object_conditions}
-              onChange={(conditions) => setEditData({ ...editData, target_object_conditions: conditions })}
-              allTags={tags}
-            />
-
-            <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
-              <h4 className="text-xs font-semibold text-gray-300 mb-2">后续效果ID</h4>
-              <EffectIdListEditor
-                effectIds={editData.resulting_effect_ids}
-                onChange={(ids) => setEditData({ ...editData, resulting_effect_ids: ids })}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-gray-300">
-              <input
-                type="checkbox"
-                checked={editData.is_active}
-                onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })}
-                className="w-3 h-3"
-              />
-              激活
-            </label>
-            <div className="flex-1" />
-            <Button size="sm" onClick={() => onSave(editData)} className="h-6 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
-              <Save className="w-3 h-3 mr-1" />
-              保存
-            </Button>
-            <Button size="sm" onClick={onCancelEdit} variant="outline" className="h-6 px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300 text-xs">
-              取消
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded hover:border-[#555] transition-colors">
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-white">{effect.effect_name}</h3>
-            {!effect.is_active && (
-              <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">未激活</span>
-            )}
-            {effect.priority > 0 && (
-              <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">P{effect.priority}</span>
-            )}
-          </div>
-          {effect.description && (
-            <p className="text-xs text-gray-400 mb-2">{effect.description}</p>
-          )}
-          <div className="text-xs text-gray-500">
-            触发: <span className="text-gray-300 font-mono">{effect.triggering_effect_tag_path}</span>
-          </div>
-        </div>
-
-        <div className="flex gap-1 ml-3">
-          <Button size="sm" variant="ghost" onClick={() => onEdit(effect)} className="h-7 w-7 p-0 hover:bg-[#3d3d3d] text-gray-300">
-            <Edit3 className="w-3 h-3" />
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => onDelete(effect.id)} className="h-7 w-7 p-0 hover:bg-[#5a1e1e] text-red-400">
-            <Trash2 className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
-          <div className="text-xs font-semibold text-gray-300 mb-1">发起者条件</div>
-          {effect.interactor_conditions?.has_any_tags?.length > 0 && (
-            <div className="mb-1">
-              <div className="text-xs text-gray-500">Has Any:</div>
-              {effect.interactor_conditions.has_any_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {effect.interactor_conditions?.has_all_tags?.length > 0 && (
-            <div className="mb-1">
-              <div className="text-xs text-gray-500">Has All:</div>
-              {effect.interactor_conditions.has_all_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {effect.interactor_conditions?.not_has_tags?.length > 0 && (
-            <div>
-              <div className="text-xs text-gray-500">Not Has:</div>
-              {effect.interactor_conditions.not_has_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {(!effect.interactor_conditions?.has_any_tags?.length && 
-            !effect.interactor_conditions?.has_all_tags?.length && 
-            !effect.interactor_conditions?.not_has_tags?.length) && (
-            <div className="text-xs text-gray-600">无条件</div>
           )}
         </div>
-
-        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
-          <div className="text-xs font-semibold text-gray-300 mb-1">目标条件</div>
-          {effect.target_object_conditions?.has_any_tags?.length > 0 && (
-            <div className="mb-1">
-              <div className="text-xs text-gray-500">Has Any:</div>
-              {effect.target_object_conditions.has_any_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {effect.target_object_conditions?.has_all_tags?.length > 0 && (
-            <div className="mb-1">
-              <div className="text-xs text-gray-500">Has All:</div>
-              {effect.target_object_conditions.has_all_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {effect.target_object_conditions?.not_has_tags?.length > 0 && (
-            <div>
-              <div className="text-xs text-gray-500">Not Has:</div>
-              {effect.target_object_conditions.not_has_tags.map((tag, i) => (
-                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
-              ))}
-            </div>
-          )}
-          {(!effect.target_object_conditions?.has_any_tags?.length && 
-            !effect.target_object_conditions?.has_all_tags?.length && 
-            !effect.target_object_conditions?.not_has_tags?.length) && (
-            <div className="text-xs text-gray-600">无条件</div>
-          )}
-        </div>
-
-        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
-          <div className="text-xs font-semibold text-gray-300 mb-1">后续效果</div>
-          {effect.resulting_effect_ids && effect.resulting_effect_ids.length > 0 ? (
-            effect.resulting_effect_ids.map((effectId, i) => (
-              <div key={i} className="text-xs text-gray-300 font-mono">{effectId}</div>
-            ))
-          ) : (
-            <div className="text-xs text-gray-600">无</div>
-          )}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -392,6 +43,13 @@ export default function InteractionEffectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [creatingNew, setCreatingNew] = useState(false);
+  const [editData, setEditData] = useState(null);
+  
+  const [tempInputs, setTempInputs] = useState({
+    interactor_any: "", interactor_all: "", interactor_not: "",
+    target_any: "", target_all: "", target_not: "",
+    effect_id: ""
+  });
 
   const queryClient = useQueryClient();
 
@@ -412,6 +70,8 @@ export default function InteractionEffectsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interactionEffects'] });
       setCreatingNew(false);
+      setEditData(null);
+      setTempInputs({ interactor_any: "", interactor_all: "", interactor_not: "", target_any: "", target_all: "", target_not: "", effect_id: "" });
     },
   });
 
@@ -420,6 +80,8 @@ export default function InteractionEffectsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interactionEffects'] });
       setEditingId(null);
+      setEditData(null);
+      setTempInputs({ interactor_any: "", interactor_all: "", interactor_not: "", target_any: "", target_all: "", target_not: "", effect_id: "" });
     },
   });
 
@@ -434,47 +96,124 @@ export default function InteractionEffectsPage() {
     if (!searchQuery) return effects;
     return effects.filter(effect => 
       effect.effect_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (effect.description && effect.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (effect.triggering_effect_tag_path && effect.triggering_effect_tag_path.toLowerCase().includes(searchQuery.toLowerCase()))
+      (effect.description && effect.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [effects, searchQuery]);
 
   const handleCreate = () => {
     setCreatingNew(true);
     setEditingId(null);
+    setEditData({
+      effect_name: "",
+      description: "",
+      triggering_effect_tag_path: "",
+      interactor_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+      target_object_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+      resulting_effect_ids: [],
+      priority: 0,
+      is_active: true
+    });
   };
 
-  const handleSaveNew = (data) => {
-    if (!data.effect_name || !data.triggering_effect_tag_path) {
-      alert('请填写必填项：效果名称和触发效果ID');
-      return;
-    }
-    createMutation.mutate(data);
+  const handleEdit = (effect) => {
+    setEditingId(effect.id);
+    setCreatingNew(false);
+    setEditData({ ...effect });
   };
 
-  const handleSaveEdit = (data) => {
-    if (!data.effect_name || !data.triggering_effect_tag_path) {
-      alert('请填写必填项：效果名称和触发效果ID');
+  const handleSave = () => {
+    if (!editData.effect_name || !editData.triggering_effect_tag_path) {
+      alert('请填写必填项');
       return;
     }
-    updateMutation.mutate({ id: data.id, data });
+    if (creatingNew) {
+      createMutation.mutate(editData);
+    } else {
+      updateMutation.mutate({ id: editData.id, data: editData });
+    }
+  };
+
+  const handleCancel = () => {
+    setCreatingNew(false);
+    setEditingId(null);
+    setEditData(null);
+    setTempInputs({ interactor_any: "", interactor_all: "", interactor_not: "", target_any: "", target_all: "", target_not: "", effect_id: "" });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('确定删除此效果规则吗？')) {
+    if (window.confirm('确定删除？')) {
       deleteMutation.mutate(id);
     }
   };
 
-  const newEffectTemplate = {
-    effect_name: "",
-    description: "",
-    triggering_effect_tag_path: "",
-    interactor_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-    target_object_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-    resulting_effect_ids: [],
-    priority: 0,
-    is_active: true
+  const addTag = (type, value) => {
+    if (!value.trim() || !editData) return;
+    
+    const updated = { ...editData };
+    if (type.startsWith('interactor_')) {
+      const condition = type.replace('interactor_', '');
+      if (condition === 'any') {
+        updated.interactor_conditions.has_any_tags = [...(updated.interactor_conditions.has_any_tags || []), value.trim()];
+      } else if (condition === 'all') {
+        updated.interactor_conditions.has_all_tags = [...(updated.interactor_conditions.has_all_tags || []), value.trim()];
+      } else if (condition === 'not') {
+        updated.interactor_conditions.not_has_tags = [...(updated.interactor_conditions.not_has_tags || []), value.trim()];
+      }
+    } else if (type.startsWith('target_')) {
+      const condition = type.replace('target_', '');
+      if (condition === 'any') {
+        updated.target_object_conditions.has_any_tags = [...(updated.target_object_conditions.has_any_tags || []), value.trim()];
+      } else if (condition === 'all') {
+        updated.target_object_conditions.has_all_tags = [...(updated.target_object_conditions.has_all_tags || []), value.trim()];
+      } else if (condition === 'not') {
+        updated.target_object_conditions.not_has_tags = [...(updated.target_object_conditions.not_has_tags || []), value.trim()];
+      }
+    }
+    
+    setEditData(updated);
+    setTempInputs({ ...tempInputs, [type]: "" });
+  };
+
+  const removeTag = (section, type, index) => {
+    if (!editData) return;
+    
+    const updated = { ...editData };
+    if (section === 'interactor') {
+      if (type === 'any') {
+        updated.interactor_conditions.has_any_tags = updated.interactor_conditions.has_any_tags.filter((_, i) => i !== index);
+      } else if (type === 'all') {
+        updated.interactor_conditions.has_all_tags = updated.interactor_conditions.has_all_tags.filter((_, i) => i !== index);
+      } else if (type === 'not') {
+        updated.interactor_conditions.not_has_tags = updated.interactor_conditions.not_has_tags.filter((_, i) => i !== index);
+      }
+    } else if (section === 'target') {
+      if (type === 'any') {
+        updated.target_object_conditions.has_any_tags = updated.target_object_conditions.has_any_tags.filter((_, i) => i !== index);
+      } else if (type === 'all') {
+        updated.target_object_conditions.has_all_tags = updated.target_object_conditions.has_all_tags.filter((_, i) => i !== index);
+      } else if (type === 'not') {
+        updated.target_object_conditions.not_has_tags = updated.target_object_conditions.not_has_tags.filter((_, i) => i !== index);
+      }
+    }
+    
+    setEditData(updated);
+  };
+
+  const addEffectId = () => {
+    if (!tempInputs.effect_id.trim() || !editData) return;
+    setEditData({
+      ...editData,
+      resulting_effect_ids: [...(editData.resulting_effect_ids || []), tempInputs.effect_id.trim()]
+    });
+    setTempInputs({ ...tempInputs, effect_id: "" });
+  };
+
+  const removeEffectId = (index) => {
+    if (!editData) return;
+    setEditData({
+      ...editData,
+      resulting_effect_ids: editData.resulting_effect_ids.filter((_, i) => i !== index)
+    });
   };
 
   return (
@@ -482,14 +221,14 @@ export default function InteractionEffectsPage() {
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Zap className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">效果编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个映射</span>
+        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个</span>
         
         <div className="flex-1" />
 
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
-            placeholder="搜索效果..."
+            placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
@@ -498,45 +237,184 @@ export default function InteractionEffectsPage() {
 
         <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-white text-xs">
           <Plus className="w-3 h-3 mr-1" />
-          新建映射
+          新建
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto p-3">
-        <div className="max-w-6xl mx-auto space-y-2">
-          {creatingNew && (
-            <EffectCard
-              effect={newEffectTemplate}
-              tags={tags}
-              isEditing={true}
-              onSave={handleSaveNew}
-              onCancelEdit={() => setCreatingNew(false)}
-            />
-          )}
-
-          {filteredEffects.length === 0 && !creatingNew ? (
-            <div className="text-center py-12 text-gray-500">
-              <Zap className="w-10 h-10 mx-auto mb-3 opacity-50" />
-              <div className="text-sm">暂无效果映射</div>
-            </div>
-          ) : (
-            filteredEffects.map(effect => (
-              <EffectCard
-                key={effect.id}
-                effect={effect}
-                tags={tags}
-                isEditing={editingId === effect.id}
-                onEdit={(e) => {
-                  setEditingId(e.id);
-                  setCreatingNew(false);
-                }}
-                onSave={handleSaveEdit}
-                onDelete={handleDelete}
-                onCancelEdit={() => setEditingId(null)}
-              />
-            ))
-          )}
-        </div>
+      <div className="flex-1 overflow-auto">
+        <table className="w-full text-xs">
+          <thead className="sticky top-0 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+            <tr>
+              <th className="text-left p-2 font-semibold text-gray-300 w-32">效果名称</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-40">触发效果ID</th>
+              <th className="text-left p-2 font-semibold text-gray-300">发起者 Has Any</th>
+              <th className="text-left p-2 font-semibold text-gray-300">发起者 Has All</th>
+              <th className="text-left p-2 font-semibold text-gray-300">发起者 Not Has</th>
+              <th className="text-left p-2 font-semibold text-gray-300">目标 Has Any</th>
+              <th className="text-left p-2 font-semibold text-gray-300">目标 Has All</th>
+              <th className="text-left p-2 font-semibold text-gray-300">目标 Not Has</th>
+              <th className="text-left p-2 font-semibold text-gray-300">后续效果</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-12">优先级</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-12">状态</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-20">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {creatingNew && editData && (
+              <tr className="border-b border-[#3d3d3d] bg-[#252526]">
+                <td className="p-2">
+                  <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white" />
+                </td>
+                <td className="p-2">
+                  <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white" list="tags-datalist" />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
+                  <TagInput value={tempInputs.interactor_any} onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_any', tempInputs.interactor_any)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.interactor_conditions?.has_all_tags} onRemove={(i) => removeTag('interactor', 'all', i)} canEdit />
+                  <TagInput value={tempInputs.interactor_all} onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_all', tempInputs.interactor_all)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.interactor_conditions?.not_has_tags} onRemove={(i) => removeTag('interactor', 'not', i)} canEdit />
+                  <TagInput value={tempInputs.interactor_not} onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_not', tempInputs.interactor_not)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.target_object_conditions?.has_any_tags} onRemove={(i) => removeTag('target', 'any', i)} canEdit />
+                  <TagInput value={tempInputs.target_any} onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_any', tempInputs.target_any)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.target_object_conditions?.has_all_tags} onRemove={(i) => removeTag('target', 'all', i)} canEdit />
+                  <TagInput value={tempInputs.target_all} onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_all', tempInputs.target_all)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.target_object_conditions?.not_has_tags} onRemove={(i) => removeTag('target', 'not', i)} canEdit />
+                  <TagInput value={tempInputs.target_not} onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_not', tempInputs.target_not)} />
+                </td>
+                <td className="p-2">
+                  <TagList tags={editData.resulting_effect_ids} onRemove={removeEffectId} canEdit />
+                  <Input value={tempInputs.effect_id} onChange={(e) => setTempInputs({ ...tempInputs, effect_id: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addEffectId()} placeholder="效果ID" className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white" />
+                </td>
+                <td className="p-2">
+                  <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white w-16" />
+                </td>
+                <td className="p-2">
+                  <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
+                </td>
+                <td className="p-2">
+                  <div className="flex gap-1">
+                    <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+                      <Save className="w-3 h-3" />
+                    </Button>
+                    <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs">
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            )}
+            
+            {filteredEffects.map((effect) => {
+              const isEditing = editingId === effect.id;
+              
+              if (isEditing && editData) {
+                return (
+                  <tr key={effect.id} className="border-b border-[#3d3d3d] bg-[#252526]">
+                    <td className="p-2">
+                      <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white" />
+                    </td>
+                    <td className="p-2">
+                      <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white" list="tags-datalist" />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
+                      <TagInput value={tempInputs.interactor_any} onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_any', tempInputs.interactor_any)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.interactor_conditions?.has_all_tags} onRemove={(i) => removeTag('interactor', 'all', i)} canEdit />
+                      <TagInput value={tempInputs.interactor_all} onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_all', tempInputs.interactor_all)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.interactor_conditions?.not_has_tags} onRemove={(i) => removeTag('interactor', 'not', i)} canEdit />
+                      <TagInput value={tempInputs.interactor_not} onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_not', tempInputs.interactor_not)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.target_object_conditions?.has_any_tags} onRemove={(i) => removeTag('target', 'any', i)} canEdit />
+                      <TagInput value={tempInputs.target_any} onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_any', tempInputs.target_any)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.target_object_conditions?.has_all_tags} onRemove={(i) => removeTag('target', 'all', i)} canEdit />
+                      <TagInput value={tempInputs.target_all} onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_all', tempInputs.target_all)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.target_object_conditions?.not_has_tags} onRemove={(i) => removeTag('target', 'not', i)} canEdit />
+                      <TagInput value={tempInputs.target_not} onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_not', tempInputs.target_not)} />
+                    </td>
+                    <td className="p-2">
+                      <TagList tags={editData.resulting_effect_ids} onRemove={removeEffectId} canEdit />
+                      <Input value={tempInputs.effect_id} onChange={(e) => setTempInputs({ ...tempInputs, effect_id: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addEffectId()} placeholder="效果ID" className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white" />
+                    </td>
+                    <td className="p-2">
+                      <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white w-16" />
+                    </td>
+                    <td className="p-2">
+                      <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
+                    </td>
+                    <td className="p-2">
+                      <div className="flex gap-1">
+                        <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+                          <Save className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs">
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }
+              
+              return (
+                <tr key={effect.id} className="border-b border-[#3d3d3d] hover:bg-[#252526]">
+                  <td className="p-2 text-gray-300">{effect.effect_name}</td>
+                  <td className="p-2 text-gray-300 font-mono">{effect.triggering_effect_tag_path}</td>
+                  <td className="p-2"><TagList tags={effect.interactor_conditions?.has_any_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.interactor_conditions?.has_all_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.interactor_conditions?.not_has_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.target_object_conditions?.has_any_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.target_object_conditions?.has_all_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.target_object_conditions?.not_has_tags} /></td>
+                  <td className="p-2"><TagList tags={effect.resulting_effect_ids} /></td>
+                  <td className="p-2 text-gray-300">{effect.priority}</td>
+                  <td className="p-2">
+                    {effect.is_active ? <span className="text-gray-300">✓</span> : <span className="text-gray-600">-</span>}
+                  </td>
+                  <td className="p-2">
+                    <div className="flex gap-1">
+                      <Button size="sm" onClick={() => handleEdit(effect)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                      <Button size="sm" onClick={() => handleDelete(effect.id)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#5a1e1e]">
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        
+        <datalist id="tags-datalist">
+          {tags.map(t => <option key={t.id} value={t.full_path} />)}
+        </datalist>
+        
+        {filteredEffects.length === 0 && !creatingNew && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-sm">暂无效果映射</div>
+          </div>
+        )}
       </div>
     </div>
   );
