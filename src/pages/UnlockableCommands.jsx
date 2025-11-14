@@ -117,7 +117,11 @@ export default function UnlockableCommandsPage() {
   const handleEdit = (rule) => {
     setEditingId(rule.id);
     setCreatingNew(false);
-    setEditData({ ...rule });
+    setEditData({
+      ...rule,
+      interactor_conditions: rule.interactor_conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+      target_conditions: rule.target_conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] }
+    });
   };
 
   const handleSave = () => {
@@ -149,6 +153,14 @@ export default function UnlockableCommandsPage() {
     if (!value.trim() || !editData) return;
     
     const updated = { ...editData };
+    
+    if (!updated.interactor_conditions) {
+      updated.interactor_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    if (!updated.target_conditions) {
+      updated.target_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    
     if (type.startsWith('interactor_')) {
       const condition = type.replace('interactor_', '');
       if (condition === 'any') {
@@ -177,21 +189,29 @@ export default function UnlockableCommandsPage() {
     if (!editData) return;
     
     const updated = { ...editData };
+    
+    if (!updated.interactor_conditions) {
+      updated.interactor_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    if (!updated.target_conditions) {
+      updated.target_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    
     if (section === 'interactor') {
       if (type === 'any') {
-        updated.interactor_conditions.has_any_tags = updated.interactor_conditions.has_any_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.has_any_tags = (updated.interactor_conditions.has_any_tags || []).filter((_, i) => i !== index);
       } else if (type === 'all') {
-        updated.interactor_conditions.has_all_tags = updated.interactor_conditions.has_all_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.has_all_tags = (updated.interactor_conditions.has_all_tags || []).filter((_, i) => i !== index);
       } else if (type === 'not') {
-        updated.interactor_conditions.not_has_tags = updated.interactor_conditions.not_has_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.not_has_tags = (updated.interactor_conditions.not_has_tags || []).filter((_, i) => i !== index);
       }
     } else if (section === 'target') {
       if (type === 'any') {
-        updated.target_conditions.has_any_tags = updated.target_conditions.has_any_tags.filter((_, i) => i !== index);
+        updated.target_conditions.has_any_tags = (updated.target_conditions.has_any_tags || []).filter((_, i) => i !== index);
       } else if (type === 'all') {
-        updated.target_conditions.has_all_tags = updated.target_conditions.has_all_tags.filter((_, i) => i !== index);
+        updated.target_conditions.has_all_tags = (updated.target_conditions.has_all_tags || []).filter((_, i) => i !== index);
       } else if (type === 'not') {
-        updated.target_conditions.not_has_tags = updated.target_conditions.not_has_tags.filter((_, i) => i !== index);
+        updated.target_conditions.not_has_tags = (updated.target_conditions.not_has_tags || []).filter((_, i) => i !== index);
       }
     }
     

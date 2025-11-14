@@ -118,7 +118,12 @@ export default function InteractionEffectsPage() {
   const handleEdit = (effect) => {
     setEditingId(effect.id);
     setCreatingNew(false);
-    setEditData({ ...effect });
+    setEditData({
+      ...effect,
+      interactor_conditions: effect.interactor_conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+      target_object_conditions: effect.target_object_conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+      resulting_effect_ids: effect.resulting_effect_ids || []
+    });
   };
 
   const handleSave = () => {
@@ -150,6 +155,14 @@ export default function InteractionEffectsPage() {
     if (!value.trim() || !editData) return;
     
     const updated = { ...editData };
+    
+    if (!updated.interactor_conditions) {
+      updated.interactor_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    if (!updated.target_object_conditions) {
+      updated.target_object_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    
     if (type.startsWith('interactor_')) {
       const condition = type.replace('interactor_', '');
       if (condition === 'any') {
@@ -178,21 +191,29 @@ export default function InteractionEffectsPage() {
     if (!editData) return;
     
     const updated = { ...editData };
+    
+    if (!updated.interactor_conditions) {
+      updated.interactor_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    if (!updated.target_object_conditions) {
+      updated.target_object_conditions = { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+    }
+    
     if (section === 'interactor') {
       if (type === 'any') {
-        updated.interactor_conditions.has_any_tags = updated.interactor_conditions.has_any_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.has_any_tags = (updated.interactor_conditions.has_any_tags || []).filter((_, i) => i !== index);
       } else if (type === 'all') {
-        updated.interactor_conditions.has_all_tags = updated.interactor_conditions.has_all_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.has_all_tags = (updated.interactor_conditions.has_all_tags || []).filter((_, i) => i !== index);
       } else if (type === 'not') {
-        updated.interactor_conditions.not_has_tags = updated.interactor_conditions.not_has_tags.filter((_, i) => i !== index);
+        updated.interactor_conditions.not_has_tags = (updated.interactor_conditions.not_has_tags || []).filter((_, i) => i !== index);
       }
     } else if (section === 'target') {
       if (type === 'any') {
-        updated.target_object_conditions.has_any_tags = updated.target_object_conditions.has_any_tags.filter((_, i) => i !== index);
+        updated.target_object_conditions.has_any_tags = (updated.target_object_conditions.has_any_tags || []).filter((_, i) => i !== index);
       } else if (type === 'all') {
-        updated.target_object_conditions.has_all_tags = updated.target_object_conditions.has_all_tags.filter((_, i) => i !== index);
+        updated.target_object_conditions.has_all_tags = (updated.target_object_conditions.has_all_tags || []).filter((_, i) => i !== index);
       } else if (type === 'not') {
-        updated.target_object_conditions.not_has_tags = updated.target_object_conditions.not_has_tags.filter((_, i) => i !== index);
+        updated.target_object_conditions.not_has_tags = (updated.target_object_conditions.not_has_tags || []).filter((_, i) => i !== index);
       }
     }
     
@@ -212,7 +233,7 @@ export default function InteractionEffectsPage() {
     if (!editData) return;
     setEditData({
       ...editData,
-      resulting_effect_ids: editData.resulting_effect_ids.filter((_, i) => i !== index)
+      resulting_effect_ids: (editData.resulting_effect_ids || []).filter((_, i) => i !== index)
     });
   };
 
