@@ -4,10 +4,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Edit3, Trash2, X, Save, Zap, Target, ArrowRight, ChevronDown, ChevronRight, CheckCircle, User } from "lucide-react";
+import { Search, Plus, Edit3, Trash2, X, Save, Zap } from "lucide-react";
 
 // 效果ID列表编辑器
-function EffectIdListEditor({ title, effectIds, onChange, color = "purple" }) {
+function EffectIdListEditor({ effectIds, onChange }) {
   const [inputValue, setInputValue] = useState("");
 
   const addEffectId = () => {
@@ -20,33 +20,27 @@ function EffectIdListEditor({ title, effectIds, onChange, color = "purple" }) {
     onChange((effectIds || []).filter((_, i) => i !== index));
   };
 
-  const colorClass = {
-    purple: "text-purple-300",
-    yellow: "text-yellow-300"
-  }[color] || "text-gray-300";
-
   return (
-    <div className="mb-3">
-      <label className="text-xs text-gray-400 mb-1 block">{title}</label>
-      <div className="space-y-1 mb-2">
+    <div>
+      <div className="space-y-1 mb-1">
         {(effectIds || []).map((effectId, idx) => (
-          <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs">
-            <span className={`${colorClass} font-mono`}>{effectId}</span>
+          <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
+            <span className="text-gray-300 font-mono">{effectId}</span>
             <button onClick={() => removeEffectId(idx)} className="text-gray-500 hover:text-red-400">
               <X className="w-3 h-3" />
             </button>
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-1">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addEffectId()}
-          placeholder="输入效果ID (标签路径)"
-          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+          placeholder="效果ID"
+          className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
         />
-        <Button size="sm" onClick={addEffectId} className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb]">
+        <Button size="sm" onClick={addEffectId} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
           <Plus className="w-3 h-3" />
         </Button>
       </div>
@@ -54,52 +48,129 @@ function EffectIdListEditor({ title, effectIds, onChange, color = "purple" }) {
   );
 }
 
-// 标签列表编辑器（用于条件）
-function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
-  const [inputValue, setInputValue] = useState("");
+// 标签条件编辑器
+function TagConditionEditor({ title, conditions, onChange, allTags }) {
+  const safeConditions = conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
+  
+  const [inputs, setInputs] = useState({
+    has_any: "",
+    has_all: "",
+    not_has: ""
+  });
 
-  const addTag = () => {
-    if (!inputValue.trim()) return;
-    onChange([...(tags || []), inputValue.trim()]);
-    setInputValue("");
+  const addTag = (type, value) => {
+    if (!value.trim()) return;
+    
+    const updated = { ...safeConditions };
+    if (type === 'has_any') {
+      updated.has_any_tags = [...(updated.has_any_tags || []), value.trim()];
+    } else if (type === 'has_all') {
+      updated.has_all_tags = [...(updated.has_all_tags || []), value.trim()];
+    } else if (type === 'not_has') {
+      updated.not_has_tags = [...(updated.not_has_tags || []), value.trim()];
+    }
+    
+    onChange(updated);
+    setInputs({ ...inputs, [type]: "" });
   };
 
-  const removeTag = (index) => {
-    onChange((tags || []).filter((_, i) => i !== index));
+  const removeTag = (type, index) => {
+    const updated = { ...safeConditions };
+    if (type === 'has_any') {
+      updated.has_any_tags = (updated.has_any_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'has_all') {
+      updated.has_all_tags = (updated.has_all_tags || []).filter((_, i) => i !== index);
+    } else if (type === 'not_has') {
+      updated.not_has_tags = (updated.not_has_tags || []).filter((_, i) => i !== index);
+    }
+    onChange(updated);
   };
-
-  const colorClass = {
-    green: "text-green-300",
-    blue: "text-blue-300",
-    red: "text-red-300"
-  }[color] || "text-gray-300";
 
   return (
-    <div className="mb-3">
-      <label className="text-xs text-gray-400 mb-1 block">{title}</label>
-      <div className="space-y-1 mb-2">
-        {(tags || []).map((tag, idx) => (
-          <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs">
-            <span className={`${colorClass} font-mono`}>{tag}</span>
-            <button onClick={() => removeTag(idx)} className="text-gray-500 hover:text-red-400">
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        ))}
+    <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
+      <h4 className="text-xs font-semibold text-gray-300 mb-2">{title}</h4>
+
+      <div className="mb-2">
+        <label className="text-xs text-gray-500 mb-1 block">Has Any</label>
+        <div className="space-y-1 mb-1">
+          {(safeConditions.has_any_tags || []).map((tag, idx) => (
+            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
+              <span className="text-gray-300 font-mono">{tag}</span>
+              <button onClick={() => removeTag('has_any', idx)} className="text-gray-500 hover:text-red-400">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          <Input
+            value={inputs.has_any}
+            onChange={(e) => setInputs({ ...inputs, has_any: e.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && addTag('has_any', inputs.has_any)}
+            placeholder="标签路径"
+            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
+            list="tags-datalist"
+          />
+          <Button size="sm" onClick={() => addTag('has_any', inputs.has_any)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+            <Plus className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
-      <div className="flex gap-2">
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addTag()}
-          placeholder="输入标签路径"
-          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
-          list="tags-datalist"
-        />
-        <Button size="sm" onClick={addTag} className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb]">
-          <Plus className="w-3 h-3" />
-        </Button>
+
+      <div className="mb-2">
+        <label className="text-xs text-gray-500 mb-1 block">Has All</label>
+        <div className="space-y-1 mb-1">
+          {(safeConditions.has_all_tags || []).map((tag, idx) => (
+            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
+              <span className="text-gray-300 font-mono">{tag}</span>
+              <button onClick={() => removeTag('has_all', idx)} className="text-gray-500 hover:text-red-400">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          <Input
+            value={inputs.has_all}
+            onChange={(e) => setInputs({ ...inputs, has_all: e.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && addTag('has_all', inputs.has_all)}
+            placeholder="标签路径"
+            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
+            list="tags-datalist"
+          />
+          <Button size="sm" onClick={() => addTag('has_all', inputs.has_all)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+            <Plus className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
+
+      <div>
+        <label className="text-xs text-gray-500 mb-1 block">Not Has</label>
+        <div className="space-y-1 mb-1">
+          {(safeConditions.not_has_tags || []).map((tag, idx) => (
+            <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-0.5 rounded text-xs">
+              <span className="text-gray-300 font-mono">{tag}</span>
+              <button onClick={() => removeTag('not_has', idx)} className="text-gray-500 hover:text-red-400">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-1">
+          <Input
+            value={inputs.not_has}
+            onChange={(e) => setInputs({ ...inputs, not_has: e.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && addTag('not_has', inputs.not_has)}
+            placeholder="标签路径"
+            className="h-6 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
+            list="tags-datalist"
+          />
+          <Button size="sm" onClick={() => addTag('not_has', inputs.not_has)} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+            <Plus className="w-3 h-3" />
+          </Button>
+        </div>
+      </div>
+
       <datalist id="tags-datalist">
         {allTags.map(t => <option key={t.id} value={t.full_path} />)}
       </datalist>
@@ -107,71 +178,22 @@ function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
   );
 }
 
-// 条件编辑器（通用）
-function ConditionEditor({ title, icon, conditions, onChange, allTags }) {
-  const safeConditions = conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
-
-  return (
-    <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <h4 className="text-sm font-semibold text-white">{title}</h4>
-      </div>
-
-      <TagListEditor
-        title="拥有任意标签 (Has Any)"
-        tags={safeConditions.has_any_tags}
-        onChange={(tags) => onChange({ ...safeConditions, has_any_tags: tags })}
-        allTags={allTags}
-        color="green"
-      />
-
-      <TagListEditor
-        title="拥有所有标签 (Has All)"
-        tags={safeConditions.has_all_tags}
-        onChange={(tags) => onChange({ ...safeConditions, has_all_tags: tags })}
-        allTags={allTags}
-        color="blue"
-      />
-
-      <TagListEditor
-        title="不能拥有标签 (Not Has)"
-        tags={safeConditions.not_has_tags}
-        onChange={(tags) => onChange({ ...safeConditions, not_has_tags: tags })}
-        allTags={allTags}
-        color="red"
-      />
-    </div>
-  );
-}
-
 // 效果卡片组件
 function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCancelEdit }) {
   const [editData, setEditData] = useState(effect);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const conditionCount = (conditions) => {
-    if (!conditions) return 0;
-    return (conditions.has_any_tags?.length || 0) + 
-           (conditions.has_all_tags?.length || 0) + 
-           (conditions.not_has_tags?.length || 0);
-  };
-
-  const hasConditions = (conditions) => conditionCount(conditions) > 0;
 
   if (isEditing) {
     return (
-      <div className="p-4 bg-[#252526] border-2 border-[#0e639c] rounded">
-        <div className="space-y-4">
-          {/* 基本信息 */}
-          <div className="grid grid-cols-3 gap-3">
+      <div className="p-3 bg-[#252526] border border-[#0e639c] rounded">
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="text-xs text-gray-400 mb-1 block">效果名称 *</label>
               <Input
                 value={editData.effect_name}
                 onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })}
                 placeholder="例如：木头燃烧"
-                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
               />
             </div>
             <div>
@@ -180,7 +202,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
                 value={editData.triggering_effect_tag_path}
                 onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })}
                 placeholder="例如：Effect.Fire.Burn"
-                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
               />
             </div>
             <div>
@@ -189,7 +211,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
                 type="number"
                 value={editData.priority}
                 onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })}
-                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+                className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
               />
             </div>
           </div>
@@ -200,72 +222,51 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
               value={editData.description || ""}
               onChange={(e) => setEditData({ ...editData, description: e.target.value })}
               placeholder="描述此效果规则..."
-              className="bg-[#1e1e1e] border-[#3d3d3d] text-white"
+              className="bg-[#1e1e1e] border-[#3d3d3d] text-white text-sm"
               rows={2}
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <ConditionEditor
+          <div className="grid grid-cols-3 gap-2">
+            <TagConditionEditor
               title="发起者条件"
-              icon={<User className="w-4 h-4 text-blue-400" />}
               conditions={editData.interactor_conditions}
               onChange={(conditions) => setEditData({ ...editData, interactor_conditions: conditions })}
               allTags={tags}
             />
 
-            <ConditionEditor
-              title="目标对象条件"
-              icon={<Target className="w-4 h-4 text-purple-400" />}
+            <TagConditionEditor
+              title="目标条件"
               conditions={editData.target_object_conditions}
               onChange={(conditions) => setEditData({ ...editData, target_object_conditions: conditions })}
               allTags={tags}
             />
 
-            <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
-              <div className="flex items-center gap-2 mb-3">
-                <ArrowRight className="w-4 h-4 text-yellow-400" />
-                <h4 className="text-sm font-semibold text-white">产生的后续效果ID</h4>
-              </div>
-              <p className="text-xs text-gray-400 mb-3">
-                这些效果ID会再次进入效果系统处理，形成效果链
-              </p>
-
+            <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
+              <h4 className="text-xs font-semibold text-gray-300 mb-2">后续效果ID</h4>
               <EffectIdListEditor
-                title="后续效果ID列表"
                 effectIds={editData.resulting_effect_ids}
                 onChange={(ids) => setEditData({ ...editData, resulting_effect_ids: ids })}
-                color="purple"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={editData.is_active}
-              onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })}
-              className="w-4 h-4"
-            />
-            <label className="text-sm text-gray-300">效果激活</label>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button
-              size="sm"
-              onClick={() => onSave(editData)}
-              className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
-            >
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm text-gray-300">
+              <input
+                type="checkbox"
+                checked={editData.is_active}
+                onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })}
+                className="w-3 h-3"
+              />
+              激活
+            </label>
+            <div className="flex-1" />
+            <Button size="sm" onClick={() => onSave(editData)} className="h-6 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
               <Save className="w-3 h-3 mr-1" />
               保存
             </Button>
-            <Button
-              size="sm"
-              onClick={onCancelEdit}
-              variant="outline"
-              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-            >
-              <X className="w-3 h-3 mr-1" />
+            <Button size="sm" onClick={onCancelEdit} variant="outline" className="h-6 px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300 text-xs">
               取消
             </Button>
           </div>
@@ -275,194 +276,112 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
   }
 
   return (
-    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded hover:border-[#0e639c] transition-colors">
-      <div className="flex items-start justify-between">
+    <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded hover:border-[#555] transition-colors">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </button>
-            <h3 className="text-base font-semibold text-white">{effect.effect_name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-sm font-semibold text-white">{effect.effect_name}</h3>
             {!effect.is_active && (
-              <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded">未激活</span>
-            )}
-            {effect.is_active && (
-              <CheckCircle className="w-4 h-4 text-green-400" />
+              <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">未激活</span>
             )}
             {effect.priority > 0 && (
-              <span className="text-xs px-2 py-0.5 bg-purple-900 text-purple-300 rounded">优先级 {effect.priority}</span>
+              <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">P{effect.priority}</span>
             )}
           </div>
-
           {effect.description && (
-            <p className="text-sm text-gray-400 ml-7 mb-3">{effect.description}</p>
+            <p className="text-xs text-gray-400 mb-2">{effect.description}</p>
           )}
-
-          <div className="ml-7 grid grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="text-xs text-gray-500 mb-1">触发效果ID</div>
-              <div className="flex items-center gap-1">
-                <Zap className="w-3 h-3 text-purple-400" />
-                <span className="text-purple-300 font-mono text-xs truncate">
-                  {effect.triggering_effect_tag_path}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-gray-500 mb-1">发起者条件</div>
-              <div className="flex items-center gap-1">
-                <User className="w-3 h-3 text-blue-400" />
-                {conditionCount(effect.interactor_conditions) > 0 ? (
-                  <span className="text-blue-300">{conditionCount(effect.interactor_conditions)} 个条件</span>
-                ) : (
-                  <span className="text-gray-600">无条件</span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-gray-500 mb-1">目标条件</div>
-              <div className="flex items-center gap-1">
-                <Target className="w-3 h-3 text-purple-400" />
-                {conditionCount(effect.target_object_conditions) > 0 ? (
-                  <span className="text-blue-300">{conditionCount(effect.target_object_conditions)} 个条件</span>
-                ) : (
-                  <span className="text-gray-600">无条件</span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-xs text-gray-500 mb-1">后续效果</div>
-              <div className="flex items-center gap-1">
-                <ArrowRight className="w-3 h-3 text-yellow-400" />
-                <span className="text-yellow-300">
-                  {effect.resulting_effect_ids?.length || 0} 个效果
-                </span>
-              </div>
-            </div>
+          <div className="text-xs text-gray-500">
+            触发: <span className="text-gray-300 font-mono">{effect.triggering_effect_tag_path}</span>
           </div>
+        </div>
 
-          {isExpanded && (
-            <div className="ml-7 mt-4 pt-4 border-t border-[#3d3d3d] grid grid-cols-3 gap-4">
-              {/* 发起者条件详情 */}
-              {hasConditions(effect.interactor_conditions) && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4 text-blue-400" />
-                    <h4 className="text-sm font-semibold text-white">发起者条件</h4>
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    {effect.interactor_conditions?.has_any_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Has Any: </span>
-                        {effect.interactor_conditions.has_any_tags.map((tag, i) => (
-                          <span key={i} className="text-green-300 font-mono">{tag}{i < effect.interactor_conditions.has_any_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                    {effect.interactor_conditions?.has_all_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Has All: </span>
-                        {effect.interactor_conditions.has_all_tags.map((tag, i) => (
-                          <span key={i} className="text-blue-300 font-mono">{tag}{i < effect.interactor_conditions.has_all_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                    {effect.interactor_conditions?.not_has_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Not Has: </span>
-                        {effect.interactor_conditions.not_has_tags.map((tag, i) => (
-                          <span key={i} className="text-red-300 font-mono">{tag}{i < effect.interactor_conditions.not_has_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+        <div className="flex gap-1 ml-3">
+          <Button size="sm" variant="ghost" onClick={() => onEdit(effect)} className="h-7 w-7 p-0 hover:bg-[#3d3d3d] text-gray-300">
+            <Edit3 className="w-3 h-3" />
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onDelete(effect.id)} className="h-7 w-7 p-0 hover:bg-[#5a1e1e] text-red-400">
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
+      </div>
 
-              {/* 目标条件详情 */}
-              {hasConditions(effect.target_object_conditions) && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Target className="w-4 h-4 text-purple-400" />
-                    <h4 className="text-sm font-semibold text-white">目标条件</h4>
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    {effect.target_object_conditions?.has_any_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Has Any: </span>
-                        {effect.target_object_conditions.has_any_tags.map((tag, i) => (
-                          <span key={i} className="text-green-300 font-mono">{tag}{i < effect.target_object_conditions.has_any_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                    {effect.target_object_conditions?.has_all_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Has All: </span>
-                        {effect.target_object_conditions.has_all_tags.map((tag, i) => (
-                          <span key={i} className="text-blue-300 font-mono">{tag}{i < effect.target_object_conditions.has_all_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                    {effect.target_object_conditions?.not_has_tags?.length > 0 && (
-                      <div>
-                        <span className="text-gray-500">Not Has: </span>
-                        {effect.target_object_conditions.not_has_tags.map((tag, i) => (
-                          <span key={i} className="text-red-300 font-mono">{tag}{i < effect.target_object_conditions.not_has_tags.length - 1 ? ', ' : ''}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* 后续效果详情 */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowRight className="w-4 h-4 text-yellow-400" />
-                  <h4 className="text-sm font-semibold text-white">产生的后续效果ID</h4>
-                </div>
-                {effect.resulting_effect_ids && effect.resulting_effect_ids.length > 0 ? (
-                  <div className="space-y-1 text-xs">
-                    {effect.resulting_effect_ids.map((effectId, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <span className="text-purple-300 font-mono">{effectId}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-gray-500">未配置后续效果</p>
-                )}
-                <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-[#3d3d3d]">
-                  💡 这些效果ID会再次进入效果系统处理
-                </p>
-              </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
+          <div className="text-xs font-semibold text-gray-300 mb-1">发起者条件</div>
+          {effect.interactor_conditions?.has_any_tags?.length > 0 && (
+            <div className="mb-1">
+              <div className="text-xs text-gray-500">Has Any:</div>
+              {effect.interactor_conditions.has_any_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
             </div>
+          )}
+          {effect.interactor_conditions?.has_all_tags?.length > 0 && (
+            <div className="mb-1">
+              <div className="text-xs text-gray-500">Has All:</div>
+              {effect.interactor_conditions.has_all_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
+            </div>
+          )}
+          {effect.interactor_conditions?.not_has_tags?.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-500">Not Has:</div>
+              {effect.interactor_conditions.not_has_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
+            </div>
+          )}
+          {(!effect.interactor_conditions?.has_any_tags?.length && 
+            !effect.interactor_conditions?.has_all_tags?.length && 
+            !effect.interactor_conditions?.not_has_tags?.length) && (
+            <div className="text-xs text-gray-600">无条件</div>
           )}
         </div>
 
-        <div className="flex gap-2 ml-4">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit(effect)}
-            className="h-8 w-8 p-0 hover:bg-[#3d3d3d] text-gray-300"
-          >
-            <Edit3 className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDelete(effect.id)}
-            className="h-8 w-8 p-0 hover:bg-[#5a1e1e] text-red-400"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
+          <div className="text-xs font-semibold text-gray-300 mb-1">目标条件</div>
+          {effect.target_object_conditions?.has_any_tags?.length > 0 && (
+            <div className="mb-1">
+              <div className="text-xs text-gray-500">Has Any:</div>
+              {effect.target_object_conditions.has_any_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
+            </div>
+          )}
+          {effect.target_object_conditions?.has_all_tags?.length > 0 && (
+            <div className="mb-1">
+              <div className="text-xs text-gray-500">Has All:</div>
+              {effect.target_object_conditions.has_all_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
+            </div>
+          )}
+          {effect.target_object_conditions?.not_has_tags?.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-500">Not Has:</div>
+              {effect.target_object_conditions.not_has_tags.map((tag, i) => (
+                <div key={i} className="text-xs text-gray-300 font-mono">{tag}</div>
+              ))}
+            </div>
+          )}
+          {(!effect.target_object_conditions?.has_any_tags?.length && 
+            !effect.target_object_conditions?.has_all_tags?.length && 
+            !effect.target_object_conditions?.not_has_tags?.length) && (
+            <div className="text-xs text-gray-600">无条件</div>
+          )}
+        </div>
+
+        <div className="border border-[#3d3d3d] rounded p-2 bg-[#1e1e1e]">
+          <div className="text-xs font-semibold text-gray-300 mb-1">后续效果</div>
+          {effect.resulting_effect_ids && effect.resulting_effect_ids.length > 0 ? (
+            effect.resulting_effect_ids.map((effectId, i) => (
+              <div key={i} className="text-xs text-gray-300 font-mono">{effectId}</div>
+            ))
+          ) : (
+            <div className="text-xs text-gray-600">无</div>
+          )}
         </div>
       </div>
     </div>
@@ -560,52 +479,31 @@ export default function InteractionEffectsPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      {/* 顶部工具栏 */}
-      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
-        <Zap className="w-5 h-5 text-purple-400" />
-        <span className="text-sm font-semibold text-gray-300">交互效果编辑器（效果链映射）</span>
-        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个映射规则</span>
+      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+        <Zap className="w-4 h-4 text-gray-400" />
+        <span className="text-sm font-semibold text-gray-300">效果编辑器</span>
+        <span className="text-xs text-gray-500">共 {filteredEffects.length} 个映射</span>
         
         <div className="flex-1" />
 
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索效果..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-8 w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
           />
         </div>
 
-        <Button
-          size="sm"
-          onClick={handleCreate}
-          className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white"
-        >
-          <Plus className="w-4 h-4 mr-1" />
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-white text-xs">
+          <Plus className="w-3 h-3 mr-1" />
           新建映射
         </Button>
       </div>
 
-      {/* 效果列表 */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="max-w-6xl mx-auto space-y-3">
-          {/* 说明提示 */}
-          <div className="p-3 bg-[#1e3d3d] border border-[#2d5d5d] rounded text-sm text-gray-300 mb-4">
-            <div className="flex items-start gap-2">
-              <span className="text-cyan-400">💡</span>
-              <div>
-                <div className="font-semibold mb-1">效果链系统</div>
-                <div className="text-xs text-gray-400 space-y-1">
-                  <div>• 效果ID（字符串标识符）+ 发起者条件 + 目标条件 → 产生后续效果ID列表</div>
-                  <div>• 后续效果ID会再次进入效果系统，形成效果链条</div>
-                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn（发起者：玩家有火魔法 + 目标：木头材质）→ 产生 [Effect.Fire.Continuous, Effect.Damage.Burn]</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+      <div className="flex-1 overflow-auto p-3">
+        <div className="max-w-6xl mx-auto space-y-2">
           {creatingNew && (
             <EffectCard
               effect={newEffectTemplate}
@@ -617,10 +515,9 @@ export default function InteractionEffectsPage() {
           )}
 
           {filteredEffects.length === 0 && !creatingNew ? (
-            <div className="text-center py-16 text-gray-500">
-              <Zap className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <div className="text-lg mb-2">暂无效果映射</div>
-              <div className="text-sm">点击右上角"新建映射"开始创建</div>
+            <div className="text-center py-12 text-gray-500">
+              <Zap className="w-10 h-10 mx-auto mb-3 opacity-50" />
+              <div className="text-sm">暂无效果映射</div>
             </div>
           ) : (
             filteredEffects.map(effect => (
