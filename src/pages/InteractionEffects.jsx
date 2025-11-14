@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Edit3, Trash2, X, Save, Zap, Target, ArrowRight, ChevronDown, ChevronRight, CheckCircle } from "lucide-react";
+import { Search, Plus, Edit3, Trash2, X, Save, Zap, Target, ArrowRight, ChevronDown, ChevronRight, CheckCircle, User } from "lucide-react";
 
 // 效果ID列表编辑器
 function EffectIdListEditor({ title, effectIds, onChange, color = "purple" }) {
@@ -107,15 +107,15 @@ function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
   );
 }
 
-// 目标条件编辑器
-function TargetConditionEditor({ conditions, onChange, allTags }) {
+// 条件编辑器（通用）
+function ConditionEditor({ title, icon, conditions, onChange, allTags }) {
   const safeConditions = conditions || { has_any_tags: [], has_all_tags: [], not_has_tags: [] };
 
   return (
     <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
       <div className="flex items-center gap-2 mb-3">
-        <Target className="w-4 h-4 text-purple-400" />
-        <h4 className="text-sm font-semibold text-white">目标对象条件</h4>
+        {icon}
+        <h4 className="text-sm font-semibold text-white">{title}</h4>
       </div>
 
       <TagListEditor
@@ -205,8 +205,18 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <TargetConditionEditor
+          <div className="grid grid-cols-3 gap-3">
+            <ConditionEditor
+              title="发起者条件"
+              icon={<User className="w-4 h-4 text-blue-400" />}
+              conditions={editData.interactor_conditions}
+              onChange={(conditions) => setEditData({ ...editData, interactor_conditions: conditions })}
+              allTags={tags}
+            />
+
+            <ConditionEditor
+              title="目标对象条件"
+              icon={<Target className="w-4 h-4 text-purple-400" />}
               conditions={editData.target_object_conditions}
               onChange={(conditions) => setEditData({ ...editData, target_object_conditions: conditions })}
               allTags={tags}
@@ -291,7 +301,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             <p className="text-sm text-gray-400 ml-7 mb-3">{effect.description}</p>
           )}
 
-          <div className="ml-7 grid grid-cols-3 gap-4 text-sm">
+          <div className="ml-7 grid grid-cols-4 gap-4 text-sm">
             <div>
               <div className="text-xs text-gray-500 mb-1">触发效果ID</div>
               <div className="flex items-center gap-1">
@@ -303,9 +313,21 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             </div>
 
             <div>
+              <div className="text-xs text-gray-500 mb-1">发起者条件</div>
+              <div className="flex items-center gap-1">
+                <User className="w-3 h-3 text-blue-400" />
+                {conditionCount(effect.interactor_conditions) > 0 ? (
+                  <span className="text-blue-300">{conditionCount(effect.interactor_conditions)} 个条件</span>
+                ) : (
+                  <span className="text-gray-600">无条件</span>
+                )}
+              </div>
+            </div>
+
+            <div>
               <div className="text-xs text-gray-500 mb-1">目标条件</div>
               <div className="flex items-center gap-1">
-                <Target className="w-3 h-3 text-blue-400" />
+                <Target className="w-3 h-3 text-purple-400" />
                 {conditionCount(effect.target_object_conditions) > 0 ? (
                   <span className="text-blue-300">{conditionCount(effect.target_object_conditions)} 个条件</span>
                 ) : (
@@ -326,7 +348,43 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
           </div>
 
           {isExpanded && (
-            <div className="ml-7 mt-4 pt-4 border-t border-[#3d3d3d] grid grid-cols-2 gap-4">
+            <div className="ml-7 mt-4 pt-4 border-t border-[#3d3d3d] grid grid-cols-3 gap-4">
+              {/* 发起者条件详情 */}
+              {hasConditions(effect.interactor_conditions) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-4 h-4 text-blue-400" />
+                    <h4 className="text-sm font-semibold text-white">发起者条件</h4>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    {effect.interactor_conditions?.has_any_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has Any: </span>
+                        {effect.interactor_conditions.has_any_tags.map((tag, i) => (
+                          <span key={i} className="text-green-300 font-mono">{tag}{i < effect.interactor_conditions.has_any_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {effect.interactor_conditions?.has_all_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has All: </span>
+                        {effect.interactor_conditions.has_all_tags.map((tag, i) => (
+                          <span key={i} className="text-blue-300 font-mono">{tag}{i < effect.interactor_conditions.has_all_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {effect.interactor_conditions?.not_has_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Not Has: </span>
+                        {effect.interactor_conditions.not_has_tags.map((tag, i) => (
+                          <span key={i} className="text-red-300 font-mono">{tag}{i < effect.interactor_conditions.not_has_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* 目标条件详情 */}
               {hasConditions(effect.target_object_conditions) && (
                 <div>
@@ -493,6 +551,7 @@ export default function InteractionEffectsPage() {
     effect_name: "",
     description: "",
     triggering_effect_tag_path: "",
+    interactor_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
     target_object_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
     resulting_effect_ids: [],
     priority: 0,
@@ -539,9 +598,9 @@ export default function InteractionEffectsPage() {
               <div>
                 <div className="font-semibold mb-1">效果链系统</div>
                 <div className="text-xs text-gray-400 space-y-1">
-                  <div>• 效果ID（字符串标识符）+ 目标条件 → 产生后续效果ID列表</div>
+                  <div>• 效果ID（字符串标识符）+ 发起者条件 + 目标条件 → 产生后续效果ID列表</div>
                   <div>• 后续效果ID会再次进入效果系统，形成效果链条</div>
-                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn + 目标有 Material.Wood → 产生 [Effect.Fire.Continuous, Effect.Damage.Burn] → 这些效果继续处理</div>
+                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn（发起者：玩家有火魔法 + 目标：木头材质）→ 产生 [Effect.Fire.Continuous, Effect.Damage.Burn]</div>
                 </div>
               </div>
             </div>
