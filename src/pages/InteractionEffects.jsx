@@ -6,7 +6,55 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Edit3, Trash2, X, Save, Zap, Target, ArrowRight, ChevronDown, ChevronRight, CheckCircle } from "lucide-react";
 
-// 标签列表编辑器
+// 效果ID列表编辑器
+function EffectIdListEditor({ title, effectIds, onChange, color = "purple" }) {
+  const [inputValue, setInputValue] = useState("");
+
+  const addEffectId = () => {
+    if (!inputValue.trim()) return;
+    onChange([...(effectIds || []), inputValue.trim()]);
+    setInputValue("");
+  };
+
+  const removeEffectId = (index) => {
+    onChange((effectIds || []).filter((_, i) => i !== index));
+  };
+
+  const colorClass = {
+    purple: "text-purple-300",
+    yellow: "text-yellow-300"
+  }[color] || "text-gray-300";
+
+  return (
+    <div className="mb-3">
+      <label className="text-xs text-gray-400 mb-1 block">{title}</label>
+      <div className="space-y-1 mb-2">
+        {(effectIds || []).map((effectId, idx) => (
+          <div key={idx} className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs">
+            <span className={`${colorClass} font-mono`}>{effectId}</span>
+            <button onClick={() => removeEffectId(idx)} className="text-gray-500 hover:text-red-400">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addEffectId()}
+          placeholder="输入效果ID (标签路径)"
+          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+        />
+        <Button size="sm" onClick={addEffectId} className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb]">
+          <Plus className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// 标签列表编辑器（用于条件）
 function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
   const [inputValue, setInputValue] = useState("");
 
@@ -23,9 +71,7 @@ function TagListEditor({ title, tags, onChange, allTags, color = "blue" }) {
   const colorClass = {
     green: "text-green-300",
     blue: "text-blue-300",
-    red: "text-red-300",
-    orange: "text-orange-300",
-    purple: "text-purple-300"
+    red: "text-red-300"
   }[color] || "text-gray-300";
 
   return (
@@ -129,13 +175,12 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">触发效果标签 *</label>
+              <label className="text-xs text-gray-400 mb-1 block">触发效果ID *</label>
               <Input
                 value={editData.triggering_effect_tag_path}
                 onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })}
                 placeholder="例如：Effect.Fire.Burn"
                 className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
-                list="tags-datalist"
               />
             </div>
             <div>
@@ -170,17 +215,16 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
               <div className="flex items-center gap-2 mb-3">
                 <ArrowRight className="w-4 h-4 text-yellow-400" />
-                <h4 className="text-sm font-semibold text-white">产生的后续效果标签</h4>
+                <h4 className="text-sm font-semibold text-white">产生的后续效果ID</h4>
               </div>
               <p className="text-xs text-gray-400 mb-3">
-                这些标签会被添加到目标上，并由标签自身的规则（attached_tags/removed_tags等）进一步处理
+                这些效果ID会再次进入效果系统处理，形成效果链
               </p>
 
-              <TagListEditor
-                title="后续效果标签列表"
-                tags={editData.resulting_effect_tags}
-                onChange={(tags) => setEditData({ ...editData, resulting_effect_tags: tags })}
-                allTags={tags}
+              <EffectIdListEditor
+                title="后续效果ID列表"
+                effectIds={editData.resulting_effect_ids}
+                onChange={(ids) => setEditData({ ...editData, resulting_effect_ids: ids })}
                 color="purple"
               />
             </div>
@@ -249,7 +293,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
 
           <div className="ml-7 grid grid-cols-3 gap-4 text-sm">
             <div>
-              <div className="text-xs text-gray-500 mb-1">触发标签</div>
+              <div className="text-xs text-gray-500 mb-1">触发效果ID</div>
               <div className="flex items-center gap-1">
                 <Zap className="w-3 h-3 text-purple-400" />
                 <span className="text-purple-300 font-mono text-xs truncate">
@@ -271,11 +315,11 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
             </div>
 
             <div>
-              <div className="text-xs text-gray-500 mb-1">产生后续效果</div>
+              <div className="text-xs text-gray-500 mb-1">后续效果</div>
               <div className="flex items-center gap-1">
                 <ArrowRight className="w-3 h-3 text-yellow-400" />
                 <span className="text-yellow-300">
-                  {effect.resulting_effect_tags?.length || 0} 个标签
+                  {effect.resulting_effect_ids?.length || 0} 个效果
                 </span>
               </div>
             </div>
@@ -323,13 +367,13 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <ArrowRight className="w-4 h-4 text-yellow-400" />
-                  <h4 className="text-sm font-semibold text-white">产生的后续效果标签</h4>
+                  <h4 className="text-sm font-semibold text-white">产生的后续效果ID</h4>
                 </div>
-                {effect.resulting_effect_tags && effect.resulting_effect_tags.length > 0 ? (
+                {effect.resulting_effect_ids && effect.resulting_effect_ids.length > 0 ? (
                   <div className="space-y-1 text-xs">
-                    {effect.resulting_effect_tags.map((tag, i) => (
+                    {effect.resulting_effect_ids.map((effectId, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <span className="text-purple-300 font-mono">{tag}</span>
+                        <span className="text-purple-300 font-mono">{effectId}</span>
                       </div>
                     ))}
                   </div>
@@ -337,7 +381,7 @@ function EffectCard({ effect, onEdit, onDelete, onSave, tags, isEditing, onCance
                   <p className="text-xs text-gray-500">未配置后续效果</p>
                 )}
                 <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-[#3d3d3d]">
-                  💡 这些标签会被添加到目标上，并由标签自身的规则进一步处理
+                  💡 这些效果ID会再次进入效果系统处理
                 </p>
               </div>
             </div>
@@ -425,7 +469,7 @@ export default function InteractionEffectsPage() {
 
   const handleSaveNew = (data) => {
     if (!data.effect_name || !data.triggering_effect_tag_path) {
-      alert('请填写必填项：效果名称和触发效果标签');
+      alert('请填写必填项：效果名称和触发效果ID');
       return;
     }
     createMutation.mutate(data);
@@ -433,7 +477,7 @@ export default function InteractionEffectsPage() {
 
   const handleSaveEdit = (data) => {
     if (!data.effect_name || !data.triggering_effect_tag_path) {
-      alert('请填写必填项：效果名称和触发效果标签');
+      alert('请填写必填项：效果名称和触发效果ID');
       return;
     }
     updateMutation.mutate({ id: data.id, data });
@@ -450,7 +494,7 @@ export default function InteractionEffectsPage() {
     description: "",
     triggering_effect_tag_path: "",
     target_object_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-    resulting_effect_tags: [],
+    resulting_effect_ids: [],
     priority: 0,
     is_active: true
   };
@@ -460,7 +504,7 @@ export default function InteractionEffectsPage() {
       {/* 顶部工具栏 */}
       <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Zap className="w-5 h-5 text-purple-400" />
-        <span className="text-sm font-semibold text-gray-300">交互效果编辑器（条件映射）</span>
+        <span className="text-sm font-semibold text-gray-300">交互效果编辑器（效果链映射）</span>
         <span className="text-xs text-gray-500">共 {filteredEffects.length} 个映射规则</span>
         
         <div className="flex-1" />
@@ -493,11 +537,11 @@ export default function InteractionEffectsPage() {
             <div className="flex items-start gap-2">
               <span className="text-cyan-400">💡</span>
               <div>
-                <div className="font-semibold mb-1">两级效果系统</div>
+                <div className="font-semibold mb-1">效果链系统</div>
                 <div className="text-xs text-gray-400 space-y-1">
-                  <div>1. <span className="text-white">条件映射</span>：效果标签 + 目标条件 → 产生后续效果标签</div>
-                  <div>2. <span className="text-white">标签规则</span>：后续效果标签利用自身的 attached_tags / removed_tags 等规则来修改目标</div>
-                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn + 目标有 Material.Wood → 产生 Status.Burning 标签 → Status.Burning 的规则会进一步添加/移除其他标签</div>
+                  <div>• 效果ID（字符串标识符）+ 目标条件 → 产生后续效果ID列表</div>
+                  <div>• 后续效果ID会再次进入效果系统，形成效果链条</div>
+                  <div className="mt-2 text-cyan-300">例如：Effect.Fire.Burn + 目标有 Material.Wood → 产生 [Effect.Fire.Continuous, Effect.Damage.Burn] → 这些效果继续处理</div>
                 </div>
               </div>
             </div>
