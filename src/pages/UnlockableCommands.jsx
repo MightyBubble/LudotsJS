@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Edit3, Trash2, X, Save, KeyRound, User, Target, CheckCircle, XCircle } from "lucide-react";
+import { Search, Plus, Edit3, Trash2, X, Save, KeyRound, User, Target, ChevronDown, ChevronRight, CheckCircle, XCircle } from "lucide-react";
 
 // 标签条件编辑组件
 function TagConditionEditor({ title, icon, conditions, onChange, allTags }) {
@@ -142,10 +142,274 @@ function TagConditionEditor({ title, icon, conditions, onChange, allTags }) {
   );
 }
 
+// 规则卡片组件
+function RuleCard({ rule, onEdit, onDelete, onSave, tags, isEditing, onCancelEdit }) {
+  const [editData, setEditData] = useState(rule);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const hasConditions = (conditions) => {
+    if (!conditions) return false;
+    return (conditions.has_any_tags && conditions.has_any_tags.length > 0) ||
+           (conditions.has_all_tags && conditions.has_all_tags.length > 0) ||
+           (conditions.not_has_tags && conditions.not_has_tags.length > 0);
+  };
+
+  const conditionCount = (conditions) => {
+    if (!conditions) return 0;
+    return (conditions.has_any_tags?.length || 0) + 
+           (conditions.has_all_tags?.length || 0) + 
+           (conditions.not_has_tags?.length || 0);
+  };
+
+  const renderConditionSummary = (conditions, label) => {
+    const count = conditionCount(conditions);
+    if (count === 0) return <span className="text-gray-600">无条件</span>;
+    return <span className="text-blue-300">{count} 个条件</span>;
+  };
+
+  if (isEditing) {
+    return (
+      <div className="p-4 bg-[#252526] border-2 border-[#0e639c] rounded">
+        <div className="space-y-4">
+          {/* 基本信息 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">规则名称 *</label>
+              <Input
+                value={editData.rule_name}
+                onChange={(e) => setEditData({ ...editData, rule_name: e.target.value })}
+                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">解锁的指令标签 *</label>
+              <Input
+                value={editData.unlocked_command_tag_path}
+                onChange={(e) => setEditData({ ...editData, unlocked_command_tag_path: e.target.value })}
+                className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+                list="tags-datalist"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">描述</label>
+            <Textarea
+              value={editData.description || ""}
+              onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+              className="bg-[#1e1e1e] border-[#3d3d3d] text-white"
+              rows={2}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <TagConditionEditor
+              title="交互者条件"
+              icon={<User className="w-4 h-4" />}
+              conditions={editData.interactor_conditions}
+              onChange={(conditions) => setEditData({ ...editData, interactor_conditions: conditions })}
+              allTags={tags}
+            />
+
+            <TagConditionEditor
+              title="目标条件"
+              icon={<Target className="w-4 h-4" />}
+              conditions={editData.target_conditions}
+              onChange={(conditions) => setEditData({ ...editData, target_conditions: conditions })}
+              allTags={tags}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={editData.is_active}
+              onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <label className="text-sm text-gray-300">规则激活</label>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button
+              size="sm"
+              onClick={() => onSave(editData)}
+              className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+            >
+              <Save className="w-3 h-3 mr-1" />
+              保存
+            </Button>
+            <Button
+              size="sm"
+              onClick={onCancelEdit}
+              variant="outline"
+              className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+            >
+              <X className="w-3 h-3 mr-1" />
+              取消
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded hover:border-[#0e639c] transition-colors">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+            <h3 className="text-base font-semibold text-white">{rule.rule_name}</h3>
+            {!rule.is_active && (
+              <span className="text-xs px-2 py-0.5 bg-gray-700 text-gray-400 rounded">未激活</span>
+            )}
+            {rule.is_active && (
+              <CheckCircle className="w-4 h-4 text-green-400" />
+            )}
+          </div>
+
+          {rule.description && (
+            <p className="text-sm text-gray-400 ml-7 mb-3">{rule.description}</p>
+          )}
+
+          <div className="ml-7 grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <div className="text-xs text-gray-500 mb-1">交互者条件</div>
+              <div className="flex items-center gap-1">
+                <User className="w-3 h-3 text-blue-400" />
+                {renderConditionSummary(rule.interactor_conditions, "交互者")}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs text-gray-500 mb-1">目标条件</div>
+              <div className="flex items-center gap-1">
+                <Target className="w-3 h-3 text-purple-400" />
+                {renderConditionSummary(rule.target_conditions, "目标")}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs text-gray-500 mb-1">解锁指令</div>
+              <div className="flex items-center gap-1">
+                <KeyRound className="w-3 h-3 text-yellow-400" />
+                <span className="text-yellow-300 font-mono text-xs truncate">
+                  {rule.unlocked_command_tag_path}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {isExpanded && (
+            <div className="ml-7 mt-4 pt-4 border-t border-[#3d3d3d] grid grid-cols-2 gap-4">
+              {/* 交互者详细条件 */}
+              {hasConditions(rule.interactor_conditions) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-4 h-4 text-blue-400" />
+                    <h4 className="text-sm font-semibold text-white">交互者条件</h4>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    {rule.interactor_conditions?.has_any_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has Any: </span>
+                        {rule.interactor_conditions.has_any_tags.map((tag, i) => (
+                          <span key={i} className="text-green-300 font-mono">{tag}{i < rule.interactor_conditions.has_any_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {rule.interactor_conditions?.has_all_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has All: </span>
+                        {rule.interactor_conditions.has_all_tags.map((tag, i) => (
+                          <span key={i} className="text-blue-300 font-mono">{tag}{i < rule.interactor_conditions.has_all_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {rule.interactor_conditions?.not_has_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Not Has: </span>
+                        {rule.interactor_conditions.not_has_tags.map((tag, i) => (
+                          <span key={i} className="text-red-300 font-mono">{tag}{i < rule.interactor_conditions.not_has_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 目标详细条件 */}
+              {hasConditions(rule.target_conditions) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="w-4 h-4 text-purple-400" />
+                    <h4 className="text-sm font-semibold text-white">目标条件</h4>
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    {rule.target_conditions?.has_any_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has Any: </span>
+                        {rule.target_conditions.has_any_tags.map((tag, i) => (
+                          <span key={i} className="text-green-300 font-mono">{tag}{i < rule.target_conditions.has_any_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {rule.target_conditions?.has_all_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Has All: </span>
+                        {rule.target_conditions.has_all_tags.map((tag, i) => (
+                          <span key={i} className="text-blue-300 font-mono">{tag}{i < rule.target_conditions.has_all_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                    {rule.target_conditions?.not_has_tags?.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Not Has: </span>
+                        {rule.target_conditions.not_has_tags.map((tag, i) => (
+                          <span key={i} className="text-red-300 font-mono">{tag}{i < rule.target_conditions.not_has_tags.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 ml-4">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onEdit(rule)}
+            className="h-8 w-8 p-0 hover:bg-[#3d3d3d] text-gray-300"
+          >
+            <Edit3 className="w-4 h-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => onDelete(rule.id)}
+            className="h-8 w-8 p-0 hover:bg-[#5a1e1e] text-red-400"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function UnlockableCommandsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingRule, setEditingRule] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [creatingNew, setCreatingNew] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -165,8 +429,7 @@ export default function UnlockableCommandsPage() {
     mutationFn: (data) => base44.entities.UnlockableCommand.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unlockableCommands'] });
-      setShowForm(false);
-      setEditingRule(null);
+      setCreatingNew(false);
     },
   });
 
@@ -174,8 +437,7 @@ export default function UnlockableCommandsPage() {
     mutationFn: ({ id, data }) => base44.entities.UnlockableCommand.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unlockableCommands'] });
-      setShowForm(false);
-      setEditingRule(null);
+      setEditingId(null);
     },
   });
 
@@ -196,33 +458,24 @@ export default function UnlockableCommandsPage() {
   }, [rules, searchQuery]);
 
   const handleCreate = () => {
-    setEditingRule({
-      rule_name: "",
-      description: "",
-      unlocked_command_tag_path: "",
-      interactor_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-      target_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
-      is_active: true
-    });
-    setShowForm(true);
+    setCreatingNew(true);
+    setEditingId(null);
   };
 
-  const handleEdit = (rule) => {
-    setEditingRule({ ...rule });
-    setShowForm(true);
-  };
-
-  const handleSave = () => {
-    if (!editingRule.rule_name || !editingRule.unlocked_command_tag_path) {
+  const handleSaveNew = (data) => {
+    if (!data.rule_name || !data.unlocked_command_tag_path) {
       alert('请填写必填项：规则名称和解锁的指令标签');
       return;
     }
+    createMutation.mutate(data);
+  };
 
-    if (editingRule.id) {
-      updateMutation.mutate({ id: editingRule.id, data: editingRule });
-    } else {
-      createMutation.mutate(editingRule);
+  const handleSaveEdit = (data) => {
+    if (!data.rule_name || !data.unlocked_command_tag_path) {
+      alert('请填写必填项：规则名称和解锁的指令标签');
+      return;
     }
+    updateMutation.mutate({ id: data.id, data });
   };
 
   const handleDelete = (id) => {
@@ -231,12 +484,22 @@ export default function UnlockableCommandsPage() {
     }
   };
 
+  const newRuleTemplate = {
+    rule_name: "",
+    description: "",
+    unlocked_command_tag_path: "",
+    interactor_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+    target_conditions: { has_any_tags: [], has_all_tags: [], not_has_tags: [] },
+    is_active: true
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
       {/* 顶部工具栏 */}
       <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <KeyRound className="w-5 h-5 text-yellow-400" />
         <span className="text-sm font-semibold text-gray-300">指令解锁编辑器</span>
+        <span className="text-xs text-gray-500">共 {filteredRules.length} 条规则</span>
         
         <div className="flex-1" />
 
@@ -260,155 +523,41 @@ export default function UnlockableCommandsPage() {
         </Button>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* 左侧列表 */}
-        <div className="w-96 bg-[#252526] border-r border-[#3d3d3d] flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-[#3d3d3d]">
-            <div className="text-xs text-gray-400">共 {filteredRules.length} 条规则</div>
-          </div>
+      {/* 规则列表 */}
+      <div className="flex-1 overflow-auto p-4">
+        <div className="max-w-6xl mx-auto space-y-3">
+          {creatingNew && (
+            <RuleCard
+              rule={newRuleTemplate}
+              tags={tags}
+              isEditing={true}
+              onSave={handleSaveNew}
+              onCancelEdit={() => setCreatingNew(false)}
+            />
+          )}
 
-          <div className="flex-1 overflow-auto p-3 space-y-2">
-            {filteredRules.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">
-                暂无规则，点击右上角创建
-              </div>
-            ) : (
-              filteredRules.map(rule => (
-                <div
-                  key={rule.id}
-                  className="p-3 bg-[#1e1e1e] border border-[#3d3d3d] rounded hover:border-[#0e639c] transition-colors cursor-pointer"
-                  onClick={() => handleEdit(rule)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-white">{rule.rule_name}</h3>
-                        {!rule.is_active && (
-                          <span className="text-xs px-1.5 py-0.5 bg-gray-700 text-gray-400 rounded">未激活</span>
-                        )}
-                      </div>
-                      {rule.description && (
-                        <p className="text-xs text-gray-400 mt-1">{rule.description}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(rule.id);
-                      }}
-                      className="text-gray-500 hover:text-red-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="mt-2 pt-2 border-t border-[#3d3d3d]">
-                    <div className="text-xs text-gray-400 mb-1">解锁指令：</div>
-                    <div className="text-xs text-yellow-300 font-mono">{rule.unlocked_command_tag_path}</div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* 右侧编辑区 */}
-        <div className="flex-1 overflow-auto p-4">
-          {showForm && editingRule ? (
-            <div className="max-w-4xl mx-auto space-y-4">
-              {/* 基本信息 */}
-              <div className="p-4 bg-[#252526] border border-[#3d3d3d] rounded">
-                <h3 className="text-base font-semibold text-white mb-3">基本信息</h3>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">规则名称 *</label>
-                    <Input
-                      value={editingRule.rule_name}
-                      onChange={(e) => setEditingRule({ ...editingRule, rule_name: e.target.value })}
-                      placeholder="例如：施放火球术"
-                      className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">规则描述</label>
-                    <Textarea
-                      value={editingRule.description || ""}
-                      onChange={(e) => setEditingRule({ ...editingRule, description: e.target.value })}
-                      placeholder="描述此规则的用途..."
-                      className="bg-[#1e1e1e] border-[#3d3d3d] text-white"
-                      rows={2}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">解锁的指令标签 *</label>
-                    <Input
-                      value={editingRule.unlocked_command_tag_path}
-                      onChange={(e) => setEditingRule({ ...editingRule, unlocked_command_tag_path: e.target.value })}
-                      placeholder="例如：Command.Attack.Fireball"
-                      className="h-8 bg-[#1e1e1e] border-[#3d3d3d] text-white"
-                      list="tags-datalist"
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={editingRule.is_active}
-                      onChange={(e) => setEditingRule({ ...editingRule, is_active: e.target.checked })}
-                      className="w-4 h-4"
-                    />
-                    <label className="text-sm text-gray-300">规则激活</label>
-                  </div>
-                </div>
-              </div>
-
-              {/* 交互者条件 */}
-              <TagConditionEditor
-                title="交互者条件（例如：玩家）"
-                icon={<User className="w-4 h-4" />}
-                conditions={editingRule.interactor_conditions}
-                onChange={(conditions) => setEditingRule({ ...editingRule, interactor_conditions: conditions })}
-                allTags={tags}
-              />
-
-              {/* 目标条件 */}
-              <TagConditionEditor
-                title="目标对象条件（例如：敌人、物品）"
-                icon={<Target className="w-4 h-4" />}
-                conditions={editingRule.target_conditions}
-                onChange={(conditions) => setEditingRule({ ...editingRule, target_conditions: conditions })}
-                allTags={tags}
-              />
-
-              {/* 操作按钮 */}
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={handleSave}
-                  className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  保存规则
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingRule(null);
-                  }}
-                  variant="outline"
-                  className="bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  取消
-                </Button>
-              </div>
+          {filteredRules.length === 0 && !creatingNew ? (
+            <div className="text-center py-16 text-gray-500">
+              <KeyRound className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <div className="text-lg mb-2">暂无规则</div>
+              <div className="text-sm">点击右上角"新建规则"开始创建</div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-              选择一个规则进行编辑，或点击"新建规则"创建新的解锁规则
-            </div>
+            filteredRules.map(rule => (
+              <RuleCard
+                key={rule.id}
+                rule={rule}
+                tags={tags}
+                isEditing={editingId === rule.id}
+                onEdit={(r) => {
+                  setEditingId(r.id);
+                  setCreatingNew(false);
+                }}
+                onSave={handleSaveEdit}
+                onDelete={handleDelete}
+                onCancelEdit={() => setEditingId(null)}
+              />
+            ))
           )}
         </div>
       </div>
