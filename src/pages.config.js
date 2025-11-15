@@ -8,6 +8,7 @@ import AttributeEditor from './pages/AttributeEditor';
 import ModifierDefinitionEditor from './pages/ModifierDefinitionEditor';
 import NewAttributeSimulator from './pages/NewAttributeSimulator';
 import DataGraphEditor from './pages/DataGraphEditor';
+import VisualGraphEditor from './pages/VisualGraphEditor';
 import Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "ModifierDefinitionEditor": ModifierDefinitionEditor,
     "NewAttributeSimulator": NewAttributeSimulator,
     "DataGraphEditor": DataGraphEditor,
+    "VisualGraphEditor": VisualGraphEditor,
 }
 
 export const pagesConfig = {
