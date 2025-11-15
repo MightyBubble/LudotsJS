@@ -86,6 +86,15 @@ export default function NewAttributeSimulatorPage() {
     });
   }, [modifiers, tagCounts, attributeKeyValues, constantValues]);
 
+  // 排序：激活的在前
+  const sortedModifierOutputs = useMemo(() => {
+    return [...modifierOutputs].sort((a, b) => {
+      if (a.isActive && !b.isActive) return -1;
+      if (!a.isActive && b.isActive) return 1;
+      return 0;
+    });
+  }, [modifierOutputs]);
+
   // 步骤2：聚合到属性键
   const attributeKeys = useMemo(() => {
     const result = {};
@@ -309,7 +318,7 @@ export default function NewAttributeSimulatorPage() {
               修饰器计算 ({modifierOutputs.length})
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              {modifierOutputs.map((output, idx) => (
+              {sortedModifierOutputs.map((output, idx) => (
                 <div key={idx} className={`bg-[#252526] border rounded p-3 ${output.isActive ? 'border-green-600/50' : 'border-[#3d3d3d] opacity-50'}`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-xs font-semibold text-white">{output.modifier.modifier_name}</div>
@@ -340,58 +349,41 @@ export default function NewAttributeSimulatorPage() {
 
         {/* 右侧：属性聚合和最终值 */}
         <div className="w-96 bg-[#252526] border-l border-[#3d3d3d] flex flex-col overflow-auto">
-          {/* 步骤2：属性键聚合 */}
-          <div className="border-b border-[#3d3d3d]">
-            <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">2</span>
-              <span className="text-sm font-semibold text-white">属性键聚合</span>
-            </div>
-            <div className="p-3 space-y-2">
-              {attributes.map(attr => {
-                const keys = attributeKeys[attr.attribute_id] || {};
-                return (
-                  <div key={attr.id} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
-                    <div className="text-xs font-semibold text-white mb-2">{attr.name}</div>
-                    <div className="space-y-1">
-                      {Object.entries(keys).map(([keyName, keyValue]) => (
-                        <div key={keyName} className="flex items-center justify-between text-[10px]">
-                          <span className="text-gray-400">{keyName}:</span>
-                          {Array.isArray(keyValue) ? (
-                            <div className="flex gap-1 flex-wrap">
-                              {keyValue.map((v, i) => (
-                                <span key={i} className="bg-[#3d3d3d] px-1 rounded text-white">{v.toFixed(1)}</span>
-                              ))}
-                              {keyValue.length === 0 && <span className="text-gray-600">[]</span>}
-                            </div>
-                          ) : (
-                            <span className="text-white">{keyValue.toFixed(1)}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">2</span>
+            <span className="text-sm font-semibold text-white">属性聚合计算</span>
           </div>
-
-          {/* 步骤3：最终属性值 */}
-          <div className="flex-1">
-            <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">3</span>
-              <span className="text-sm font-semibold text-white">最终属性值</span>
-            </div>
-            <div className="p-3 space-y-3">
-              {attributes.map(attr => (
-                <div key={attr.id} className="bg-gradient-to-br from-[#1e1e1e] to-[#252526] border-2 border-green-600/30 rounded-lg p-4">
-                  <div className="text-xs text-gray-400 mb-2">{attr.name}</div>
-                  <div className="text-4xl font-bold text-green-400 mb-1">
-                    {finalValues[attr.attribute_id]?.toFixed(0) || 0}
+          <div className="flex-1 p-3 space-y-3">
+            {attributes.map(attr => {
+              const keys = attributeKeys[attr.attribute_id] || {};
+              const final = finalValues[attr.attribute_id] || 0;
+              return (
+                <div key={attr.id} className="bg-gradient-to-br from-[#1e1e1e] to-[#252526] border-2 border-green-600/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-sm font-semibold text-white">{attr.name}</div>
+                    <div className="text-3xl font-bold text-green-400">{final.toFixed(0)}</div>
                   </div>
-                  <div className="text-[9px] text-gray-600 font-mono">{attr.attribute_id}</div>
+                  <div className="space-y-1 pt-2 border-t border-[#3d3d3d]/50">
+                    {Object.entries(keys).map(([keyName, keyValue]) => (
+                      <div key={keyName} className="flex items-center justify-between text-[10px]">
+                        <span className="text-gray-400">{keyName}:</span>
+                        {Array.isArray(keyValue) ? (
+                          <div className="flex gap-1 flex-wrap">
+                            {keyValue.map((v, i) => (
+                              <span key={i} className="bg-[#3d3d3d] px-1 rounded text-white">{v.toFixed(1)}</span>
+                            ))}
+                            {keyValue.length === 0 && <span className="text-gray-600">[]</span>}
+                          </div>
+                        ) : (
+                          <span className="text-white">{keyValue.toFixed(1)}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-[9px] text-gray-600 font-mono mt-2">{attr.attribute_id}</div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
