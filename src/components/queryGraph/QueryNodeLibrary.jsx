@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent } from 'lucide-react';
+import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network } from 'lucide-react';
 
 const nodeTypes = [
   { type: 'entity_source', label: '实体源', icon: Database, color: '#0e639c', category: '源' },
@@ -7,6 +7,10 @@ const nodeTypes = [
   { type: 'filter_attribute', label: '属性过滤', icon: Filter, color: '#9b6bb3', category: '过滤' },
   { type: 'filter_tag', label: '标签过滤', icon: Tag, color: '#ffc000', category: '过滤' },
   { type: 'filter_relation', label: '关系过滤', icon: Link, color: '#e67e22', category: '过滤' },
+  { type: 'filter_relation_attribute', label: '关系属性过滤', icon: Network, color: '#e67e22', category: '过滤' },
+  { type: 'filter_relation_tag', label: '关系标签过滤', icon: Network, color: '#e67e22', category: '过滤' },
+  { type: 'filter_related_entity_attribute', label: '关联实体属性过滤', icon: Network, color: '#e67e22', category: '过滤' },
+  { type: 'filter_related_entity_tag', label: '关联实体标签过滤', icon: Network, color: '#e67e22', category: '过滤' },
   { type: 'spatial_distance', label: '距离查询', icon: MapPin, color: '#c97fff', category: '空间' },
   { type: 'spatial_area', label: '区域查询', icon: Box, color: '#c97fff', category: '空间' },
   { type: 'logic_intersect', label: '交集', icon: GitMerge, color: '#d9534f', category: '逻辑' },

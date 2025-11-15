@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -103,6 +104,10 @@ export default function EntityQueryEditorPage() {
       'filter_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'filter_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'filter_relation': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_relation_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_relation_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_related_entity_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_related_entity_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'spatial_distance': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'spatial_area': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'logic_intersect': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
@@ -127,6 +132,10 @@ export default function EntityQueryEditorPage() {
       'filter_attribute': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'filter_tag': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'filter_relation': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
+      'filter_relation_attribute': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
+      'filter_relation_tag': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
+      'filter_related_entity_attribute': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
+      'filter_related_entity_tag': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'spatial_distance': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'spatial_area': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'logic_intersect': [{ id: 'result', label: '结果', type: 'entities' }],
@@ -151,6 +160,10 @@ export default function EntityQueryEditorPage() {
       filter_attribute: { attributeId: '', key: '', operator: 'gt', threshold: 0 },
       filter_tag: { tagPath: '', mode: 'has' },
       filter_relation: { relationId: '', direction: 'source' },
+      filter_relation_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0 },
+      filter_relation_tag: { relationId: '', tagPath: '', mode: 'has' },
+      filter_related_entity_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0 },
+      filter_related_entity_tag: { relationId: '', tagPath: '', mode: 'has' },
       spatial_distance: { maxDistance: 100, x: 0, y: 0, z: 0 },
       spatial_area: { shape: 'sphere', centerX: 0, centerY: 0, centerZ: 0, sizeX: 10, sizeY: 10, sizeZ: 10 },
       sort_by_attribute: { attributeId: '', key: '', order: 'asc' },
