@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Box, Link as LinkIcon } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Box, Link as LinkIcon, Filter, Play } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -92,6 +92,14 @@ export default function Layout({ children, currentPageName }) {
           }`}
         >
           <LinkIcon className="w-4 h-4" />实体关系
+        </Link>
+        <Link
+          to={createPageUrl("EntityQueryEditor")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "EntityQueryEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Filter className="w-4 h-4" />实体查询
         </Link>
         <Link
           to={createPageUrl("NewAttributeSimulator")}
