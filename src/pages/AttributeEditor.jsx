@@ -36,15 +36,27 @@ export default function AttributeEditorPage() {
       setEditingRow(null);
       setEditData(null);
     },
+    onError: (error) => {
+      console.error('创建失败:', error);
+      alert('创建失败: ' + (error.message || '未知错误'));
+    }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Attribute.update(id, data),
+    mutationFn: ({ id, data }) => {
+      console.log('保存数据:', { id, data });
+      return base44.entities.Attribute.update(id, data);
+    },
     onSuccess: () => {
+      console.log('保存成功');
       queryClient.invalidateQueries({ queryKey: ['attributes'] });
       setEditingRow(null);
       setEditData(null);
     },
+    onError: (error) => {
+      console.error('保存失败:', error);
+      alert('保存失败: ' + (error.message || '未知错误'));
+    }
   });
 
   const deleteMutation = useMutation({
@@ -77,10 +89,17 @@ export default function AttributeEditorPage() {
 
   const handleEdit = (attr) => {
     setEditingRow(attr.id);
-    setEditData({ ...attr, keys: attr.keys || [] });
+    setEditData({ 
+      ...attr, 
+      keys: attr.keys || [],
+      input_mappings: attr.input_mappings || {},
+      description: attr.description || ""
+    });
   };
 
   const handleSave = () => {
+    console.log('开始保存，当前数据:', editData);
+    
     if (!editData.attribute_id || !editData.name || !editData.final_calculation_data_graph_id) {
       alert('请填写必填项');
       return;
@@ -93,13 +112,14 @@ export default function AttributeEditorPage() {
     const dataToSave = {
       attribute_id: editData.attribute_id,
       name: editData.name,
-      description: editData.description,
+      description: editData.description || "",
       default_base_value: editData.default_base_value,
       keys: editData.keys,
-      input_mappings: editData.input_mappings,
+      input_mappings: editData.input_mappings || {},
       final_calculation_data_graph_id: editData.final_calculation_data_graph_id
     };
     
+    console.log('准备保存的数据:', dataToSave);
     updateMutation.mutate({ id: editData.id, data: dataToSave });
   };
 
@@ -388,6 +408,7 @@ export default function AttributeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleSave}
+                          disabled={updateMutation.isPending}
                           className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]"
                         >
                           <Save className="w-3 h-3" />
