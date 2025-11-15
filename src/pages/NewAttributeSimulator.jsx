@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Plus, Minus, ArrowRight, AlertTriangle, Power } from "lucide-react";
+import { Calculator, Plus, Minus, ArrowRight, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function NewAttributeSimulatorPage() {
@@ -41,7 +41,6 @@ export default function NewAttributeSimulatorPage() {
     return prototypes.find(p => p.id === selectedPrototypeId);
   }, [prototypes, selectedPrototypeId]);
 
-  // 检查哪些属性缺失
   const missingAttributes = useMemo(() => {
     if (!selectedPrototype) return [];
     return (selectedPrototype.referenced_attributes || []).filter(attrId => 
@@ -49,7 +48,6 @@ export default function NewAttributeSimulatorPage() {
     );
   }, [selectedPrototype, attributes]);
 
-  // 过滤出原型引用的属性
   const filteredAttributes = useMemo(() => {
     if (!selectedPrototype) return attributes;
     return attributes.filter(a => 
@@ -57,7 +55,6 @@ export default function NewAttributeSimulatorPage() {
     );
   }, [selectedPrototype, attributes]);
 
-  // 收集被引用的输入源
   const referencedInputs = useMemo(() => {
     const tagSet = new Set();
     const attrKeySet = new Set();
@@ -83,7 +80,6 @@ export default function NewAttributeSimulatorPage() {
     };
   }, [modifiers]);
 
-  // 检查修饰器的输入和输出是否在原型中
   const modifierWarnings = useMemo(() => {
     const warnings = {};
     
@@ -94,7 +90,6 @@ export default function NewAttributeSimulatorPage() {
     modifiers.forEach(mod => {
       const warns = [];
       
-      // 检查输入来源的属性是否在原型中
       (mod.curve_input_mappings || []).forEach(mapping => {
         if (mapping.source_type === 'attribute_key' && mapping.attribute_id) {
           if (!prototypeAttrs.includes(mapping.attribute_id)) {
@@ -103,7 +98,6 @@ export default function NewAttributeSimulatorPage() {
         }
       });
       
-      // 检查目标属性是否在原型中
       if (mod.target_attribute_id && !prototypeAttrs.includes(mod.target_attribute_id)) {
         warns.push({ type: 'target', message: `目标属性 ${mod.target_attribute_id} 不在原型中` });
       }
@@ -123,7 +117,6 @@ export default function NewAttributeSimulatorPage() {
     }));
   };
 
-  // 步骤1：计算所有修饰器输出
   const modifierOutputs = useMemo(() => {
     return modifiers.map(mod => {
       const inputs = {};
@@ -151,6 +144,7 @@ export default function NewAttributeSimulatorPage() {
         inputs,
         magnitude,
         isActive: isManuallyActive && magnitude > 0,
+        isManuallyDisabled: modifierActiveStates[mod.id] === false,
         targetAttribute: mod.target_attribute_id,
         targetKey: mod.output_key,
         warnings: modifierWarnings[mod.id] || []
@@ -158,7 +152,6 @@ export default function NewAttributeSimulatorPage() {
     });
   }, [modifiers, tagCounts, attributeKeyValues, constantValues, modifierActiveStates, modifierWarnings]);
 
-  // 排序：激活的在前
   const sortedModifierOutputs = useMemo(() => {
     return [...modifierOutputs].sort((a, b) => {
       if (a.isActive && !b.isActive) return -1;
@@ -167,7 +160,6 @@ export default function NewAttributeSimulatorPage() {
     });
   }, [modifierOutputs]);
 
-  // 步骤2：聚合到属性键
   const attributeKeys = useMemo(() => {
     const result = {};
     
@@ -201,7 +193,6 @@ export default function NewAttributeSimulatorPage() {
     return result;
   }, [filteredAttributes, modifierOutputs]);
 
-  // 步骤3：计算最终值
   const finalValues = useMemo(() => {
     const result = {};
     
@@ -423,19 +414,33 @@ export default function NewAttributeSimulatorPage() {
                 const hasInputWarning = output.warnings.some(w => w.type === 'input');
                 const hasTargetWarning = output.warnings.some(w => w.type === 'target');
                 
+                let borderColor = 'border-[#3d3d3d]';
+                let opacity = '';
+                
+                if (output.isActive) {
+                  borderColor = 'border-green-600/50';
+                } else if (output.isManuallyDisabled) {
+                  borderColor = 'border-gray-600';
+                } else {
+                  opacity = 'opacity-50';
+                }
+                
                 return (
-                  <div key={idx} className={`bg-[#252526] border rounded p-3 ${output.isActive ? 'border-green-600/50' : 'border-[#3d3d3d] opacity-50'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="text-xs font-semibold text-white">{output.modifier.modifier_name}</div>
-                        <button
-                          onClick={() => toggleModifierActive(output.modifier.id)}
-                          className={`p-1 rounded transition-colors ${isManuallyActive ? 'bg-green-600/30 text-green-400' : 'bg-gray-700/30 text-gray-500'}`}
-                          title={isManuallyActive ? '点击禁用' : '点击启用'}
-                        >
-                          <Power className="w-3 h-3" />
-                        </button>
-                      </div>
+                  <div key={idx} className={`bg-[#252526] border rounded p-3 relative ${borderColor} ${opacity}`}>
+                    {/* Toggle开关 - 右上角 */}
+                    <button
+                      onClick={() => toggleModifierActive(output.modifier.id)}
+                      className={`absolute top-2 right-2 w-10 h-5 rounded-full transition-colors ${
+                        isManuallyActive ? 'bg-green-600' : 'bg-gray-600'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                        isManuallyActive ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+
+                    <div className="flex items-center justify-between mb-2 pr-12">
+                      <div className="text-xs font-semibold text-white">{output.modifier.modifier_name}</div>
                       <div className="flex gap-1">
                         {hasInputWarning && (
                           <span className="text-[9px] bg-orange-900/50 text-orange-300 px-1 rounded" title={output.warnings.filter(w => w.type === 'input').map(w => w.message).join(', ')}>
@@ -447,10 +452,20 @@ export default function NewAttributeSimulatorPage() {
                             目标预警
                           </span>
                         )}
-                        {!isManuallyActive && <span className="text-[9px] bg-gray-700 text-gray-400 px-1 rounded">已禁用</span>}
-                        {isManuallyActive && !output.isActive && <span className="text-[9px] bg-gray-700 text-gray-400 px-1 rounded">输出为0</span>}
                       </div>
                     </div>
+                    
+                    {!isManuallyActive && (
+                      <div className="mb-2">
+                        <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">已禁用</span>
+                      </div>
+                    )}
+                    {isManuallyActive && !output.isActive && (
+                      <div className="mb-2">
+                        <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">输出为0</span>
+                      </div>
+                    )}
+                    
                     <div className="space-y-1 text-[10px] text-gray-400">
                       <div>曲线: {output.modifier.curve_data_graph_id}</div>
                       <div className="flex items-center gap-1 flex-wrap">
