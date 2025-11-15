@@ -8,7 +8,6 @@ import { Search, Plus, Trash2, GitBranch } from "lucide-react";
 
 export default function ModifierDefinitionEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingId, setEditingId] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -44,7 +43,6 @@ export default function ModifierDefinitionEditorPage() {
     mutationFn: (data) => base44.entities.ModifierDefinition.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modifierDefinitions'] });
-      setEditingId(null);
     },
   });
 
@@ -84,12 +82,9 @@ export default function ModifierDefinitionEditorPage() {
     createMutation.mutate(newMod);
   };
 
-  const handleUpdate = (id, field, value) => {
-    const mod = modifiers.find(m => m.id === id);
-    if (!mod) return;
-    
-    const updated = { ...mod, [field]: value };
-    updateMutation.mutate({ id, data: updated });
+  const handleUpdate = (mod, updates) => {
+    const updatedData = { ...mod, ...updates };
+    updateMutation.mutate({ id: mod.id, data: updatedData });
   };
 
   const handleDelete = (id) => {
@@ -98,10 +93,7 @@ export default function ModifierDefinitionEditorPage() {
     }
   };
 
-  const handleAddMapping = (modId) => {
-    const mod = modifiers.find(m => m.id === modId);
-    if (!mod) return;
-
+  const handleAddMapping = (mod) => {
     const graph = dataGraphs.find(g => g.graph_id === mod.curve_data_graph_id);
     if (!graph) return;
 
@@ -121,37 +113,20 @@ export default function ModifierDefinitionEditorPage() {
       step_size: 1
     };
 
-    updateMutation.mutate({
-      id: modId,
-      data: {
-        ...mod,
-        curve_input_mappings: [...(mod.curve_input_mappings || []), newMapping]
-      }
+    handleUpdate(mod, {
+      curve_input_mappings: [...(mod.curve_input_mappings || []), newMapping]
     });
   };
 
-  const handleUpdateMapping = (modId, mappingIndex, field, value) => {
-    const mod = modifiers.find(m => m.id === modId);
-    if (!mod) return;
-
+  const handleUpdateMapping = (mod, mappingIndex, field, value) => {
     const mappings = [...(mod.curve_input_mappings || [])];
     mappings[mappingIndex] = { ...mappings[mappingIndex], [field]: value };
-
-    updateMutation.mutate({
-      id: modId,
-      data: { ...mod, curve_input_mappings: mappings }
-    });
+    handleUpdate(mod, { curve_input_mappings: mappings });
   };
 
-  const handleRemoveMapping = (modId, mappingIndex) => {
-    const mod = modifiers.find(m => m.id === modId);
-    if (!mod) return;
-
+  const handleRemoveMapping = (mod, mappingIndex) => {
     const mappings = (mod.curve_input_mappings || []).filter((_, i) => i !== mappingIndex);
-    updateMutation.mutate({
-      id: modId,
-      data: { ...mod, curve_input_mappings: mappings }
-    });
+    handleUpdate(mod, { curve_input_mappings: mappings });
   };
 
   const getAttributeKeys = (attributeId) => {
@@ -216,14 +191,14 @@ export default function ModifierDefinitionEditorPage() {
                   <td className="p-2">
                     <Input
                       value={mod.modifier_name}
-                      onChange={(e) => handleUpdate(mod.id, 'modifier_name', e.target.value)}
+                      onChange={(e) => handleUpdate(mod, { modifier_name: e.target.value })}
                       className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
                     />
                   </td>
                   <td className="p-2">
                     <Select
                       value={mod.curve_data_graph_id}
-                      onValueChange={(val) => handleUpdate(mod.id, 'curve_data_graph_id', val)}
+                      onValueChange={(val) => handleUpdate(mod, { curve_data_graph_id: val })}
                     >
                       <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                         <SelectValue />
@@ -247,7 +222,7 @@ export default function ModifierDefinitionEditorPage() {
                             <>
                               <Select
                                 value={mapping.tag_path || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod.id, idx, 'tag_path', val)}
+                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'tag_path', val)}
                               >
                                 <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
                                   <SelectValue placeholder="标签" />
@@ -263,7 +238,7 @@ export default function ModifierDefinitionEditorPage() {
                               <Input
                                 type="number"
                                 value={mapping.step_size || 1}
-                                onChange={(e) => handleUpdateMapping(mod.id, idx, 'step_size', parseInt(e.target.value) || 1)}
+                                onChange={(e) => handleUpdateMapping(mod, idx, 'step_size', parseInt(e.target.value) || 1)}
                                 className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
                               />
                             </>
@@ -273,7 +248,7 @@ export default function ModifierDefinitionEditorPage() {
                             <>
                               <Select
                                 value={mapping.attribute_id || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod.id, idx, 'attribute_id', val)}
+                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'attribute_id', val)}
                               >
                                 <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
                                   <SelectValue placeholder="属性" />
@@ -288,7 +263,7 @@ export default function ModifierDefinitionEditorPage() {
                               </Select>
                               <Select
                                 value={mapping.attribute_key || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod.id, idx, 'attribute_key', val)}
+                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'attribute_key', val)}
                               >
                                 <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
                                   <SelectValue placeholder="键" />
@@ -309,14 +284,14 @@ export default function ModifierDefinitionEditorPage() {
                               type="number"
                               step="0.1"
                               value={mapping.constant_value || 0}
-                              onChange={(e) => handleUpdateMapping(mod.id, idx, 'constant_value', parseFloat(e.target.value) || 0)}
+                              onChange={(e) => handleUpdateMapping(mod, idx, 'constant_value', parseFloat(e.target.value) || 0)}
                               className="h-5 w-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
                             />
                           )}
                           
                           <Select
                             value={mapping.source_type}
-                            onValueChange={(val) => handleUpdateMapping(mod.id, idx, 'source_type', val)}
+                            onValueChange={(val) => handleUpdateMapping(mod, idx, 'source_type', val)}
                           >
                             <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
                               <SelectValue />
@@ -329,7 +304,7 @@ export default function ModifierDefinitionEditorPage() {
                           </Select>
                           
                           <button
-                            onClick={() => handleRemoveMapping(mod.id, idx)}
+                            onClick={() => handleRemoveMapping(mod, idx)}
                             className="text-white/30 hover:text-red-400"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -338,7 +313,7 @@ export default function ModifierDefinitionEditorPage() {
                       ))}
                       <Button
                         size="sm"
-                        onClick={() => handleAddMapping(mod.id)}
+                        onClick={() => handleAddMapping(mod)}
                         className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
                       >
                         <Plus className="w-3 h-3" />
@@ -348,7 +323,7 @@ export default function ModifierDefinitionEditorPage() {
                   <td className="p-2">
                     <Select
                       value={mod.target_attribute_id}
-                      onValueChange={(val) => handleUpdate(mod.id, 'target_attribute_id', val)}
+                      onValueChange={(val) => handleUpdate(mod, { target_attribute_id: val })}
                     >
                       <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                         <SelectValue />
@@ -365,7 +340,7 @@ export default function ModifierDefinitionEditorPage() {
                   <td className="p-2">
                     <Select
                       value={mod.output_aggregation_key}
-                      onValueChange={(val) => handleUpdate(mod.id, 'output_aggregation_key', val)}
+                      onValueChange={(val) => handleUpdate(mod, { output_aggregation_key: val })}
                     >
                       <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                         <SelectValue />
@@ -383,7 +358,7 @@ export default function ModifierDefinitionEditorPage() {
                     <Input
                       type="number"
                       value={mod.max_trigger_times || ""}
-                      onChange={(e) => handleUpdate(mod.id, 'max_trigger_times', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) => handleUpdate(mod, { max_trigger_times: e.target.value ? parseInt(e.target.value) : null })}
                       placeholder="∞"
                       className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white text-center"
                     />
@@ -392,7 +367,7 @@ export default function ModifierDefinitionEditorPage() {
                     <input
                       type="checkbox"
                       checked={mod.is_active}
-                      onChange={(e) => handleUpdate(mod.id, 'is_active', e.target.checked)}
+                      onChange={(e) => handleUpdate(mod, { is_active: e.target.checked })}
                       className="w-4 h-4"
                     />
                   </td>
