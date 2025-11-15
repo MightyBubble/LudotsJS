@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
 import { Input } from '@/components/ui/input';
@@ -34,14 +34,14 @@ const nodeLabels = {
 
 export default function QueryNode({ 
   node,
-  isSelected = false,
-  hasConnectedInput,
+  selected = false,
+  connectedInputPorts,
   onUpdatePosition,
   onUpdateData,
   onDelete,
   onSelect,
-  onConnectionStart,
-  onConnectionEnd,
+  onStartConnection,
+  onEndConnection,
   prototypes = [],
   attributes = [],
   tags = [],
@@ -49,86 +49,70 @@ export default function QueryNode({
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const nodeRef = useRef(null);
-  const dragStateRef = useRef({ startX: 0, startY: 0, startNodeX: 0, startNodeY: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
   const accentColor = nodeAccentColors[node?.type] || '#6b7280';
 
   if (!node || !node.position) {
     return null;
   }
 
-  const handleMouseDown = useCallback((e) => {
+  const handleMouseDown = (e) => {
     if (e.button !== 0) return;
     
-    // 排除所有交互元素
-    const target = e.target;
-    if (
-      target.closest('.node-port') || 
-      target.closest('.delete-button') || 
-      target.closest('input') ||
-      target.closest('button') ||
-      target.closest('[role="combobox"]') ||
-      target.tagName === 'SELECT'
-    ) {
+    if (e.target.closest('.node-port') || e.target.closest('.delete-button') || e.target.closest('input')) {
       return;
     }
-    
-    e.preventDefault();
-    e.stopPropagation();
     
     const multiSelect = e.ctrlKey || e.metaKey;
     onSelect?.(node.id, multiSelect);
     
-    dragStateRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startNodeX: node.position.x || 0,
-      startNodeY: node.position.y || 0
-    };
-    
     setIsDragging(true);
-  }, [node.id, node.position, onSelect]);
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      nodeX: node.position.x || 0,
+      nodeY: node.position.y || 0
+    };
+    e.stopPropagation();
+  };
 
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging || !nodeRef.current) return;
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
 
-    const container = nodeRef.current.parentElement;
-    if (!container) return;
+    const parent = nodeRef.current?.parentElement?.parentElement;
+    if (!parent) return;
 
-    // 获取容器的 transform scale
-    const computedStyle = window.getComputedStyle(container);
-    const transform = computedStyle.transform;
-    let scale = 1;
-    if (transform && transform !== 'none') {
-      const matrix = transform.match(/matrix\((.+)\)/);
-      if (matrix) {
-        const values = matrix[1].split(', ');
-        scale = parseFloat(values[0]) || 1;
-      }
-    }
+    const transform = parent.style.transform;
+    const scaleMatch = transform.match(/scale\(([\d.]+)\)/);
+    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
 
-    const dx = (e.clientX - dragStateRef.current.startX) / scale;
-    const dy = (e.clientY - dragStateRef.current.startY) / scale;
+    const dx = (e.clientX - dragStartRef.current.x) / scale;
+    const dy = (e.clientY - dragStartRef.current.y) / scale;
 
-    const newX = dragStateRef.current.startNodeX + dx;
-    const newY = dragStateRef.current.startNodeY + dy;
+    onUpdatePosition(node.id, {
+      x: dragStartRef.current.nodeX + dx,
+      y: dragStartRef.current.nodeY + dy
+    });
+  };
 
-    onUpdatePosition?.(node.id, { x: newX, y: newY });
-  }, [isDragging, node.id, onUpdatePosition]);
-
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = () => {
     setIsDragging(false);
-  }, []);
+  };
 
   React.useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging]);
+
+  const isPortConnected = (portId) => {
+    return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
+  };
 
   const getAttributeKeys = (attributeId) => {
     const attr = attributes.find(a => a.attribute_id === attributeId);
@@ -270,7 +254,7 @@ export default function QueryNode({
       return (
         <div className="space-y-1.5">
           {node.inputs.map(input => (
-            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
+            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
           ))}
         </div>
       );
@@ -282,35 +266,22 @@ export default function QueryNode({
   return (
     <div
       ref={nodeRef}
-      className="absolute rounded shadow-2xl select-none"
+      className="absolute rounded shadow-2xl select-none cursor-move"
       style={{
         left: node.position.x ?? 0,
         top: node.position.y ?? 0,
         width: '220px',
         backgroundColor: '#3c3c3c',
         borderLeft: `3px solid ${accentColor}`,
-        border: isSelected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
-        boxShadow: isSelected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
-        transition: 'border 0.2s, box-shadow 0.2s',
-        cursor: isDragging ? 'grabbing' : 'grab'
+        border: selected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
+        boxShadow: selected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
+        transition: 'border 0.2s, box-shadow 0.2s'
       }}
       onMouseDown={handleMouseDown}
     >
-      <div 
-        className="flex items-center justify-between px-3 py-2 border-b draggable-header" 
-        style={{ 
-          borderColor: '#2a2a2a', 
-          background: 'linear-gradient(180deg, #3e3e42 0%, #3a3a3a 100%)'
-        }}
-      >
+      <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: '#2a2a2a', background: 'linear-gradient(180deg, #3e3e42 0%, #3a3a3a 100%)' }}>
         <span className="font-medium text-xs text-white/95">{nodeLabels[node.type] || node.type}</span>
-        <button 
-          className="delete-button text-white/30 hover:text-white/80 transition-colors" 
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            onDelete(node.id); 
-          }}
-        >
+        <button className="delete-button text-white/30 hover:text-white/80 transition-colors" onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}>
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -319,7 +290,7 @@ export default function QueryNode({
         {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {node.outputs.map(output => (
-              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
+              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
             ))}
           </div>
         )}

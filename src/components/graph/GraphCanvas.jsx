@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useCallback } from 'react';
 import Node from './Node';
 import Connection from './Connection';
@@ -18,7 +17,7 @@ export default function GraphCanvas({
   onAddConnection,
   onDeleteConnection,
   onAddNodeAtPosition,
-  NodeComponent // Added NodeComponent prop
+  NodeComponent
 }) {
   const canvasRef = useRef(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -30,7 +29,6 @@ export default function GraphCanvas({
   const [selectedNodes, setSelectedNodes] = useState(new Set());
   const [selectedConnections, setSelectedConnections] = useState(new Set());
 
-  // Use the provided NodeComponent or default to the internal Node
   const DefaultNodeComponent = NodeComponent || Node;
 
   const handleMouseDown = (e) => {
@@ -78,7 +76,7 @@ export default function GraphCanvas({
         }
       }
     } catch (err) {
-      // Continue to handle regular node drop if JSON parsing fails or not a blackboard key
+      // Continue to handle regular node drop
     }
 
     const nodeType = e.dataTransfer.getData('nodeType');
@@ -96,7 +94,7 @@ export default function GraphCanvas({
       onAddNodeAtPosition(nodeType, pendingDrop.position, pendingDrop.blackboardKey);
       setPendingDrop(null);
     }
-    setContextMenu(null); // Close context menu after selection
+    setContextMenu(null);
   };
 
   const handleMouseMove = useCallback((e) => {
@@ -237,7 +235,7 @@ export default function GraphCanvas({
         fromY: fromPos.y,
         toX: toPos.x,
         toY: toPos.y,
-        value: connectionValues[conn.id]
+        value: connectionValues?.[conn.id]
       };
     });
   };
@@ -256,16 +254,22 @@ export default function GraphCanvas({
     return { fromX, fromY, toX, toY };
   };
 
-  // Helper function to check if an input port is connected
   const isInputPortConnected = useCallback((nodeId, portId) => {
     return connections.some(c => c.toNode === nodeId && c.toPort === portId);
   }, [connections]);
 
+  const connectedInputPorts = React.useMemo(() => {
+    const set = new Set();
+    connections.forEach(conn => {
+      set.add(`${conn.toNode}-${conn.toPort}`);
+    });
+    return set;
+  }, [connections]);
 
   return (
     <div
       ref={canvasRef}
-      className="w-full h-full bg-[#1e1e1e] relative overflow-hidden" // Updated className
+      className="w-full h-full bg-[#1e1e1e] relative overflow-hidden"
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
@@ -334,27 +338,27 @@ export default function GraphCanvas({
         </svg>
       </div>
 
-      <div // This is the new nodes container div
-        className="absolute inset-0" // Ensured it covers the canvas
+      <div
+        className="absolute inset-0"
         style={{
-          zIndex: 2, // Ensures nodes are above connections
-          pointerEvents: 'auto', // Ensures nodes are interactive
+          zIndex: 2,
+          pointerEvents: 'auto',
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: '0 0'
         }}
       >
         {nodes.map(node => (
-          <DefaultNodeComponent // Using DefaultNodeComponent
+          <DefaultNodeComponent
             key={node.id}
             node={node}
-            isSelected={selectedNodes.has(node.id)} // Renamed prop
-            hasConnectedInput={isInputPortConnected} // Changed to a function
+            selected={selectedNodes.has(node.id)}
+            connectedInputPorts={connectedInputPorts}
             onUpdatePosition={onUpdateNodePosition}
             onUpdateData={onUpdateNodeData}
             onDelete={onDeleteNode}
             onSelect={handleSelectNode}
-            onConnectionStart={handleStartConnection} // Renamed prop
-            onConnectionEnd={handleEndConnection} // Renamed prop
+            onStartConnection={handleStartConnection}
+            onEndConnection={handleEndConnection}
           />
         ))}
       </div>
