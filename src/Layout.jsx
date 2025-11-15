@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Activity, Calculator } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Calculator } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -91,18 +91,6 @@ export default function Layout({ children, currentPageName }) {
         >
           <TrendingUp className="w-4 h-4" />
           修饰器编辑器
-        </Link>
-
-        <Link
-          to={createPageUrl("ModifierSimulator")}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
-            currentPageName === "ModifierSimulator"
-              ? "bg-[#0e639c] text-white"
-              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          修饰器模拟器
         </Link>
 
         <Link
