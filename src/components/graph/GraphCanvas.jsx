@@ -1,22 +1,24 @@
+
 import React, { useRef, useState, useCallback } from 'react';
 import Node from './Node';
 import Connection from './Connection';
 import ContextMenu from './ContextMenu';
 import { Download, Upload } from 'lucide-react';
 
-export default function GraphCanvas({ 
-  nodes, 
+export default function GraphCanvas({
+  nodes,
   connections,
   connectionValues,
-  zoom, 
-  pan, 
+  zoom,
+  pan,
   onPanChange,
   onUpdateNodePosition,
   onUpdateNodeData,
   onDeleteNode,
   onAddConnection,
   onDeleteConnection,
-  onAddNodeAtPosition
+  onAddNodeAtPosition,
+  NodeComponent // Added NodeComponent prop
 }) {
   const canvasRef = useRef(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -27,6 +29,9 @@ export default function GraphCanvas({
   const [pendingDrop, setPendingDrop] = useState(null);
   const [selectedNodes, setSelectedNodes] = useState(new Set());
   const [selectedConnections, setSelectedConnections] = useState(new Set());
+
+  // Use the provided NodeComponent or default to the internal Node
+  const DefaultNodeComponent = NodeComponent || Node;
 
   const handleMouseDown = (e) => {
     if (e.button === 2) {
@@ -50,7 +55,7 @@ export default function GraphCanvas({
 
   const handleDrop = (e) => {
     e.preventDefault();
-    
+
     try {
       const jsonData = e.dataTransfer.getData('application/json');
       if (jsonData) {
@@ -59,7 +64,7 @@ export default function GraphCanvas({
           const canvasRect = canvasRef.current.getBoundingClientRect();
           const x = (e.clientX - canvasRect.left - pan.x) / zoom;
           const y = (e.clientY - canvasRect.top - pan.y) / zoom;
-          
+
           setContextMenu({
             x: e.clientX,
             y: e.clientY,
@@ -73,9 +78,9 @@ export default function GraphCanvas({
         }
       }
     } catch (err) {
-      // 继续处理普通节点拖放
+      // Continue to handle regular node drop if JSON parsing fails or not a blackboard key
     }
-    
+
     const nodeType = e.dataTransfer.getData('nodeType');
     if (nodeType) {
       const canvasRect = canvasRef.current.getBoundingClientRect();
@@ -91,6 +96,7 @@ export default function GraphCanvas({
       onAddNodeAtPosition(nodeType, pendingDrop.position, pendingDrop.blackboardKey);
       setPendingDrop(null);
     }
+    setContextMenu(null); // Close context menu after selection
   };
 
   const handleMouseMove = useCallback((e) => {
@@ -100,7 +106,7 @@ export default function GraphCanvas({
         y: e.clientY - panStart.y
       });
     }
-    
+
     if (connectingFrom) {
       setMousePos({ x: e.clientX, y: e.clientY });
     }
@@ -116,15 +122,15 @@ export default function GraphCanvas({
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
       e.preventDefault();
-      
+
       selectedNodes.forEach(nodeId => {
         onDeleteNode(nodeId);
       });
-      
+
       selectedConnections.forEach(connId => {
         onDeleteConnection(connId);
       });
-      
+
       setSelectedNodes(new Set());
       setSelectedConnections(new Set());
     }
@@ -147,12 +153,12 @@ export default function GraphCanvas({
 
   const handleEndConnection = useCallback((nodeId, portId, portType) => {
     if (!connectingFrom) return;
-    
+
     if (connectingFrom.nodeId === nodeId) {
       setConnectingFrom(null);
       return;
     }
-    
+
     if (connectingFrom.portType === portType) {
       setConnectingFrom(null);
       return;
@@ -165,7 +171,7 @@ export default function GraphCanvas({
       toNode: connectingFrom.portType === 'output' ? nodeId : connectingFrom.nodeId,
       toPort: connectingFrom.portType === 'output' ? portId : connectingFrom.portId
     };
-    
+
     onAddConnection(connection);
     setConnectingFrom(null);
   }, [connectingFrom, onAddConnection]);
@@ -213,7 +219,7 @@ export default function GraphCanvas({
 
     const canvasRect = canvasRef.current.getBoundingClientRect();
     const portRect = portElement.getBoundingClientRect();
-    
+
     return {
       x: (portRect.left + portRect.width / 2 - canvasRect.left - pan.x) / zoom,
       y: (portRect.top + portRect.height / 2 - canvasRect.top - pan.y) / zoom
@@ -224,7 +230,7 @@ export default function GraphCanvas({
     return connections.map(conn => {
       const fromPos = getPortPosition(conn.fromNode, conn.fromPort, 'output');
       const toPos = getPortPosition(conn.toNode, conn.toPort, 'input');
-      
+
       return {
         ...conn,
         fromX: fromPos.x,
@@ -237,11 +243,11 @@ export default function GraphCanvas({
   };
 
   const getTempConnectionPosition = () => {
-    if (!connectingFrom || !connectingFrom.portElement) return null;
+    if (!connectingFrom || !canvasRef.current || !connectingFrom.portElement) return null;
 
     const canvasRect = canvasRef.current.getBoundingClientRect();
     const portRect = connectingFrom.portElement.getBoundingClientRect();
-    
+
     const fromX = (portRect.left + portRect.width / 2 - canvasRect.left - pan.x) / zoom;
     const fromY = (portRect.top + portRect.height / 2 - canvasRect.top - pan.y) / zoom;
     const toX = (mousePos.x - canvasRect.left - pan.x) / zoom;
@@ -250,36 +256,32 @@ export default function GraphCanvas({
     return { fromX, fromY, toX, toY };
   };
 
-  const getConnectedInputPorts = () => {
-    const connectedPorts = new Set();
-    connections.forEach(conn => {
-      connectedPorts.add(`${conn.toNode}-${conn.toPort}`);
-    });
-    return connectedPorts;
-  };
+  // Helper function to check if an input port is connected
+  const isInputPortConnected = useCallback((nodeId, portId) => {
+    return connections.some(c => c.toNode === nodeId && c.toPort === portId);
+  }, [connections]);
+
 
   return (
-    <div 
+    <div
       ref={canvasRef}
-      className="w-full h-full relative"
+      className="w-full h-full bg-[#1e1e1e] relative overflow-hidden" // Updated className
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      style={{ 
-        background: '#2a2a2a',
+      style={{
         cursor: isPanning ? 'grabbing' : 'default',
-        overflow: 'hidden',
         position: 'relative'
       }}
     >
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <svg className="w-full h-full">
           <defs>
-            <pattern 
-              id="grid" 
-              width={20 * zoom} 
-              height={20 * zoom} 
+            <pattern
+              id="grid"
+              width={20 * zoom}
+              height={20 * zoom}
               patternUnits="userSpaceOnUse"
               x={pan.x % (20 * zoom)}
               y={pan.y % (20 * zoom)}
@@ -292,7 +294,7 @@ export default function GraphCanvas({
       </div>
 
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <svg 
+        <svg
           className="w-full h-full"
           style={{
             overflow: 'visible',
@@ -315,7 +317,7 @@ export default function GraphCanvas({
                 onDelete={onDeleteConnection}
               />
             ))}
-            
+
             {connectingFrom && getTempConnectionPosition() && (() => {
               const pos = getTempConnectionPosition();
               return (
@@ -332,38 +334,29 @@ export default function GraphCanvas({
         </svg>
       </div>
 
-      <div 
-        className="absolute inset-0"
+      <div // This is the new nodes container div
+        className="absolute inset-0" // Ensured it covers the canvas
         style={{
-          zIndex: 2,
-          pointerEvents: 'none'
+          zIndex: 2, // Ensures nodes are above connections
+          pointerEvents: 'auto', // Ensures nodes are interactive
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: '0 0'
         }}
       >
-        <div 
-          style={{ 
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
-            pointerEvents: 'auto',
-            position: 'relative',
-            width: '100%',
-            height: '100%'
-          }}
-        >
-          {nodes.map(node => (
-            <Node
-              key={node.id}
-              node={node}
-              selected={selectedNodes.has(node.id)}
-              connectedInputPorts={getConnectedInputPorts()}
-              onUpdatePosition={onUpdateNodePosition}
-              onUpdateData={onUpdateNodeData}
-              onDelete={onDeleteNode}
-              onSelect={handleSelectNode}
-              onStartConnection={handleStartConnection}
-              onEndConnection={handleEndConnection}
-            />
-          ))}
-        </div>
+        {nodes.map(node => (
+          <DefaultNodeComponent // Using DefaultNodeComponent
+            key={node.id}
+            node={node}
+            isSelected={selectedNodes.has(node.id)} // Renamed prop
+            hasConnectedInput={isInputPortConnected} // Changed to a function
+            onUpdatePosition={onUpdateNodePosition}
+            onUpdateData={onUpdateNodeData}
+            onDelete={onDeleteNode}
+            onSelect={handleSelectNode}
+            onConnectionStart={handleStartConnection} // Renamed prop
+            onConnectionEnd={handleEndConnection} // Renamed prop
+          />
+        ))}
       </div>
 
       {contextMenu && (
