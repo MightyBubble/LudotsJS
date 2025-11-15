@@ -155,8 +155,7 @@ export default function ModifierDefinitionEditorPage() {
     const newMapping = {
       graph_blackboard_key: newKey,
       source_type: 'constant',
-      constant_value: 0,
-      step_size: 1
+      constant_value: 0
     };
 
     setEditData({
@@ -184,6 +183,15 @@ export default function ModifierDefinitionEditorPage() {
   const getRelationAttributes = (relationId) => {
     const relation = relations.find(r => r.relation_id === relationId);
     return (relation?.relation_attributes || []);
+  };
+
+  const getTargetTypeLabel = (type) => {
+    const labels = {
+      'entity_attribute': '实体自身属性',
+      'related_entity_attribute': '关联实体属性',
+      'relation_attribute': '关系属性'
+    };
+    return labels[type] || type;
   };
 
   return (
@@ -275,29 +283,21 @@ export default function ModifierDefinitionEditorPage() {
                             <span className="text-white/50 text-xs">{mapping.graph_blackboard_key} ←</span>
                             
                             {mapping.source_type === 'tag_count' && (
-                              <>
-                                <Select
-                                  value={mapping.tag_path || ''}
-                                  onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
-                                >
-                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-28">
-                                    <SelectValue placeholder="标签" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
-                                    {tags.map(t => (
-                                      <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
-                                        {t.full_path}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <Input
-                                  type="number"
-                                  value={mapping.step_size || 1}
-                                  onChange={(e) => handleUpdateMapping(idx, 'step_size', parseInt(e.target.value) || 1)}
-                                  className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                                />
-                              </>
+                              <Select
+                                value={mapping.tag_path || ''}
+                                onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
+                              >
+                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
+                                  <SelectValue placeholder="选择标签" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
+                                  {tags.map(t => (
+                                    <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
+                                      {t.full_path}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             )}
                             
                             {mapping.source_type === 'attribute_key' && (
@@ -469,8 +469,8 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.tag_path || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-28">
-                                    <SelectValue placeholder="标签" />
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
+                                    <SelectValue placeholder="选择标签" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
                                     {tags.map(t => (
@@ -480,12 +480,6 @@ export default function ModifierDefinitionEditorPage() {
                                     ))}
                                   </SelectContent>
                                 </Select>
-                                <Input
-                                  type="number"
-                                  value={mapping.step_size || 1}
-                                  onChange={(e) => handleUpdateMapping(idx, 'step_size', parseInt(e.target.value) || 1)}
-                                  className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                                />
                               </>
                             )}
                             
@@ -497,12 +491,12 @@ export default function ModifierDefinitionEditorPage() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                                <SelectItem value="tag_count" className="text-white text-xs">标签</SelectItem>
-                                <SelectItem value="attribute_key" className="text-white text-xs">属性</SelectItem>
+                                <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
+                                <SelectItem value="attribute_key" className="text-white text-xs">属性键</SelectItem>
                                 <SelectItem value="constant" className="text-white text-xs">常量</SelectItem>
-                                <SelectItem value="relation_entity_attribute" className="text-white text-xs">关联属性</SelectItem>
+                                <SelectItem value="relation_entity_attribute" className="text-white text-xs">关联实体属性</SelectItem>
                                 <SelectItem value="relation_attribute" className="text-white text-xs">关系属性</SelectItem>
-                                <SelectItem value="relation_tag_count" className="text-white text-xs">关系标签</SelectItem>
+                                <SelectItem value="relation_tag_count" className="text-white text-xs">关系标签计数</SelectItem>
                               </SelectContent>
                             </Select>
                             
@@ -542,20 +536,21 @@ export default function ModifierDefinitionEditorPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                          <SelectItem value="entity_attribute" className="text-white text-xs">实体属性</SelectItem>
+                          <SelectItem value="entity_attribute" className="text-white text-xs">实体自身属性</SelectItem>
+                          <SelectItem value="related_entity_attribute" className="text-white text-xs">关联实体属性</SelectItem>
                           <SelectItem value="relation_attribute" className="text-white text-xs">关系属性</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
                       <span className="text-white/70 text-xs">
-                        {mod.target_type === 'relation_attribute' ? '关系属性' : '实体属性'}
+                        {getTargetTypeLabel(mod.target_type)}
                       </span>
                     )}
                   </td>
                   <td className="p-2">
                     {isEditing ? (
                       <div className="space-y-1">
-                        {editData.target_type === 'relation_attribute' && (
+                        {(editData.target_type === 'related_entity_attribute' || editData.target_type === 'relation_attribute') && (
                           <Select
                             value={editData.target_relation_id || ''}
                             onValueChange={(val) => setEditData({ ...editData, target_relation_id: val })}
@@ -605,7 +600,7 @@ export default function ModifierDefinitionEditorPage() {
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        {mod.target_type === 'relation_attribute' && targetRelation && (
+                        {(mod.target_type === 'related_entity_attribute' || mod.target_type === 'relation_attribute') && targetRelation && (
                           <div className="text-white/60 text-xs">{targetRelation.name}</div>
                         )}
                         <div className="text-white/90 text-xs">{targetAttr?.name || mod.target_attribute_id}.{mod.output_key}</div>
