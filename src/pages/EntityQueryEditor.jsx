@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import { Search, Plus, Filter, Trash2 } from "lucide-react";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import QueryNodeLibrary from '../components/queryGraph/QueryNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
+import QueryNode from '../components/queryGraph/QueryNode';
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import QueryNode from '../components/queryGraph/QueryNode'; // Added import
 
 export default function EntityQueryEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,9 +105,6 @@ export default function EntityQueryEditorPage() {
       'filter_relation': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'spatial_distance': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'spatial_area': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'logic_and': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
-      'logic_or': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
-      'logic_not': [{ id: 'input', label: '输入', type: 'entities' }],
       'logic_intersect': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
       'logic_union': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
       'logic_difference': [{ id: 'a', label: 'A (被减)', type: 'entities' }, { id: 'b', label: 'B (减去)', type: 'entities' }],
@@ -133,9 +129,6 @@ export default function EntityQueryEditorPage() {
       'filter_relation': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'spatial_distance': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
       'spatial_area': [{ id: 'filtered', label: '过滤结果', type: 'entities' }],
-      'logic_and': [{ id: 'result', label: '结果', type: 'entities' }],
-      'logic_or': [{ id: 'result', label: '结果', type: 'entities' }],
-      'logic_not': [{ id: 'result', label: '结果', type: 'entities' }],
       'logic_intersect': [{ id: 'result', label: '结果', type: 'entities' }],
       'logic_union': [{ id: 'result', label: '结果', type: 'entities' }],
       'logic_difference': [{ id: 'result', label: '结果', type: 'entities' }],
@@ -256,7 +249,7 @@ export default function EntityQueryEditorPage() {
               onAddConnection={addConnection}
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
-              NodeComponent={QueryNode} {/* Added NodeComponent prop */}
+              NodeComponent={QueryNode}
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
