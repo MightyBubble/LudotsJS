@@ -6,7 +6,31 @@ const formatValue = (value) => {
   if (typeof value === 'number') {
     return value.toFixed(2);
   }
+  
   if (typeof value === 'object') {
+    // 处理嵌套的 vector 对象 (例如 { vector: { x, y, z } })
+    if (value.vector && typeof value.vector === 'object') {
+      const v = value.vector;
+      if (v.x !== undefined && v.y !== undefined) {
+        if (v.z !== undefined) {
+          if (v.w !== undefined) {
+            return `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)}, ${v.w.toFixed(1)})`;
+          }
+          return `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})`;
+        }
+        return `(${v.x.toFixed(1)}, ${v.y.toFixed(1)})`;
+      }
+    }
+    
+    // 处理嵌套的 color 对象 (例如 { color: { r, g, b } })
+    if (value.color && typeof value.color === 'object') {
+      const c = value.color;
+      if (c.r !== undefined && c.g !== undefined && c.b !== undefined) {
+        return `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`;
+      }
+    }
+    
+    // 处理直接的向量对象 { x, y, z, w }
     if (value.x !== undefined && value.y !== undefined) {
       if (value.z !== undefined) {
         if (value.w !== undefined) {
@@ -16,13 +40,17 @@ const formatValue = (value) => {
       }
       return `(${value.x.toFixed(1)}, ${value.y.toFixed(1)})`;
     }
+    
+    // 处理直接的颜色对象 { r, g, b }
     if (value.r !== undefined && value.g !== undefined && value.b !== undefined) {
       return `rgb(${Math.round(value.r * 255)}, ${Math.round(value.g * 255)}, ${Math.round(value.b * 255)})`;
     }
   }
+  
   if (typeof value === 'string') {
     return value.length > 20 ? value.substring(0, 20) + '...' : value;
   }
+  
   return String(value);
 };
 
@@ -38,11 +66,6 @@ export default function Connection({ id, fromX, fromY, toX, toY, value, selected
     e.stopPropagation();
     const multiSelect = e.ctrlKey || e.metaKey;
     onSelect?.(id, multiSelect);
-  };
-
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    onDelete?.(id);
   };
 
   const strokeColor = selected ? '#ffa500' : (temporary ? '#666' : '#999');
