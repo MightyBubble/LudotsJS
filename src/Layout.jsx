@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Calculator } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Calculator, Layers, GitBranch } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -51,20 +51,28 @@ export default function Layout({ children, currentPageName }) {
           <Sparkles className="w-4 h-4" />效果编辑器
         </Link>
         <Link
-          to={createPageUrl("AttributeModifiers")}
+          to={createPageUrl("AttributeEditor")}
           className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
-            currentPageName === "AttributeModifiers" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+            currentPageName === "AttributeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
           }`}
         >
-          <TrendingUp className="w-4 h-4" />修饰器编辑器
+          <Layers className="w-4 h-4" />属性编辑器
         </Link>
         <Link
-          to={createPageUrl("AttributeSimulator")}
+          to={createPageUrl("ModifierDefinitionEditor")}
           className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
-            currentPageName === "AttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+            currentPageName === "ModifierDefinitionEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
           }`}
         >
-          <Calculator className="w-4 h-4" />属性模拟器
+          <GitBranch className="w-4 h-4" />修饰器定义
+        </Link>
+        <Link
+          to={createPageUrl("NewAttributeSimulator")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Calculator className="w-4 h-4" />新属性模拟器
         </Link>
       </div>
 

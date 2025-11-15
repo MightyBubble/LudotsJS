@@ -4,6 +4,9 @@ import UnlockableCommands from './pages/UnlockableCommands';
 import InteractionEffects from './pages/InteractionEffects';
 import AttributeModifiers from './pages/AttributeModifiers';
 import AttributeSimulator from './pages/AttributeSimulator';
+import AttributeEditor from './pages/AttributeEditor';
+import ModifierDefinitionEditor from './pages/ModifierDefinitionEditor';
+import NewAttributeSimulator from './pages/NewAttributeSimulator';
 import Layout from './Layout.jsx';
 
 
@@ -14,6 +17,9 @@ export const PAGES = {
     "InteractionEffects": InteractionEffects,
     "AttributeModifiers": AttributeModifiers,
     "AttributeSimulator": AttributeSimulator,
+    "AttributeEditor": AttributeEditor,
+    "ModifierDefinitionEditor": ModifierDefinitionEditor,
+    "NewAttributeSimulator": NewAttributeSimulator,
 }
 
 export const pagesConfig = {
