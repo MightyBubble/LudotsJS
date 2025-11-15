@@ -23,7 +23,6 @@ export default function AttributeSimulatorPage() {
     initialData: [],
   });
 
-  // 动态统计所有涉及的属性
   const allAttributeIds = useMemo(() => {
     return [...new Set(modifiers.map(mod => mod.affected_attribute_id))];
   }, [modifiers]);
@@ -36,7 +35,6 @@ export default function AttributeSimulatorPage() {
     return defaults;
   });
 
-  // 更新基础值当属性列表变化时
   useEffect(() => {
     setBaseValues(prev => {
       const updated = { ...prev };
@@ -49,7 +47,6 @@ export default function AttributeSimulatorPage() {
     });
   }, [allAttributeIds]);
 
-  // 保存标签计数到 localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tagCounts));
   }, [tagCounts]);
@@ -92,7 +89,7 @@ export default function AttributeSimulatorPage() {
         if (!attributes[mod.affected_attribute_id]) {
           attributes[mod.affected_attribute_id] = {
             base: baseValues[mod.affected_attribute_id] || 100,
-            zones: { base_add: [], base_multiply: [], flat_add: [], override: [] }
+            zones: { base_add: [], base_multiply: [], flat_add: [], final_multiply: [], override: [] }
           };
         }
 
@@ -110,6 +107,7 @@ export default function AttributeSimulatorPage() {
             case 'add': attr.zones.base_add.push(entry); break;
             case 'multiply': attr.zones.base_multiply.push(entry); break;
             case 'flat_add': attr.zones.flat_add.push(entry); break;
+            case 'final_multiply': attr.zones.final_multiply.push(entry); break;
             case 'override': attr.zones.override.push(entry); break;
           }
         }
@@ -139,6 +137,12 @@ export default function AttributeSimulatorPage() {
       }
       attr.result_after_flat = current;
       
+      if (attr.zones.final_multiply.length > 0) {
+        const prod = attr.zones.final_multiply.reduce((p, e) => p * e.value, 1);
+        current *= prod;
+      }
+      attr.result_after_final = current;
+      
       if (attr.zones.override.length > 0) {
         current = Math.max(...attr.zones.override.map(e => e.value));
       }
@@ -164,7 +168,6 @@ export default function AttributeSimulatorPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* 左侧：标签计数 + 基础值 */}
         <div className="w-64 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
           <div className="p-2 border-b border-[#3d3d3d]">
             <div className="text-xs font-semibold text-gray-400 mb-1.5">基础值</div>
@@ -222,7 +225,6 @@ export default function AttributeSimulatorPage() {
           </div>
         </div>
 
-        {/* 右侧：横向阶段，纵向来源 */}
         <div className="flex-1 overflow-auto p-3">
           {Object.keys(attributeCalculations).length === 0 ? (
             <div className="h-full flex items-center justify-center text-gray-500 text-sm">
@@ -306,6 +308,28 @@ export default function AttributeSimulatorPage() {
                                 <div key={idx} className="flex items-center justify-between text-[10px]">
                                   <span className="text-gray-400 truncate flex-1">{entry.name}</span>
                                   <span className="text-purple-400 ml-1">+{entry.value.toFixed(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {attr.zones.final_multiply.length > 0 && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 self-center" />
+                        <div className="flex-shrink-0 w-40">
+                          <div className="bg-[#1e1e1e] rounded p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-400">最终百分比</span>
+                              <span className="text-sm font-bold text-blue-400">{attr.result_after_final.toFixed(1)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {attr.zones.final_multiply.map((entry, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span className="text-gray-400 truncate flex-1">{entry.name}</span>
+                                  <span className="text-cyan-400 ml-1">×{entry.value.toFixed(2)}</span>
                                 </div>
                               ))}
                             </div>
