@@ -9,6 +9,7 @@ import ModifierDefinitionEditor from './pages/ModifierDefinitionEditor';
 import NewAttributeSimulator from './pages/NewAttributeSimulator';
 import DataGraphEditor from './pages/DataGraphEditor';
 import VisualGraphEditor from './pages/VisualGraphEditor';
+import EntityPrototypeEditor from './pages/EntityPrototypeEditor';
 import Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "NewAttributeSimulator": NewAttributeSimulator,
     "DataGraphEditor": DataGraphEditor,
     "VisualGraphEditor": VisualGraphEditor,
+    "EntityPrototypeEditor": EntityPrototypeEditor,
 }
 
 export const pagesConfig = {

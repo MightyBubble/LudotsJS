@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Box } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -76,6 +76,14 @@ export default function Layout({ children, currentPageName }) {
           }`}
         >
           <GitBranch className="w-4 h-4" />修饰器定义
+        </Link>
+        <Link
+          to={createPageUrl("EntityPrototypeEditor")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "EntityPrototypeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Box className="w-4 h-4" />实体原型
         </Link>
         <Link
           to={createPageUrl("NewAttributeSimulator")}

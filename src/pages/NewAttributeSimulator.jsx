@@ -3,12 +3,14 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Plus, Minus, ArrowRight } from "lucide-react";
+import { Calculator, Plus, Minus, ArrowRight, AlertTriangle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function NewAttributeSimulatorPage() {
   const [tagCounts, setTagCounts] = useState({});
   const [attributeKeyValues, setAttributeKeyValues] = useState({});
   const [constantValues, setConstantValues] = useState({});
+  const [selectedPrototypeId, setSelectedPrototypeId] = useState(null);
 
   const { data: modifiers = [] } = useQuery({
     queryKey: ['modifierDefinitions'],
@@ -27,6 +29,32 @@ export default function NewAttributeSimulatorPage() {
     queryFn: () => base44.entities.GameplayTag.list(),
     initialData: [],
   });
+
+  const { data: prototypes = [] } = useQuery({
+    queryKey: ['entityPrototypes'],
+    queryFn: () => base44.entities.EntityPrototype.list(),
+    initialData: [],
+  });
+
+  const selectedPrototype = useMemo(() => {
+    return prototypes.find(p => p.id === selectedPrototypeId);
+  }, [prototypes, selectedPrototypeId]);
+
+  // 检查哪些属性缺失
+  const missingAttributes = useMemo(() => {
+    if (!selectedPrototype) return [];
+    return (selectedPrototype.referenced_attributes || []).filter(attrId => 
+      !attributes.some(a => a.attribute_id === attrId)
+    );
+  }, [selectedPrototype, attributes]);
+
+  // 过滤出原型引用的属性
+  const filteredAttributes = useMemo(() => {
+    if (!selectedPrototype) return attributes;
+    return attributes.filter(a => 
+      (selectedPrototype.referenced_attributes || []).includes(a.attribute_id)
+    );
+  }, [selectedPrototype, attributes]);
 
   // 收集被引用的输入源
   const referencedInputs = useMemo(() => {
@@ -99,7 +127,7 @@ export default function NewAttributeSimulatorPage() {
   const attributeKeys = useMemo(() => {
     const result = {};
     
-    attributes.forEach(attr => {
+    filteredAttributes.forEach(attr => {
       const keys = {};
       
       (attr.keys || []).forEach(key => {
@@ -127,13 +155,13 @@ export default function NewAttributeSimulatorPage() {
     });
     
     return result;
-  }, [attributes, modifierOutputs]);
+  }, [filteredAttributes, modifierOutputs]);
 
   // 步骤3：计算最终值
   const finalValues = useMemo(() => {
     const result = {};
     
-    attributes.forEach(attr => {
+    filteredAttributes.forEach(attr => {
       const keys = attributeKeys[attr.attribute_id] || {};
       
       let total = 0;
@@ -149,7 +177,7 @@ export default function NewAttributeSimulatorPage() {
     });
     
     return result;
-  }, [attributes, attributeKeys]);
+  }, [filteredAttributes, attributeKeys]);
 
   const updateTagCount = (tag, delta) => {
     setTagCounts(prev => {
@@ -167,7 +195,33 @@ export default function NewAttributeSimulatorPage() {
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Calculator className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">属性模拟器</span>
+        
+        <div className="flex-1" />
+        
+        <span className="text-xs text-gray-500">实体原型:</span>
+        <Select value={selectedPrototypeId || ""} onValueChange={setSelectedPrototypeId}>
+          <SelectTrigger className="h-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+            <SelectValue placeholder="全部属性" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+            <SelectItem value="all" className="text-white text-xs">全部属性</SelectItem>
+            {prototypes.map(p => (
+              <SelectItem key={p.id} value={p.id} className="text-white text-xs">
+                {p.name} ({p.prototype_id})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
+      {missingAttributes.length > 0 && (
+        <div className="bg-red-900/20 border-b border-red-900/50 px-4 py-2 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <span className="text-xs text-red-400">
+            原型引用的属性不存在: {missingAttributes.join(', ')}
+          </span>
+        </div>
+      )}
 
       <div className="flex-1 flex overflow-hidden">
         {/* 左侧：输入源 */}
@@ -354,7 +408,7 @@ export default function NewAttributeSimulatorPage() {
             <span className="text-sm font-semibold text-white">属性聚合计算</span>
           </div>
           <div className="flex-1 p-3 space-y-3">
-            {attributes.map(attr => {
+            {filteredAttributes.map(attr => {
               const keys = attributeKeys[attr.attribute_id] || {};
               const final = finalValues[attr.attribute_id] || 0;
               return (
@@ -384,6 +438,11 @@ export default function NewAttributeSimulatorPage() {
                 </div>
               );
             })}
+            {filteredAttributes.length === 0 && (
+              <div className="text-center py-8 text-gray-500 text-xs">
+                {selectedPrototype ? '原型没有引用任何属性' : '请选择实体原型'}
+              </div>
+            )}
           </div>
         </div>
       </div>
