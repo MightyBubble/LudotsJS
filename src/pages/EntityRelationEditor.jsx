@@ -25,6 +25,12 @@ export default function EntityRelationEditorPage() {
     initialData: [],
   });
 
+  const { data: attributes = [] } = useQuery({
+    queryKey: ['attributes'],
+    queryFn: () => base44.entities.Attribute.list(),
+    initialData: [],
+  });
+
   const { data: tags = [] } = useQuery({
     queryKey: ['gameplayTags'],
     queryFn: () => base44.entities.GameplayTag.list(),
@@ -117,15 +123,18 @@ export default function EntityRelationEditorPage() {
   };
 
   const handleAddAttribute = () => {
-    setEditData({
-      ...editData,
-      relation_attributes: [...editData.relation_attributes, { name: "new_attr", type: "number", default_value: 0 }]
-    });
+    const availableAttrs = attributes.filter(a => !editData.relation_attributes.includes(a.attribute_id));
+    if (availableAttrs.length > 0) {
+      setEditData({
+        ...editData,
+        relation_attributes: [...editData.relation_attributes, availableAttrs[0].attribute_id]
+      });
+    }
   };
 
-  const handleUpdateAttribute = (index, field, value) => {
+  const handleUpdateAttribute = (index, attrId) => {
     const attrs = [...editData.relation_attributes];
-    attrs[index] = { ...attrs[index], [field]: value };
+    attrs[index] = attrId;
     setEditData({ ...editData, relation_attributes: attrs });
   };
 
@@ -279,35 +288,34 @@ export default function EntityRelationEditorPage() {
                   <td className="p-2">
                     {isEditing ? (
                       <div className="space-y-1">
-                        {editData.relation_attributes.map((attr, idx) => (
-                          <div key={idx} className="flex gap-1 items-center">
-                            <Input
-                              value={attr.name}
-                              onChange={(e) => handleUpdateAttribute(idx, 'name', e.target.value)}
-                              placeholder="属性名"
-                              className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white flex-1"
-                            />
-                            <Select
-                              value={attr.type}
-                              onValueChange={(val) => handleUpdateAttribute(idx, 'type', val)}
-                            >
-                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                                <SelectItem value="number" className="text-white text-xs">数字</SelectItem>
-                                <SelectItem value="string" className="text-white text-xs">字符串</SelectItem>
-                                <SelectItem value="boolean" className="text-white text-xs">布尔</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <button
-                              onClick={() => handleRemoveAttribute(idx)}
-                              className="text-white/30 hover:text-red-400"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
+                        {editData.relation_attributes.map((attrId, idx) => {
+                          const attr = attributes.find(a => a.attribute_id === attrId);
+                          return (
+                            <div key={idx} className="flex gap-1 items-center">
+                              <Select
+                                value={attrId}
+                                onValueChange={(val) => handleUpdateAttribute(idx, val)}
+                              >
+                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                  {attributes.map(a => (
+                                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                                      {a.name} ({a.attribute_id})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <button
+                                onClick={() => handleRemoveAttribute(idx)}
+                                className="text-white/30 hover:text-red-400"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
                         <Button
                           size="sm"
                           onClick={handleAddAttribute}
@@ -318,11 +326,14 @@ export default function EntityRelationEditorPage() {
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        {(rel.relation_attributes || []).map((attr, idx) => (
-                          <div key={idx} className="text-white/70 text-xs">
-                            {attr.name} <span className="text-white/40">({attr.type})</span>
-                          </div>
-                        ))}
+                        {(rel.relation_attributes || []).map((attrId, idx) => {
+                          const attr = attributes.find(a => a.attribute_id === attrId);
+                          return (
+                            <div key={idx} className="text-white/70 text-xs">
+                              {attr?.name || attrId}
+                            </div>
+                          );
+                        })}
                         {(rel.relation_attributes || []).length === 0 && <span className="text-gray-600 text-xs">无</span>}
                       </div>
                     )}
