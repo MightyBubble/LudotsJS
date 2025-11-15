@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, X } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 
 export default function CurveInputMapper({ 
   curveGraphId, 
@@ -11,6 +13,12 @@ export default function CurveInputMapper({
   mappings, 
   onChange 
 }) {
+  const { data: tags = [] } = useQuery({
+    queryKey: ['gameplayTags'],
+    queryFn: () => base44.entities.GameplayTag.list(),
+    initialData: [],
+  });
+
   const selectedGraph = useMemo(() => {
     return dataGraphs.find(g => g.graph_id === curveGraphId);
   }, [dataGraphs, curveGraphId]);
@@ -29,6 +37,21 @@ export default function CurveInputMapper({
       return [];
     }
   }, [selectedGraph]);
+
+  const getAttributeKeys = (attributeId) => {
+    const attr = attributes.find(a => a.attribute_id === attributeId);
+    if (!attr) return [];
+    
+    const keys = [...(attr.aggregation_keys || [])];
+    
+    if (attr.extra_keys && Array.isArray(attr.extra_keys)) {
+      attr.extra_keys.forEach(ek => {
+        if (ek.key) keys.push(ek.key);
+      });
+    }
+    
+    return keys;
+  };
 
   const handleAddMapping = () => {
     const newKey = publicBlackboardKeys.find(k => !mappings.some(m => m.graph_blackboard_key === k)) || publicBlackboardKeys[0];
@@ -136,12 +159,21 @@ export default function CurveInputMapper({
 
           {mapping.source_type === 'tag_count' && (
             <div className="space-y-1">
-              <Input
-                value={mapping.tag_path || ''}
-                onChange={(e) => handleUpdateMapping(index, 'tag_path', e.target.value)}
-                placeholder="标签路径 (如: Status.Buff)"
-                className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-              />
+              <Select 
+                value={mapping.tag_path || ''} 
+                onValueChange={(val) => handleUpdateMapping(index, 'tag_path', val)}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                  <SelectValue placeholder="选择标签路径" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-[200px] overflow-y-auto">
+                  {tags.map(tag => (
+                    <SelectItem key={tag.id} value={tag.full_path} className="text-white hover:bg-[#3d3d3d] text-xs">
+                      {tag.full_path}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 type="number"
                 value={mapping.step_size || 1}
@@ -153,12 +185,15 @@ export default function CurveInputMapper({
           )}
 
           {mapping.source_type === 'attribute_key' && (
-            <div className="flex gap-2">
+            <div className="space-y-1">
               <Select 
                 value={mapping.attribute_id || ''} 
-                onValueChange={(val) => handleUpdateMapping(index, 'attribute_id', val)}
+                onValueChange={(val) => {
+                  handleUpdateMapping(index, 'attribute_id', val);
+                  handleUpdateMapping(index, 'attribute_key', '');
+                }}
               >
-                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                   <SelectValue placeholder="选择属性" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -169,12 +204,24 @@ export default function CurveInputMapper({
                   ))}
                 </SelectContent>
               </Select>
-              <Input
-                value={mapping.attribute_key || ''}
-                onChange={(e) => handleUpdateMapping(index, 'attribute_key', e.target.value)}
-                placeholder="键名"
-                className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white flex-1"
-              />
+              
+              {mapping.attribute_id && (
+                <Select 
+                  value={mapping.attribute_key || ''} 
+                  onValueChange={(val) => handleUpdateMapping(index, 'attribute_key', val)}
+                >
+                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                    <SelectValue placeholder="选择键名" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                    {getAttributeKeys(mapping.attribute_id).map(key => (
+                      <SelectItem key={key} value={key} className="text-white hover:bg-[#3d3d3d] text-xs">
+                        {key}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 
