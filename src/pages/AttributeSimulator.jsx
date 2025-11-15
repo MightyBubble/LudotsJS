@@ -1,26 +1,58 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calculator, Plus, Minus, X, ChevronRight } from "lucide-react";
 
-export default function AttributeSimulatorPage() {
-  const [baseValues, setBaseValues] = useState({
-    attack_power: 100,
-    defense: 50,
-    move_speed: 100,
-    critical_chance: 5,
-    critical_damage: 150
-  });
+const STORAGE_KEY = "attribute_simulator_tag_counts";
 
-  const [tagCounts, setTagCounts] = useState({});
+export default function AttributeSimulatorPage() {
+  const [tagCounts, setTagCounts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const { data: modifiers = [] } = useQuery({
     queryKey: ['attributeModifiers'],
     queryFn: () => base44.entities.AttributeModifier.list(),
     initialData: [],
   });
+
+  // 动态统计所有涉及的属性
+  const allAttributeIds = useMemo(() => {
+    return [...new Set(modifiers.map(mod => mod.affected_attribute_id))];
+  }, [modifiers]);
+
+  const [baseValues, setBaseValues] = useState(() => {
+    const defaults = {};
+    allAttributeIds.forEach(id => {
+      defaults[id] = 100;
+    });
+    return defaults;
+  });
+
+  // 更新基础值当属性列表变化时
+  useEffect(() => {
+    setBaseValues(prev => {
+      const updated = { ...prev };
+      allAttributeIds.forEach(id => {
+        if (!(id in updated)) {
+          updated[id] = 100;
+        }
+      });
+      return updated;
+    });
+  }, [allAttributeIds]);
+
+  // 保存标签计数到 localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tagCounts));
+  }, [tagCounts]);
 
   const calculateModifierValue = (modifier, count) => {
     if (count === 0) return 0;
@@ -83,7 +115,6 @@ export default function AttributeSimulatorPage() {
         }
       });
 
-    // 计算各阶段结果
     Object.keys(attributes).forEach(attrId => {
       const attr = attributes[attrId];
       
@@ -138,13 +169,13 @@ export default function AttributeSimulatorPage() {
           <div className="p-2 border-b border-[#3d3d3d]">
             <div className="text-xs font-semibold text-gray-400 mb-1.5">基础值</div>
             <div className="space-y-1">
-              {Object.entries(baseValues).map(([attrId, value]) => (
+              {allAttributeIds.map(attrId => (
                 <div key={attrId} className="flex items-center gap-1.5">
                   <span className="text-[11px] text-gray-400 w-20 truncate">{attrId}</span>
                   <Input
                     type="number"
                     step="0.1"
-                    value={value}
+                    value={baseValues[attrId] || 100}
                     onChange={(e) => setBaseValues(prev => ({ ...prev, [attrId]: parseFloat(e.target.value) || 0 }))}
                     className="h-6 flex-1 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs"
                   />
@@ -201,7 +232,6 @@ export default function AttributeSimulatorPage() {
             <div className="space-y-4">
               {Object.entries(attributeCalculations).map(([attrId, attr]) => (
                 <div key={attrId} className="bg-[#252526] border border-[#3d3d3d] rounded">
-                  {/* 属性标题 */}
                   <div className="bg-[#2d2d2d] px-3 py-2 flex items-center justify-between border-b border-[#3d3d3d]">
                     <span className="text-sm font-bold text-white font-mono">{attrId}</span>
                     <div className="flex items-center gap-3">
@@ -210,9 +240,7 @@ export default function AttributeSimulatorPage() {
                     </div>
                   </div>
 
-                  {/* 横向阶段布局 */}
                   <div className="p-3 flex gap-2 overflow-x-auto">
-                    {/* 基础值 */}
                     <div className="flex-shrink-0 w-32">
                       <div className="bg-[#1e1e1e] rounded p-2 h-full">
                         <div className="text-xs text-gray-400 mb-1">基础值</div>
