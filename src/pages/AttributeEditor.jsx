@@ -83,7 +83,7 @@ export default function AttributeEditorPage() {
 
   const handleAddAggregationKey = (attr) => {
     handleUpdate(attr, {
-      aggregation_keys: [...(attr.aggregation_keys || []), '']
+      aggregation_keys: [...(attr.aggregation_keys || []), 'new_key']
     });
   };
 
@@ -111,7 +111,7 @@ export default function AttributeEditorPage() {
     const newKey = publicKeys.find(k => !Object.keys(attr.aggregation_inputs || {}).includes(k)) || publicKeys[0];
     if (!newKey) return;
 
-    const aggKey = (attr.aggregation_keys || [])[0] || '';
+    const aggKey = (attr.aggregation_keys || []).filter(k => k).find(k => k) || 'base';
     handleUpdate(attr, {
       aggregation_inputs: { ...(attr.aggregation_inputs || {}), [newKey]: aggKey }
     });
@@ -185,6 +185,7 @@ export default function AttributeEditorPage() {
           <tbody>
             {filteredAttributes.map((attr) => {
               const publicKeys = getPublicBlackboardKeys(attr.final_calculation_data_graph_id);
+              const validAggKeys = (attr.aggregation_keys || []).filter(k => k);
               
               return (
                 <tr key={attr.id} className="border-b border-[#3d3d3d] hover:bg-[#2d2d2d]">
@@ -267,7 +268,7 @@ export default function AttributeEditorPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                              {(attr.aggregation_keys || []).map(k => (
+                              {validAggKeys.map(k => (
                                 <SelectItem key={k} value={k} className="text-white text-xs">
                                   {k}
                                 </SelectItem>
