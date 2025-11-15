@@ -128,6 +128,17 @@ export default function NewAttributeSimulatorPage() {
     });
   }, [modifiers, tagCounts, attributeKeyValues, constantValues, modifierActiveStates, modifierWarnings]);
 
+  const sortedModifierOutputs = useMemo(() => {
+    return [...modifierOutputs].sort((a, b) => {
+      const aHasInteraction = a.isActive || a.isManuallyDisabled;
+      const bHasInteraction = b.isActive || b.isManuallyDisabled;
+      
+      if (aHasInteraction && !bHasInteraction) return -1;
+      if (!aHasInteraction && bHasInteraction) return 1;
+      return 0;
+    });
+  }, [modifierOutputs]);
+
   const activeModifiers = useMemo(() => 
     modifierOutputs.filter(o => o.isActive), 
     [modifierOutputs]
@@ -235,84 +246,6 @@ export default function NewAttributeSimulatorPage() {
   const unreferencedTags = useMemo(() => {
     return tags.filter(t => !referencedInputs.tags.includes(t.full_path));
   }, [tags, referencedInputs.tags]);
-
-  const renderModifierCard = (output, idx) => {
-    const isManuallyActive = modifierActiveStates[output.modifier.id] !== undefined 
-      ? modifierActiveStates[output.modifier.id] 
-      : output.modifier.is_active;
-    const hasInputWarning = output.warnings.some(w => w.type === 'input');
-    const hasTargetWarning = output.warnings.some(w => w.type === 'target');
-    
-    let borderColor = 'border-[#3d3d3d]';
-    let opacity = '';
-    
-    if (output.isActive) {
-      borderColor = 'border-green-600/50';
-    } else if (output.isManuallyDisabled) {
-      borderColor = 'border-gray-600';
-    } else {
-      opacity = 'opacity-50';
-    }
-    
-    return (
-      <div key={idx} className={`bg-[#252526] border rounded p-3 relative ${borderColor} ${opacity}`}>
-        <button
-          onClick={() => toggleModifierActive(output.modifier.id)}
-          className={`absolute top-2 right-2 w-10 h-5 rounded-full transition-colors ${
-            isManuallyActive ? 'bg-green-600' : 'bg-gray-600'
-          }`}
-        >
-          <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
-            isManuallyActive ? 'translate-x-5' : 'translate-x-0.5'
-          }`} />
-        </button>
-
-        <div className="flex items-center justify-between mb-2 pr-12">
-          <div className="text-xs font-semibold text-white">{output.modifier.modifier_name}</div>
-          <div className="flex gap-1">
-            {hasInputWarning && (
-              <span className="text-[9px] bg-orange-900/50 text-orange-300 px-1 rounded" title={output.warnings.filter(w => w.type === 'input').map(w => w.message).join(', ')}>
-                输入预警
-              </span>
-            )}
-            {hasTargetWarning && (
-              <span className="text-[9px] bg-red-900/50 text-red-300 px-1 rounded" title={output.warnings.filter(w => w.type === 'target').map(w => w.message).join(', ')}>
-                目标预警
-              </span>
-            )}
-          </div>
-        </div>
-        
-        {!isManuallyActive && (
-          <div className="mb-2">
-            <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">已禁用</span>
-          </div>
-        )}
-        {isManuallyActive && !output.isActive && (
-          <div className="mb-2">
-            <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">输出为0</span>
-          </div>
-        )}
-        
-        <div className="space-y-1 text-[10px] text-gray-400">
-          <div>曲线: {output.modifier.curve_data_graph_id}</div>
-          <div className="flex items-center gap-1 flex-wrap">
-            <span>输入:</span>
-            {Object.entries(output.inputs).map(([key, val]) => (
-              <span key={key} className="bg-[#3d3d3d] px-1 rounded">{key}={val}</span>
-            ))}
-            {Object.keys(output.inputs).length === 0 && <span className="text-gray-600">无</span>}
-          </div>
-          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#3d3d3d]">
-            <ArrowRight className="w-3 h-3 text-green-400" />
-            <span className={`font-semibold ${output.isActive ? 'text-green-400' : 'text-gray-600'}`}>{output.magnitude.toFixed(1)}</span>
-            <ArrowRight className="w-3 h-3 text-blue-400" />
-            <span className={`text-blue-400 ${hasTargetWarning ? 'line-through' : ''}`}>{output.targetAttribute}.{output.targetKey}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
@@ -526,33 +459,91 @@ export default function NewAttributeSimulatorPage() {
         </div>
 
         {/* 中间：修饰器计算 */}
-        <div className="flex-1 overflow-auto p-4 space-y-4">
-          {/* 激活的修饰器 */}
+        <div className="flex-1 overflow-auto p-4">
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">1</span>
-              激活的修饰器 ({activeModifiers.length})
+              <span className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
+              修饰器计算 ({modifierOutputs.length})
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              {activeModifiers.map((output, idx) => renderModifierCard(output, idx))}
-            </div>
-            {activeModifiers.length === 0 && (
-              <div className="text-center py-8 text-gray-500 text-xs">无激活的修饰器</div>
-            )}
-          </div>
+              {sortedModifierOutputs.map((output, idx) => {
+                const isManuallyActive = modifierActiveStates[output.modifier.id] !== undefined 
+                  ? modifierActiveStates[output.modifier.id] 
+                  : output.modifier.is_active;
+                const hasInputWarning = output.warnings.some(w => w.type === 'input');
+                const hasTargetWarning = output.warnings.some(w => w.type === 'target');
+                
+                let borderColor = 'border-[#3d3d3d]';
+                let opacity = '';
+                
+                if (output.isActive) {
+                  borderColor = 'border-green-600/50';
+                } else if (output.isManuallyDisabled) {
+                  borderColor = 'border-gray-600';
+                } else {
+                  opacity = 'opacity-50';
+                }
+                
+                return (
+                  <div key={idx} className={`bg-[#252526] border rounded p-3 relative ${borderColor} ${opacity}`}>
+                    <button
+                      onClick={() => toggleModifierActive(output.modifier.id)}
+                      className={`absolute top-2 right-2 w-10 h-5 rounded-full transition-colors ${
+                        isManuallyActive ? 'bg-green-600' : 'bg-gray-600'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                        isManuallyActive ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </button>
 
-          {/* 未激活的修饰器 */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs">-</span>
-              未激活的修饰器 ({inactiveModifiers.length})
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {inactiveModifiers.map((output, idx) => renderModifierCard(output, idx))}
+                    <div className="flex items-center justify-between mb-2 pr-12">
+                      <div className="text-xs font-semibold text-white">{output.modifier.modifier_name}</div>
+                      <div className="flex gap-1">
+                        {hasInputWarning && (
+                          <span className="text-[9px] bg-orange-900/50 text-orange-300 px-1 rounded" title={output.warnings.filter(w => w.type === 'input').map(w => w.message).join(', ')}>
+                            输入预警
+                          </span>
+                        )}
+                        {hasTargetWarning && (
+                          <span className="text-[9px] bg-red-900/50 text-red-300 px-1 rounded" title={output.warnings.filter(w => w.type === 'target').map(w => w.message).join(', ')}>
+                            目标预警
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {!isManuallyActive && (
+                      <div className="mb-2">
+                        <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">已禁用</span>
+                      </div>
+                    )}
+                    {isManuallyActive && !output.isActive && (
+                      <div className="mb-2">
+                        <span className="text-[9px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">输出为0</span>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-1 text-[10px] text-gray-400">
+                      <div>曲线: {output.modifier.curve_data_graph_id}</div>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span>输入:</span>
+                        {Object.entries(output.inputs).map(([key, val]) => (
+                          <span key={key} className="bg-[#3d3d3d] px-1 rounded">{key}={val}</span>
+                        ))}
+                        {Object.keys(output.inputs).length === 0 && <span className="text-gray-600">无</span>}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#3d3d3d]">
+                        <ArrowRight className="w-3 h-3 text-green-400" />
+                        <span className={`font-semibold ${output.isActive ? 'text-green-400' : 'text-gray-600'}`}>{output.magnitude.toFixed(1)}</span>
+                        <ArrowRight className="w-3 h-3 text-blue-400" />
+                        <span className={`text-blue-400 ${hasTargetWarning ? 'line-through' : ''}`}>{output.targetAttribute}.{output.targetKey}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            {inactiveModifiers.length === 0 && (
-              <div className="text-center py-8 text-gray-500 text-xs">无未激活的修饰器</div>
-            )}
           </div>
         </div>
 
