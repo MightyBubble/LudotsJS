@@ -301,9 +301,8 @@ export default function NewAttributeSimulatorPage() {
           </div>
         </div>
 
-        {/* 中间：计算流程 */}
-        <div className="flex-1 overflow-auto p-4 space-y-4">
-          {/* 修饰器计算 */}
+        {/* 中间：修饰器计算 */}
+        <div className="flex-1 overflow-auto p-4">
           <div>
             <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
@@ -337,18 +336,21 @@ export default function NewAttributeSimulatorPage() {
               ))}
             </div>
           </div>
+        </div>
 
-          {/* 属性键聚合 */}
-          <div>
-            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        {/* 右侧：属性聚合和最终值 */}
+        <div className="w-96 bg-[#252526] border-l border-[#3d3d3d] flex flex-col overflow-auto">
+          {/* 步骤2：属性键聚合 */}
+          <div className="border-b border-[#3d3d3d]">
+            <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
               <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">2</span>
-              属性键聚合
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
+              <span className="text-sm font-semibold text-white">属性键聚合</span>
+            </div>
+            <div className="p-3 space-y-2">
               {attributes.map(attr => {
                 const keys = attributeKeys[attr.attribute_id] || {};
                 return (
-                  <div key={attr.id} className="bg-[#252526] border border-[#3d3d3d] rounded p-3">
+                  <div key={attr.id} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
                     <div className="text-xs font-semibold text-white mb-2">{attr.name}</div>
                     <div className="space-y-1">
                       {Object.entries(keys).map(([keyName, keyValue]) => (
@@ -372,24 +374,24 @@ export default function NewAttributeSimulatorPage() {
               })}
             </div>
           </div>
-        </div>
 
-        {/* 右侧：最终属性 */}
-        <div className="w-80 bg-[#252526] border-l border-[#3d3d3d] flex flex-col overflow-auto">
-          <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">3</span>
-            <span className="text-sm font-semibold text-white">最终属性值</span>
-          </div>
-          <div className="p-3 space-y-3">
-            {attributes.map(attr => (
-              <div key={attr.id} className="bg-gradient-to-br from-[#1e1e1e] to-[#252526] border-2 border-green-600/30 rounded-lg p-4">
-                <div className="text-xs text-gray-400 mb-2">{attr.name}</div>
-                <div className="text-4xl font-bold text-green-400 mb-1">
-                  {finalValues[attr.attribute_id]?.toFixed(0) || 0}
+          {/* 步骤3：最终属性值 */}
+          <div className="flex-1">
+            <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">3</span>
+              <span className="text-sm font-semibold text-white">最终属性值</span>
+            </div>
+            <div className="p-3 space-y-3">
+              {attributes.map(attr => (
+                <div key={attr.id} className="bg-gradient-to-br from-[#1e1e1e] to-[#252526] border-2 border-green-600/30 rounded-lg p-4">
+                  <div className="text-xs text-gray-400 mb-2">{attr.name}</div>
+                  <div className="text-4xl font-bold text-green-400 mb-1">
+                    {finalValues[attr.attribute_id]?.toFixed(0) || 0}
+                  </div>
+                  <div className="text-[9px] text-gray-600 font-mono">{attr.attribute_id}</div>
                 </div>
-                <div className="text-[9px] text-gray-600 font-mono">{attr.attribute_id}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
