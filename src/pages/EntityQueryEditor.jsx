@@ -1,14 +1,13 @@
-
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Plus, Trash2, Filter, Save, ArrowLeft } from "lucide-react";
+import { Search, Plus, Filter, Trash2 } from "lucide-react";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import QueryNodeLibrary from '../components/queryGraph/QueryNodeLibrary';
-import QueryNode from '../components/queryGraph/QueryNode';
 import Toolbar from '../components/graph/Toolbar';
+import QueryNode from '../components/queryGraph/QueryNode';
+import { Input } from "@/components/ui/input";
 
 export default function EntityQueryEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,7 +75,7 @@ export default function EntityQueryEditorPage() {
   const filteredQueries = useMemo(() => {
     if (!searchQuery) return queries;
     return queries.filter(q => 
-      q.query_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.query_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (q.description && q.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [queries, searchQuery]);
