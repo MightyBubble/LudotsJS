@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Plus, Minus, X, Activity } from "lucide-react";
+import { Calculator, Plus, Minus, X, ChevronRight } from "lucide-react";
 
 export default function AttributeSimulatorPage() {
   const [baseValues, setBaseValues] = useState({
@@ -41,29 +41,6 @@ export default function AttributeSimulatorPage() {
         const logBase = modifier.curve_config?.logarithmic_base || 10;
         value = modifier.base_value * (Math.log(effectiveSteps + 1) / Math.log(logBase));
         break;
-      case 'custom':
-        const points = modifier.curve_config?.custom_points || [];
-        if (points.length === 0) {
-          value = 0;
-        } else {
-          const sortedPoints = [...points].sort((a, b) => a.tag_count - b.tag_count);
-          if (count <= sortedPoints[0].tag_count) {
-            value = sortedPoints[0].value;
-          } else if (count >= sortedPoints[sortedPoints.length - 1].tag_count) {
-            value = sortedPoints[sortedPoints.length - 1].value;
-          } else {
-            for (let i = 0; i < sortedPoints.length - 1; i++) {
-              const p1 = sortedPoints[i];
-              const p2 = sortedPoints[i + 1];
-              if (count >= p1.tag_count && count <= p2.tag_count) {
-                const t = (count - p1.tag_count) / (p2.tag_count - p1.tag_count);
-                value = p1.value + t * (p2.value - p1.value);
-                break;
-              }
-            }
-          }
-        }
-        break;
       default:
         value = modifier.base_value * effectiveSteps;
     }
@@ -83,8 +60,7 @@ export default function AttributeSimulatorPage() {
         if (!attributes[mod.affected_attribute_id]) {
           attributes[mod.affected_attribute_id] = {
             base: baseValues[mod.affected_attribute_id] || 100,
-            zones: { base_add: [], base_multiply: [], flat_add: [], override: [] },
-            steps: []
+            zones: { base_add: [], base_multiply: [], flat_add: [], override: [] }
           };
         }
 
@@ -95,7 +71,6 @@ export default function AttributeSimulatorPage() {
             name: mod.modifier_name,
             tagPath: mod.tag_path,
             tagCount: count,
-            operation: mod.operation_type,
             value: value
           };
 
@@ -108,60 +83,35 @@ export default function AttributeSimulatorPage() {
         }
       });
 
+    // 计算各阶段结果
     Object.keys(attributes).forEach(attrId => {
       const attr = attributes[attrId];
-      const steps = attr.steps;
-
-      steps.push({ name: '基础值', value: attr.base, accumulated: attr.base });
-
+      
+      let current = attr.base;
+      attr.result_after_base = current;
+      
       if (attr.zones.base_add.length > 0) {
-        const addSum = attr.zones.base_add.reduce((sum, entry) => sum + entry.value, 0);
-        const accumulated = attr.base + addSum;
-        steps.push({
-          name: '基础加法区',
-          value: addSum,
-          accumulated: accumulated,
-          details: attr.zones.base_add
-        });
+        const sum = attr.zones.base_add.reduce((s, e) => s + e.value, 0);
+        current += sum;
       }
-
-      let currentValue = steps[steps.length - 1].accumulated;
+      attr.result_after_add = current;
+      
       if (attr.zones.base_multiply.length > 0) {
-        const multiplyProduct = attr.zones.base_multiply.reduce((prod, entry) => prod * entry.value, 1);
-        const accumulated = currentValue * multiplyProduct;
-        steps.push({
-          name: '基础乘法区',
-          value: multiplyProduct,
-          accumulated: accumulated,
-          details: attr.zones.base_multiply
-        });
-        currentValue = accumulated;
+        const prod = attr.zones.base_multiply.reduce((p, e) => p * e.value, 1);
+        current *= prod;
       }
-
+      attr.result_after_multiply = current;
+      
       if (attr.zones.flat_add.length > 0) {
-        const flatSum = attr.zones.flat_add.reduce((sum, entry) => sum + entry.value, 0);
-        const accumulated = currentValue + flatSum;
-        steps.push({
-          name: '固定加成区',
-          value: flatSum,
-          accumulated: accumulated,
-          details: attr.zones.flat_add
-        });
-        currentValue = accumulated;
+        const sum = attr.zones.flat_add.reduce((s, e) => s + e.value, 0);
+        current += sum;
       }
-
+      attr.result_after_flat = current;
+      
       if (attr.zones.override.length > 0) {
-        const maxOverride = Math.max(...attr.zones.override.map(e => e.value));
-        steps.push({
-          name: '覆盖值',
-          value: maxOverride,
-          accumulated: maxOverride,
-          details: attr.zones.override
-        });
-        currentValue = maxOverride;
+        current = Math.max(...attr.zones.override.map(e => e.value));
       }
-
-      attr.final = currentValue;
+      attr.final = current;
     });
 
     return attributes;
@@ -184,13 +134,13 @@ export default function AttributeSimulatorPage() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* 左侧：标签计数 + 基础值 */}
-        <div className="w-72 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
-          <div className="p-3 border-b border-[#3d3d3d]">
-            <div className="text-xs font-semibold text-gray-400 mb-2">基础值</div>
-            <div className="space-y-1.5">
+        <div className="w-64 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
+          <div className="p-2 border-b border-[#3d3d3d]">
+            <div className="text-xs font-semibold text-gray-400 mb-1.5">基础值</div>
+            <div className="space-y-1">
               {Object.entries(baseValues).map(([attrId, value]) => (
-                <div key={attrId} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400 w-24 truncate">{attrId}</span>
+                <div key={attrId} className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-gray-400 w-20 truncate">{attrId}</span>
                   <Input
                     type="number"
                     step="0.1"
@@ -203,20 +153,20 @@ export default function AttributeSimulatorPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-3">
-            <div className="text-xs font-semibold text-gray-400 mb-2">标签计数</div>
-            <div className="space-y-1.5">
+          <div className="flex-1 overflow-auto p-2">
+            <div className="text-xs font-semibold text-gray-400 mb-1.5">标签计数</div>
+            <div className="space-y-1">
               {uniqueTagPaths.map(tagPath => {
                 const count = tagCounts[tagPath] || 0;
                 return (
-                  <div key={tagPath} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
-                    <div className="text-xs text-gray-400 mb-1 truncate font-mono">{tagPath}</div>
+                  <div key={tagPath} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-1.5">
+                    <div className="text-[10px] text-gray-400 mb-1 truncate font-mono">{tagPath}</div>
                     <div className="flex items-center gap-1">
                       <Button
                         size="sm"
                         onClick={() => setTagCounts(prev => ({ ...prev, [tagPath]: Math.max(0, (prev[tagPath] || 0) - 1) }))}
                         disabled={count === 0}
-                        className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#4d4d4d] disabled:opacity-30"
+                        className="h-5 w-5 p-0 bg-[#3d3d3d] hover:bg-[#4d4d4d] disabled:opacity-30"
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
@@ -224,12 +174,12 @@ export default function AttributeSimulatorPage() {
                         type="number"
                         value={count}
                         onChange={(e) => setTagCounts(prev => ({ ...prev, [tagPath]: Math.max(0, parseInt(e.target.value) || 0) }))}
-                        className="h-6 flex-1 text-center bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs font-bold"
+                        className="h-5 flex-1 text-center bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs font-bold px-1"
                       />
                       <Button
                         size="sm"
                         onClick={() => setTagCounts(prev => ({ ...prev, [tagPath]: (prev[tagPath] || 0) + 1 }))}
-                        className="h-6 w-6 p-0 bg-[#0e639c] hover:bg-[#1177bb]"
+                        className="h-5 w-5 p-0 bg-[#0e639c] hover:bg-[#1177bb]"
                       >
                         <Plus className="w-3 h-3" />
                       </Button>
@@ -241,8 +191,8 @@ export default function AttributeSimulatorPage() {
           </div>
         </div>
 
-        {/* 右侧：计算详情 */}
-        <div className="flex-1 overflow-auto p-4">
+        {/* 右侧：横向阶段，纵向来源 */}
+        <div className="flex-1 overflow-auto p-3">
           {Object.keys(attributeCalculations).length === 0 ? (
             <div className="h-full flex items-center justify-center text-gray-500 text-sm">
               调整标签数量查看属性计算
@@ -251,43 +201,112 @@ export default function AttributeSimulatorPage() {
             <div className="space-y-4">
               {Object.entries(attributeCalculations).map(([attrId, attr]) => (
                 <div key={attrId} className="bg-[#252526] border border-[#3d3d3d] rounded">
+                  {/* 属性标题 */}
                   <div className="bg-[#2d2d2d] px-3 py-2 flex items-center justify-between border-b border-[#3d3d3d]">
-                    <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm font-bold text-white font-mono">{attrId}</span>
+                    <span className="text-sm font-bold text-white font-mono">{attrId}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-500">最终值</span>
+                      <span className="text-xl font-bold text-green-400">{attr.final.toFixed(1)}</span>
                     </div>
-                    <div className="text-xl font-bold text-green-400">{attr.final.toFixed(1)}</div>
                   </div>
 
-                  <div className="p-3 space-y-2">
-                    {attr.steps.map((step, idx) => (
-                      <div key={idx} className="bg-[#1e1e1e] rounded p-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded bg-[#0e639c] flex items-center justify-center text-xs font-bold">{idx + 1}</div>
-                            <span className="text-xs font-semibold text-white">{step.name}</span>
-                          </div>
-                          <span className="text-sm font-bold text-blue-400">{step.accumulated.toFixed(1)}</span>
-                        </div>
-
-                        {step.details && step.details.length > 0 && (
-                          <div className="mt-1.5 pt-1.5 border-t border-[#3d3d3d] space-y-0.5">
-                            {step.details.map((detail, detailIdx) => (
-                              <div key={detailIdx} className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-gray-600">•</span>
-                                  <span className="text-gray-300">{detail.name}</span>
-                                  <span className="text-gray-600 text-[10px]">({detail.tagCount})</span>
-                                </div>
-                                <span className="font-mono text-gray-400">
-                                  {detail.operation === 'multiply' ? `×${detail.value.toFixed(2)}` : `+${detail.value.toFixed(1)}`}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                  {/* 横向阶段布局 */}
+                  <div className="p-3 flex gap-2 overflow-x-auto">
+                    {/* 基础值 */}
+                    <div className="flex-shrink-0 w-32">
+                      <div className="bg-[#1e1e1e] rounded p-2 h-full">
+                        <div className="text-xs text-gray-400 mb-1">基础值</div>
+                        <div className="text-lg font-bold text-blue-400">{attr.base}</div>
                       </div>
-                    ))}
+                    </div>
+
+                    {attr.zones.base_add.length > 0 && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 self-center" />
+                        <div className="flex-shrink-0 w-40">
+                          <div className="bg-[#1e1e1e] rounded p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-400">基础加法</span>
+                              <span className="text-sm font-bold text-blue-400">{attr.result_after_add.toFixed(1)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {attr.zones.base_add.map((entry, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span className="text-gray-400 truncate flex-1">{entry.name}</span>
+                                  <span className="text-green-400 ml-1">+{entry.value.toFixed(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {attr.zones.base_multiply.length > 0 && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 self-center" />
+                        <div className="flex-shrink-0 w-40">
+                          <div className="bg-[#1e1e1e] rounded p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-400">基础乘法</span>
+                              <span className="text-sm font-bold text-blue-400">{attr.result_after_multiply.toFixed(1)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {attr.zones.base_multiply.map((entry, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span className="text-gray-400 truncate flex-1">{entry.name}</span>
+                                  <span className="text-yellow-400 ml-1">×{entry.value.toFixed(2)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {attr.zones.flat_add.length > 0 && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 self-center" />
+                        <div className="flex-shrink-0 w-40">
+                          <div className="bg-[#1e1e1e] rounded p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-400">固定加成</span>
+                              <span className="text-sm font-bold text-blue-400">{attr.result_after_flat.toFixed(1)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {attr.zones.flat_add.map((entry, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span className="text-gray-400 truncate flex-1">{entry.name}</span>
+                                  <span className="text-purple-400 ml-1">+{entry.value.toFixed(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {attr.zones.override.length > 0 && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0 self-center" />
+                        <div className="flex-shrink-0 w-40">
+                          <div className="bg-[#1e1e1e] rounded p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-gray-400">覆盖值</span>
+                              <span className="text-sm font-bold text-blue-400">{attr.final.toFixed(1)}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {attr.zones.override.map((entry, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-[10px]">
+                                  <span className="text-gray-400 truncate flex-1">{entry.name}</span>
+                                  <span className="text-red-400 ml-1">={entry.value.toFixed(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
