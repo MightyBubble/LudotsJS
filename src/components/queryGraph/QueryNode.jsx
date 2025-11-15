@@ -53,7 +53,7 @@ export default function QueryNode({
   const [isDragging, setIsDragging] = useState(false);
   const nodeRef = useRef(null);
   const dragStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
-  const accentColor = nodeAccentColors[node?.type] || nodeAccentColors.number;
+  const accentColor = nodeAccentColors[node?.type] || '#6b7280';
 
   if (!node || !node.position) {
     return null;
@@ -62,7 +62,10 @@ export default function QueryNode({
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
     
-    if (e.target.closest('.node-port') || e.target.closest('.delete-button') || e.target.closest('input')) {
+    if (e.target.closest('.node-port') || 
+        e.target.closest('.delete-button') || 
+        e.target.closest('input') ||
+        e.target.closest('button[role="combobox"]')) {
       return;
     }
     
