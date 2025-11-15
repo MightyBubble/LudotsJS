@@ -34,14 +34,13 @@ const nodeLabels = {
 
 export default function QueryNode({ 
   node,
-  selected = false,
-  connectedInputPorts,
+  isSelected = false,
   onUpdatePosition,
   onUpdateData,
   onDelete,
   onSelect,
-  onStartConnection,
-  onEndConnection,
+  onConnectionStart,
+  onConnectionEnd,
   prototypes = [],
   attributes = [],
   tags = [],
@@ -250,7 +249,7 @@ export default function QueryNode({
       return (
         <div className="space-y-1.5">
           {node.inputs.map(input => (
-            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
+            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
           ))}
         </div>
       );
@@ -269,8 +268,8 @@ export default function QueryNode({
         width: '220px',
         backgroundColor: '#3c3c3c',
         borderLeft: `3px solid ${accentColor}`,
-        border: selected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
-        boxShadow: selected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
+        border: isSelected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
+        boxShadow: isSelected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
         transition: 'border 0.2s, box-shadow 0.2s'
       }}
       onMouseDown={handleMouseDown}
@@ -286,7 +285,7 @@ export default function QueryNode({
         {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {node.outputs.map(output => (
-              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
+              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
             ))}
           </div>
         )}
