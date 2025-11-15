@@ -109,12 +109,16 @@ export default function AttributeEditorPage() {
       return;
     }
     
+    const uniqueKeys = editData.keys.filter((key, index, self) => 
+      index === self.findIndex(k => k.name === key.name)
+    );
+    
     const dataToSave = {
       attribute_id: editData.attribute_id,
       name: editData.name,
       description: editData.description || "",
       default_base_value: editData.default_base_value,
-      keys: editData.keys,
+      keys: uniqueKeys,
       input_mappings: editData.input_mappings || {},
       final_calculation_data_graph_id: editData.final_calculation_data_graph_id
     };
@@ -135,9 +139,18 @@ export default function AttributeEditorPage() {
   };
 
   const handleAddKey = () => {
+    const existingNames = editData.keys.map(k => k.name);
+    let newKeyName = "new_key";
+    let counter = 1;
+    
+    while (existingNames.includes(newKeyName)) {
+      newKeyName = `new_key_${counter}`;
+      counter++;
+    }
+    
     setEditData({
       ...editData,
-      keys: [...editData.keys, { name: "new_key", type: "value" }]
+      keys: [...editData.keys, { name: newKeyName, type: "value" }]
     });
   };
 
