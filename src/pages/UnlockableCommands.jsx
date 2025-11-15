@@ -7,16 +7,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Edit3, Trash2, X, Save, KeyRound } from "lucide-react";
 
 // 标签输入组件
-function TagInput({ value, onChange, onKeyDown, allTags }) {
+function TagInput({ value, onChange, onKeyDown, onBlur, allTags }) {
   return (
-    <Input
-      value={value}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      placeholder="标签路径"
-      className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white"
-      list="tags-datalist"
-    />
+    <div className="flex gap-1">
+      <Input
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onBlur={onBlur}
+        placeholder="输入或选择标签"
+        className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white flex-1"
+        list="tags-datalist"
+      />
+      <Button
+        size="sm"
+        onClick={() => onKeyDown({ key: 'Enter' })}
+        className="h-6 w-6 p-0 bg-[#0e639c] hover:bg-[#1177bb]"
+        type="button"
+      >
+        <Plus className="w-3 h-3" />
+      </Button>
+    </div>
   );
 }
 
@@ -279,27 +290,63 @@ export default function UnlockableCommandsPage() {
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
-                  <TagInput value={tempInputs.interactor_any} onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_any', tempInputs.interactor_any)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.interactor_any} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_any', tempInputs.interactor_any); }}}
+                    onBlur={() => { if (tempInputs.interactor_any.trim()) addTag('interactor_any', tempInputs.interactor_any); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.interactor_conditions?.has_all_tags} onRemove={(i) => removeTag('interactor', 'all', i)} canEdit />
-                  <TagInput value={tempInputs.interactor_all} onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_all', tempInputs.interactor_all)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.interactor_all} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_all', tempInputs.interactor_all); }}}
+                    onBlur={() => { if (tempInputs.interactor_all.trim()) addTag('interactor_all', tempInputs.interactor_all); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.interactor_conditions?.not_has_tags} onRemove={(i) => removeTag('interactor', 'not', i)} canEdit />
-                  <TagInput value={tempInputs.interactor_not} onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_not', tempInputs.interactor_not)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.interactor_not} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_not', tempInputs.interactor_not); }}}
+                    onBlur={() => { if (tempInputs.interactor_not.trim()) addTag('interactor_not', tempInputs.interactor_not); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.target_conditions?.has_any_tags} onRemove={(i) => removeTag('target', 'any', i)} canEdit />
-                  <TagInput value={tempInputs.target_any} onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_any', tempInputs.target_any)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.target_any} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_any', tempInputs.target_any); }}}
+                    onBlur={() => { if (tempInputs.target_any.trim()) addTag('target_any', tempInputs.target_any); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.target_conditions?.has_all_tags} onRemove={(i) => removeTag('target', 'all', i)} canEdit />
-                  <TagInput value={tempInputs.target_all} onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_all', tempInputs.target_all)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.target_all} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_all', tempInputs.target_all); }}}
+                    onBlur={() => { if (tempInputs.target_all.trim()) addTag('target_all', tempInputs.target_all); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.target_conditions?.not_has_tags} onRemove={(i) => removeTag('target', 'not', i)} canEdit />
-                  <TagInput value={tempInputs.target_not} onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_not', tempInputs.target_not)} allTags={tags} />
+                  <TagInput 
+                    value={tempInputs.target_not} 
+                    onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_not', tempInputs.target_not); }}}
+                    onBlur={() => { if (tempInputs.target_not.trim()) addTag('target_not', tempInputs.target_not); }}
+                    allTags={tags} 
+                  />
                 </td>
                 <td className="p-2">
                   <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
@@ -340,27 +387,63 @@ export default function UnlockableCommandsPage() {
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
-                      <TagInput value={tempInputs.interactor_any} onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_any', tempInputs.interactor_any)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.interactor_any} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_any', tempInputs.interactor_any); }}}
+                        onBlur={() => { if (tempInputs.interactor_any.trim()) addTag('interactor_any', tempInputs.interactor_any); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.interactor_conditions?.has_all_tags} onRemove={(i) => removeTag('interactor', 'all', i)} canEdit />
-                      <TagInput value={tempInputs.interactor_all} onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_all', tempInputs.interactor_all)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.interactor_all} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_all', tempInputs.interactor_all); }}}
+                        onBlur={() => { if (tempInputs.interactor_all.trim()) addTag('interactor_all', tempInputs.interactor_all); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.interactor_conditions?.not_has_tags} onRemove={(i) => removeTag('interactor', 'not', i)} canEdit />
-                      <TagInput value={tempInputs.interactor_not} onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('interactor_not', tempInputs.interactor_not)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.interactor_not} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_not', tempInputs.interactor_not); }}}
+                        onBlur={() => { if (tempInputs.interactor_not.trim()) addTag('interactor_not', tempInputs.interactor_not); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.target_conditions?.has_any_tags} onRemove={(i) => removeTag('target', 'any', i)} canEdit />
-                      <TagInput value={tempInputs.target_any} onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_any', tempInputs.target_any)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.target_any} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_any', tempInputs.target_any); }}}
+                        onBlur={() => { if (tempInputs.target_any.trim()) addTag('target_any', tempInputs.target_any); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.target_conditions?.has_all_tags} onRemove={(i) => removeTag('target', 'all', i)} canEdit />
-                      <TagInput value={tempInputs.target_all} onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_all', tempInputs.target_all)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.target_all} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_all', tempInputs.target_all); }}}
+                        onBlur={() => { if (tempInputs.target_all.trim()) addTag('target_all', tempInputs.target_all); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.target_conditions?.not_has_tags} onRemove={(i) => removeTag('target', 'not', i)} canEdit />
-                      <TagInput value={tempInputs.target_not} onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && addTag('target_not', tempInputs.target_not)} allTags={tags} />
+                      <TagInput 
+                        value={tempInputs.target_not} 
+                        onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} 
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_not', tempInputs.target_not); }}}
+                        onBlur={() => { if (tempInputs.target_not.trim()) addTag('target_not', tempInputs.target_not); }}
+                        allTags={tags} 
+                      />
                     </td>
                     <td className="p-2">
                       <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
