@@ -37,6 +37,12 @@ export default function ModifierDefinitionEditorPage() {
     initialData: [],
   });
 
+  const { data: relations = [] } = useQuery({
+    queryKey: ['entityRelations'],
+    queryFn: () => base44.entities.EntityRelation.list(),
+    initialData: [],
+  });
+
   const curveGraphs = useMemo(() => {
     return dataGraphs.filter(g => g.graph_type === 'curve');
   }, [dataGraphs]);
@@ -80,8 +86,10 @@ export default function ModifierDefinitionEditorPage() {
       description: "",
       curve_data_graph_id: curveGraphs[0]?.graph_id || "",
       curve_input_mappings: [],
+      target_type: "entity_attribute",
       target_attribute_id: attributes[0]?.attribute_id || "",
       output_key: attributes[0]?.keys?.[0]?.name || "",
+      target_relation_id: "",
       max_trigger_times: null,
       is_active: true
     };
@@ -90,7 +98,12 @@ export default function ModifierDefinitionEditorPage() {
 
   const handleEdit = (mod) => {
     setEditingRow(mod.id);
-    setEditData({ ...mod, curve_input_mappings: mod.curve_input_mappings || [] });
+    setEditData({ 
+      ...mod, 
+      curve_input_mappings: mod.curve_input_mappings || [],
+      target_type: mod.target_type || "entity_attribute",
+      target_relation_id: mod.target_relation_id || ""
+    });
   };
 
   const handleSave = () => {
@@ -104,8 +117,10 @@ export default function ModifierDefinitionEditorPage() {
       description: editData.description,
       curve_data_graph_id: editData.curve_data_graph_id,
       curve_input_mappings: editData.curve_input_mappings,
+      target_type: editData.target_type,
       target_attribute_id: editData.target_attribute_id,
       output_key: editData.output_key,
+      target_relation_id: editData.target_relation_id || "",
       max_trigger_times: editData.max_trigger_times,
       is_active: editData.is_active
     };
@@ -166,6 +181,11 @@ export default function ModifierDefinitionEditorPage() {
     return (attr?.keys || []).map(k => k.name).filter(k => k);
   };
 
+  const getRelationAttributes = (relationId) => {
+    const relation = relations.find(r => r.relation_id === relationId);
+    return (relation?.relation_attributes || []);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
@@ -195,11 +215,11 @@ export default function ModifierDefinitionEditorPage() {
         <table className="w-full text-xs text-white">
           <thead className="bg-[#2d2d2d] border-b border-[#3d3d3d] sticky top-0 z-10">
             <tr>
-              <th className="text-left p-2 font-medium text-white/70 w-40">名称</th>
-              <th className="text-left p-2 font-medium text-white/70 w-48">曲线图</th>
+              <th className="text-left p-2 font-medium text-white/70 w-32">名称</th>
+              <th className="text-left p-2 font-medium text-white/70 w-32">曲线图</th>
               <th className="text-left p-2 font-medium text-white/70">输入映射</th>
-              <th className="text-left p-2 font-medium text-white/70 w-40">目标属性</th>
-              <th className="text-left p-2 font-medium text-white/70 w-32">输出键</th>
+              <th className="text-left p-2 font-medium text-white/70 w-32">目标类型</th>
+              <th className="text-left p-2 font-medium text-white/70 w-32">目标</th>
               <th className="text-left p-2 font-medium text-white/70 w-24">最大次数</th>
               <th className="text-left p-2 font-medium text-white/70 w-16">激活</th>
               <th className="text-right p-2 font-medium text-white/70 w-24"></th>
@@ -211,6 +231,7 @@ export default function ModifierDefinitionEditorPage() {
               const currentData = isEditing ? editData : mod;
               const targetAttr = attributes.find(a => a.attribute_id === currentData.target_attribute_id);
               const availableKeys = getAttributeKeys(currentData.target_attribute_id);
+              const targetRelation = relations.find(r => r.relation_id === currentData.target_relation_id);
               
               return (
                 <tr key={mod.id} className="border-b border-[#3d3d3d] hover:bg-[#2d2d2d]">
@@ -250,7 +271,7 @@ export default function ModifierDefinitionEditorPage() {
                     {isEditing ? (
                       <div className="space-y-1">
                         {editData.curve_input_mappings.map((mapping, idx) => (
-                          <div key={idx} className="flex gap-1 items-center">
+                          <div key={idx} className="flex gap-1 items-center flex-wrap">
                             <span className="text-white/50 text-xs">{mapping.graph_blackboard_key} ←</span>
                             
                             {mapping.source_type === 'tag_count' && (
@@ -259,7 +280,7 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.tag_path || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-28">
                                     <SelectValue placeholder="标签" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
@@ -285,7 +306,7 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
                                     <SelectValue placeholder="属性" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -300,7 +321,7 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_key || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
                                     <SelectValue placeholder="键" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -323,18 +344,165 @@ export default function ModifierDefinitionEditorPage() {
                                 className="h-5 w-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
                               />
                             )}
+
+                            {mapping.source_type === 'relation_entity_attribute' && (
+                              <>
+                                <Select
+                                  value={mapping.relation_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="关系" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {relations.map(r => (
+                                      <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
+                                        {r.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.attribute_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="属性" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {attributes.map(a => (
+                                      <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                                        {a.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.attribute_key || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="键" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {getAttributeKeys(mapping.attribute_id).map(k => (
+                                      <SelectItem key={k} value={k} className="text-white text-xs">
+                                        {k}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </>
+                            )}
+
+                            {mapping.source_type === 'relation_attribute' && (
+                              <>
+                                <Select
+                                  value={mapping.relation_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="关系" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {relations.map(r => (
+                                      <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
+                                        {r.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.attribute_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="属性" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {getRelationAttributes(mapping.relation_id).map(attrId => {
+                                      const attr = attributes.find(a => a.attribute_id === attrId);
+                                      return (
+                                        <SelectItem key={attrId} value={attrId} className="text-white text-xs">
+                                          {attr?.name || attrId}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.attribute_key || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="键" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {getAttributeKeys(mapping.attribute_id).map(k => (
+                                      <SelectItem key={k} value={k} className="text-white text-xs">
+                                        {k}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </>
+                            )}
+
+                            {mapping.source_type === 'relation_tag_count' && (
+                              <>
+                                <Select
+                                  value={mapping.relation_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                    <SelectValue placeholder="关系" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {relations.map(r => (
+                                      <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
+                                        {r.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.tag_path || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-28">
+                                    <SelectValue placeholder="标签" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
+                                    {tags.map(t => (
+                                      <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
+                                        {t.full_path}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  value={mapping.step_size || 1}
+                                  onChange={(e) => handleUpdateMapping(idx, 'step_size', parseInt(e.target.value) || 1)}
+                                  className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                                />
+                              </>
+                            )}
                             
                             <Select
                               value={mapping.source_type}
                               onValueChange={(val) => handleUpdateMapping(idx, 'source_type', val)}
                             >
-                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-16">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
                                 <SelectItem value="tag_count" className="text-white text-xs">标签</SelectItem>
                                 <SelectItem value="attribute_key" className="text-white text-xs">属性</SelectItem>
                                 <SelectItem value="constant" className="text-white text-xs">常量</SelectItem>
+                                <SelectItem value="relation_entity_attribute" className="text-white text-xs">关联属性</SelectItem>
+                                <SelectItem value="relation_attribute" className="text-white text-xs">关系属性</SelectItem>
+                                <SelectItem value="relation_tag_count" className="text-white text-xs">关系标签</SelectItem>
                               </SelectContent>
                             </Select>
                             
@@ -367,43 +535,81 @@ export default function ModifierDefinitionEditorPage() {
                   <td className="p-2">
                     {isEditing ? (
                       <Select
-                        value={editData.target_attribute_id}
-                        onValueChange={(val) => setEditData({ ...editData, target_attribute_id: val, output_key: '' })}
+                        value={editData.target_type}
+                        onValueChange={(val) => setEditData({ ...editData, target_type: val })}
                       >
                         <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                          {attributes.map(a => (
-                            <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
-                              {a.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="entity_attribute" className="text-white text-xs">实体属性</SelectItem>
+                          <SelectItem value="relation_attribute" className="text-white text-xs">关系属性</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className="text-white/90">{targetAttr?.name || mod.target_attribute_id}</span>
+                      <span className="text-white/70 text-xs">
+                        {mod.target_type === 'relation_attribute' ? '关系属性' : '实体属性'}
+                      </span>
                     )}
                   </td>
                   <td className="p-2">
                     {isEditing ? (
-                      <Select
-                        value={editData.output_key}
-                        onValueChange={(val) => setEditData({ ...editData, output_key: val })}
-                      >
-                        <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                          {availableKeys.map(k => (
-                            <SelectItem key={k} value={k} className="text-white text-xs">
-                              {k}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-1">
+                        {editData.target_type === 'relation_attribute' && (
+                          <Select
+                            value={editData.target_relation_id || ''}
+                            onValueChange={(val) => setEditData({ ...editData, target_relation_id: val })}
+                          >
+                            <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                              <SelectValue placeholder="关系" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                              {relations.map(r => (
+                                <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
+                                  {r.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                        <Select
+                          value={editData.target_attribute_id}
+                          onValueChange={(val) => setEditData({ ...editData, target_attribute_id: val, output_key: '' })}
+                        >
+                          <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                            {attributes.map(a => (
+                              <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                                {a.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={editData.output_key}
+                          onValueChange={(val) => setEditData({ ...editData, output_key: val })}
+                        >
+                          <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                            {availableKeys.map(k => (
+                              <SelectItem key={k} value={k} className="text-white text-xs">
+                                {k}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     ) : (
-                      <span className="text-white/90">{mod.output_key}</span>
+                      <div className="space-y-1">
+                        {mod.target_type === 'relation_attribute' && targetRelation && (
+                          <div className="text-white/60 text-xs">{targetRelation.name}</div>
+                        )}
+                        <div className="text-white/90 text-xs">{targetAttr?.name || mod.target_attribute_id}.{mod.output_key}</div>
+                      </div>
                     )}
                   </td>
                   <td className="p-2">
