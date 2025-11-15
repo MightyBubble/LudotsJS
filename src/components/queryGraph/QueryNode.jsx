@@ -35,6 +35,7 @@ const nodeLabels = {
 export default function QueryNode({ 
   node,
   selected = false,
+  connectedInputPorts,
   onUpdatePosition,
   onUpdateData,
   onDelete,
@@ -78,7 +79,7 @@ export default function QueryNode({
   const handleMouseMove = (e) => {
     if (!isDragging) return;
 
-    const parent = nodeRef.current?.parentElement?.parentElement;
+    const parent = nodeRef.current?.parentElement;
     if (!parent) return;
 
     const transform = parent.style.transform;
