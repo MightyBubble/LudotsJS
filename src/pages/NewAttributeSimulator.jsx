@@ -138,13 +138,14 @@ export default function NewAttributeSimulatorPage() {
       const magnitude = inputValues.reduce((a, b) => a * 10 + b * 5, 0);
       
       const isManuallyActive = modifierActiveStates[mod.id] !== undefined ? modifierActiveStates[mod.id] : mod.is_active;
+      const isManuallyDisabled = modifierActiveStates[mod.id] === false;
       
       return {
         modifier: mod,
         inputs,
         magnitude,
         isActive: isManuallyActive && magnitude > 0,
-        isManuallyDisabled: modifierActiveStates[mod.id] === false,
+        isManuallyDisabled,
         targetAttribute: mod.target_attribute_id,
         targetKey: mod.output_key,
         warnings: modifierWarnings[mod.id] || []
@@ -152,10 +153,14 @@ export default function NewAttributeSimulatorPage() {
     });
   }, [modifiers, tagCounts, attributeKeyValues, constantValues, modifierActiveStates, modifierWarnings]);
 
+  // 排序：激活的和手动禁用的在前，只有自动未激活的（输出为0）排后面
   const sortedModifierOutputs = useMemo(() => {
     return [...modifierOutputs].sort((a, b) => {
-      if (a.isActive && !b.isActive) return -1;
-      if (!a.isActive && b.isActive) return 1;
+      const aHasInteraction = a.isActive || a.isManuallyDisabled;
+      const bHasInteraction = b.isActive || b.isManuallyDisabled;
+      
+      if (aHasInteraction && !bHasInteraction) return -1;
+      if (!aHasInteraction && bHasInteraction) return 1;
       return 0;
     });
   }, [modifierOutputs]);
