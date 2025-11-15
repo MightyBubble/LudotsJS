@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, GitBranch, GitCommit, FileOutput } from 'lucide-react';
+import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent } from 'lucide-react';
 
 const nodeTypes = [
   { type: 'entity_source', label: '实体源', icon: Database, color: '#0e639c', category: '源' },
@@ -9,10 +9,17 @@ const nodeTypes = [
   { type: 'filter_relation', label: '关系过滤', icon: Link, color: '#e67e22', category: '过滤' },
   { type: 'spatial_distance', label: '距离查询', icon: MapPin, color: '#c97fff', category: '空间' },
   { type: 'spatial_area', label: '区域查询', icon: Box, color: '#c97fff', category: '空间' },
-  { type: 'logic_and', label: '逻辑与', icon: GitMerge, color: '#d9534f', category: '逻辑' },
-  { type: 'logic_or', label: '逻辑或', icon: GitBranch, color: '#d9534f', category: '逻辑' },
-  { type: 'logic_not', label: '逻辑非', icon: GitCommit, color: '#d9534f', category: '逻辑' },
-  { type: 'output', label: '输出', icon: FileOutput, color: '#5cb85c', category: '输出' },
+  { type: 'logic_intersect', label: '交集', icon: GitMerge, color: '#d9534f', category: '逻辑' },
+  { type: 'logic_union', label: '并集', icon: GitMerge, color: '#d9534f', category: '逻辑' },
+  { type: 'logic_difference', label: '差集', icon: GitMerge, color: '#d9534f', category: '逻辑' },
+  { type: 'sort_by_attribute', label: '按属性排序', icon: ArrowUpDown, color: '#5bc0de', category: '排序' },
+  { type: 'sort_by_relation', label: '按关系排序', icon: ArrowUpDown, color: '#5bc0de', category: '排序' },
+  { type: 'sort_by_tag', label: '按标签排序', icon: ArrowUpDown, color: '#5bc0de', category: '排序' },
+  { type: 'limit_top', label: '取前N名', icon: Hash, color: '#17a2b8', category: '限制' },
+  { type: 'limit_bottom', label: '取后N名', icon: Hash, color: '#17a2b8', category: '限制' },
+  { type: 'limit_percent_top', label: '取前N%', icon: Percent, color: '#17a2b8', category: '限制' },
+  { type: 'limit_percent_bottom', label: '取后N%', icon: Percent, color: '#17a2b8', category: '限制' },
+  { type: 'output', label: '输出', icon: Database, color: '#5cb85c', category: '输出' },
 ];
 
 export default function QueryNodeLibrary({ onAddNode, onClose }) {

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import QueryNode from '../components/queryGraph/QueryNode'; // Added import
 
 export default function EntityQueryEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,7 +65,7 @@ export default function EntityQueryEditorPage() {
 
   const filteredQueries = useMemo(() => {
     if (!searchQuery) return queries;
-    return queries.filter(q => 
+    return queries.filter(q =>
       q.query_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (q.description && q.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -72,8 +74,8 @@ export default function EntityQueryEditorPage() {
   const openQuery = (query) => {
     let graphDef;
     try {
-      graphDef = typeof query.graph_definition === 'string' 
-        ? JSON.parse(query.graph_definition) 
+      graphDef = typeof query.graph_definition === 'string'
+        ? JSON.parse(query.graph_definition)
         : query.graph_definition || {};
     } catch {
       graphDef = {};
@@ -86,7 +88,7 @@ export default function EntityQueryEditorPage() {
 
   const saveQuery = useCallback(() => {
     if (!currentQuery) return;
-    
+
     updateMutation.mutate({
       id: currentQuery.id,
       data: {
@@ -107,6 +109,16 @@ export default function EntityQueryEditorPage() {
       'logic_and': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
       'logic_or': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
       'logic_not': [{ id: 'input', label: '输入', type: 'entities' }],
+      'logic_intersect': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
+      'logic_union': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
+      'logic_difference': [{ id: 'a', label: 'A (被减)', type: 'entities' }, { id: 'b', label: 'B (减去)', type: 'entities' }],
+      'sort_by_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'sort_by_relation': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'sort_by_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'limit_top': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'limit_bottom': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'limit_percent_top': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'limit_percent_bottom': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'output': [{ id: 'entities', label: '实体集', type: 'entities' }]
     };
     return inputConfigs[type] || [];
@@ -124,6 +136,16 @@ export default function EntityQueryEditorPage() {
       'logic_and': [{ id: 'result', label: '结果', type: 'entities' }],
       'logic_or': [{ id: 'result', label: '结果', type: 'entities' }],
       'logic_not': [{ id: 'result', label: '结果', type: 'entities' }],
+      'logic_intersect': [{ id: 'result', label: '结果', type: 'entities' }],
+      'logic_union': [{ id: 'result', label: '结果', type: 'entities' }],
+      'logic_difference': [{ id: 'result', label: '结果', type: 'entities' }],
+      'sort_by_attribute': [{ id: 'sorted', label: '排序结果', type: 'entities' }],
+      'sort_by_relation': [{ id: 'sorted', label: '排序结果', type: 'entities' }],
+      'sort_by_tag': [{ id: 'sorted', label: '排序结果', type: 'entities' }],
+      'limit_top': [{ id: 'limited', label: '限制结果', type: 'entities' }],
+      'limit_bottom': [{ id: 'limited', label: '限制结果', type: 'entities' }],
+      'limit_percent_top': [{ id: 'limited', label: '限制结果', type: 'entities' }],
+      'limit_percent_bottom': [{ id: 'limited', label: '限制结果', type: 'entities' }],
       'output': []
     };
     return outputConfigs[type] || [];
@@ -137,7 +159,14 @@ export default function EntityQueryEditorPage() {
       filter_tag: { tagPath: '', mode: 'has' },
       filter_relation: { relationId: '', direction: 'source' },
       spatial_distance: { maxDistance: 100, x: 0, y: 0, z: 0 },
-      spatial_area: { shape: 'sphere', centerX: 0, centerY: 0, centerZ: 0, sizeX: 10, sizeY: 10, sizeZ: 10 }
+      spatial_area: { shape: 'sphere', centerX: 0, centerY: 0, centerZ: 0, sizeX: 10, sizeY: 10, sizeZ: 10 },
+      sort_by_attribute: { attributeId: '', key: '', order: 'asc' },
+      sort_by_relation: { relationId: '', order: 'asc' },
+      sort_by_tag: { tagPath: '', order: 'asc' },
+      limit_top: { count: 10 },
+      limit_bottom: { count: 10 },
+      limit_percent_top: { percent: 10 },
+      limit_percent_bottom: { percent: 10 }
     };
 
     const newNode = {
@@ -177,7 +206,7 @@ export default function EntityQueryEditorPage() {
   }, []);
 
   const addConnection = useCallback((connection) => {
-    const exists = connections.some(c => 
+    const exists = connections.some(c =>
       c.fromNode === connection.fromNode && c.fromPort === connection.fromPort &&
       c.toNode === connection.toNode && c.toPort === connection.toPort
     );
@@ -199,7 +228,7 @@ export default function EntityQueryEditorPage() {
   if (currentQuery) {
     return (
       <div className="h-screen w-full bg-[#1e1e1e] flex flex-col overflow-hidden">
-        <Toolbar 
+        <Toolbar
           onSave={saveQuery}
           onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
           onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
@@ -227,6 +256,7 @@ export default function EntityQueryEditorPage() {
               onAddConnection={addConnection}
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
+              NodeComponent={QueryNode} {/* Added NodeComponent prop */}
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
