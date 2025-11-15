@@ -1,10 +1,12 @@
 import React from 'react';
 
 const formatValue = (value) => {
+  if (value === undefined || value === null) return 'null';
+  
   if (typeof value === 'number') {
     return value.toFixed(2);
   }
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === 'object') {
     if (value.x !== undefined && value.y !== undefined) {
       if (value.z !== undefined) {
         if (value.w !== undefined) {

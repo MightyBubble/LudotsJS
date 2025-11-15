@@ -9,25 +9,25 @@ export default function SimulationPanel({ results }) {
   }
 
   const formatValue = (value, type) => {
-    if (!value) return 'null';
+    if (!value && value !== 0) return 'null';
     
     if (type === 'output_number') {
       return typeof value === 'number' ? value.toFixed(3) : value;
     }
     
-    if (type === 'output_vector2' && value.x !== undefined) {
+    if (type === 'output_vector2' && value && value.x !== undefined) {
       return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
     }
     
-    if (type === 'output_vector3' && value.x !== undefined) {
+    if (type === 'output_vector3' && value && value.x !== undefined) {
       return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)}, ${value.z.toFixed(2)})`;
     }
     
-    if (type === 'output_vector4' && value.x !== undefined) {
+    if (type === 'output_vector4' && value && value.x !== undefined) {
       return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)}, ${value.z.toFixed(2)}, ${value.w.toFixed(2)})`;
     }
     
-    if (type === 'output_color' && value.r !== undefined) {
+    if (type === 'output_color' && value && value.r !== undefined) {
       const r = Math.round(value.r * 255);
       const g = Math.round(value.g * 255);
       const b = Math.round(value.b * 255);
