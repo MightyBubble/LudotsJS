@@ -85,8 +85,12 @@ export default function Node({
   const [isDragging, setIsDragging] = useState(false);
   const nodeRef = useRef(null);
   const dragStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
-  const accentColor = nodeAccentColors[node.type] || nodeAccentColors.number;
-  const isLocked = node.locked || node.id.startsWith('output-');
+  const accentColor = nodeAccentColors[node?.type] || nodeAccentColors.number;
+  const isLocked = node?.locked || (node?.id && node.id.startsWith('output-'));
+
+  if (!node || !node.position) {
+    return null;
+  }
 
   const handleMouseDown = (e) => {
     if (e.button !== 0 || isLocked) return;
@@ -102,8 +106,8 @@ export default function Node({
     dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      nodeX: node.position.x,
-      nodeY: node.position.y
+      nodeX: node.position.x || 0,
+      nodeY: node.position.y || 0
     };
     e.stopPropagation();
   };
@@ -143,12 +147,14 @@ export default function Node({
   }, [isDragging]);
 
   const isPortConnected = (portId) => {
-    return connectedInputPorts.has(`${node.id}-${portId}`);
+    return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
   };
 
   const renderInputWithPort = (portId, placeholder, value) => {
     const isConnected = isPortConnected(portId);
-    const inputPort = node.inputs.find(i => i.id === portId);
+    const inputPort = node.inputs?.find(i => i.id === portId);
+    
+    if (!inputPort) return null;
     
     return (
       <div className="flex items-center gap-2 mb-1.5">
@@ -163,7 +169,7 @@ export default function Node({
           <Input
             type="number"
             placeholder={placeholder}
-            value={value}
+            value={value ?? 0}
             onChange={(e) => onUpdateData(node.id, { [portId]: parseFloat(e.target.value) || 0 })}
             className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white/90 flex-1 px-2"
           />
@@ -173,10 +179,14 @@ export default function Node({
   };
 
   const renderInlineInputs = () => {
-    if (node.id.startsWith('output-')) {
+    if (!node.data) {
+      node.data = {};
+    }
+
+    if (node.id && node.id.startsWith('output-')) {
       return (
         <div className="space-y-1.5">
-          {node.inputs.map(input => (
+          {(node.inputs || []).map(input => (
             <NodePort
               key={input.id}
               nodeId={node.id}
@@ -194,7 +204,7 @@ export default function Node({
       return (
         <Input
           type="number"
-          value={node.data.value || 0}
+          value={node.data.value ?? 0}
           onChange={(e) => onUpdateData(node.id, { value: parseFloat(e.target.value) || 0 })}
           className="h-7 text-xs bg-[#2d2d30] border-[#434343] text-white/90 px-2"
         />
@@ -204,8 +214,8 @@ export default function Node({
     if (['add', 'subtract', 'multiply', 'divide'].includes(node.type)) {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('a', 'A', node.data.a || 0)}
-          {renderInputWithPort('b', 'B', node.data.b || (node.type === 'divide' ? 1 : 0))}
+          {renderInputWithPort('a', 'A', node.data.a ?? 0)}
+          {renderInputWithPort('b', 'B', node.data.b ?? (node.type === 'divide' ? 1 : 0))}
         </div>
       );
     }
@@ -213,8 +223,8 @@ export default function Node({
     if (node.type === 'power') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('base', '底数', node.data.base || 2)}
-          {renderInputWithPort('exponent', '指数', node.data.exponent || 2)}
+          {renderInputWithPort('base', '底数', node.data.base ?? 2)}
+          {renderInputWithPort('exponent', '指数', node.data.exponent ?? 2)}
         </div>
       );
     }
@@ -222,9 +232,9 @@ export default function Node({
     if (node.type === 'clamp') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('value', '值', node.data.value || 0)}
-          {renderInputWithPort('min', '最小值', node.data.min || 0)}
-          {renderInputWithPort('max', '最大值', node.data.max || 100)}
+          {renderInputWithPort('value', '值', node.data.value ?? 0)}
+          {renderInputWithPort('min', '最小值', node.data.min ?? 0)}
+          {renderInputWithPort('max', '最大值', node.data.max ?? 100)}
         </div>
       );
     }
@@ -232,8 +242,8 @@ export default function Node({
     if (node.type === 'vector2') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('x', 'X', node.data.x || 0)}
-          {renderInputWithPort('y', 'Y', node.data.y || 0)}
+          {renderInputWithPort('x', 'X', node.data.x ?? 0)}
+          {renderInputWithPort('y', 'Y', node.data.y ?? 0)}
         </div>
       );
     }
@@ -241,9 +251,9 @@ export default function Node({
     if (node.type === 'vector3') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('x', 'X', node.data.x || 0)}
-          {renderInputWithPort('y', 'Y', node.data.y || 0)}
-          {renderInputWithPort('z', 'Z', node.data.z || 0)}
+          {renderInputWithPort('x', 'X', node.data.x ?? 0)}
+          {renderInputWithPort('y', 'Y', node.data.y ?? 0)}
+          {renderInputWithPort('z', 'Z', node.data.z ?? 0)}
         </div>
       );
     }
@@ -251,10 +261,10 @@ export default function Node({
     if (node.type === 'vector4' || node.type === 'quaternion') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('x', 'X', node.data.x || 0)}
-          {renderInputWithPort('y', 'Y', node.data.y || 0)}
-          {renderInputWithPort('z', 'Z', node.data.z || 0)}
-          {renderInputWithPort('w', 'W', node.data.w || (node.type === 'quaternion' ? 1 : 0))}
+          {renderInputWithPort('x', 'X', node.data.x ?? 0)}
+          {renderInputWithPort('y', 'Y', node.data.y ?? 0)}
+          {renderInputWithPort('z', 'Z', node.data.z ?? 0)}
+          {renderInputWithPort('w', 'W', node.data.w ?? (node.type === 'quaternion' ? 1 : 0))}
         </div>
       );
     }
@@ -262,9 +272,9 @@ export default function Node({
     if (node.type === 'color') {
       return (
         <div className="space-y-0">
-          {renderInputWithPort('r', 'R', node.data.r || 1)}
-          {renderInputWithPort('g', 'G', node.data.g || 1)}
-          {renderInputWithPort('b', 'B', node.data.b || 1)}
+          {renderInputWithPort('r', 'R', node.data.r ?? 1)}
+          {renderInputWithPort('g', 'G', node.data.g ?? 1)}
+          {renderInputWithPort('b', 'B', node.data.b ?? 1)}
         </div>
       );
     }
@@ -283,7 +293,7 @@ export default function Node({
           <div className="text-white/90 text-sm font-mono px-2 py-1.5 bg-[#16825d]/10 rounded border border-[#16825d]/30">
             {node.data.key || '未设置'}
           </div>
-          {node.inputs.length > 0 && (
+          {node.inputs && node.inputs.length > 0 && (
             <div className="space-y-1.5">
               {node.inputs.map(input => (
                 <NodePort
@@ -301,7 +311,7 @@ export default function Node({
       );
     }
 
-    if (node.inputs.length > 0) {
+    if (node.inputs && node.inputs.length > 0) {
       return (
         <div className="space-y-1.5">
           {node.inputs.map(input => (
@@ -326,8 +336,8 @@ export default function Node({
       ref={nodeRef}
       className={`absolute rounded shadow-2xl select-none ${isLocked ? 'cursor-default' : 'cursor-move'}`}
       style={{
-        left: node.position.x,
-        top: node.position.y,
+        left: node.position.x ?? 0,
+        top: node.position.y ?? 0,
         width: '220px',
         backgroundColor: '#3c3c3c',
         borderLeft: `3px solid ${accentColor}`,
@@ -346,7 +356,7 @@ export default function Node({
         }}
       >
         <span className="font-medium text-xs text-white/95">
-          {node.data.label || nodeLabels[node.type] || node.type}
+          {node.data?.label || nodeLabels[node.type] || node.type}
         </span>
         {!isLocked && (
           <button
@@ -364,7 +374,7 @@ export default function Node({
       <div className="p-3 space-y-0">
         {renderInlineInputs()}
 
-        {node.outputs.length > 0 && (
+        {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {node.outputs.map(output => (
               <NodePort
