@@ -89,7 +89,18 @@ export default function AttributeEditorPage() {
       alert('请至少添加一个键');
       return;
     }
-    updateMutation.mutate({ id: editData.id, data: editData });
+    
+    const dataToSave = {
+      attribute_id: editData.attribute_id,
+      name: editData.name,
+      description: editData.description,
+      default_base_value: editData.default_base_value,
+      keys: editData.keys,
+      input_mappings: editData.input_mappings,
+      final_calculation_data_graph_id: editData.final_calculation_data_graph_id
+    };
+    
+    updateMutation.mutate({ id: editData.id, data: dataToSave });
   };
 
   const handleCancel = () => {

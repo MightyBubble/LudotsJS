@@ -98,7 +98,19 @@ export default function ModifierDefinitionEditorPage() {
       alert('请填写必填项');
       return;
     }
-    updateMutation.mutate({ id: editData.id, data: editData });
+    
+    const dataToSave = {
+      modifier_name: editData.modifier_name,
+      description: editData.description,
+      curve_data_graph_id: editData.curve_data_graph_id,
+      curve_input_mappings: editData.curve_input_mappings,
+      target_attribute_id: editData.target_attribute_id,
+      output_key: editData.output_key,
+      max_trigger_times: editData.max_trigger_times,
+      is_active: editData.is_active
+    };
+    
+    updateMutation.mutate({ id: editData.id, data: dataToSave });
   };
 
   const handleCancel = () => {
