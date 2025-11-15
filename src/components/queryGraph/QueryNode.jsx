@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
@@ -12,6 +13,10 @@ const nodeAccentColors = {
   filter_attribute: '#9b6bb3',
   filter_tag: '#ffc000',
   filter_relation: '#e67e22',
+  filter_relation_attribute: '#e67e22', // New
+  filter_relation_tag: '#e67e22', // New
+  filter_related_entity_attribute: '#9b6bb3', // New
+  filter_related_entity_tag: '#ffc000', // New
   spatial_distance: '#c97fff',
   spatial_area: '#c97fff',
   logic_intersect: '#d9534f',
@@ -33,6 +38,10 @@ const nodeLabels = {
   filter_attribute: '属性过滤',
   filter_tag: '标签过滤',
   filter_relation: '关系过滤',
+  filter_relation_attribute: '关系属性过滤', // New
+  filter_relation_tag: '关系标签过滤', // New
+  filter_related_entity_attribute: '关联实体属性过滤', // New
+  filter_related_entity_tag: '关联实体标签过滤', // New
   spatial_distance: '距离查询',
   spatial_area: '区域查询',
   logic_intersect: '交集',
@@ -148,7 +157,12 @@ export default function QueryNode({
 
   const getAttributeKeys = (attributeId) => {
     const attr = attributes.find(a => a.attribute_id === attributeId);
-    return attr?.keys || [];
+    return (attr?.keys || []).map(k => k.name).filter(k => k);
+  };
+
+  const getRelationAttributes = (relationId) => {
+    const relation = relations.find(r => r.relation_id === relationId);
+    return (relation?.relation_attributes || []);
   };
 
   const renderNodeContent = () => {
@@ -177,7 +191,6 @@ export default function QueryNode({
         );
 
       case 'filter_attribute':
-        const selectedAttr = attributes.find(a => a.attribute_id === data.attributeId);
         const attrKeys = getAttributeKeys(data.attributeId);
         return (
           <div className="space-y-2">
@@ -200,8 +213,8 @@ export default function QueryNode({
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
                   {attrKeys.map(key => (
-                    <SelectItem key={key.name} value={key.name} className="text-white text-xs">
-                      {key.name}
+                    <SelectItem key={key} value={key} className="text-white text-xs">
+                      {key}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -279,6 +292,220 @@ export default function QueryNode({
               <SelectContent className="bg-[#2d2d30] border-[#434343]">
                 <SelectItem value="source" className="text-white text-xs">作为源</SelectItem>
                 <SelectItem value="target" className="text-white text-xs">作为目标</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
+      case 'filter_relation_attribute':
+        const relAttrIds = getRelationAttributes(data.relationId);
+        const relAttrKeys = getAttributeKeys(data.attributeId);
+        return (
+          <div className="space-y-2">
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v, attributeId: '', key: '' })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {data.relationId && (
+              <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择属性" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                  {relAttrIds.map(attrId => {
+                    const attr = attributes.find(a => a.attribute_id === attrId);
+                    return attr ? (
+                      <SelectItem key={attr.id} value={attr.attribute_id} className="text-white text-xs">
+                        {attr.name} ({attr.attribute_id})
+                      </SelectItem>
+                    ) : null;
+                  })}
+                </SelectContent>
+              </Select>
+            )}
+            {data.attributeId && (
+              <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                  {relAttrKeys.map(key => (
+                    <SelectItem key={key} value={key} className="text-white text-xs">
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                <SelectItem value="gt" className="text-white text-xs">大于</SelectItem>
+                <SelectItem value="gte" className="text-white text-xs">大于等于</SelectItem>
+                <SelectItem value="lt" className="text-white text-xs">小于</SelectItem>
+                <SelectItem value="lte" className="text-white text-xs">小于等于</SelectItem>
+                <SelectItem value="eq" className="text-white text-xs">等于</SelectItem>
+                <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="number"
+              placeholder="阈值"
+              value={data.threshold ?? 0}
+              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
+          </div>
+        );
+
+      case 'filter_relation_tag':
+        return (
+          <div className="space-y-2">
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={data.tagPath || ''} onValueChange={(v) => onUpdateData(node.id, { tagPath: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择标签" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {tags.map(tag => (
+                  <SelectItem key={tag.id} value={tag.full_path} className="text-white text-xs">
+                    {tag.name} ({tag.full_path})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={data.mode || 'has'} onValueChange={(v) => onUpdateData(node.id, { mode: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                <SelectItem value="has" className="text-white text-xs">拥有</SelectItem>
+                <SelectItem value="not_has" className="text-white text-xs">不拥有</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
+      case 'filter_related_entity_attribute':
+        const relatedAttrKeys = getAttributeKeys(data.attributeId);
+        return (
+          <div className="space-y-2">
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择属性" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {attributes.map(attr => (
+                  <SelectItem key={attr.id} value={attr.attribute_id} className="text-white text-xs">
+                    {attr.name} ({attr.attribute_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {data.attributeId && (
+              <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                  {relatedAttrKeys.map(key => (
+                    <SelectItem key={key} value={key} className="text-white text-xs">
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                <SelectItem value="gt" className="text-white text-xs">大于</SelectItem>
+                <SelectItem value="gte" className="text-white text-xs">大于等于</SelectItem>
+                <SelectItem value="lt" className="text-white text-xs">小于</SelectItem>
+                <SelectItem value="lte" className="text-white text-xs">小于等于</SelectItem>
+                <SelectItem value="eq" className="text-white text-xs">等于</SelectItem>
+                <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="number"
+              placeholder="阈值"
+              value={data.threshold ?? 0}
+              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
+          </div>
+        );
+
+      case 'filter_related_entity_tag':
+        return (
+          <div className="space-y-2">
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={data.tagPath || ''} onValueChange={(v) => onUpdateData(node.id, { tagPath: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择标签" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {tags.map(tag => (
+                  <SelectItem key={tag.id} value={tag.full_path} className="text-white text-xs">
+                    {tag.name} ({tag.full_path})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={data.mode || 'has'} onValueChange={(v) => onUpdateData(node.id, { mode: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                <SelectItem value="has" className="text-white text-xs">拥有</SelectItem>
+                <SelectItem value="not_has" className="text-white text-xs">不拥有</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -406,8 +633,8 @@ export default function QueryNode({
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
                   {sortAttrKeys.map(key => (
-                    <SelectItem key={key.name} value={key.name} className="text-white text-xs">
-                      {key.name}
+                    <SelectItem key={key} value={key} className="text-white text-xs">
+                      {key}
                     </SelectItem>
                   ))}
                 </SelectContent>
