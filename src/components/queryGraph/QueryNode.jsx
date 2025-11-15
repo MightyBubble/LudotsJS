@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
@@ -83,7 +84,8 @@ export default function QueryNode({
   const handleMouseMove = (e) => {
     if (!isDragging) return;
 
-    const parent = nodeRef.current?.parentElement?.parentElement;
+    // Change made here: parent.parentElement was removed as per the outline
+    const parent = nodeRef.current?.parentElement; 
     if (!parent) return;
 
     const transform = parent.style.transform;
