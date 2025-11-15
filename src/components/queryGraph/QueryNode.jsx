@@ -34,13 +34,13 @@ const nodeLabels = {
 
 export default function QueryNode({ 
   node,
-  isSelected = false,
+  selected = false,
   onUpdatePosition,
   onUpdateData,
   onDelete,
   onSelect,
-  onConnectionStart,
-  onConnectionEnd,
+  onStartConnection,
+  onEndConnection,
   prototypes = [],
   attributes = [],
   tags = [],
@@ -58,15 +58,7 @@ export default function QueryNode({
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
     
-    // 检查是否点击了交互元素
-    const target = e.target;
-    if (
-      target.closest('.node-port') || 
-      target.closest('.delete-button') || 
-      target.closest('input') ||
-      target.closest('button[role="combobox"]') ||
-      target.matches('button[role="combobox"]')
-    ) {
+    if (e.target.closest('.node-port') || e.target.closest('.delete-button') || e.target.closest('input')) {
       return;
     }
     
@@ -131,20 +123,18 @@ export default function QueryNode({
 
     if (node.type === 'filter_prototype') {
       return (
-        <div onClick={(e) => e.stopPropagation()}>
-          <Select value={node.data?.prototypeId || ''} onValueChange={(val) => onUpdateData(node.id, { prototypeId: val })}>
-            <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue placeholder="选择原型" /></SelectTrigger>
-            <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
-              {prototypes.map(p => <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">{p.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={node.data?.prototypeId || ''} onValueChange={(val) => onUpdateData(node.id, { prototypeId: val })}>
+          <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue placeholder="选择原型" /></SelectTrigger>
+          <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+            {prototypes.map(p => <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">{p.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
       );
     }
 
     if (node.type === 'filter_attribute') {
       return (
-        <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-2">
           <Select value={node.data?.attributeId || ''} onValueChange={(val) => onUpdateData(node.id, { attributeId: val, key: '' })}>
             <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue placeholder="选择属性" /></SelectTrigger>
             <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
@@ -178,7 +168,7 @@ export default function QueryNode({
 
     if (node.type === 'filter_tag') {
       return (
-        <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-2">
           <Select value={node.data?.tagPath || ''} onValueChange={(val) => onUpdateData(node.id, { tagPath: val })}>
             <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue placeholder="选择标签" /></SelectTrigger>
             <SelectContent className="bg-[#2d2d30] border-[#3e3e42] max-h-60">
@@ -198,7 +188,7 @@ export default function QueryNode({
 
     if (node.type === 'filter_relation') {
       return (
-        <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-2">
           <Select value={node.data?.relationId || ''} onValueChange={(val) => onUpdateData(node.id, { relationId: val })}>
             <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue placeholder="选择关系" /></SelectTrigger>
             <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
@@ -232,15 +222,13 @@ export default function QueryNode({
     if (node.type === 'spatial_area') {
       return (
         <div className="space-y-2">
-          <div onClick={(e) => e.stopPropagation()}>
-            <Select value={node.data?.shape || 'sphere'} onValueChange={(val) => onUpdateData(node.id, { shape: val })}>
-              <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
-                <SelectItem value="sphere" className="text-white text-xs">球体</SelectItem>
-                <SelectItem value="box" className="text-white text-xs">方块</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={node.data?.shape || 'sphere'} onValueChange={(val) => onUpdateData(node.id, { shape: val })}>
+            <SelectTrigger className="h-7 bg-[#2d2d30] border-[#434343] text-white text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+              <SelectItem value="sphere" className="text-white text-xs">球体</SelectItem>
+              <SelectItem value="box" className="text-white text-xs">方块</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="text-[10px] text-white/40">中心点</div>
           <div className="grid grid-cols-3 gap-1">
             <Input type="number" placeholder="X" value={node.data?.centerX ?? 0} onChange={(e) => onUpdateData(node.id, { centerX: parseFloat(e.target.value) || 0 })} className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white" />
@@ -261,7 +249,7 @@ export default function QueryNode({
       return (
         <div className="space-y-1.5">
           {node.inputs.map(input => (
-            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
+            <NodePort key={input.id} nodeId={node.id} port={input} type="input" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
           ))}
         </div>
       );
@@ -280,16 +268,13 @@ export default function QueryNode({
         width: '220px',
         backgroundColor: '#3c3c3c',
         borderLeft: `3px solid ${accentColor}`,
-        border: isSelected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
-        boxShadow: isSelected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
+        border: selected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
+        boxShadow: selected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
         transition: 'border 0.2s, box-shadow 0.2s'
       }}
       onMouseDown={handleMouseDown}
     >
-      <div 
-        className="flex items-center justify-between px-3 py-2 border-b cursor-move" 
-        style={{ borderColor: '#2a2a2a', background: 'linear-gradient(180deg, #3e3e42 0%, #3a3a3a 100%)' }}
-      >
+      <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: '#2a2a2a', background: 'linear-gradient(180deg, #3e3e42 0%, #3a3a3a 100%)' }}>
         <span className="font-medium text-xs text-white/95">{nodeLabels[node.type] || node.type}</span>
         <button className="delete-button text-white/30 hover:text-white/80 transition-colors" onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}>
           <X className="w-3.5 h-3.5" />
@@ -300,7 +285,7 @@ export default function QueryNode({
         {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {node.outputs.map(output => (
-              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onConnectionStart} onEndConnection={onConnectionEnd} />
+              <NodePort key={output.id} nodeId={node.id} port={output} type="output" onStartConnection={onStartConnection} onEndConnection={onEndConnection} />
             ))}
           </div>
         )}
