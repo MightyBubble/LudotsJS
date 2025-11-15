@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Activity } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Activity, Calculator } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -103,6 +103,18 @@ export default function Layout({ children, currentPageName }) {
         >
           <Activity className="w-4 h-4" />
           修饰器模拟器
+        </Link>
+
+        <Link
+          to={createPageUrl("AttributeSimulator")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "AttributeSimulator"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Calculator className="w-4 h-4" />
+          属性模拟器
         </Link>
       </div>
 
