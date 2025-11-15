@@ -6,7 +6,6 @@ import { Search, Plus, Filter, Trash2 } from "lucide-react";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import QueryNodeLibrary from '../components/queryGraph/QueryNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
-import QueryNode from '../components/queryGraph/QueryNode';
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -32,30 +31,6 @@ export default function EntityQueryEditorPage() {
   const { data: queries = [] } = useQuery({
     queryKey: ['entityQueries'],
     queryFn: () => base44.entities.EntityQuery.list(),
-    initialData: [],
-  });
-
-  const { data: prototypes = [] } = useQuery({
-    queryKey: ['entityPrototypes'],
-    queryFn: () => base44.entities.EntityPrototype.list(),
-    initialData: [],
-  });
-
-  const { data: attributes = [] } = useQuery({
-    queryKey: ['attributes'],
-    queryFn: () => base44.entities.Attribute.list(),
-    initialData: [],
-  });
-
-  const { data: tags = [] } = useQuery({
-    queryKey: ['gameplayTags'],
-    queryFn: () => base44.entities.GameplayTag.list(),
-    initialData: [],
-  });
-
-  const { data: relations = [] } = useQuery({
-    queryKey: ['entityRelations'],
-    queryFn: () => base44.entities.EntityRelation.list(),
     initialData: [],
   });
 
@@ -252,15 +227,6 @@ export default function EntityQueryEditorPage() {
               onAddConnection={addConnection}
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
-              NodeComponent={(props) => (
-                <QueryNode
-                  {...props}
-                  prototypes={prototypes}
-                  attributes={attributes}
-                  tags={tags}
-                  relations={relations}
-                />
-              )}
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
