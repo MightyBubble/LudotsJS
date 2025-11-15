@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Workflow } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -53,6 +53,14 @@ export default function Layout({ children, currentPageName }) {
         
         <div className="h-6 w-px bg-[#3d3d3d]" />
         
+        <Link
+          to={createPageUrl("VisualGraphEditor")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "VisualGraphEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Workflow className="w-4 h-4" />可视化图编辑器
+        </Link>
         <Link
           to={createPageUrl("DataGraphEditor")}
           className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
