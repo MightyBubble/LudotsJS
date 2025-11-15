@@ -39,17 +39,16 @@ const nodeTypeLabels = {
 export default function QueryNode({ 
   node,
   isSelected = false,
-  hasConnectedInput,
   onUpdatePosition,
   onUpdateData,
   onDelete,
   onSelect,
   onConnectionStart,
   onConnectionEnd,
-  prototypes,
-  attributes,
-  tags,
-  relations
+  prototypes = [],
+  attributes = [],
+  tags = [],
+  relations = []
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const nodeRef = useRef(null);
@@ -64,7 +63,7 @@ export default function QueryNode({
     if (e.button !== 0) return;
     
     if (e.target.closest('.node-port') || e.target.closest('.delete-button') || 
-        e.target.closest('input') || e.target.closest('select')) {
+        e.target.closest('input') || e.target.closest('select') || e.target.closest('[role="combobox"]')) {
       return;
     }
     
