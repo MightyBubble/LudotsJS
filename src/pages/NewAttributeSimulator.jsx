@@ -1,57 +1,38 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Plus, Minus, ChevronRight, Database } from "lucide-react";
+import { Calculator, Plus } from "lucide-react";
 
-// Mock Data Graph 执行器（简化版，后续替换为真实API）
+// Mock Data Graph 执行器 - 后续替换为真实 API
 function mockExecuteCurveDataGraph(graphId, inputValue, baseValue) {
-  // 模拟不同类型的曲线计算
-  if (graphId === "linear_curve") {
-    return inputValue * baseValue;
-  } else if (graphId === "exponential_curve") {
-    return baseValue * Math.pow(1.5, inputValue);
-  } else if (graphId === "logarithmic_curve") {
-    return baseValue * Math.log(inputValue + 1) / Math.log(10);
-  }
-  return inputValue * baseValue; // 默认线性
+  if (graphId === "linear_curve") return inputValue * baseValue;
+  if (graphId === "exponential_curve") return baseValue * Math.pow(1.5, inputValue);
+  if (graphId === "logarithmic_curve") return baseValue * Math.log(inputValue + 1) / Math.log(10);
+  return inputValue * baseValue;
 }
 
-function mockExecuteAttributeDataGraph(graphId, blackboard, attributeId) {
-  // 模拟属性最终计算的Data Graph
-  // 假设标准计算流程：base + sum(add_zone) * product(multiply_zone) + sum(flat_add_zone) * product(final_multiply_zone)
+function mockExecuteAttributeDataGraph(graphId, mappedInputs) {
+  // mappedInputs 是根据 aggregation_inputs 映射后的逻辑参数
+  // 例如：{base_value: 100, add_zone: [10, 20], multiply_zone: [1.2]}
   
-  const baseKey = `${attributeId}_base`;
-  const addZoneKey = `${attributeId}_add_zone`;
-  const multiplyZoneKey = `${attributeId}_multiply_zone`;
-  const flatAddZoneKey = `${attributeId}_flat_add_zone`;
-  const finalMultiplyZoneKey = `${attributeId}_final_multiply_zone`;
+  let result = mappedInputs.base_value || 0;
   
-  let result = blackboard[baseKey] || 0;
-  
-  // 加法区
-  if (blackboard[addZoneKey] && blackboard[addZoneKey].length > 0) {
-    const addSum = blackboard[addZoneKey].reduce((sum, val) => sum + val, 0);
-    result += addSum;
+  if (mappedInputs.add_zone && Array.isArray(mappedInputs.add_zone)) {
+    result += mappedInputs.add_zone.reduce((sum, val) => sum + val, 0);
   }
   
-  // 乘法区
-  if (blackboard[multiplyZoneKey] && blackboard[multiplyZoneKey].length > 0) {
-    const multiplyProduct = blackboard[multiplyZoneKey].reduce((prod, val) => prod * val, 1);
-    result *= multiplyProduct;
+  if (mappedInputs.multiply_zone && Array.isArray(mappedInputs.multiply_zone)) {
+    result *= mappedInputs.multiply_zone.reduce((prod, val) => prod * val, 1);
   }
   
-  // 固定加成区
-  if (blackboard[flatAddZoneKey] && blackboard[flatAddZoneKey].length > 0) {
-    const flatAddSum = blackboard[flatAddZoneKey].reduce((sum, val) => sum + val, 0);
-    result += flatAddSum;
+  if (mappedInputs.flat_add_zone && Array.isArray(mappedInputs.flat_add_zone)) {
+    result += mappedInputs.flat_add_zone.reduce((sum, val) => sum + val, 0);
   }
   
-  // 最终百分比区
-  if (blackboard[finalMultiplyZoneKey] && blackboard[finalMultiplyZoneKey].length > 0) {
-    const finalMultiplyProduct = blackboard[finalMultiplyZoneKey].reduce((prod, val) => prod * val, 1);
-    result *= finalMultiplyProduct;
+  if (mappedInputs.final_multiply_zone && Array.isArray(mappedInputs.final_multiply_zone)) {
+    result *= mappedInputs.final_multiply_zone.reduce((prod, val) => prod * val, 1);
   }
   
   return result;
@@ -79,9 +60,10 @@ export default function NewAttributeSimulatorPage() {
   const blackboard = useMemo(() => {
     const bb = { ...blackboardInputs };
     
-    // 为每个属性设置基础值
+    // 为每个属性设置基础值到黑板
     attributes.forEach(attr => {
-      bb[`${attr.attribute_id}_base`] = attr.default_base_value;
+      const baseKey = `${attr.attribute_id}_base`;
+      bb[baseKey] = attr.default_base_value;
     });
     
     // 处理所有激活的Modifier
@@ -112,15 +94,24 @@ export default function NewAttributeSimulatorPage() {
     return bb;
   }, [blackboardInputs, modifiers, attributes]);
 
-  // 计算最终属性值
+  // 计算最终属性值 - 使用映射逻辑
   const finalAttributeValues = useMemo(() => {
     const results = {};
     
     attributes.forEach(attr => {
+      // 根据 aggregation_inputs 映射，从黑板提取值并传给 Data Graph
+      const mappedInputs = {};
+      
+      if (attr.aggregation_inputs) {
+        Object.entries(attr.aggregation_inputs).forEach(([logicalParam, blackboardKey]) => {
+          mappedInputs[logicalParam] = blackboard[blackboardKey];
+        });
+      }
+      
+      // Mock执行属性计算 Data Graph
       results[attr.attribute_id] = mockExecuteAttributeDataGraph(
         attr.final_calculation_data_graph_id,
-        blackboard,
-        attr.attribute_id
+        mappedInputs
       );
     });
     
@@ -143,7 +134,7 @@ export default function NewAttributeSimulatorPage() {
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Calculator className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">新属性模拟器</span>
-        <span className="text-xs text-yellow-600">(使用Mock Data Graph)</span>
+        <span className="text-xs text-yellow-600">(使用Mock Data Graph + 映射逻辑)</span>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
@@ -205,6 +196,12 @@ export default function NewAttributeSimulatorPage() {
                   <div className="text-[10px] text-gray-500 mt-1 font-mono">
                     Graph: {attr.final_calculation_data_graph_id}
                   </div>
+                  <details className="mt-2 text-[10px] text-gray-500">
+                    <summary className="cursor-pointer hover:text-gray-300">映射详情</summary>
+                    <pre className="mt-1 p-1 bg-[#1e1e1e] rounded font-mono text-[9px]">
+                      {JSON.stringify(attr.aggregation_inputs, null, 2)}
+                    </pre>
+                  </details>
                 </div>
               ))}
             </div>

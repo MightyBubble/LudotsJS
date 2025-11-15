@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, TrendingUp, Calculator, Layers, GitBranch } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -50,6 +50,17 @@ export default function Layout({ children, currentPageName }) {
         >
           <Sparkles className="w-4 h-4" />效果编辑器
         </Link>
+        
+        <div className="h-6 w-px bg-[#3d3d3d]" />
+        
+        <Link
+          to={createPageUrl("DataGraphEditor")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "DataGraphEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Network className="w-4 h-4" />Data Graph
+        </Link>
         <Link
           to={createPageUrl("AttributeEditor")}
           className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
@@ -72,7 +83,7 @@ export default function Layout({ children, currentPageName }) {
             currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
           }`}
         >
-          <Calculator className="w-4 h-4" />新属性模拟器
+          <Calculator className="w-4 h-4" />属性模拟器
         </Link>
       </div>
 

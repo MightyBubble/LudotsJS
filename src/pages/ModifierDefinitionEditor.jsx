@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Edit3, Trash2, X, Save, GitBranch } from "lucide-react";
 
 export default function ModifierDefinitionEditorPage() {
@@ -19,6 +19,16 @@ export default function ModifierDefinitionEditorPage() {
     queryFn: () => base44.entities.ModifierDefinition.list(),
     initialData: [],
   });
+
+  const { data: dataGraphs = [] } = useQuery({
+    queryKey: ['dataGraphs'],
+    queryFn: () => base44.entities.DataGraph.list(),
+    initialData: [],
+  });
+
+  const curveGraphs = useMemo(() => {
+    return dataGraphs.filter(g => g.graph_type === 'curve');
+  }, [dataGraphs]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ModifierDefinition.create(data),
@@ -61,7 +71,7 @@ export default function ModifierDefinitionEditorPage() {
       description: "",
       input_blackboard_key: "",
       base_value: 0,
-      curve_data_graph_id: "linear_curve",
+      curve_data_graph_id: "",
       output_blackboard_aggregation_key: "",
       max_trigger_times: null,
       input_step_size: 1,
@@ -128,12 +138,21 @@ export default function ModifierDefinitionEditorPage() {
           />
         </td>
         <td className="p-2">
-          <Input
+          <Select
             value={editData.curve_data_graph_id}
-            onChange={(e) => setEditData({ ...editData, curve_data_graph_id: e.target.value })}
-            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white font-mono"
-            placeholder="linear_curve"
-          />
+            onValueChange={(value) => setEditData({ ...editData, curve_data_graph_id: value })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue placeholder="选择曲线图" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              {curveGraphs.map(g => (
+                <SelectItem key={g.id} value={g.graph_id} className="text-white hover:bg-[#3d3d3d] text-xs">
+                  {g.name} ({g.graph_id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </td>
         <td className="p-2">
           <Input
@@ -212,9 +231,9 @@ export default function ModifierDefinitionEditorPage() {
           <thead className="sticky top-0 bg-[#2d2d2d] border-b border-[#3d3d3d]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">修饰器名称</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-40">输入黑板键</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-32">输入黑板键</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-20">基础值</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-32">曲线Graph ID</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-40">曲线 Data Graph</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-40">输出聚合键</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-16">步长</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-16">最大次数</th>

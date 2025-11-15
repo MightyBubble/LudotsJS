@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Edit3, Trash2, X, Save, Layers } from "lucide-react";
 
 export default function AttributeEditorPage() {
@@ -19,6 +20,16 @@ export default function AttributeEditorPage() {
     queryFn: () => base44.entities.Attribute.list(),
     initialData: [],
   });
+
+  const { data: dataGraphs = [] } = useQuery({
+    queryKey: ['dataGraphs'],
+    queryFn: () => base44.entities.DataGraph.list(),
+    initialData: [],
+  });
+
+  const attributeCalcGraphs = useMemo(() => {
+    return dataGraphs.filter(g => g.graph_type === 'attribute_calculation');
+  }, [dataGraphs]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Attribute.create(data),
@@ -61,7 +72,8 @@ export default function AttributeEditorPage() {
       name: "",
       description: "",
       default_base_value: 100,
-      final_calculation_data_graph_id: "default_attribute_calc"
+      aggregation_inputs: {},
+      final_calculation_data_graph_id: ""
     });
   };
 
@@ -73,7 +85,7 @@ export default function AttributeEditorPage() {
 
   const handleSave = () => {
     if (!editData.attribute_id || !editData.name || !editData.final_calculation_data_graph_id) {
-      alert('请填写必填项：属性ID、名称和Data Graph ID');
+      alert('请填写必填项：属性ID、名称和Data Graph');
       return;
     }
     if (creatingNew) {
@@ -124,18 +136,41 @@ export default function AttributeEditorPage() {
           />
         </td>
         <td className="p-2">
-          <Input
+          <Select
             value={editData.final_calculation_data_graph_id}
-            onChange={(e) => setEditData({ ...editData, final_calculation_data_graph_id: e.target.value })}
-            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white font-mono"
-            placeholder="data_graph_id"
+            onValueChange={(value) => setEditData({ ...editData, final_calculation_data_graph_id: value })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue placeholder="选择 Data Graph" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              {attributeCalcGraphs.map(g => (
+                <SelectItem key={g.id} value={g.graph_id} className="text-white hover:bg-[#3d3d3d] text-xs">
+                  {g.name} ({g.graph_id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </td>
+        <td className="p-2">
+          <Textarea
+            value={JSON.stringify(editData.aggregation_inputs, null, 2)}
+            onChange={(e) => {
+              try {
+                setEditData({ ...editData, aggregation_inputs: JSON.parse(e.target.value) });
+              } catch (err) {
+                // 忽略解析错误
+              }
+            }}
+            className="h-16 bg-[#1e1e1e] border-[#3d3d3d] text-[10px] text-white resize-none font-mono"
+            placeholder='{"base_value": "attack_base", "add_zone": "attack_add_zone"}'
           />
         </td>
         <td className="p-2">
           <Textarea
             value={editData.description || ""}
             onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-            className="h-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white resize-none"
+            className="h-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white resize-none"
             placeholder="属性描述..."
           />
         </td>
@@ -182,11 +217,12 @@ export default function AttributeEditorPage() {
         <table className="w-full text-xs">
           <thead className="sticky top-0 bg-[#2d2d2d] border-b border-[#3d3d3d]">
             <tr>
-              <th className="text-left p-2 font-semibold text-gray-300 w-40">属性ID</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-24">默认基础值</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-48">Data Graph ID</th>
-              <th className="text-left p-2 font-semibold text-gray-300">描述</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-32">属性ID</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-24">名称</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-20">默认基础值</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-40">Data Graph</th>
+              <th className="text-left p-2 font-semibold text-gray-300">聚合输入映射</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-32">描述</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-20">操作</th>
             </tr>
           </thead>
@@ -206,6 +242,16 @@ export default function AttributeEditorPage() {
                   <td className="p-2 text-gray-300">{attr.name}</td>
                   <td className="p-2 text-gray-300">{attr.default_base_value}</td>
                   <td className="p-2 text-gray-400 font-mono text-[10px]">{attr.final_calculation_data_graph_id}</td>
+                  <td className="p-2">
+                    <details className="text-[10px] text-gray-500">
+                      <summary className="cursor-pointer hover:text-gray-300">
+                        {Object.keys(attr.aggregation_inputs || {}).length} mappings
+                      </summary>
+                      <pre className="mt-1 p-2 bg-[#1e1e1e] rounded font-mono text-[9px]">
+                        {JSON.stringify(attr.aggregation_inputs, null, 2)}
+                      </pre>
+                    </details>
+                  </td>
                   <td className="p-2 text-gray-500 text-[10px]">{attr.description || "-"}</td>
                   <td className="p-2">
                     <div className="flex gap-1">
