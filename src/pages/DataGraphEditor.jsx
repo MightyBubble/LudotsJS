@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Workflow, Trash2, ArrowLeft, Network } from "lucide-react";
+import { Search, Plus, Workflow, Trash2, Network } from "lucide-react";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import NodeLibrary from '../components/graph/NodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
@@ -74,7 +74,7 @@ export default function DataGraphEditorPage() {
   const filteredGraphs = useMemo(() => {
     if (!searchQuery) return graphs;
     return graphs.filter(g => 
-      g.graph_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      g.graph_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (g.name && g.name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [graphs, searchQuery]);
@@ -100,7 +100,7 @@ export default function DataGraphEditorPage() {
     if (!currentGraph) return;
 
     const outputNodeIds = new Set(outputs.map(o => `output-${o.id}`));
-    const existingOutputNodes = nodes.filter(n => n.id.startsWith('output-'));
+    const existingOutputNodes = nodes.filter(n => n.id && n.id.startsWith('output-'));
     
     const nodesToRemove = existingOutputNodes.filter(n => !outputNodeIds.has(n.id));
     if (nodesToRemove.length > 0) {
@@ -276,49 +276,77 @@ export default function DataGraphEditorPage() {
         if (!node) return null;
 
         const inputs = {};
-        node.inputs.forEach(input => {
-          const conn = connections.find(c => c.toNode === nodeId && c.toPort === input.id);
-          if (conn) {
-            const sourceValue = execute(conn.fromNode);
-            if (sourceValue && sourceValue[conn.fromPort] !== undefined) {
-              inputs[input.id] = sourceValue[conn.fromPort];
-              connValues[conn.id] = sourceValue[conn.fromPort];
+        if (node.inputs) {
+          node.inputs.forEach(input => {
+            const conn = connections.find(c => c.toNode === nodeId && c.toPort === input.id);
+            if (conn) {
+              const sourceValue = execute(conn.fromNode);
+              if (sourceValue && sourceValue[conn.fromPort] !== undefined) {
+                inputs[input.id] = sourceValue[conn.fromPort];
+                connValues[conn.id] = sourceValue[conn.fromPort];
+              }
+            } else if (node.data && node.data[input.id] !== undefined) {
+              inputs[input.id] = node.data[input.id];
             }
-          } else if (node.data[input.id] !== undefined) {
-            inputs[input.id] = node.data[input.id];
-          }
-        });
+          });
+        }
 
         let output = {};
-        switch (node.type) {
-          case 'number': output = { value: node.data.value || 0 }; break;
-          case 'add': output = { result: (inputs.a ?? node.data.a ?? 0) + (inputs.b ?? node.data.b ?? 0) }; break;
-          case 'subtract': output = { result: (inputs.a ?? node.data.a ?? 0) - (inputs.b ?? node.data.b ?? 0) }; break;
-          case 'multiply': output = { result: (inputs.a ?? node.data.a ?? 0) * (inputs.b ?? node.data.b ?? 0) }; break;
-          case 'divide': 
-            const b = inputs.b ?? node.data.b ?? 1;
-            output = { result: b !== 0 ? (inputs.a ?? node.data.a ?? 0) / b : 0 };
-            break;
-          case 'power': output = { result: Math.pow(inputs.base ?? node.data.base ?? 0, inputs.exponent ?? node.data.exponent ?? 0) }; break;
-          case 'clamp':
-            const val = inputs.value ?? node.data.value ?? 0;
-            const minVal = inputs.min ?? node.data.min ?? 0;
-            const maxVal = inputs.max ?? node.data.max ?? 100;
-            output = { result: Math.max(minVal, Math.min(maxVal, val)) };
-            break;
-          case 'vector2': output = { vector: { x: inputs.x ?? node.data.x ?? 0, y: inputs.y ?? node.data.y ?? 0 } }; break;
-          case 'vector3': output = { vector: { x: inputs.x ?? node.data.x ?? 0, y: inputs.y ?? node.data.y ?? 0, z: inputs.z ?? node.data.z ?? 0 } }; break;
-          case 'vector4': output = { vector: { x: inputs.x ?? node.data.x ?? 0, y: inputs.y ?? node.data.y ?? 0, z: inputs.z ?? node.data.z ?? 0, w: inputs.w ?? node.data.w ?? 0 } }; break;
-          case 'color': output = { color: { r: inputs.r ?? node.data.r ?? 0, g: inputs.g ?? node.data.g ?? 0, b: inputs.b ?? node.data.b ?? 0 } }; break;
-          case 'blackboard_get': output = { value: blackboard[node.data.key]?.value }; break;
-          case 'output_number':
-          case 'output_vector2':
-          case 'output_vector3':
-          case 'output_vector4':
-          case 'output_color':
-            output = { value: inputs.value };
-            break;
-          default: output = inputs;
+        try {
+          switch (node.type) {
+            case 'number': 
+              output = { value: node.data?.value ?? 0 }; 
+              break;
+            case 'add': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) + (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'subtract': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) - (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'multiply': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) * (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'divide': 
+              const b = inputs.b ?? node.data?.b ?? 1;
+              output = { result: b !== 0 ? (inputs.a ?? node.data?.a ?? 0) / b : 0 };
+              break;
+            case 'power': 
+              output = { result: Math.pow(inputs.base ?? node.data?.base ?? 0, inputs.exponent ?? node.data?.exponent ?? 0) }; 
+              break;
+            case 'clamp':
+              const val = inputs.value ?? node.data?.value ?? 0;
+              const minVal = inputs.min ?? node.data?.min ?? 0;
+              const maxVal = inputs.max ?? node.data?.max ?? 100;
+              output = { result: Math.max(minVal, Math.min(maxVal, val)) };
+              break;
+            case 'vector2': 
+              output = { vector: { x: inputs.x ?? node.data?.x ?? 0, y: inputs.y ?? node.data?.y ?? 0 } }; 
+              break;
+            case 'vector3': 
+              output = { vector: { x: inputs.x ?? node.data?.x ?? 0, y: inputs.y ?? node.data?.y ?? 0, z: inputs.z ?? node.data?.z ?? 0 } }; 
+              break;
+            case 'vector4': 
+              output = { vector: { x: inputs.x ?? node.data?.x ?? 0, y: inputs.y ?? node.data?.y ?? 0, z: inputs.z ?? node.data?.z ?? 0, w: inputs.w ?? node.data?.w ?? 0 } }; 
+              break;
+            case 'color': 
+              output = { color: { r: inputs.r ?? node.data?.r ?? 0, g: inputs.g ?? node.data?.g ?? 0, b: inputs.b ?? node.data?.b ?? 0 } }; 
+              break;
+            case 'blackboard_get': 
+              output = { value: blackboard[node.data?.key]?.value }; 
+              break;
+            case 'output_number':
+            case 'output_vector2':
+            case 'output_vector3':
+            case 'output_vector4':
+            case 'output_color':
+              output = { value: inputs.value };
+              break;
+            default: 
+              output = inputs;
+          }
+        } catch (e) {
+          console.error('Error calculating node', nodeId, e);
+          output = {};
         }
 
         values[nodeId] = output;
@@ -326,14 +354,21 @@ export default function DataGraphEditorPage() {
         return output;
       };
 
-      nodes.forEach(node => execute(node.id));
+      nodes.forEach(node => {
+        try {
+          execute(node.id);
+        } catch (e) {
+          console.error('Error executing node', node.id, e);
+        }
+      });
+      
       setConnectionValues(connValues);
 
       const results = {};
-      nodes.filter(n => n.id.startsWith('output-')).forEach(node => {
+      nodes.filter(n => n.id && n.id.startsWith('output-')).forEach(node => {
         const val = values[node.id];
         if (val && val.value !== undefined) {
-          results[node.id] = { nodeId: node.id, type: node.type, value: val.value, label: node.data.label };
+          results[node.id] = { nodeId: node.id, type: node.type, value: val.value, label: node.data?.label };
         }
       });
       setSimulationResults(results);
