@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Trash2, GitBranch } from "lucide-react";
+import { Search, Plus, Trash2, GitBranch, Edit3, Save, X } from "lucide-react";
 
 export default function ModifierDefinitionEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingRow, setEditingRow] = useState(null);
+  const [editData, setEditData] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -43,6 +45,8 @@ export default function ModifierDefinitionEditorPage() {
     mutationFn: (data) => base44.entities.ModifierDefinition.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modifierDefinitions'] });
+      setEditingRow(null);
+      setEditData(null);
     },
   });
 
@@ -50,6 +54,8 @@ export default function ModifierDefinitionEditorPage() {
     mutationFn: ({ id, data }) => base44.entities.ModifierDefinition.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['modifierDefinitions'] });
+      setEditingRow(null);
+      setEditData(null);
     },
   });
 
@@ -75,16 +81,29 @@ export default function ModifierDefinitionEditorPage() {
       curve_data_graph_id: curveGraphs[0]?.graph_id || "",
       curve_input_mappings: [],
       target_attribute_id: attributes[0]?.attribute_id || "",
-      output_aggregation_key: attributes[0]?.aggregation_keys?.[0] || "",
+      output_key: attributes[0]?.keys?.[0]?.name || "",
       max_trigger_times: null,
       is_active: true
     };
     createMutation.mutate(newMod);
   };
 
-  const handleUpdate = (mod, updates) => {
-    const updatedData = { ...mod, ...updates };
-    updateMutation.mutate({ id: mod.id, data: updatedData });
+  const handleEdit = (mod) => {
+    setEditingRow(mod.id);
+    setEditData({ ...mod, curve_input_mappings: mod.curve_input_mappings || [] });
+  };
+
+  const handleSave = () => {
+    if (!editData.modifier_name || !editData.curve_data_graph_id || !editData.target_attribute_id || !editData.output_key) {
+      alert('请填写必填项');
+      return;
+    }
+    updateMutation.mutate({ id: editData.id, data: editData });
+  };
+
+  const handleCancel = () => {
+    setEditingRow(null);
+    setEditData(null);
   };
 
   const handleDelete = (id) => {
@@ -93,8 +112,8 @@ export default function ModifierDefinitionEditorPage() {
     }
   };
 
-  const handleAddMapping = (mod) => {
-    const graph = dataGraphs.find(g => g.graph_id === mod.curve_data_graph_id);
+  const handleAddMapping = () => {
+    const graph = dataGraphs.find(g => g.graph_id === editData.curve_data_graph_id);
     if (!graph) return;
 
     const graphDef = typeof graph.graph_definition === 'string' 
@@ -103,7 +122,7 @@ export default function ModifierDefinitionEditorPage() {
     const blackboard = graphDef?.blackboard || {};
     const publicKeys = Object.keys(blackboard).filter(k => blackboard[k]?.public === true);
     
-    const newKey = publicKeys.find(k => !(mod.curve_input_mappings || []).some(m => m.graph_blackboard_key === k)) || publicKeys[0];
+    const newKey = publicKeys.find(k => !editData.curve_input_mappings.some(m => m.graph_blackboard_key === k)) || publicKeys[0];
     if (!newKey) return;
 
     const newMapping = {
@@ -113,33 +132,26 @@ export default function ModifierDefinitionEditorPage() {
       step_size: 1
     };
 
-    handleUpdate(mod, {
-      curve_input_mappings: [...(mod.curve_input_mappings || []), newMapping]
+    setEditData({
+      ...editData,
+      curve_input_mappings: [...editData.curve_input_mappings, newMapping]
     });
   };
 
-  const handleUpdateMapping = (mod, mappingIndex, field, value) => {
-    const mappings = [...(mod.curve_input_mappings || [])];
+  const handleUpdateMapping = (mappingIndex, field, value) => {
+    const mappings = [...editData.curve_input_mappings];
     mappings[mappingIndex] = { ...mappings[mappingIndex], [field]: value };
-    handleUpdate(mod, { curve_input_mappings: mappings });
+    setEditData({ ...editData, curve_input_mappings: mappings });
   };
 
-  const handleRemoveMapping = (mod, mappingIndex) => {
-    const mappings = (mod.curve_input_mappings || []).filter((_, i) => i !== mappingIndex);
-    handleUpdate(mod, { curve_input_mappings: mappings });
+  const handleRemoveMapping = (mappingIndex) => {
+    const mappings = editData.curve_input_mappings.filter((_, i) => i !== mappingIndex);
+    setEditData({ ...editData, curve_input_mappings: mappings });
   };
 
   const getAttributeKeys = (attributeId) => {
     const attr = attributes.find(a => a.attribute_id === attributeId);
-    if (!attr) return [];
-    
-    const keys = [...(attr.aggregation_keys || [])];
-    if (attr.extra_keys && Array.isArray(attr.extra_keys)) {
-      attr.extra_keys.forEach(ek => {
-        if (ek.key) keys.push(ek.key);
-      });
-    }
-    return keys;
+    return (attr?.keys || []).map(k => k.name).filter(k => k);
   };
 
   return (
@@ -178,206 +190,269 @@ export default function ModifierDefinitionEditorPage() {
               <th className="text-left p-2 font-medium text-white/70 w-32">输出键</th>
               <th className="text-left p-2 font-medium text-white/70 w-24">最大次数</th>
               <th className="text-left p-2 font-medium text-white/70 w-16">激活</th>
-              <th className="text-right p-2 font-medium text-white/70 w-16"></th>
+              <th className="text-right p-2 font-medium text-white/70 w-24"></th>
             </tr>
           </thead>
           <tbody>
             {filteredModifiers.map((mod) => {
-              const targetAttr = attributes.find(a => a.attribute_id === mod.target_attribute_id);
-              const availableKeys = targetAttr?.aggregation_keys || [];
+              const isEditing = editingRow === mod.id;
+              const currentData = isEditing ? editData : mod;
+              const targetAttr = attributes.find(a => a.attribute_id === currentData.target_attribute_id);
+              const availableKeys = getAttributeKeys(currentData.target_attribute_id);
               
               return (
                 <tr key={mod.id} className="border-b border-[#3d3d3d] hover:bg-[#2d2d2d]">
                   <td className="p-2">
-                    <Input
-                      value={mod.modifier_name}
-                      onChange={(e) => handleUpdate(mod, { modifier_name: e.target.value })}
-                      className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                    />
+                    {isEditing ? (
+                      <Input
+                        value={editData.modifier_name}
+                        onChange={(e) => setEditData({ ...editData, modifier_name: e.target.value })}
+                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                      />
+                    ) : (
+                      <span className="text-white/90">{mod.modifier_name}</span>
+                    )}
                   </td>
                   <td className="p-2">
-                    <Select
-                      value={mod.curve_data_graph_id}
-                      onValueChange={(val) => handleUpdate(mod, { curve_data_graph_id: val })}
-                    >
-                      <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                        {curveGraphs.map(g => (
-                          <SelectItem key={g.id} value={g.graph_id} className="text-white hover:bg-[#3d3d3d] text-xs">
-                            {g.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {isEditing ? (
+                      <Select
+                        value={editData.curve_data_graph_id}
+                        onValueChange={(val) => setEditData({ ...editData, curve_data_graph_id: val })}
+                      >
+                        <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                          {curveGraphs.map(g => (
+                            <SelectItem key={g.id} value={g.graph_id} className="text-white hover:bg-[#3d3d3d] text-xs">
+                              {g.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-white/70 text-xs font-mono">{mod.curve_data_graph_id}</span>
+                    )}
                   </td>
                   <td className="p-2">
-                    <div className="space-y-1">
-                      {(mod.curve_input_mappings || []).map((mapping, idx) => (
-                        <div key={idx} className="flex gap-1 items-center">
-                          <span className="text-white/50 text-xs">{mapping.graph_blackboard_key} ←</span>
-                          
-                          {mapping.source_type === 'tag_count' && (
-                            <>
-                              <Select
-                                value={mapping.tag_path || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'tag_path', val)}
-                              >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
-                                  <SelectValue placeholder="标签" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
-                                  {tags.map(t => (
-                                    <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
-                                      {t.full_path}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                    {isEditing ? (
+                      <div className="space-y-1">
+                        {editData.curve_input_mappings.map((mapping, idx) => (
+                          <div key={idx} className="flex gap-1 items-center">
+                            <span className="text-white/50 text-xs">{mapping.graph_blackboard_key} ←</span>
+                            
+                            {mapping.source_type === 'tag_count' && (
+                              <>
+                                <Select
+                                  value={mapping.tag_path || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
+                                    <SelectValue placeholder="标签" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d] max-h-48">
+                                    {tags.map(t => (
+                                      <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
+                                        {t.full_path}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  value={mapping.step_size || 1}
+                                  onChange={(e) => handleUpdateMapping(idx, 'step_size', parseInt(e.target.value) || 1)}
+                                  className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                                />
+                              </>
+                            )}
+                            
+                            {mapping.source_type === 'attribute_key' && (
+                              <>
+                                <Select
+                                  value={mapping.attribute_id || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                    <SelectValue placeholder="属性" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {attributes.map(a => (
+                                      <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                                        {a.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={mapping.attribute_key || ''}
+                                  onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
+                                >
+                                  <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                    <SelectValue placeholder="键" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                    {getAttributeKeys(mapping.attribute_id).map(k => (
+                                      <SelectItem key={k} value={k} className="text-white text-xs">
+                                        {k}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </>
+                            )}
+                            
+                            {mapping.source_type === 'constant' && (
                               <Input
                                 type="number"
-                                value={mapping.step_size || 1}
-                                onChange={(e) => handleUpdateMapping(mod, idx, 'step_size', parseInt(e.target.value) || 1)}
-                                className="h-5 w-12 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                                step="0.1"
+                                value={mapping.constant_value || 0}
+                                onChange={(e) => handleUpdateMapping(idx, 'constant_value', parseFloat(e.target.value) || 0)}
+                                className="h-5 w-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
                               />
-                            </>
-                          )}
-                          
-                          {mapping.source_type === 'attribute_key' && (
-                            <>
-                              <Select
-                                value={mapping.attribute_id || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'attribute_id', val)}
-                              >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
-                                  <SelectValue placeholder="属性" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                                  {attributes.map(a => (
-                                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
-                                      {a.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                value={mapping.attribute_key || ''}
-                                onValueChange={(val) => handleUpdateMapping(mod, idx, 'attribute_key', val)}
-                              >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
-                                  <SelectValue placeholder="键" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                                  {getAttributeKeys(mapping.attribute_id).map(k => (
-                                    <SelectItem key={k} value={k} className="text-white text-xs">
-                                      {k}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </>
-                          )}
-                          
-                          {mapping.source_type === 'constant' && (
-                            <Input
-                              type="number"
-                              step="0.1"
-                              value={mapping.constant_value || 0}
-                              onChange={(e) => handleUpdateMapping(mod, idx, 'constant_value', parseFloat(e.target.value) || 0)}
-                              className="h-5 w-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                            />
-                          )}
-                          
-                          <Select
-                            value={mapping.source_type}
-                            onValueChange={(val) => handleUpdateMapping(mod, idx, 'source_type', val)}
-                          >
-                            <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                              <SelectItem value="tag_count" className="text-white text-xs">标签</SelectItem>
-                              <SelectItem value="attribute_key" className="text-white text-xs">属性</SelectItem>
-                              <SelectItem value="constant" className="text-white text-xs">常量</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          
-                          <button
-                            onClick={() => handleRemoveMapping(mod, idx)}
-                            className="text-white/30 hover:text-red-400"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddMapping(mod)}
-                        className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
+                            )}
+                            
+                            <Select
+                              value={mapping.source_type}
+                              onValueChange={(val) => handleUpdateMapping(idx, 'source_type', val)}
+                            >
+                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                <SelectItem value="tag_count" className="text-white text-xs">标签</SelectItem>
+                                <SelectItem value="attribute_key" className="text-white text-xs">属性</SelectItem>
+                                <SelectItem value="constant" className="text-white text-xs">常量</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            
+                            <button
+                              onClick={() => handleRemoveMapping(idx)}
+                              className="text-white/30 hover:text-red-400"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                        <Button
+                          size="sm"
+                          onClick={handleAddMapping}
+                          className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {(mod.curve_input_mappings || []).map((mapping, idx) => (
+                          <div key={idx} className="text-white/70 text-xs">
+                            {mapping.graph_blackboard_key} ← {mapping.source_type === 'constant' ? mapping.constant_value : mapping.source_type}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    {isEditing ? (
+                      <Select
+                        value={editData.target_attribute_id}
+                        onValueChange={(val) => setEditData({ ...editData, target_attribute_id: val, output_key: '' })}
                       >
-                        <Plus className="w-3 h-3" />
-                      </Button>
-                    </div>
+                        <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                          {attributes.map(a => (
+                            <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                              {a.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-white/90">{targetAttr?.name || mod.target_attribute_id}</span>
+                    )}
                   </td>
                   <td className="p-2">
-                    <Select
-                      value={mod.target_attribute_id}
-                      onValueChange={(val) => handleUpdate(mod, { target_attribute_id: val })}
-                    >
-                      <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                        {attributes.map(a => (
-                          <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
-                            {a.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {isEditing ? (
+                      <Select
+                        value={editData.output_key}
+                        onValueChange={(val) => setEditData({ ...editData, output_key: val })}
+                      >
+                        <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                          {availableKeys.map(k => (
+                            <SelectItem key={k} value={k} className="text-white text-xs">
+                              {k}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="text-white/90">{mod.output_key}</span>
+                    )}
                   </td>
                   <td className="p-2">
-                    <Select
-                      value={mod.output_aggregation_key}
-                      onValueChange={(val) => handleUpdate(mod, { output_aggregation_key: val })}
-                    >
-                      <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                        {availableKeys.map(k => (
-                          <SelectItem key={k} value={k} className="text-white text-xs">
-                            {k}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="p-2">
-                    <Input
-                      type="number"
-                      value={mod.max_trigger_times || ""}
-                      onChange={(e) => handleUpdate(mod, { max_trigger_times: e.target.value ? parseInt(e.target.value) : null })}
-                      placeholder="∞"
-                      className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white text-center"
-                    />
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        value={editData.max_trigger_times || ""}
+                        onChange={(e) => setEditData({ ...editData, max_trigger_times: e.target.value ? parseInt(e.target.value) : null })}
+                        placeholder="∞"
+                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white text-center"
+                      />
+                    ) : (
+                      <span className="text-white/70">{mod.max_trigger_times || '∞'}</span>
+                    )}
                   </td>
                   <td className="p-2 text-center">
-                    <input
-                      type="checkbox"
-                      checked={mod.is_active}
-                      onChange={(e) => handleUpdate(mod, { is_active: e.target.checked })}
-                      className="w-4 h-4"
-                    />
+                    {isEditing ? (
+                      <input
+                        type="checkbox"
+                        checked={editData.is_active}
+                        onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })}
+                        className="w-4 h-4"
+                      />
+                    ) : (
+                      <span className="text-white/70">{mod.is_active ? '✓' : ''}</span>
+                    )}
                   </td>
                   <td className="p-2 text-right">
-                    <button
-                      onClick={() => handleDelete(mod.id)}
-                      className="text-white/30 hover:text-red-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isEditing ? (
+                      <div className="flex gap-1 justify-end">
+                        <Button
+                          size="sm"
+                          onClick={handleSave}
+                          className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]"
+                        >
+                          <Save className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleCancel}
+                          className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-1 justify-end">
+                        <button
+                          onClick={() => handleEdit(mod)}
+                          className="text-white/30 hover:text-blue-400"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(mod.id)}
+                          className="text-white/30 hover:text-red-400"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );
