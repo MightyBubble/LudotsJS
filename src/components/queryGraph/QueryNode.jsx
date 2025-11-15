@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const nodeAccentColors = {
   entity_source: '#0e639c',
@@ -62,6 +64,30 @@ export default function QueryNode({
   const dragStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
   const accentColor = nodeAccentColors[node?.type] || '#6c757d';
 
+  const { data: attributes = [] } = useQuery({
+    queryKey: ['attributes'],
+    queryFn: () => base44.entities.Attribute.list(),
+    initialData: [],
+  });
+
+  const { data: relations = [] } = useQuery({
+    queryKey: ['entityRelations'],
+    queryFn: () => base44.entities.EntityRelation.list(),
+    initialData: [],
+  });
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ['gameplayTags'],
+    queryFn: () => base44.entities.GameplayTag.list(),
+    initialData: [],
+  });
+
+  const { data: prototypes = [] } = useQuery({
+    queryKey: ['entityPrototypes'],
+    queryFn: () => base44.entities.EntityPrototype.list(),
+    initialData: [],
+  });
+
   if (!node || !node.position) {
     return null;
   }
@@ -120,8 +146,9 @@ export default function QueryNode({
     }
   }, [isDragging]);
 
-  const isPortConnected = (portId) => {
-    return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
+  const getAttributeKeys = (attributeId) => {
+    const attr = attributes.find(a => a.attribute_id === attributeId);
+    return attr?.keys || [];
   };
 
   const renderNodeContent = () => {
@@ -134,30 +161,52 @@ export default function QueryNode({
       case 'filter_prototype':
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="原型ID"
-              value={data.prototypeId || ''}
-              onChange={(e) => onUpdateData(node.id, { prototypeId: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.prototypeId || ''} onValueChange={(v) => onUpdateData(node.id, { prototypeId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择原型" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {prototypes.map(p => (
+                  <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">
+                    {p.name} ({p.prototype_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         );
 
       case 'filter_attribute':
+        const selectedAttr = attributes.find(a => a.attribute_id === data.attributeId);
+        const attrKeys = getAttributeKeys(data.attributeId);
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="属性ID"
-              value={data.attributeId || ''}
-              onChange={(e) => onUpdateData(node.id, { attributeId: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
-            <Input
-              placeholder="键名"
-              value={data.key || ''}
-              onChange={(e) => onUpdateData(node.id, { key: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择属性" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {attributes.map(attr => (
+                  <SelectItem key={attr.id} value={attr.attribute_id} className="text-white text-xs">
+                    {attr.name} ({attr.attribute_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {data.attributeId && (
+              <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                  {attrKeys.map(key => (
+                    <SelectItem key={key.name} value={key.name} className="text-white text-xs">
+                      {key.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
@@ -184,12 +233,18 @@ export default function QueryNode({
       case 'filter_tag':
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="标签路径"
-              value={data.tagPath || ''}
-              onChange={(e) => onUpdateData(node.id, { tagPath: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.tagPath || ''} onValueChange={(v) => onUpdateData(node.id, { tagPath: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择标签" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {tags.map(tag => (
+                  <SelectItem key={tag.id} value={tag.full_path} className="text-white text-xs">
+                    {tag.name} ({tag.full_path})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={data.mode || 'has'} onValueChange={(v) => onUpdateData(node.id, { mode: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
@@ -205,12 +260,18 @@ export default function QueryNode({
       case 'filter_relation':
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="关系ID"
-              value={data.relationId || ''}
-              onChange={(e) => onUpdateData(node.id, { relationId: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={data.direction || 'source'} onValueChange={(v) => onUpdateData(node.id, { direction: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
@@ -323,20 +384,35 @@ export default function QueryNode({
         );
 
       case 'sort_by_attribute':
+        const sortAttrKeys = getAttributeKeys(data.attributeId);
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="属性ID"
-              value={data.attributeId || ''}
-              onChange={(e) => onUpdateData(node.id, { attributeId: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
-            <Input
-              placeholder="键名"
-              value={data.key || ''}
-              onChange={(e) => onUpdateData(node.id, { key: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择属性" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {attributes.map(attr => (
+                  <SelectItem key={attr.id} value={attr.attribute_id} className="text-white text-xs">
+                    {attr.name} ({attr.attribute_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {data.attributeId && (
+              <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                  {sortAttrKeys.map(key => (
+                    <SelectItem key={key.name} value={key.name} className="text-white text-xs">
+                      {key.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select value={data.order || 'asc'} onValueChange={(v) => onUpdateData(node.id, { order: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
@@ -352,12 +428,18 @@ export default function QueryNode({
       case 'sort_by_relation':
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="关系ID"
-              value={data.relationId || ''}
-              onChange={(e) => onUpdateData(node.id, { relationId: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {relations.map(rel => (
+                  <SelectItem key={rel.id} value={rel.relation_id} className="text-white text-xs">
+                    {rel.name} ({rel.relation_id})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={data.order || 'asc'} onValueChange={(v) => onUpdateData(node.id, { order: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
@@ -373,12 +455,18 @@ export default function QueryNode({
       case 'sort_by_tag':
         return (
           <div className="space-y-2">
-            <Input
-              placeholder="标签路径"
-              value={data.tagPath || ''}
-              onChange={(e) => onUpdateData(node.id, { tagPath: e.target.value })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            <Select value={data.tagPath || ''} onValueChange={(v) => onUpdateData(node.id, { tagPath: v })}>
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectValue placeholder="选择标签" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d30] border-[#434343]">
+                {tags.map(tag => (
+                  <SelectItem key={tag.id} value={tag.full_path} className="text-white text-xs">
+                    {tag.name} ({tag.full_path})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={data.order || 'asc'} onValueChange={(v) => onUpdateData(node.id, { order: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue />
