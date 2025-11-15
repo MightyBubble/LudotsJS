@@ -7,13 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search, Plus, Edit3, Trash2, X, Save, KeyRound } from "lucide-react";
 
 // 标签输入组件
-function TagInput({ value, onChange, onKeyDown, onBlur, allTags }) {
+function TagInput({ value, onChange, onAdd, onBlur, allTags }) {
   return (
     <div className="flex gap-1">
       <Input
         value={value}
         onChange={onChange}
-        onKeyDown={onKeyDown}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAdd(); }}}
         onBlur={onBlur}
         placeholder="输入或选择标签"
         className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs text-white flex-1"
@@ -21,7 +21,7 @@ function TagInput({ value, onChange, onKeyDown, onBlur, allTags }) {
       />
       <Button
         size="sm"
-        onClick={() => onKeyDown({ key: 'Enter' })}
+        onClick={onAdd}
         className="h-6 w-6 p-0 bg-[#0e639c] hover:bg-[#1177bb]"
         type="button"
       >
@@ -293,7 +293,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.interactor_any} 
                     onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_any', tempInputs.interactor_any); }}}
+                    onAdd={() => addTag('interactor_any', tempInputs.interactor_any)}
                     onBlur={() => { if (tempInputs.interactor_any.trim()) addTag('interactor_any', tempInputs.interactor_any); }}
                     allTags={tags} 
                   />
@@ -303,7 +303,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.interactor_all} 
                     onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_all', tempInputs.interactor_all); }}}
+                    onAdd={() => addTag('interactor_all', tempInputs.interactor_all)}
                     onBlur={() => { if (tempInputs.interactor_all.trim()) addTag('interactor_all', tempInputs.interactor_all); }}
                     allTags={tags} 
                   />
@@ -313,7 +313,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.interactor_not} 
                     onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_not', tempInputs.interactor_not); }}}
+                    onAdd={() => addTag('interactor_not', tempInputs.interactor_not)}
                     onBlur={() => { if (tempInputs.interactor_not.trim()) addTag('interactor_not', tempInputs.interactor_not); }}
                     allTags={tags} 
                   />
@@ -323,7 +323,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.target_any} 
                     onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_any', tempInputs.target_any); }}}
+                    onAdd={() => addTag('target_any', tempInputs.target_any)}
                     onBlur={() => { if (tempInputs.target_any.trim()) addTag('target_any', tempInputs.target_any); }}
                     allTags={tags} 
                   />
@@ -333,7 +333,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.target_all} 
                     onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_all', tempInputs.target_all); }}}
+                    onAdd={() => addTag('target_all', tempInputs.target_all)}
                     onBlur={() => { if (tempInputs.target_all.trim()) addTag('target_all', tempInputs.target_all); }}
                     allTags={tags} 
                   />
@@ -343,7 +343,7 @@ export default function UnlockableCommandsPage() {
                   <TagInput 
                     value={tempInputs.target_not} 
                     onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} 
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_not', tempInputs.target_not); }}}
+                    onAdd={() => addTag('target_not', tempInputs.target_not)}
                     onBlur={() => { if (tempInputs.target_not.trim()) addTag('target_not', tempInputs.target_not); }}
                     allTags={tags} 
                   />
@@ -390,7 +390,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.interactor_any} 
                         onChange={(e) => setTempInputs({ ...tempInputs, interactor_any: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_any', tempInputs.interactor_any); }}}
+                        onAdd={() => addTag('interactor_any', tempInputs.interactor_any)}
                         onBlur={() => { if (tempInputs.interactor_any.trim()) addTag('interactor_any', tempInputs.interactor_any); }}
                         allTags={tags} 
                       />
@@ -400,7 +400,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.interactor_all} 
                         onChange={(e) => setTempInputs({ ...tempInputs, interactor_all: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_all', tempInputs.interactor_all); }}}
+                        onAdd={() => addTag('interactor_all', tempInputs.interactor_all)}
                         onBlur={() => { if (tempInputs.interactor_all.trim()) addTag('interactor_all', tempInputs.interactor_all); }}
                         allTags={tags} 
                       />
@@ -410,7 +410,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.interactor_not} 
                         onChange={(e) => setTempInputs({ ...tempInputs, interactor_not: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('interactor_not', tempInputs.interactor_not); }}}
+                        onAdd={() => addTag('interactor_not', tempInputs.interactor_not)}
                         onBlur={() => { if (tempInputs.interactor_not.trim()) addTag('interactor_not', tempInputs.interactor_not); }}
                         allTags={tags} 
                       />
@@ -420,7 +420,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.target_any} 
                         onChange={(e) => setTempInputs({ ...tempInputs, target_any: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_any', tempInputs.target_any); }}}
+                        onAdd={() => addTag('target_any', tempInputs.target_any)}
                         onBlur={() => { if (tempInputs.target_any.trim()) addTag('target_any', tempInputs.target_any); }}
                         allTags={tags} 
                       />
@@ -430,7 +430,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.target_all} 
                         onChange={(e) => setTempInputs({ ...tempInputs, target_all: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_all', tempInputs.target_all); }}}
+                        onAdd={() => addTag('target_all', tempInputs.target_all)}
                         onBlur={() => { if (tempInputs.target_all.trim()) addTag('target_all', tempInputs.target_all); }}
                         allTags={tags} 
                       />
@@ -440,7 +440,7 @@ export default function UnlockableCommandsPage() {
                       <TagInput 
                         value={tempInputs.target_not} 
                         onChange={(e) => setTempInputs({ ...tempInputs, target_not: e.target.value })} 
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag('target_not', tempInputs.target_not); }}}
+                        onAdd={() => addTag('target_not', tempInputs.target_not)}
                         onBlur={() => { if (tempInputs.target_not.trim()) addTag('target_not', tempInputs.target_not); }}
                         allTags={tags} 
                       />
