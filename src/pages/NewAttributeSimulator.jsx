@@ -3,49 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Plus } from "lucide-react";
-
-// Mock Data Graph 执行器
-function mockExecuteDataGraph(graphId, blackboard, dataGraphs) {
-  const graph = dataGraphs.find(g => g.graph_id === graphId);
-  if (!graph) return 0;
-
-  try {
-    const graphDef = typeof graph.graph_definition === 'string' 
-      ? JSON.parse(graph.graph_definition) 
-      : graph.graph_definition;
-    
-    const graphBlackboard = { ...(graphDef.blackboard || {}) };
-    
-    // 合并外部黑板值
-    Object.keys(graphBlackboard).forEach(key => {
-      if (blackboard[key] !== undefined) {
-        graphBlackboard[key] = { ...graphBlackboard[key], value: blackboard[key] };
-      }
-    });
-
-    // 简单计算逻辑（模拟节点执行）
-    const nodes = graphDef.nodes || [];
-    const outputNode = nodes.find(n => n.type && n.type.startsWith('output_'));
-    
-    if (!outputNode) return 0;
-    
-    // 简化：假设输出节点连接到一个计算结果
-    // 这里做一个简单的模拟：base + growth * level
-    const base = graphBlackboard.base_value?.value || graphBlackboard.hero_level?.value || 0;
-    const growth = graphBlackboard.growth_per_level?.value || 0;
-    const level = graphBlackboard.hero_level?.value || graphBlackboard.skill_level?.value || graphBlackboard.buff_stacks?.value || 1;
-    
-    return base + (growth * level);
-  } catch (e) {
-    console.error('Graph execution error:', e);
-    return 0;
-  }
-}
+import { Calculator, Plus, Minus, ArrowRight, Target } from "lucide-react";
 
 export default function NewAttributeSimulatorPage() {
-  const [heroLevel, setHeroLevel] = useState(10);
-  const [tagCounts, setTagCounts] = useState({});
+  const [heroLevel, setHeroLevel] = useState(1);
+  const [selectedHero, setSelectedHero] = useState(null);
+  const [activeTags, setActiveTags] = useState([]);
 
   const { data: modifiers = [] } = useQuery({
     queryKey: ['modifierDefinitions'],
@@ -71,121 +34,125 @@ export default function NewAttributeSimulatorPage() {
     initialData: [],
   });
 
-  // 收集所有需要的标签
-  const requiredTags = useMemo(() => {
-    const tagSet = new Set();
-    modifiers.forEach(mod => {
+  const heroes = useMemo(() => {
+    return tags.filter(t => t.full_path && t.full_path.startsWith('Hero.') && t.depth === 1);
+  }, [tags]);
+
+  const buffTags = useMemo(() => {
+    return tags.filter(t => t.full_path && t.full_path.startsWith('Buff.') && t.depth === 1);
+  }, [tags]);
+
+  // 计算标签计数
+  const tagCounts = useMemo(() => {
+    const counts = {};
+    counts['Level.LevelUp'] = heroLevel;
+    activeTags.forEach(tag => {
+      counts[tag] = (counts[tag] || 0) + 1;
+    });
+    return counts;
+  }, [heroLevel, activeTags]);
+
+  // 第一步：计算修饰器输出
+  const modifierOutputs = useMemo(() => {
+    const outputs = [];
+    
+    modifiers.filter(m => m.is_active).forEach(mod => {
+      const inputs = {};
+      let canTrigger = true;
+      
+      // 收集曲线输入
       (mod.curve_input_mappings || []).forEach(mapping => {
-        if (mapping.source_type === 'tag_count' && mapping.tag_path) {
-          tagSet.add(mapping.tag_path);
+        if (mapping.source_type === 'tag_count') {
+          const count = tagCounts[mapping.tag_path] || 0;
+          inputs[mapping.graph_blackboard_key] = Math.floor(count / (mapping.step_size || 1));
+        } else if (mapping.source_type === 'constant') {
+          inputs[mapping.graph_blackboard_key] = mapping.constant_value || 0;
+        } else {
+          inputs[mapping.graph_blackboard_key] = 0;
         }
       });
-    });
-    return Array.from(tagSet);
-  }, [modifiers]);
 
-  // 初始化标签计数
-  useMemo(() => {
-    const counts = {};
-    requiredTags.forEach(tag => {
-      if (tagCounts[tag] === undefined) {
-        counts[tag] = tag.includes('LevelUp') ? heroLevel : 0;
+      // 简单计算（假设线性）
+      const inputValues = Object.values(inputs);
+      const magnitude = inputValues.length > 0 ? inputValues.reduce((a, b) => a * 10 + b * 5, 0) : 0;
+      
+      if (magnitude > 0 || mod.modifier_name.includes('等级')) {
+        outputs.push({
+          modifier: mod,
+          inputs,
+          magnitude,
+          targetAttribute: mod.target_attribute_id,
+          targetKey: mod.output_key
+        });
       }
     });
-    if (Object.keys(counts).length > 0) {
-      setTagCounts(prev => ({ ...prev, ...counts }));
-    }
-  }, [requiredTags]);
+    
+    return outputs;
+  }, [modifiers, tagCounts]);
 
-  // 计算属性的中间键值
-  const attributeKeyValues = useMemo(() => {
+  // 第二步：聚合到属性键
+  const attributeKeys = useMemo(() => {
     const result = {};
     
     attributes.forEach(attr => {
-      const keyValues = {};
+      const keys = {};
       
-      // 初始化所有键
+      // 初始化键
       (attr.keys || []).forEach(key => {
         if (key.type === 'value') {
-          keyValues[key.name] = key.name.includes('base') ? attr.default_base_value : 0;
+          keys[key.name] = key.name.includes('base') ? attr.default_base_value : 0;
         } else {
-          keyValues[key.name] = [];
+          keys[key.name] = [];
         }
       });
-
-      // 处理修饰器输出
-      modifiers.filter(m => m.is_active && m.target_attribute_id === attr.attribute_id).forEach(mod => {
-        const blackboard = {};
-        
-        // 构建曲线图输入
-        (mod.curve_input_mappings || []).forEach(mapping => {
-          const bbKey = mapping.graph_blackboard_key;
-          
-          if (mapping.source_type === 'tag_count') {
-            const count = tagCounts[mapping.tag_path] || 0;
-            blackboard[bbKey] = Math.floor(count / (mapping.step_size || 1));
-          } else if (mapping.source_type === 'constant') {
-            blackboard[bbKey] = mapping.constant_value || 0;
-          } else if (mapping.source_type === 'attribute_key') {
-            const sourceAttr = attributes.find(a => a.attribute_id === mapping.attribute_id);
-            if (sourceAttr) {
-              const sourceKeyValues = result[sourceAttr.attribute_id];
-              if (sourceKeyValues && sourceKeyValues[mapping.attribute_key] !== undefined) {
-                blackboard[bbKey] = sourceKeyValues[mapping.attribute_key];
-              }
+      
+      // 应用修饰器
+      modifierOutputs.forEach(output => {
+        if (output.targetAttribute === attr.attribute_id) {
+          const key = (attr.keys || []).find(k => k.name === output.targetKey);
+          if (key) {
+            if (key.type === 'array') {
+              keys[output.targetKey].push(output.magnitude);
+            } else {
+              keys[output.targetKey] = (keys[output.targetKey] || 0) + output.magnitude;
             }
-          }
-        });
-
-        // 执行曲线图计算
-        const magnitude = mockExecuteDataGraph(mod.curve_data_graph_id, blackboard, dataGraphs);
-        
-        // 输出到目标键
-        const outputKey = mod.output_key;
-        const targetKey = (attr.keys || []).find(k => k.name === outputKey);
-        
-        if (targetKey) {
-          if (targetKey.type === 'array') {
-            if (!keyValues[outputKey]) keyValues[outputKey] = [];
-            keyValues[outputKey].push(magnitude);
-          } else {
-            keyValues[outputKey] = (keyValues[outputKey] || 0) + magnitude;
           }
         }
       });
       
-      result[attr.attribute_id] = keyValues;
+      result[attr.attribute_id] = keys;
     });
     
     return result;
-  }, [attributes, modifiers, tagCounts, dataGraphs]);
+  }, [attributes, modifierOutputs]);
 
-  // 计算最终属性值
-  const finalAttributeValues = useMemo(() => {
-    const results = {};
+  // 第三步：计算最终值
+  const finalValues = useMemo(() => {
+    const result = {};
     
     attributes.forEach(attr => {
-      const keyValues = attributeKeyValues[attr.attribute_id] || {};
-      const blackboard = {};
+      const keys = attributeKeys[attr.attribute_id] || {};
       
-      // 映射键到黑板
-      Object.entries(attr.input_mappings || {}).forEach(([graphKey, attrKey]) => {
-        blackboard[graphKey] = keyValues[attrKey];
+      // 简单求和逻辑
+      let total = 0;
+      Object.values(keys).forEach(val => {
+        if (Array.isArray(val)) {
+          total += val.reduce((sum, v) => sum + v, 0);
+        } else {
+          total += val;
+        }
       });
       
-      // 执行最终计算图
-      results[attr.attribute_id] = mockExecuteDataGraph(
-        attr.final_calculation_data_graph_id,
-        blackboard,
-        dataGraphs
-      );
+      result[attr.attribute_id] = total;
     });
     
-    return results;
-  }, [attributes, attributeKeyValues, dataGraphs]);
+    return result;
+  }, [attributes, attributeKeys]);
 
-  const updateTagCount = (tag, value) => {
-    setTagCounts(prev => ({ ...prev, [tag]: parseFloat(value) || 0 }));
+  const toggleTag = (tagPath) => {
+    setActiveTags(prev => 
+      prev.includes(tagPath) ? prev.filter(t => t !== tagPath) : [...prev, tagPath]
+    );
   };
 
   return (
@@ -193,79 +160,145 @@ export default function NewAttributeSimulatorPage() {
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <Calculator className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">属性模拟器</span>
-        <span className="text-xs text-gray-500">{attributes.length}个属性 | {modifiers.filter(m => m.is_active).length}个激活修饰器</span>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* 左侧：输入控制 */}
-        <div className="w-64 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
-          <div className="p-3 border-b border-[#3d3d3d]">
-            <span className="text-xs font-semibold text-gray-400">模拟器输入</span>
-          </div>
-          
-          <div className="flex-1 overflow-auto p-2 space-y-2">
-            <div className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
-              <div className="text-[10px] text-gray-400 mb-1">英雄等级</div>
-              <Input
-                type="number"
+        {/* 左侧：输入配置 */}
+        <div className="w-80 bg-[#252526] border-r border-[#3d3d3d] flex flex-col overflow-auto">
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="text-xs text-gray-400 mb-2 block">选择英雄</label>
+              <select 
+                value={selectedHero?.full_path || ''}
+                onChange={(e) => setSelectedHero(heroes.find(h => h.full_path === e.target.value))}
+                className="w-full bg-[#3d3d3d] border border-[#4d4d4d] rounded px-3 py-2 text-white text-sm"
+              >
+                <option value="">请选择...</option>
+                {heroes.map(hero => (
+                  <option key={hero.id} value={hero.full_path}>{hero.description}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 mb-2 block">英雄等级: {heroLevel}</label>
+              <input
+                type="range"
                 min="1"
                 max="18"
                 value={heroLevel}
-                onChange={(e) => {
-                  const level = parseInt(e.target.value) || 1;
-                  setHeroLevel(level);
-                  if (tagCounts['Level.LevelUp'] !== undefined) {
-                    setTagCounts(prev => ({ ...prev, 'Level.LevelUp': level }));
-                  }
-                }}
-                className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs"
+                onChange={(e) => setHeroLevel(parseInt(e.target.value))}
+                className="w-full"
               />
+              <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                <span>1级</span>
+                <span>18级</span>
+              </div>
             </div>
 
-            {requiredTags.filter(tag => !tag.includes('LevelUp')).map(tag => (
-              <div key={tag} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
-                <div className="text-[10px] text-gray-400 mb-1 font-mono truncate" title={tag}>
-                  {tag.split('.').pop()}
-                </div>
-                <Input
-                  type="number"
-                  step="1"
-                  value={tagCounts[tag] || 0}
-                  onChange={(e) => updateTagCount(tag, e.target.value)}
-                  className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs"
-                />
+            <div>
+              <label className="text-xs text-gray-400 mb-2 block">激活Buff</label>
+              <div className="space-y-1">
+                {buffTags.map(buff => {
+                  const count = activeTags.filter(t => t === buff.full_path).length;
+                  return (
+                    <div key={buff.id} className="flex items-center justify-between bg-[#1e1e1e] rounded p-2">
+                      <span className="text-xs text-white/90">{buff.description}</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => toggleTag(buff.full_path)}
+                          className="w-5 h-5 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded flex items-center justify-center"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-6 text-center text-xs">{count}</span>
+                        <button
+                          onClick={() => setActiveTags(prev => [...prev, buff.full_path])}
+                          className="w-5 h-5 bg-[#0e639c] hover:bg-[#1177bb] rounded flex items-center justify-center"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            </div>
+
+            <div className="pt-2 border-t border-[#3d3d3d]">
+              <div className="text-[10px] text-gray-500">
+                标签计数:
+                {Object.entries(tagCounts).map(([tag, count]) => (
+                  <div key={tag} className="mt-1">
+                    {tag.split('.').pop()}: {count}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* 中间：属性键值中间态 */}
-        <div className="flex-1 overflow-auto p-3">
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">属性键值（中间态）</h3>
-            <div className="space-y-3">
+        {/* 右侧：计算流程和结果 */}
+        <div className="flex-1 overflow-auto p-4 space-y-4">
+          {/* 步骤1：修饰器计算 */}
+          <div>
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
+              修饰器计算
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {modifierOutputs.map((output, idx) => (
+                <div key={idx} className="bg-[#252526] border border-[#3d3d3d] rounded p-3">
+                  <div className="text-xs font-semibold text-white mb-2">{output.modifier.modifier_name}</div>
+                  <div className="space-y-1 text-[10px] text-gray-400">
+                    <div>曲线: {output.modifier.curve_data_graph_id}</div>
+                    <div className="flex items-center gap-1">
+                      <span>输入:</span>
+                      {Object.entries(output.inputs).map(([key, val]) => (
+                        <span key={key} className="bg-[#3d3d3d] px-1 rounded">{key}={val}</span>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#3d3d3d]">
+                      <ArrowRight className="w-3 h-3 text-green-400" />
+                      <span className="text-green-400 font-semibold">{output.magnitude.toFixed(1)}</span>
+                      <ArrowRight className="w-3 h-3 text-blue-400" />
+                      <span className="text-blue-400">{output.targetAttribute}.{output.targetKey}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {modifierOutputs.length === 0 && (
+                <div className="col-span-2 text-center py-8 text-gray-500 text-sm">
+                  暂无激活的修饰器输出
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 步骤2：属性键聚合 */}
+          <div>
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">2</span>
+              属性键聚合
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
               {attributes.map(attr => {
-                const keyValues = attributeKeyValues[attr.attribute_id] || {};
+                const keys = attributeKeys[attr.attribute_id] || {};
                 return (
                   <div key={attr.id} className="bg-[#252526] border border-[#3d3d3d] rounded p-3">
-                    <div className="text-xs text-white font-semibold mb-2">{attr.name}</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(attr.keys || []).map(key => (
-                        <div key={key.name} className="bg-[#1e1e1e] rounded p-2">
-                          <div className="text-[10px] text-gray-400 mb-1 font-mono">{key.name}</div>
-                          {key.type === 'array' ? (
-                            <div className="flex flex-wrap gap-1">
-                              {(keyValues[key.name] || []).map((val, idx) => (
-                                <span key={idx} className="px-1.5 py-0.5 bg-[#3d3d3d] rounded text-xs text-green-400">
-                                  {val.toFixed(1)}
-                                </span>
+                    <div className="text-xs font-semibold text-white mb-2">{attr.name}</div>
+                    <div className="space-y-1">
+                      {Object.entries(keys).map(([keyName, keyValue]) => (
+                        <div key={keyName} className="flex items-center justify-between text-[10px]">
+                          <span className="text-gray-400">{keyName}:</span>
+                          {Array.isArray(keyValue) ? (
+                            <div className="flex gap-1">
+                              {keyValue.map((v, i) => (
+                                <span key={i} className="bg-[#3d3d3d] px-1 rounded text-white">{v.toFixed(1)}</span>
                               ))}
-                              {(keyValues[key.name] || []).length === 0 && (
-                                <span className="text-xs text-gray-600">[]</span>
-                              )}
                             </div>
                           ) : (
-                            <div className="text-sm text-white">{(keyValues[key.name] || 0).toFixed(1)}</div>
+                            <span className="text-white">{keyValue.toFixed(1)}</span>
                           )}
                         </div>
                       ))}
@@ -276,60 +309,35 @@ export default function NewAttributeSimulatorPage() {
             </div>
           </div>
 
+          {/* 步骤3：最终属性值 */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">最终属性值</h3>
-            <div className="grid grid-cols-3 gap-3">
+            <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-xs">3</span>
+              最终属性值
+            </h3>
+            <div className="grid grid-cols-5 gap-4">
               {attributes.map(attr => (
-                <div key={attr.id} className="bg-[#252526] border border-[#3d3d3d] rounded p-3">
+                <div key={attr.id} className="bg-gradient-to-br from-[#252526] to-[#1e1e1e] border-2 border-green-600/30 rounded-lg p-4 text-center">
                   <div className="text-xs text-gray-400 mb-1">{attr.name}</div>
                   <div className="text-3xl font-bold text-green-400">
-                    {finalAttributeValues[attr.attribute_id]?.toFixed(1) || 0}
+                    {finalValues[attr.attribute_id]?.toFixed(0) || 0}
                   </div>
-                  <div className="text-[10px] text-gray-500 mt-1 font-mono truncate" title={attr.final_calculation_data_graph_id}>
-                    {attr.final_calculation_data_graph_id}
+                  <div className="text-[9px] text-gray-600 mt-1 font-mono">
+                    {attr.attribute_id}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* 右侧：激活的修饰器 */}
-        <div className="w-80 bg-[#252526] border-l border-[#3d3d3d] overflow-auto p-3">
-          <h3 className="text-xs font-semibold text-gray-400 mb-2">激活的修饰器</h3>
-          <div className="space-y-2">
-            {modifiers.filter(mod => mod.is_active).map(mod => {
-              const blackboard = {};
-              (mod.curve_input_mappings || []).forEach(mapping => {
-                if (mapping.source_type === 'tag_count') {
-                  const count = tagCounts[mapping.tag_path] || 0;
-                  blackboard[mapping.graph_blackboard_key] = Math.floor(count / (mapping.step_size || 1));
-                } else if (mapping.source_type === 'constant') {
-                  blackboard[mapping.graph_blackboard_key] = mapping.constant_value || 0;
-                }
-              });
-              const magnitude = mockExecuteDataGraph(mod.curve_data_graph_id, blackboard, dataGraphs);
-              
-              return (
-                <div key={mod.id} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2">
-                  <div className="text-xs text-white font-semibold mb-1">{mod.modifier_name}</div>
-                  <div className="text-[10px] text-gray-500 space-y-0.5">
-                    <div>目标: {mod.target_attribute_id}.{mod.output_key}</div>
-                    <div>曲线: {mod.curve_data_graph_id}</div>
-                    {(mod.curve_input_mappings || []).map((mapping, idx) => (
-                      <div key={idx} className="text-[9px]">
-                        {mapping.graph_blackboard_key} ← {
-                          mapping.source_type === 'tag_count' ? `tag(${mapping.tag_path?.split('.').pop()})` :
-                          mapping.source_type === 'constant' ? `${mapping.constant_value}` :
-                          'attr'
-                        }
-                      </div>
-                    ))}
-                    <div className="text-green-400 font-semibold">输出: {magnitude.toFixed(2)}</div>
-                  </div>
-                </div>
-              );
-            })}
+          {/* 说明 */}
+          <div className="bg-[#252526] border border-blue-600/30 rounded p-3 text-xs text-gray-400">
+            <div className="font-semibold text-blue-400 mb-2">💡 模拟流程说明</div>
+            <div className="space-y-1 text-[10px]">
+              <div><strong>步骤1:</strong> 根据当前标签计数，每个激活的修饰器读取其配置的输入（标签/常量/属性），通过曲线Data Graph计算出一个数值</div>
+              <div><strong>步骤2:</strong> 将修饰器的输出数值写入对应属性的指定键（value类型直接覆盖，array类型追加）</div>
+              <div><strong>步骤3:</strong> 每个属性将其所有键的值通过最终计算Data Graph汇总，得到最终属性值</div>
+            </div>
           </div>
         </div>
       </div>
