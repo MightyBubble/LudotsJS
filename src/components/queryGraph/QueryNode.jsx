@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
@@ -62,7 +63,11 @@ export default function QueryNode({
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
     
-    if (e.target.closest('.node-port') || e.target.closest('.delete-button') || e.target.closest('input')) {
+    // 排除端口、删除按钮、input、button（Select组件的trigger）的点击
+    if (e.target.closest('.node-port') || 
+        e.target.closest('.delete-button') || 
+        e.target.closest('input') ||
+        (e.target.closest('button') && !e.target.classList.contains('delete-button'))) {
       return;
     }
     
