@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Tag, FlaskConical, Eye, Palette } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   return (
@@ -79,6 +79,56 @@ export default function Layout({ children, currentPageName }) {
         >
           <Sparkles className="w-4 h-4" />
           效果编辑器
+        </Link>
+
+        <div className="w-px h-6 bg-[#3d3d3d] mx-2" />
+
+        <Link
+          to={createPageUrl("TagEditorV2")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "TagEditorV2"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Tag className="w-4 h-4" />
+          标签编辑器 V2
+        </Link>
+
+        <Link
+          to={createPageUrl("TagSimulatorV2")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "TagSimulatorV2"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <FlaskConical className="w-4 h-4" />
+          标签模拟器 V2
+        </Link>
+
+        <Link
+          to={createPageUrl("UnlockableCommandsV2")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "UnlockableCommandsV2"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Eye className="w-4 h-4" />
+          指令可见性 V2
+        </Link>
+
+        <Link
+          to={createPageUrl("InteractionEffectsV2")}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+            currentPageName === "InteractionEffectsV2"
+              ? "bg-[#0e639c] text-white"
+              : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          事件响应 V2
         </Link>
       </div>
 
