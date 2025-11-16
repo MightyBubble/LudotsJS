@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Multiply, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload } from 'lucide-react';
+import { X, Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload } from 'lucide-react';
 
 const nodeTypes = [
   // 查询节点
@@ -30,7 +30,7 @@ const nodeTypes = [
   { type: 'number', label: '数值', icon: Hash, color: '#5b9bd5', category: '基础' },
   { type: 'add', label: '加法', icon: Plus, color: '#9b6bb3', category: '数学' },
   { type: 'subtract', label: '减法', icon: Minus, color: '#9b6bb3', category: '数学' },
-  { type: 'multiply', label: '乘法', icon: Multiply, color: '#9b6bb3', category: '数学' },
+  { type: 'multiply', label: '乘法', icon: X, color: '#9b6bb3', category: '数学' },
   { type: 'divide', label: '除法', icon: Divide, color: '#9b6bb3', category: '数学' },
   { type: 'power', label: '幂运算', icon: TrendingUp, color: '#9b6bb3', category: '数学' },
   { type: 'sum', label: '求和', icon: Sigma, color: '#e67e22', category: '聚合' },
