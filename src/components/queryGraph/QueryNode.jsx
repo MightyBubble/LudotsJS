@@ -169,14 +169,27 @@ export default function QueryNode({
     return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
   };
 
+  const getConnectedValue = (portId) => {
+    const conn = (node.connectedValues || {})[portId];
+    return conn;
+  };
+
   const renderInputWithPort = (portId, placeholder, value, inputType = 'number') => {
     const isConnected = isPortConnected(portId);
     const inputPort = node.inputs?.find(i => i.id === portId);
+    const connectedValue = getConnectedValue(portId);
     
     if (!inputPort) return null;
     
+    const displayValue = isConnected 
+      ? (connectedValue !== undefined && connectedValue !== null 
+          ? connectedValue 
+          : (inputType === 'number' ? 0 : '')
+        ) 
+      : (value ?? (inputType === 'number' ? 0 : ''));
+    
     return (
-      <div className="flex items-center gap-2 mb-1.5 mt-1.5"> {/* Added mt-1.5 for consistent spacing with Selects */}
+      <div className="flex items-center gap-2 mb-1.5">
         <NodePort
           nodeId={node.id}
           port={inputPort}
@@ -184,15 +197,18 @@ export default function QueryNode({
           onStartConnection={onStartConnection}
           onEndConnection={onEndConnection}
         />
-        {!isConnected && (
-          <Input
-            type={inputType}
-            placeholder={placeholder}
-            value={value ?? (inputType === 'number' ? 0 : '')}
-            onChange={(e) => onUpdateData(node.id, { [portId]: inputType === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value })}
-            className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white/90 flex-1 px-2"
-          />
-        )}
+        <Input
+          type={inputType}
+          placeholder={placeholder}
+          value={displayValue}
+          onChange={(e) => onUpdateData(node.id, { [portId]: inputType === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value })}
+          disabled={isConnected}
+          className={`h-6 text-xs border-[#434343] flex-1 px-2 ${
+            isConnected 
+              ? 'bg-[#2d2d30]/50 text-white/60 cursor-not-allowed' 
+              : 'bg-[#2d2d30] text-white/90'
+          }`}
+        />
       </div>
     );
   };

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +31,7 @@ export default function EntityQueryEditorPage() {
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newQuery, setNewQuery] = useState({ query_name: '', description: '' });
+  const [connectionValues, setConnectionValues] = useState({});
 
   const queryClient = useQueryClient();
 
@@ -310,6 +312,144 @@ export default function EntityQueryEditorPage() {
     setConnections(prev => prev.filter(c => c.id !== connectionId));
   }, []);
 
+  useEffect(() => {
+    const calculateNodeValues = () => {
+      const values = {};
+      const connValues = {};
+      const executed = new Set();
+      const nodeOrder = [];
+      const visited = new Set();
+      const recursionStack = new Set();
+
+      // Topological sort (DFS based) to ensure correct execution order
+      const dfs = (nodeId) => {
+          if (recursionStack.has(nodeId)) {
+              console.warn(`Circular dependency detected involving node: ${nodeId}`);
+              return; // Break cycle
+          }
+          if (visited.has(nodeId)) return;
+
+          visited.add(nodeId);
+          recursionStack.add(nodeId);
+
+          const node = nodes.find(n => n.id === nodeId);
+          if (node && node.inputs) {
+              node.inputs.forEach(input => {
+                  const conn = connections.find(c => c.toNode === nodeId && c.toPort === input.id);
+                  if (conn) {
+                      dfs(conn.fromNode);
+                  }
+              });
+          }
+
+          recursionStack.delete(nodeId);
+          nodeOrder.push(nodeId);
+      };
+
+      nodes.forEach(node => dfs(node.id));
+
+      const execute = (nodeId) => {
+        if (executed.has(nodeId)) return values[nodeId];
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return null;
+
+        const inputs = {};
+        if (node.inputs) {
+          node.inputs.forEach(input => {
+            const conn = connections.find(c => c.toNode === nodeId && c.toPort === input.id);
+            if (conn) {
+              const sourceValue = execute(conn.fromNode);
+              if (sourceValue && sourceValue[conn.fromPort] !== undefined) {
+                inputs[input.id] = sourceValue[conn.fromPort];
+                connValues[conn.id] = sourceValue[conn.fromPort];
+              } else {
+                // If source node hasn't produced a value for this port, use default data or undefined
+                inputs[input.id] = node.data[input.id]; // Fallback to node's own data
+              }
+            } else if (node.data && node.data[input.id] !== undefined) {
+              inputs[input.id] = node.data[input.id];
+            }
+          });
+        }
+
+        let output = {};
+        try {
+          switch (node.type) {
+            case 'number': 
+              output = { value: node.data?.value ?? 0 }; 
+              break;
+            case 'add': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) + (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'subtract': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) - (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'multiply': 
+              output = { result: (inputs.a ?? node.data?.a ?? 0) * (inputs.b ?? node.data?.b ?? 0) }; 
+              break;
+            case 'divide': 
+              const b = inputs.b ?? node.data?.b ?? 1;
+              output = { result: b !== 0 ? (inputs.a ?? node.data?.a ?? 0) / b : 0 };
+              break;
+            case 'power': 
+              output = { result: Math.pow(inputs.base ?? node.data?.base ?? 0, inputs.exponent ?? node.data?.exponent ?? 0) }; 
+              break;
+            case 'clamp':
+              const val = inputs.value ?? node.data?.value ?? 0;
+              const minVal = inputs.min ?? node.data?.min ?? 0;
+              const maxVal = inputs.max ?? node.data?.max ?? 100;
+              output = { result: Math.max(minVal, Math.min(maxVal, val)) };
+              break;
+            case 'blackboard_get': 
+              output = { value: blackboard[node.data?.key]?.value }; 
+              break;
+            default: 
+              // For other nodes, pass inputs through or provide default outputs based on type config
+              const defaultOutputs = getNodeOutputs(node.type).reduce((acc, out) => {
+                // Try to pass the input with the same name as output, otherwise use a sensible default
+                acc[out.id] = inputs[out.id] !== undefined ? inputs[out.id] : (out.type === 'entities' ? [] : undefined);
+                return acc;
+              }, {});
+              output = defaultOutputs;
+          }
+        } catch (e) {
+          console.error('Error calculating node', nodeId, e);
+          output = {};
+        }
+
+        values[nodeId] = output;
+        executed.add(nodeId);
+        return output;
+      };
+
+      nodeOrder.forEach(nodeId => { // Use topological sort order
+        try {
+          execute(nodeId);
+        } catch (e) {
+          console.error('Error executing node', nodeId, e);
+        }
+      });
+      
+      setConnectionValues(connValues);
+
+      const nodeConnectedValues = {};
+      connections.forEach(conn => {
+        if (!nodeConnectedValues[conn.toNode]) {
+          nodeConnectedValues[conn.toNode] = {};
+        }
+        // Only store the connected value for the specific port
+        nodeConnectedValues[conn.toNode][conn.toPort] = connValues[conn.id];
+      });
+
+      setNodes(prev => prev.map(node => ({
+        ...node,
+        connectedValues: nodeConnectedValues[node.id] || {}
+      })));
+    };
+
+    calculateNodeValues();
+  }, [nodes.length, connections, blackboard, getNodeOutputs]); // Added getNodeOutputs to dependencies to ensure correctness
+
   const handleCreate = () => {
     if (!newQuery.query_name) {
       alert('请填写查询名称');
@@ -364,6 +504,7 @@ export default function EntityQueryEditorPage() {
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
               NodeComponent={NodeComponentRouter}
+              connectionValues={connectionValues} // Pass connection values to GraphCanvas
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
