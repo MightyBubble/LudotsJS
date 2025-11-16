@@ -165,6 +165,38 @@ export default function QueryNode({
     return (relation?.relation_attributes || []);
   };
 
+  const isPortConnected = (portId) => {
+    return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
+  };
+
+  const renderInputWithPort = (portId, placeholder, value, inputType = 'number') => {
+    const isConnected = isPortConnected(portId);
+    const inputPort = node.inputs?.find(i => i.id === portId);
+    
+    if (!inputPort) return null;
+    
+    return (
+      <div className="flex items-center gap-2 mb-1.5 mt-1.5"> {/* Added mt-1.5 for consistent spacing with Selects */}
+        <NodePort
+          nodeId={node.id}
+          port={inputPort}
+          type="input"
+          onStartConnection={onStartConnection}
+          onEndConnection={onEndConnection}
+        />
+        {!isConnected && (
+          <Input
+            type={inputType}
+            placeholder={placeholder}
+            value={value ?? (inputType === 'number' ? 0 : '')}
+            onChange={(e) => onUpdateData(node.id, { [portId]: inputType === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value })}
+            className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white/90 flex-1 px-2"
+          />
+        )}
+      </div>
+    );
+  };
+
   const renderNodeContent = () => {
     const data = node.data || {};
 
@@ -193,7 +225,7 @@ export default function QueryNode({
       case 'filter_attribute':
         const attrKeys = getAttributeKeys(data.attributeId);
         return (
-          <div className="space-y-2">
+          <div className="space-y-0">
             <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue placeholder="选择属性" />
@@ -208,7 +240,7 @@ export default function QueryNode({
             </Select>
             {data.attributeId && (
               <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
-                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                   <SelectValue placeholder="选择键" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -221,7 +253,7 @@ export default function QueryNode({
               </Select>
             )}
             <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
-              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -233,13 +265,7 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              type="number"
-              placeholder="阈值"
-              value={data.threshold ?? 0}
-              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            {renderInputWithPort('threshold', '阈值', data.threshold)}
           </div>
         );
 
@@ -301,7 +327,7 @@ export default function QueryNode({
         const relAttrIds = getRelationAttributes(data.relationId);
         const relAttrKeys = getAttributeKeys(data.attributeId);
         return (
-          <div className="space-y-2">
+          <div className="space-y-0">
             <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v, attributeId: '', key: '' })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue placeholder="选择关系" />
@@ -316,7 +342,7 @@ export default function QueryNode({
             </Select>
             {data.relationId && (
               <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
-                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                   <SelectValue placeholder="选择属性" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -333,7 +359,7 @@ export default function QueryNode({
             )}
             {data.attributeId && (
               <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
-                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                   <SelectValue placeholder="选择键" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -346,7 +372,7 @@ export default function QueryNode({
               </Select>
             )}
             <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
-              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -358,13 +384,7 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              type="number"
-              placeholder="阈值"
-              value={data.threshold ?? 0}
-              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            {renderInputWithPort('threshold', '阈值', data.threshold)}
           </div>
         );
 
@@ -410,7 +430,7 @@ export default function QueryNode({
       case 'filter_related_entity_attribute':
         const relatedAttrKeys = getAttributeKeys(data.attributeId);
         return (
-          <div className="space-y-2">
+          <div className="space-y-0">
             <Select value={data.relationId || ''} onValueChange={(v) => onUpdateData(node.id, { relationId: v })}>
               <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                 <SelectValue placeholder="选择关系" />
@@ -424,7 +444,7 @@ export default function QueryNode({
               </SelectContent>
             </Select>
             <Select value={data.attributeId || ''} onValueChange={(v) => onUpdateData(node.id, { attributeId: v, key: '' })}>
-              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                 <SelectValue placeholder="选择属性" />
               </SelectTrigger>
               <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -437,7 +457,7 @@ export default function QueryNode({
             </Select>
             {data.attributeId && (
               <Select value={data.key || ''} onValueChange={(v) => onUpdateData(node.id, { key: v })}>
-                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                   <SelectValue placeholder="选择键" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -450,7 +470,7 @@ export default function QueryNode({
               </Select>
             )}
             <Select value={data.operator || 'gt'} onValueChange={(v) => onUpdateData(node.id, { operator: v })}>
-              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+              <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white mt-1.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2d2d30] border-[#434343]">
@@ -462,13 +482,7 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              type="number"
-              placeholder="阈值"
-              value={data.threshold ?? 0}
-              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+            {renderInputWithPort('threshold', '阈值', data.threshold)}
           </div>
         );
 
@@ -513,15 +527,10 @@ export default function QueryNode({
 
       case 'spatial_distance':
         return (
-          <div className="space-y-2">
-            <Input
-              type="number"
-              placeholder="最大距离"
-              value={data.maxDistance ?? 100}
-              onChange={(e) => onUpdateData(node.id, { maxDistance: parseFloat(e.target.value) || 0 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
-            <div className="grid grid-cols-3 gap-1">
+          <div className="space-y-0">
+            {renderInputWithPort('maxDistance', '最大距离', data.maxDistance)}
+            <div className="text-[10px] text-white/40 mt-2">中心点</div>
+            <div className="grid grid-cols-3 gap-1 mt-1">
               <Input
                 type="number"
                 placeholder="X"
@@ -709,29 +718,17 @@ export default function QueryNode({
       case 'limit_top':
       case 'limit_bottom':
         return (
-          <div className="space-y-2">
-            <Input
-              type="number"
-              placeholder="数量"
-              value={data.count ?? 10}
-              onChange={(e) => onUpdateData(node.id, { count: parseInt(e.target.value) || 1 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
+          <div className="space-y-0">
+            {renderInputWithPort('count', '数量', data.count, 'number')}
           </div>
         );
 
       case 'limit_percent_top':
       case 'limit_percent_bottom':
         return (
-          <div className="space-y-2">
-            <Input
-              type="number"
-              placeholder="百分比"
-              value={data.percent ?? 10}
-              onChange={(e) => onUpdateData(node.id, { percent: parseFloat(e.target.value) || 1 })}
-              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-            />
-            <div className="text-[10px] text-white/40">0-100</div>
+          <div className="space-y-0">
+            {renderInputWithPort('percent', '百分比', data.percent, 'number')}
+            <div className="text-[10px] text-white/40 mt-1">0-100</div>
           </div>
         );
 
@@ -780,7 +777,7 @@ export default function QueryNode({
       <div className="p-3 space-y-2">
         {node.inputs && node.inputs.length > 0 && (
           <div className="space-y-1.5">
-            {node.inputs.map(input => (
+            {node.inputs.filter(input => !['threshold', 'maxDistance', 'count', 'percent'].includes(input.id)).map(input => (
               <NodePort
                 key={input.id}
                 nodeId={node.id}
