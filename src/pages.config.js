@@ -13,6 +13,7 @@ import EntityPrototypeEditor from './pages/EntityPrototypeEditor';
 import EntityRelationEditor from './pages/EntityRelationEditor';
 import EntityQueryEditor from './pages/EntityQueryEditor';
 import UnifiedGraphEditor from './pages/UnifiedGraphEditor';
+import GameEventEditor from './pages/GameEventEditor';
 import Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "EntityRelationEditor": EntityRelationEditor,
     "EntityQueryEditor": EntityQueryEditor,
     "UnifiedGraphEditor": UnifiedGraphEditor,
+    "GameEventEditor": GameEventEditor,
 }
 
 export const pagesConfig = {
