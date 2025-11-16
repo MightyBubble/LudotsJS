@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
@@ -12,10 +13,10 @@ const nodeAccentColors = {
   filter_attribute: '#9b6bb3',
   filter_tag: '#ffc000',
   filter_relation: '#e67e22',
-  filter_relation_attribute: '#e67e22',
-  filter_relation_tag: '#e67e22',
-  filter_related_entity_attribute: '#9b6bb3',
-  filter_related_entity_tag: '#ffc000',
+  filter_relation_attribute: '#e67e22', // New
+  filter_relation_tag: '#e67e22', // New
+  filter_related_entity_attribute: '#9b6bb3', // New
+  filter_related_entity_tag: '#ffc000', // New
   spatial_distance: '#c97fff',
   spatial_area: '#c97fff',
   logic_intersect: '#d9534f',
@@ -37,10 +38,10 @@ const nodeLabels = {
   filter_attribute: '属性过滤',
   filter_tag: '标签过滤',
   filter_relation: '关系过滤',
-  filter_relation_attribute: '关系属性过滤',
-  filter_relation_tag: '关系标签过滤',
-  filter_related_entity_attribute: '关联实体属性过滤',
-  filter_related_entity_tag: '关联实体标签过滤',
+  filter_relation_attribute: '关系属性过滤', // New
+  filter_relation_tag: '关系标签过滤', // New
+  filter_related_entity_attribute: '关联实体属性过滤', // New
+  filter_related_entity_tag: '关联实体标签过滤', // New
   spatial_distance: '距离查询',
   spatial_area: '区域查询',
   logic_intersect: '交集',
@@ -60,7 +61,6 @@ export default function QueryNode({
   node,
   selected = false,
   connectedInputPorts,
-  blackboard = {},
   onUpdatePosition,
   onUpdateData,
   onDelete,
@@ -165,50 +165,6 @@ export default function QueryNode({
     return (relation?.relation_attributes || []);
   };
 
-  const blackboardKeys = Object.keys(blackboard).filter(k => blackboard[k]?.type === 'number');
-
-  const renderValueInput = (fieldName, placeholder, defaultValue = 0) => {
-    const data = node.data || {};
-    const useBlackboard = data.useBlackboard || false;
-    const blackboardKey = data.blackboardKey || '';
-
-    return (
-      <div className="space-y-1">
-        <div className="flex items-center gap-1">
-          <input
-            type="checkbox"
-            checked={useBlackboard}
-            onChange={(e) => onUpdateData(node.id, { useBlackboard: e.target.checked })}
-            className="w-3 h-3"
-          />
-          <span className="text-[10px] text-white/60">黑板</span>
-        </div>
-        {useBlackboard ? (
-          <Select value={blackboardKey} onValueChange={(v) => onUpdateData(node.id, { blackboardKey: v })}>
-            <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
-              <SelectValue placeholder="选择变量" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2d2d30] border-[#434343]">
-              {blackboardKeys.map(key => (
-                <SelectItem key={key} value={key} className="text-white text-xs">
-                  {key}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input
-            type="number"
-            placeholder={placeholder}
-            value={data[fieldName] ?? defaultValue}
-            onChange={(e) => onUpdateData(node.id, { [fieldName]: parseFloat(e.target.value) || 0 })}
-            className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-          />
-        )}
-      </div>
-    );
-  };
-
   const renderNodeContent = () => {
     const data = node.data || {};
 
@@ -277,7 +233,13 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            {renderValueInput('threshold', '阈值', 0)}
+            <Input
+              type="number"
+              placeholder="阈值"
+              value={data.threshold ?? 0}
+              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
           </div>
         );
 
@@ -396,7 +358,13 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            {renderValueInput('threshold', '阈值', 0)}
+            <Input
+              type="number"
+              placeholder="阈值"
+              value={data.threshold ?? 0}
+              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
           </div>
         );
 
@@ -494,7 +462,13 @@ export default function QueryNode({
                 <SelectItem value="ne" className="text-white text-xs">不等于</SelectItem>
               </SelectContent>
             </Select>
-            {renderValueInput('threshold', '阈值', 0)}
+            <Input
+              type="number"
+              placeholder="阈值"
+              value={data.threshold ?? 0}
+              onChange={(e) => onUpdateData(node.id, { threshold: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
           </div>
         );
 
@@ -540,7 +514,13 @@ export default function QueryNode({
       case 'spatial_distance':
         return (
           <div className="space-y-2">
-            {renderValueInput('maxDistance', '最大距离', 100)}
+            <Input
+              type="number"
+              placeholder="最大距离"
+              value={data.maxDistance ?? 100}
+              onChange={(e) => onUpdateData(node.id, { maxDistance: parseFloat(e.target.value) || 0 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
             <div className="grid grid-cols-3 gap-1">
               <Input
                 type="number"
@@ -728,13 +708,29 @@ export default function QueryNode({
 
       case 'limit_top':
       case 'limit_bottom':
-        return renderValueInput('count', '数量', 10);
+        return (
+          <div className="space-y-2">
+            <Input
+              type="number"
+              placeholder="数量"
+              value={data.count ?? 10}
+              onChange={(e) => onUpdateData(node.id, { count: parseInt(e.target.value) || 1 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
+          </div>
+        );
 
       case 'limit_percent_top':
       case 'limit_percent_bottom':
         return (
           <div className="space-y-2">
-            {renderValueInput('percent', '百分比', 10)}
+            <Input
+              type="number"
+              placeholder="百分比"
+              value={data.percent ?? 10}
+              onChange={(e) => onUpdateData(node.id, { percent: parseFloat(e.target.value) || 1 })}
+              className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+            />
             <div className="text-[10px] text-white/40">0-100</div>
           </div>
         );
