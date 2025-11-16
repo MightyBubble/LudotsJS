@@ -33,6 +33,7 @@ export default function UnifiedGraphEditorPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Added return_type
   const [connectionValues, setConnectionValues] = useState({});
+  const [isEditingType, setIsEditingType] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -164,7 +165,29 @@ export default function UnifiedGraphEditorPage() {
         graph_definition: JSON.stringify({ nodes, connections, blackboard })
       }
     });
-  }, [currentGraph, nodes, connections, blackboard]);
+  }, [currentGraph, nodes, connections, blackboard, updateMutation]);
+
+  const updateGraphType = useCallback((newType) => {
+    if (!currentGraph) return;
+    
+    // 转换图类型需要删除旧图并创建新图
+    alert('图类型转换功能开发中...');
+    setIsEditingType(false);
+  }, [currentGraph]);
+
+  const updateReturnType = useCallback((newReturnType) => {
+    if (!currentGraph || currentGraph.graph_type !== 'function') return;
+    
+    updateMutation.mutate({
+      id: currentGraph.id,
+      entity_type: currentGraph.entity_type,
+      data: {
+        return_type: newReturnType
+      }
+    });
+    
+    setCurrentGraph(prev => ({ ...prev, return_type: newReturnType }));
+  }, [currentGraph, updateMutation]);
 
   const addNode = useCallback((type) => {
     const config = getNodeConfig(type);
@@ -393,7 +416,7 @@ export default function UnifiedGraphEditorPage() {
     };
 
     calculateNodeValues();
-  }, [nodes.length, connections, blackboard, currentGraph]);
+  }, [nodes.length, connections, blackboard, currentGraph, nodes]);
 
   const handleCreate = () => {
     if (!newGraph.name) {
@@ -440,9 +463,40 @@ export default function UnifiedGraphEditorPage() {
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
-              <div>类型: {currentGraph.graph_type === 'data' ? 'Data Graph' : currentGraph.graph_type === 'query' ? 'Entity Query' : 'Function Graph'}</div>
-              {currentGraph.graph_type === 'function' && currentGraph.return_type && ( // Display return type for function graphs
-                <div>返回: {currentGraph.return_type}</div>
+              <div className="flex items-center gap-2">
+                <span>类型: {currentGraph.graph_type === 'data' ? 'Data' : currentGraph.graph_type === 'query' ? 'Query' : 'Function'}</span>
+              </div>
+              {currentGraph.graph_type === 'function' && (
+                <div className="flex items-center gap-2">
+                  <span>返回:</span>
+                  <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
+                    <DialogTrigger asChild>
+                      <button className="text-[#0e639c] hover:text-[#1177bb] underline">
+                        {currentGraph.return_type || 'void'}
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white">
+                      <DialogHeader><DialogTitle className="text-white">修改返回类型</DialogTitle></DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <Select value={currentGraph.return_type || 'void'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
+                          <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                            <SelectItem value="void" className="text-white">void (无返回)</SelectItem>
+                            <SelectItem value="number" className="text-white">number (数值)</SelectItem>
+                            <SelectItem value="boolean" className="text-white">boolean (布尔)</SelectItem>
+                            <SelectItem value="string" className="text-white">string (字符串)</SelectItem>
+                            <SelectItem value="array" className="text-white">array (数组)</SelectItem>
+                            <SelectItem value="object" className="text-white">object (对象)</SelectItem>
+                            <SelectItem value="entity" className="text-white">entity (实体)</SelectItem>
+                            <SelectItem value="entities" className="text-white">entities (实体集)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               )}
               <div>节点: {nodes.length}</div>
               <div>连接: {connections.length}</div>
