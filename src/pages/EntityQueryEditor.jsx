@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +7,8 @@ import GraphCanvas from '../components/graph/GraphCanvas';
 import QueryNodeLibrary from '../components/queryGraph/QueryNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
 import QueryNode from '../components/queryGraph/QueryNode';
+import Node from '../components/graph/Node';
+import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -22,9 +23,11 @@ export default function EntityQueryEditorPage() {
   const [currentQuery, setCurrentQuery] = useState(null);
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
+  const [blackboard, setBlackboard] = useState({});
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [showLibrary, setShowLibrary] = useState(true);
+  const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newQuery, setNewQuery] = useState({ query_name: '', description: '' });
 
@@ -39,7 +42,7 @@ export default function EntityQueryEditorPage() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.EntityQuery.create({
       ...data,
-      graph_definition: JSON.stringify({ nodes: [], connections: [] })
+      graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
     }),
     onSuccess: (query) => {
       queryClient.invalidateQueries({ queryKey: ['entityQueries'] });
@@ -84,6 +87,7 @@ export default function EntityQueryEditorPage() {
     setCurrentQuery(query);
     setNodes(graphDef.nodes || []);
     setConnections(graphDef.connections || []);
+    setBlackboard(graphDef.blackboard || {});
   };
 
   const saveQuery = useCallback(() => {
@@ -92,23 +96,35 @@ export default function EntityQueryEditorPage() {
     updateMutation.mutate({
       id: currentQuery.id,
       data: {
-        graph_definition: JSON.stringify({ nodes, connections })
+        graph_definition: JSON.stringify({ nodes, connections, blackboard })
       }
     });
-  }, [currentQuery, nodes, connections]);
+  }, [currentQuery, nodes, connections, blackboard]);
 
   const getNodeInputs = (type) => {
     const inputConfigs = {
       'entity_source': [],
       'filter_prototype': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'filter_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_attribute': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'threshold', label: '阈值', type: 'number' }
+      ],
       'filter_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'filter_relation': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'filter_relation_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_relation_attribute': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'threshold', label: '阈值', type: 'number' }
+      ],
       'filter_relation_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'filter_related_entity_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'filter_related_entity_attribute': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'threshold', label: '阈值', type: 'number' }
+      ],
       'filter_related_entity_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'spatial_distance': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      'spatial_distance': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'maxDistance', label: '最大距离', type: 'number' }
+      ],
       'spatial_area': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'logic_intersect': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
       'logic_union': [{ id: 'a', label: 'A', type: 'entities' }, { id: 'b', label: 'B', type: 'entities' }],
@@ -116,11 +132,43 @@ export default function EntityQueryEditorPage() {
       'sort_by_attribute': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'sort_by_relation': [{ id: 'entities', label: '实体集', type: 'entities' }],
       'sort_by_tag': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'limit_top': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'limit_bottom': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'limit_percent_top': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'limit_percent_bottom': [{ id: 'entities', label: '实体集', type: 'entities' }],
-      'output': [{ id: 'entities', label: '实体集', type: 'entities' }]
+      'limit_top': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'count', label: '数量', type: 'number' }
+      ],
+      'limit_bottom': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'count', label: '数量', type: 'number' }
+      ],
+      'limit_percent_top': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'percent', label: '百分比', type: 'number' }
+      ],
+      'limit_percent_bottom': [
+        { id: 'entities', label: '实体集', type: 'entities' },
+        { id: 'percent', label: '百分比', type: 'number' }
+      ],
+      'output': [{ id: 'entities', label: '实体集', type: 'entities' }],
+      
+      // DataGraph 节点
+      'number': [],
+      'add': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
+      'subtract': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
+      'multiply': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
+      'divide': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
+      'power': [{ id: 'base', label: '底数', type: 'number' }, { id: 'exponent', label: '指数', type: 'number' }],
+      'sum': [{ id: 'array', label: '数组', type: 'array' }],
+      'product': [{ id: 'array', label: '数组', type: 'array' }],
+      'max': [{ id: 'array', label: '数组', type: 'array' }],
+      'min': [{ id: 'array', label: '数组', type: 'array' }],
+      'clamp': [{ id: 'value', label: '值', type: 'number' }, { id: 'min', label: '最小值', type: 'number' }, { id: 'max', label: '最大值', type: 'number' }],
+      'vector2': [{ id: 'x', label: 'X', type: 'number' }, { id: 'y', label: 'Y', type: 'number' }],
+      'vector3': [{ id: 'x', label: 'X', type: 'number' }, { id: 'y', label: 'Y', type: 'number' }, { id: 'z', label: 'Z', type: 'number' }],
+      'vector4': [{ id: 'x', label: 'X', type: 'number' }, { id: 'y', label: 'Y', type: 'number' }, { id: 'z', label: 'Z', type: 'number' }, { id: 'w', label: 'W', type: 'number' }],
+      'quaternion': [{ id: 'x', label: 'X', type: 'number' }, { id: 'y', label: 'Y', type: 'number' }, { id: 'z', label: 'Z', type: 'number' }, { id: 'w', label: 'W', type: 'number' }],
+      'color': [{ id: 'r', label: 'R', type: 'number' }, { id: 'g', label: 'G', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
+      'blackboard_get': [],
+      'blackboard_set': [{ id: 'value', label: '值', type: 'any' }]
     };
     return inputConfigs[type] || [];
   };
@@ -148,7 +196,27 @@ export default function EntityQueryEditorPage() {
       'limit_bottom': [{ id: 'limited', label: '限制结果', type: 'entities' }],
       'limit_percent_top': [{ id: 'limited', label: '限制结果', type: 'entities' }],
       'limit_percent_bottom': [{ id: 'limited', label: '限制结果', type: 'entities' }],
-      'output': []
+      'output': [],
+      
+      // DataGraph 节点
+      'number': [{ id: 'value', label: '值', type: 'number' }],
+      'add': [{ id: 'result', label: '结果', type: 'number' }],
+      'subtract': [{ id: 'result', label: '结果', type: 'number' }],
+      'multiply': [{ id: 'result', label: '结果', type: 'number' }],
+      'divide': [{ id: 'result', label: '结果', type: 'number' }],
+      'power': [{ id: 'result', label: '结果', type: 'number' }],
+      'sum': [{ id: 'result', label: '总和', type: 'number' }],
+      'product': [{ id: 'result', label: '乘积', type: 'number' }],
+      'max': [{ id: 'result', label: '最大值', type: 'number' }],
+      'min': [{ id: 'result', label: '最小值', type: 'number' }],
+      'clamp': [{ id: 'result', label: '结果', type: 'number' }],
+      'vector2': [{ id: 'vector', label: '向量', type: 'vector2' }],
+      'vector3': [{ id: 'vector', label: '向量', type: 'vector3' }],
+      'vector4': [{ id: 'vector', label: '向量', type: 'vector4' }],
+      'quaternion': [{ id: 'quaternion', label: '四元数', type: 'quaternion' }],
+      'color': [{ id: 'color', label: '颜色', type: 'color' }],
+      'blackboard_get': [{ id: 'value', label: '值', type: 'any' }],
+      'blackboard_set': []
     };
     return outputConfigs[type] || [];
   };
@@ -172,7 +240,23 @@ export default function EntityQueryEditorPage() {
       limit_top: { count: 10 },
       limit_bottom: { count: 10 },
       limit_percent_top: { percent: 10 },
-      limit_percent_bottom: { percent: 10 }
+      limit_percent_bottom: { percent: 10 },
+      
+      // DataGraph 节点
+      number: { value: 0 },
+      add: { a: 0, b: 0 },
+      subtract: { a: 0, b: 0 },
+      multiply: { a: 0, b: 0 },
+      divide: { a: 1, b: 1 },
+      power: { base: 2, exponent: 2 },
+      clamp: { value: 0, min: 0, max: 100 },
+      vector2: { x: 0, y: 0 },
+      vector3: { x: 0, y: 0, z: 0 },
+      vector4: { x: 0, y: 0, z: 0, w: 0 },
+      quaternion: { x: 0, y: 0, z: 0, w: 1 },
+      color: { r: 1, g: 1, b: 1 },
+      blackboard_get: { key: '' },
+      blackboard_set: { key: '' }
     };
 
     const newNode = {
@@ -186,12 +270,18 @@ export default function EntityQueryEditorPage() {
     setNodes(prev => [...prev, newNode]);
   }, [nodes.length]);
 
-  const addNodeAtPosition = useCallback((type, position) => {
+  const addNodeAtPosition = useCallback((type, position, blackboardKey = null) => {
+    const defaultData = {
+      number: { value: 0 },
+      blackboard_get: { key: blackboardKey || '' },
+      blackboard_set: { key: blackboardKey || '' }
+    };
+
     const newNode = {
       id: `node-${Date.now()}`,
       type,
       position,
-      data: {},
+      data: defaultData[type] || {},
       inputs: getNodeInputs(type),
       outputs: getNodeOutputs(type)
     };
@@ -231,6 +321,19 @@ export default function EntityQueryEditorPage() {
     createMutation.mutate(newQuery);
   };
 
+  const NodeComponentRouter = useCallback((props) => {
+    const queryNodeTypes = ['entity_source', 'filter_prototype', 'filter_attribute', 'filter_tag', 'filter_relation', 
+      'filter_relation_attribute', 'filter_relation_tag', 'filter_related_entity_attribute', 'filter_related_entity_tag',
+      'spatial_distance', 'spatial_area', 'logic_intersect', 'logic_union', 'logic_difference',
+      'sort_by_attribute', 'sort_by_relation', 'sort_by_tag',
+      'limit_top', 'limit_bottom', 'limit_percent_top', 'limit_percent_bottom', 'output'];
+    
+    if (queryNodeTypes.includes(props.node.type)) {
+      return <QueryNode {...props} />;
+    }
+    return <Node {...props} />;
+  }, []);
+
   if (currentQuery) {
     return (
       <div className="h-screen w-full bg-[#1e1e1e] flex flex-col overflow-hidden">
@@ -240,10 +343,11 @@ export default function EntityQueryEditorPage() {
           onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
           onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
           onToggleLibrary={() => setShowLibrary(!showLibrary)}
+          onToggleBlackboard={() => setShowBlackboard(!showBlackboard)}
           onBack={() => setCurrentQuery(null)}
           projectName={currentQuery.query_name}
           zoom={zoom}
-          showBlackboard={false}
+          showBlackboard={showBlackboard}
         />
 
         <div className="flex-1 flex overflow-hidden relative">
@@ -262,7 +366,7 @@ export default function EntityQueryEditorPage() {
               onAddConnection={addConnection}
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
-              NodeComponent={QueryNode}
+              NodeComponent={NodeComponentRouter}
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
@@ -271,6 +375,8 @@ export default function EntityQueryEditorPage() {
               <div>缩放: {(zoom * 100).toFixed(0)}%</div>
             </div>
           </div>
+
+          {showBlackboard && <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />}
         </div>
       </div>
     );
