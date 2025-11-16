@@ -1,5 +1,5 @@
 
-import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch } from 'lucide-react';
+import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat } from 'lucide-react';
 
 // 节点类型定义
 export const NODE_TYPES = {
@@ -782,3 +782,4 @@ export function getNodeColor(nodeType) {
 export function getNodeLabel(nodeType) {
   return NODE_TYPES[nodeType]?.label || nodeType;
 }
+
