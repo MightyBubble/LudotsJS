@@ -275,12 +275,33 @@ export default function UnifiedGraphEditorPage() {
   }, []);
 
   const addConnection = useCallback((connection) => {
+    // 类型校验
+    const fromNode = nodes.find(n => n.id === connection.fromNode);
+    const toNode = nodes.find(n => n.id === connection.toNode);
+    
+    if (fromNode && toNode) {
+      const fromPort = fromNode.outputs?.find(p => p.id === connection.fromPort);
+      const toPort = toNode.inputs?.find(p => p.id === connection.toPort);
+      
+      if (fromPort && toPort) {
+        // 检查类型兼容性
+        const fromType = fromPort.type;
+        const toType = toPort.type;
+        
+        // any类型可以接受任何输入
+        if (toType !== 'any' && fromType !== 'any' && fromType !== toType) {
+          alert(`类型不匹配：无法将 ${fromType} 连接到 ${toType}`);
+          return;
+        }
+      }
+    }
+    
     const exists = connections.some(c =>
       c.fromNode === connection.fromNode && c.fromPort === connection.fromPort &&
       c.toNode === connection.toNode && c.toPort === connection.toPort
     );
     if (!exists) setConnections(prev => [...prev, connection]);
-  }, [connections]);
+  }, [connections, nodes]);
 
   const deleteConnection = useCallback((connectionId) => {
     setConnections(prev => prev.filter(c => c.id !== connectionId));
