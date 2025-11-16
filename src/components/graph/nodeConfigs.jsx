@@ -1,5 +1,5 @@
 
-import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers } from 'lucide-react';
+import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch } from 'lucide-react';
 
 // 节点类型定义
 export const NODE_TYPES = {
@@ -704,7 +704,7 @@ export const NODE_TYPES = {
   // 函数图专用节点 - 条件类
   if_else: {
     label: '条件分支',
-    icon: Shuffle, // Re-adding Shuffle as it was removed from import, but present here. Assuming it should be kept.
+    icon: GitBranch, 
     color: '#c97fff',
     category: '函数-条件',
     graphTypes: ['function'],
