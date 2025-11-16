@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -217,14 +218,14 @@ export default function AttributeEditorPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Layers className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">属性定义</span>
-        <span className="text-xs text-gray-500">共 {filteredAttributes.length} 个</span>
+        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredAttributes.length} 个</span>
         
         <div className="flex-1" />
 
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
@@ -234,14 +235,28 @@ export default function AttributeEditorPage() {
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
-          <Plus className="w-3 h-3 mr-1" />
-          新建
+        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
+          <Plus className="w-3 h-3 md:mr-1" />
+          <span className="hidden md:inline">新建</span>
         </Button>
       </div>
 
+      {/* 移动端搜索 */}
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+          <Input
+            placeholder="搜索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          />
+        </div>
+      </div>
+
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-xs text-white">
+        {/* 桌面端表格 */}
+        <table className="w-full text-xs text-white hidden md:table">
           <thead className="bg-[#2d2d2d] border-b border-[#3d3d3d] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-32">属性ID</th>
@@ -456,6 +471,50 @@ export default function AttributeEditorPage() {
             })}
           </tbody>
         </table>
+
+        {/* 移动端卡片 */}
+        <div className="md:hidden space-y-2 p-2">
+          {filteredAttributes.map((attr) => {
+            const isEditing = editingRow === attr.id;
+            const currentData = isEditing ? editData : attr;
+
+            return (
+              <div key={attr.id} className="bg-[#252526] rounded border border-[#3e3e42] p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-white">{currentData.attribute_id}</div>
+                    <div className="text-xs text-white/70">{currentData.name}</div>
+                  </div>
+                  <div className="flex gap-1">
+                    {isEditing ? (
+                      <>
+                        <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]">
+                          <Save className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => handleEdit(attr)} className="text-white/30 hover:text-blue-400 p-1">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(attr.id)} className="text-white/30 hover:text-red-400 p-1">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {/* 简化的移动端显示 */}
+                <div className="text-xs text-white/50">
+                  基础值: {currentData.default_base_value} | 键: {(currentData.keys || []).length}个
+                </div>
+              </div>
+            );
+          })}
+        </div>
         
         {filteredAttributes.length === 0 && (
           <div className="text-center py-12 text-gray-500">

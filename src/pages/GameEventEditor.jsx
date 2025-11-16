@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -102,12 +103,12 @@ export default function GameEventEditor() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Zap className="w-4 h-4 text-yellow-400" />
         <span className="text-sm font-semibold text-gray-300">事件编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredEvents.length} 个</span>
+        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredEvents.length} 个</span>
         <div className="flex-1" />
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
@@ -116,21 +117,35 @@ export default function GameEventEditor() {
             className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
           />
         </div>
-        <Button onClick={handleCreate} size="sm" className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
-          <Plus className="w-3 h-3 mr-1" />新建事件
+        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+          <Plus className="w-3 h-3 md:mr-1" />
+          <span className="hidden md:inline">新建事件</span>
         </Button>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
+      {/* 移动端搜索 */}
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+          <Input
+            placeholder="搜索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-2 md:p-4">
         <div className="space-y-3">
           {filteredEvents.map((event) => {
             const isEditing = editingId === event.id;
             const data = isEditing ? editData : event;
 
             return (
-              <div key={event.id} className="bg-[#252526] rounded border border-[#3e3e42] p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 grid grid-cols-3 gap-3">
+              <div key={event.id} className="bg-[#252526] rounded border border-[#3e3e42] p-3 md:p-4">
+                <div className="flex items-start justify-between mb-3 gap-2">
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <label className="text-xs text-white/50 mb-1 block">事件ID</label>
                       {isEditing ? (
@@ -140,7 +155,7 @@ export default function GameEventEditor() {
                           className="h-7 text-xs bg-[#3c3c3c] border-[#434343] text-white"
                         />
                       ) : (
-                        <div className="text-sm text-white/90 font-mono">{data.event_id}</div>
+                        <div className="text-sm text-white/90 font-mono break-all">{data.event_id}</div>
                       )}
                     </div>
                     <div>
@@ -168,7 +183,7 @@ export default function GameEventEditor() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-3">
+                  <div className="flex gap-1">
                     {isEditing ? (
                       <>
                         <Button onClick={handleSave} size="sm" className="h-7 px-2 bg-green-600 hover:bg-green-700">
@@ -206,7 +221,7 @@ export default function GameEventEditor() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-white/50">输入参数（订阅）</label>

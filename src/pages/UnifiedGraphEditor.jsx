@@ -34,6 +34,8 @@ export default function UnifiedGraphEditorPage() {
   const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Added return_type
   const [connectionValues, setConnectionValues] = useState({});
   const [isEditingType, setIsEditingType] = useState(false);
+  const [showLibraryMobile, setShowLibraryMobile] = useState(false);
+  const [showBlackboardMobile, setShowBlackboardMobile] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -169,7 +171,7 @@ export default function UnifiedGraphEditorPage() {
 
   const updateGraphType = useCallback((newType) => {
     if (!currentGraph) return;
-    
+
     // 转换图类型需要删除旧图并创建新图
     alert('图类型转换功能开发中...');
     setIsEditingType(false);
@@ -177,7 +179,7 @@ export default function UnifiedGraphEditorPage() {
 
   const updateReturnType = useCallback((newReturnType) => {
     if (!currentGraph || currentGraph.graph_type !== 'function') return;
-    
+
     updateMutation.mutate({
       id: currentGraph.id,
       entity_type: currentGraph.entity_type,
@@ -185,7 +187,7 @@ export default function UnifiedGraphEditorPage() {
         return_type: newReturnType
       }
     });
-    
+
     setCurrentGraph(prev => ({ ...prev, return_type: newReturnType }));
   }, [currentGraph, updateMutation]);
 
@@ -278,16 +280,16 @@ export default function UnifiedGraphEditorPage() {
     // 类型校验
     const fromNode = nodes.find(n => n.id === connection.fromNode);
     const toNode = nodes.find(n => n.id === connection.toNode);
-    
+
     if (fromNode && toNode) {
       const fromPort = fromNode.outputs?.find(p => p.id === connection.fromPort);
       const toPort = toNode.inputs?.find(p => p.id === connection.toPort);
-      
+
       if (fromPort && toPort) {
         // 检查类型兼容性
         const fromType = fromPort.type;
         const toType = toPort.type;
-        
+
         // any类型可以接受任何输入
         if (toType !== 'any' && fromType !== 'any' && fromType !== toType) {
           alert(`类型不匹配：无法将 ${fromType} 连接到 ${toType}`);
@@ -295,7 +297,7 @@ export default function UnifiedGraphEditorPage() {
         }
       }
     }
-    
+
     const exists = connections.some(c =>
       c.fromNode === connection.fromNode && c.fromPort === connection.fromPort &&
       c.toNode === connection.toNode && c.toPort === connection.toPort
@@ -309,7 +311,7 @@ export default function UnifiedGraphEditorPage() {
 
   useEffect(() => {
     if (!currentGraph) return;
-    
+
     const calculateNodeValues = () => {
       const values = {};
       const connValues = {};
@@ -365,24 +367,24 @@ export default function UnifiedGraphEditorPage() {
         let output = {};
         try {
           switch (node.type) {
-            case 'number': 
-              output = { value: node.data?.value ?? 0 }; 
+            case 'number':
+              output = { value: node.data?.value ?? 0 };
               break;
-            case 'add': 
-              output = { result: (inputs.a ?? node.data?.a ?? 0) + (inputs.b ?? node.data?.b ?? 0) }; 
+            case 'add':
+              output = { result: (inputs.a ?? node.data?.a ?? 0) + (inputs.b ?? node.data?.b ?? 0) };
               break;
-            case 'subtract': 
-              output = { result: (inputs.a ?? node.data?.a ?? 0) - (inputs.b ?? node.data?.b ?? 0) }; 
+            case 'subtract':
+              output = { result: (inputs.a ?? node.data?.a ?? 0) - (inputs.b ?? node.data?.b ?? 0) };
               break;
-            case 'multiply': 
-              output = { result: (inputs.a ?? node.data?.a ?? 0) * (inputs.b ?? node.data?.b ?? 0) }; 
+            case 'multiply':
+              output = { result: (inputs.a ?? node.data?.a ?? 0) * (inputs.b ?? node.data?.b ?? 0) };
               break;
-            case 'divide': 
+            case 'divide':
               const b = inputs.b ?? node.data?.b ?? 1;
               output = { result: b !== 0 ? (inputs.a ?? node.data?.a ?? 0) / b : 0 };
               break;
-            case 'power': 
-              output = { result: Math.pow(inputs.base ?? node.data?.base ?? 0, inputs.exponent ?? node.data?.exponent ?? 0) }; 
+            case 'power':
+              output = { result: Math.pow(inputs.base ?? node.data?.base ?? 0, inputs.exponent ?? node.data?.exponent ?? 0) };
               break;
             case 'clamp':
               const val = inputs.value ?? node.data?.value ?? 0;
@@ -390,8 +392,8 @@ export default function UnifiedGraphEditorPage() {
               const maxVal = inputs.max ?? node.data?.max ?? 100;
               output = { result: Math.max(minVal, Math.min(maxVal, val)) };
               break;
-            case 'blackboard_get': 
-              output = { value: blackboard[node.data?.key]?.value }; 
+            case 'blackboard_get':
+              output = { value: blackboard[node.data?.key]?.value };
               break;
             default:
               const config = getNodeConfig(node.type);
@@ -419,7 +421,7 @@ export default function UnifiedGraphEditorPage() {
           console.error('Error executing node', nodeId, e);
         }
       });
-      
+
       setConnectionValues(connValues);
 
       const nodeConnectedValues = {};
@@ -455,8 +457,14 @@ export default function UnifiedGraphEditorPage() {
           onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
           onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
           onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-          onToggleLibrary={() => setShowLibrary(!showLibrary)}
-          onToggleBlackboard={() => setShowBlackboard(!showBlackboard)}
+          onToggleLibrary={() => {
+            setShowLibrary(prev => !prev);
+            setShowLibraryMobile(prev => !prev);
+          }}
+          onToggleBlackboard={() => {
+            setShowBlackboard(prev => !prev);
+            setShowBlackboardMobile(prev => !prev);
+          }}
           onBack={() => setCurrentGraph(null)}
           projectName={currentGraph.name}
           zoom={zoom}
@@ -464,7 +472,17 @@ export default function UnifiedGraphEditorPage() {
         />
 
         <div className="flex-1 flex overflow-hidden relative">
-          {showLibrary && <UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={addNode} onClose={() => setShowLibrary(false)} />}
+          {/* 桌面端显示 */}
+          {showLibrary && <div className="hidden md:block"><UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={addNode} onClose={() => setShowLibrary(false)} /></div>}
+
+          {/* 移动端节点库弹窗 */}
+          {showLibraryMobile && (
+            <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowLibraryMobile(false)}>
+              <div className="absolute bottom-0 left-0 right-0 bg-[#252526] max-h-[60vh] overflow-hidden rounded-t-xl" onClick={(e) => e.stopPropagation()}>
+                <UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={(type) => { addNode(type); setShowLibraryMobile(false); }} onClose={() => setShowLibraryMobile(false)} />
+              </div>
+            </div>
+          )}
 
           <div className="flex-1 relative">
             <GraphCanvas
@@ -525,7 +543,17 @@ export default function UnifiedGraphEditorPage() {
             </div>
           </div>
 
-          {showBlackboard && <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />}
+          {/* 桌面端显示 */}
+          {showBlackboard && <div className="hidden md:block"><BlackboardPanel blackboard={blackboard} onChange={setBlackboard} /></div>}
+
+          {/* 移动端黑板弹窗 */}
+          {showBlackboardMobile && (
+            <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowBlackboardMobile(false)}>
+              <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-[#252526]" onClick={(e) => e.stopPropagation()}>
+                <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -533,12 +561,12 @@ export default function UnifiedGraphEditorPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Network className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">图编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredGraphs.length} 个</span>
+        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredGraphs.length} 个</span>
         <div className="flex-1" />
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
@@ -549,8 +577,9 @@ export default function UnifiedGraphEditorPage() {
         </div>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
-              <Plus className="w-3 h-3 mr-1" />新建图
+            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
+              <Plus className="w-3 h-3 md:mr-1" />
+              <span className="hidden md:inline">新建图</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white">
@@ -603,8 +632,21 @@ export default function UnifiedGraphEditorPage() {
         </Dialog>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
-        <div className="grid grid-cols-3 gap-4">
+      {/* 移动端搜索 */}
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+          <Input
+            placeholder="搜索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-2 md:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredGraphs.map((graph) => (
             <div key={graph.id} className="bg-[#252526] rounded border border-[#3e3e42] p-4 hover:border-[#0e639c] transition-colors group">
               <div className="flex items-start justify-between mb-2">
