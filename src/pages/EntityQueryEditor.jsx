@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +7,7 @@ import GraphCanvas from '../components/graph/GraphCanvas';
 import QueryNodeLibrary from '../components/queryGraph/QueryNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
 import QueryNode from '../components/queryGraph/QueryNode';
+import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -22,9 +22,11 @@ export default function EntityQueryEditorPage() {
   const [currentQuery, setCurrentQuery] = useState(null);
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
+  const [blackboard, setBlackboard] = useState({});
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [showLibrary, setShowLibrary] = useState(true);
+  const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newQuery, setNewQuery] = useState({ query_name: '', description: '' });
 
@@ -39,7 +41,7 @@ export default function EntityQueryEditorPage() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.EntityQuery.create({
       ...data,
-      graph_definition: JSON.stringify({ nodes: [], connections: [] })
+      graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
     }),
     onSuccess: (query) => {
       queryClient.invalidateQueries({ queryKey: ['entityQueries'] });
@@ -84,6 +86,7 @@ export default function EntityQueryEditorPage() {
     setCurrentQuery(query);
     setNodes(graphDef.nodes || []);
     setConnections(graphDef.connections || []);
+    setBlackboard(graphDef.blackboard || {});
   };
 
   const saveQuery = useCallback(() => {
@@ -92,10 +95,10 @@ export default function EntityQueryEditorPage() {
     updateMutation.mutate({
       id: currentQuery.id,
       data: {
-        graph_definition: JSON.stringify({ nodes, connections })
+        graph_definition: JSON.stringify({ nodes, connections, blackboard })
       }
     });
-  }, [currentQuery, nodes, connections]);
+  }, [currentQuery, nodes, connections, blackboard]);
 
   const getNodeInputs = (type) => {
     const inputConfigs = {
@@ -157,22 +160,22 @@ export default function EntityQueryEditorPage() {
     const defaultData = {
       entity_source: {},
       filter_prototype: { prototypeId: '' },
-      filter_attribute: { attributeId: '', key: '', operator: 'gt', threshold: 0 },
+      filter_attribute: { attributeId: '', key: '', operator: 'gt', threshold: 0, useBlackboard: false, blackboardKey: '' },
       filter_tag: { tagPath: '', mode: 'has' },
       filter_relation: { relationId: '', direction: 'source' },
-      filter_relation_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0 },
+      filter_relation_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0, useBlackboard: false, blackboardKey: '' },
       filter_relation_tag: { relationId: '', tagPath: '', mode: 'has' },
-      filter_related_entity_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0 },
+      filter_related_entity_attribute: { relationId: '', attributeId: '', key: '', operator: 'gt', threshold: 0, useBlackboard: false, blackboardKey: '' },
       filter_related_entity_tag: { relationId: '', tagPath: '', mode: 'has' },
-      spatial_distance: { maxDistance: 100, x: 0, y: 0, z: 0 },
+      spatial_distance: { maxDistance: 100, x: 0, y: 0, z: 0, useBlackboard: false, blackboardKey: '' },
       spatial_area: { shape: 'sphere', centerX: 0, centerY: 0, centerZ: 0, sizeX: 10, sizeY: 10, sizeZ: 10 },
       sort_by_attribute: { attributeId: '', key: '', order: 'asc' },
       sort_by_relation: { relationId: '', order: 'asc' },
       sort_by_tag: { tagPath: '', order: 'asc' },
-      limit_top: { count: 10 },
-      limit_bottom: { count: 10 },
-      limit_percent_top: { percent: 10 },
-      limit_percent_bottom: { percent: 10 }
+      limit_top: { count: 10, useBlackboard: false, blackboardKey: '' },
+      limit_bottom: { count: 10, useBlackboard: false, blackboardKey: '' },
+      limit_percent_top: { percent: 10, useBlackboard: false, blackboardKey: '' },
+      limit_percent_bottom: { percent: 10, useBlackboard: false, blackboardKey: '' }
     };
 
     const newNode = {
@@ -240,10 +243,11 @@ export default function EntityQueryEditorPage() {
           onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
           onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
           onToggleLibrary={() => setShowLibrary(!showLibrary)}
+          onToggleBlackboard={() => setShowBlackboard(!showBlackboard)}
           onBack={() => setCurrentQuery(null)}
           projectName={currentQuery.query_name}
           zoom={zoom}
-          showBlackboard={false}
+          showBlackboard={showBlackboard}
         />
 
         <div className="flex-1 flex overflow-hidden relative">
@@ -262,7 +266,7 @@ export default function EntityQueryEditorPage() {
               onAddConnection={addConnection}
               onDeleteConnection={deleteConnection}
               onAddNodeAtPosition={addNodeAtPosition}
-              NodeComponent={QueryNode}
+              NodeComponent={(props) => <QueryNode {...props} blackboard={blackboard} />}
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
@@ -271,6 +275,8 @@ export default function EntityQueryEditorPage() {
               <div>缩放: {(zoom * 100).toFixed(0)}%</div>
             </div>
           </div>
+
+          {showBlackboard && <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />}
         </div>
       </div>
     );
