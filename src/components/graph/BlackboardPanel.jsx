@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Database, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { getTypeColor, getTypeShape } from './nodeConfigs';
 import {
   Dialog,
   DialogContent,
@@ -102,6 +103,37 @@ export default function BlackboardPanel({ blackboard, onChange }) {
       case 'entitySet': return [];
       default: return 0;
     }
+  };
+
+  const renderTypeIndicator = (type) => {
+    const color = getTypeColor(type);
+    const shape = getTypeShape(type);
+    const size = 10;
+    
+    const shapeElement = () => {
+      const commonProps = {
+        style: { fill: color, stroke: '#1a1a1a', strokeWidth: 1 }
+      };
+      
+      switch (shape) {
+        case 'circle':
+          return <circle cx={size/2} cy={size/2} r={size/2 - 1} {...commonProps} />;
+        case 'square':
+          return <rect x={1} y={1} width={size - 2} height={size - 2} {...commonProps} />;
+        case 'diamond':
+          return <polygon points={`${size/2},1 ${size-1},${size/2} ${size/2},${size-1} 1,${size/2}`} {...commonProps} />;
+        case 'triangle':
+          return <polygon points={`${size/2},1 ${size-1},${size-1} 1,${size-1}`} {...commonProps} />;
+        default:
+          return <circle cx={size/2} cy={size/2} r={size/2 - 1} {...commonProps} />;
+      }
+    };
+    
+    return (
+      <svg width={size} height={size} style={{ minWidth: size, minHeight: size }}>
+        {shapeElement()}
+      </svg>
+    );
   };
 
   return (
@@ -302,6 +334,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-1.5">
+                {renderTypeIndicator(variable.type)}
                 <span className="text-xs font-mono text-white/90">{variable.key}</span>
                 <button
                   onClick={() => handleUpdate(variable.key, 'public', !variable.public)}

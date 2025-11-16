@@ -91,10 +91,9 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, nodeType.type)}
                     onClick={() => onAddNode(nodeType.type)}
-                    className="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all hover:bg-[#2d2d30] active:scale-95"
-                    style={{ borderLeft: `3px solid ${nodeType.color}` }}
+                    className="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all hover:bg-[#2d2d30] active:scale-95 border-l-2 border-[#3e3e42] hover:border-white/20"
                   >
-                    <Icon className="w-4 h-4" style={{ color: nodeType.color }} />
+                    <Icon className="w-4 h-4 text-white/60" />
                     <span className="text-xs text-white/90">{nodeType.label}</span>
                   </div>
                 );

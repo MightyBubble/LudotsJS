@@ -1,67 +1,68 @@
-import React, { useRef } from 'react';
+import React from 'react';
+import { getTypeColor, getTypeShape } from './nodeConfigs';
 
-const portColors = {
-  number: '#5b9bd5',
-  vector: '#70ad47',
-  color: '#ffc000',
-  any: '#808080'
-};
-
-export default function NodePort({ 
-  nodeId,
-  port, 
-  type,
-  onStartConnection,
-  onEndConnection 
-}) {
-  const portRef = useRef(null);
+export default function NodePort({ nodeId, port, type, onStartConnection, onEndConnection }) {
   const isInput = type === 'input';
-  const color = portColors[port.type] || portColors.any;
+  const portColor = getTypeColor(port.type);
+  const portShape = getTypeShape(port.type);
 
   const handleMouseDown = (e) => {
-    e.stopPropagation();
-    if (portRef.current) {
-      onStartConnection(nodeId, port.id, type, portRef.current);
+    if (type === 'output') {
+      e.stopPropagation();
+      onStartConnection?.(nodeId, port.id);
     }
   };
 
   const handleMouseUp = (e) => {
-    e.stopPropagation();
-    onEndConnection(nodeId, port.id, type);
+    if (type === 'input') {
+      e.stopPropagation();
+      onEndConnection?.(nodeId, port.id);
+    }
+  };
+
+  const renderPortShape = () => {
+    const size = 12;
+    const commonProps = {
+      className: "node-port transition-all",
+      style: { 
+        fill: portColor,
+        stroke: '#1a1a1a',
+        strokeWidth: 2,
+        cursor: 'pointer'
+      },
+      onMouseDown: handleMouseDown,
+      onMouseUp: handleMouseUp
+    };
+
+    switch (portShape) {
+      case 'circle':
+        return <circle cx={size/2} cy={size/2} r={size/2 - 1} {...commonProps} />;
+      
+      case 'square':
+        return <rect x={1} y={1} width={size - 2} height={size - 2} {...commonProps} />;
+      
+      case 'diamond':
+        return <polygon points={`${size/2},1 ${size-1},${size/2} ${size/2},${size-1} 1,${size/2}`} {...commonProps} />;
+      
+      case 'triangle':
+        return <polygon points={`${size/2},1 ${size-1},${size-1} 1,${size-1}`} {...commonProps} />;
+      
+      default:
+        return <circle cx={size/2} cy={size/2} r={size/2 - 1} {...commonProps} />;
+    }
   };
 
   return (
     <div 
-      className={`flex items-center text-xs text-white/80 relative ${isInput ? 'flex-row' : 'flex-row-reverse text-right'}`}
-      style={{ 
-        position: 'relative',
-        paddingLeft: isInput ? '0' : '8px',
-        paddingRight: isInput ? '8px' : '0'
-      }}
+      className={`flex items-center gap-2 ${isInput ? 'flex-row' : 'flex-row-reverse'} text-white/80`}
+      style={{ fontSize: '11px' }}
     >
-      <div
-        ref={portRef}
-        data-node-id={nodeId}
-        data-port-id={port.id}
-        data-port-type={type}
-        className="node-port w-3 h-3 rounded-full cursor-pointer hover:scale-125 transition-transform flex-shrink-0"
-        style={{ 
-          backgroundColor: color,
-          border: '2px solid #2a2a2a',
-          position: 'absolute',
-          left: isInput ? '-6px' : 'auto',
-          right: isInput ? 'auto' : '-6px',
-          zIndex: 20
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-      />
-      <span className="font-medium leading-none" style={{ 
-        marginLeft: isInput ? '10px' : '0',
-        marginRight: isInput ? '0' : '10px'
-      }}>
-        {port.label}
-      </span>
+      <div className="relative" style={{ width: 12, height: 12 }}>
+        <svg width="12" height="12" style={{ overflow: 'visible' }}>
+          {renderPortShape()}
+        </svg>
+      </div>
+      <span className="text-white/70">{port.label}</span>
     </div>
   );
 }

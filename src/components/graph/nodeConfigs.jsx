@@ -1,5 +1,48 @@
-
 import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat } from 'lucide-react';
+
+// 类型颜色映射
+export const TYPE_COLORS = {
+  number: '#5b9bd5',
+  boolean: '#d9534f',
+  string: '#e91e63',
+  array: '#e67e22',
+  object: '#9b6bb3',
+  vector2: '#70ad47',
+  vector3: '#70ad47',
+  vector4: '#70ad47',
+  color: '#ffc000',
+  quaternion: '#c97fff',
+  entity: '#17a2b8',
+  entities: '#5bc0de',
+  relation: '#e67e22',
+  attribute: '#9b6bb3',
+  tag: '#ffc000',
+  entityPrototype: '#17a2b8',
+  entitySet: '#5bc0de',
+  any: '#6c757d'
+};
+
+// 类型形状映射
+export const TYPE_SHAPES = {
+  number: 'circle',
+  boolean: 'circle',
+  string: 'circle',
+  array: 'square',
+  object: 'square',
+  vector2: 'diamond',
+  vector3: 'diamond',
+  vector4: 'diamond',
+  color: 'triangle',
+  quaternion: 'triangle',
+  entity: 'square',
+  entities: 'square',
+  relation: 'square',
+  attribute: 'square',
+  tag: 'square',
+  entityPrototype: 'square',
+  entitySet: 'square',
+  any: 'circle'
+};
 
 // 节点类型定义
 export const NODE_TYPES = {
@@ -7,7 +50,6 @@ export const NODE_TYPES = {
   number: { 
     label: '数值', 
     icon: Hash, 
-    color: '#5b9bd5', 
     category: '基础',
     graphTypes: ['data', 'query', 'function'],
     inputs: [],
@@ -16,7 +58,6 @@ export const NODE_TYPES = {
   add: { 
     label: '加法', 
     icon: Plus, 
-    color: '#9b6bb3', 
     category: '数学',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -28,7 +69,6 @@ export const NODE_TYPES = {
   subtract: { 
     label: '减法', 
     icon: Minus, 
-    color: '#9b6bb3', 
     category: '数学',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -40,7 +80,6 @@ export const NODE_TYPES = {
   multiply: { 
     label: '乘法', 
     icon: X, 
-    color: '#9b6bb3', 
     category: '数学',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -52,7 +91,6 @@ export const NODE_TYPES = {
   divide: { 
     label: '除法', 
     icon: Divide, 
-    color: '#9b6bb3', 
     category: '数学',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -64,7 +102,6 @@ export const NODE_TYPES = {
   power: { 
     label: '幂运算', 
     icon: TrendingUp, 
-    color: '#9b6bb3', 
     category: '数学',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -76,7 +113,6 @@ export const NODE_TYPES = {
   sum: { 
     label: '求和', 
     icon: Sigma, 
-    color: '#e67e22', 
     category: '聚合',
     graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
@@ -85,7 +121,6 @@ export const NODE_TYPES = {
   product: { 
     label: '求积', 
     icon: Sigma, 
-    color: '#e67e22', 
     category: '聚合',
     graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
@@ -94,7 +129,6 @@ export const NODE_TYPES = {
   max: { 
     label: '最大值', 
     icon: TrendingUp, 
-    color: '#e67e22', 
     category: '聚合',
     graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
@@ -103,7 +137,6 @@ export const NODE_TYPES = {
   min: { 
     label: '最小值', 
     icon: TrendingUp, 
-    color: '#e67e22', 
     category: '聚合',
     graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
@@ -112,7 +145,6 @@ export const NODE_TYPES = {
   clamp: { 
     label: '钳制', 
     icon: TrendingUp, 
-    color: '#e67e22', 
     category: '聚合',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -127,7 +159,6 @@ export const NODE_TYPES = {
   vector2: { 
     label: '二维向量', 
     icon: Move, 
-    color: '#70ad47', 
     category: '向量',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -139,7 +170,6 @@ export const NODE_TYPES = {
   vector3: { 
     label: '三维向量', 
     icon: Move, 
-    color: '#70ad47', 
     category: '向量',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -152,7 +182,6 @@ export const NODE_TYPES = {
   vector4: { 
     label: '四维向量', 
     icon: Move, 
-    color: '#70ad47', 
     category: '向量',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -166,7 +195,6 @@ export const NODE_TYPES = {
   quaternion: { 
     label: '四元数', 
     icon: Move, 
-    color: '#c97fff', 
     category: '高级',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -180,7 +208,6 @@ export const NODE_TYPES = {
   color: { 
     label: '颜色', 
     icon: Palette, 
-    color: '#ffc000', 
     category: '高级',
     graphTypes: ['data', 'query', 'function'],
     inputs: [
@@ -195,7 +222,6 @@ export const NODE_TYPES = {
   blackboard_get: { 
     label: 'Get', 
     icon: Download, 
-    color: '#0e639c', 
     category: '黑板',
     graphTypes: ['data', 'query', 'function'],
     inputs: [],
@@ -204,7 +230,6 @@ export const NODE_TYPES = {
   blackboard_set: { 
     label: 'Set', 
     icon: Upload, 
-    color: '#16825d', 
     category: '黑板',
     graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'value', label: '值', type: 'any' }],
@@ -215,7 +240,6 @@ export const NODE_TYPES = {
   entity_source: { 
     label: '实体源', 
     icon: Database, 
-    color: '#0e639c', 
     category: '源',
     graphTypes: ['query'],
     inputs: [],
@@ -224,7 +248,6 @@ export const NODE_TYPES = {
   filter_prototype: { 
     label: '原型过滤', 
     icon: Filter, 
-    color: '#70ad47', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -233,7 +256,6 @@ export const NODE_TYPES = {
   filter_attribute: { 
     label: '属性过滤', 
     icon: Filter, 
-    color: '#9b6bb3', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [
@@ -245,7 +267,6 @@ export const NODE_TYPES = {
   filter_tag: { 
     label: '标签过滤', 
     icon: Tag, 
-    color: '#ffc000', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -254,7 +275,6 @@ export const NODE_TYPES = {
   filter_relation: { 
     label: '关系过滤', 
     icon: Link, 
-    color: '#e67e22', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -263,7 +283,6 @@ export const NODE_TYPES = {
   filter_relation_attribute: { 
     label: '关系属性过滤', 
     icon: Network, 
-    color: '#e67e22', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [
@@ -275,7 +294,6 @@ export const NODE_TYPES = {
   filter_relation_tag: { 
     label: '关系标签过滤', 
     icon: Network, 
-    color: '#e67e22', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -284,7 +302,6 @@ export const NODE_TYPES = {
   filter_related_entity_attribute: { 
     label: '关联实体属性过滤', 
     icon: Network, 
-    color: '#9b6bb3', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [
@@ -296,7 +313,6 @@ export const NODE_TYPES = {
   filter_related_entity_tag: { 
     label: '关联实体标签过滤', 
     icon: Network, 
-    color: '#ffc000', 
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -305,7 +321,6 @@ export const NODE_TYPES = {
   spatial_distance: { 
     label: '距离查询', 
     icon: MapPin, 
-    color: '#c97fff', 
     category: '空间',
     graphTypes: ['query'],
     inputs: [
@@ -317,7 +332,6 @@ export const NODE_TYPES = {
   spatial_area: { 
     label: '区域查询', 
     icon: Box, 
-    color: '#c97fff', 
     category: '空间',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -326,7 +340,6 @@ export const NODE_TYPES = {
   logic_intersect: { 
     label: '交集', 
     icon: GitMerge, 
-    color: '#d9534f', 
     category: '逻辑',
     graphTypes: ['query'],
     inputs: [
@@ -338,7 +351,6 @@ export const NODE_TYPES = {
   logic_union: { 
     label: '并集', 
     icon: GitMerge, 
-    color: '#d9534f', 
     category: '逻辑',
     graphTypes: ['query'],
     inputs: [
@@ -350,7 +362,6 @@ export const NODE_TYPES = {
   logic_difference: { 
     label: '差集', 
     icon: GitMerge, 
-    color: '#d9534f', 
     category: '逻辑',
     graphTypes: ['query'],
     inputs: [
@@ -362,7 +373,6 @@ export const NODE_TYPES = {
   sort_by_attribute: { 
     label: '按属性排序', 
     icon: ArrowUpDown, 
-    color: '#5bc0de', 
     category: '排序',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -371,7 +381,6 @@ export const NODE_TYPES = {
   sort_by_relation: { 
     label: '按关系排序', 
     icon: ArrowUpDown, 
-    color: '#5bc0de', 
     category: '排序',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -380,7 +389,6 @@ export const NODE_TYPES = {
   sort_by_tag: { 
     label: '按标签排序', 
     icon: ArrowUpDown, 
-    color: '#5bc0de', 
     category: '排序',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -389,7 +397,6 @@ export const NODE_TYPES = {
   limit_top: { 
     label: '取前N名', 
     icon: Hash, 
-    color: '#17a2b8', 
     category: '限制',
     graphTypes: ['query'],
     inputs: [
@@ -401,7 +408,6 @@ export const NODE_TYPES = {
   limit_bottom: { 
     label: '取后N名', 
     icon: Hash, 
-    color: '#17a2b8', 
     category: '限制',
     graphTypes: ['query'],
     inputs: [
@@ -413,7 +419,6 @@ export const NODE_TYPES = {
   limit_percent_top: { 
     label: '取前N%', 
     icon: Percent, 
-    color: '#17a2b8', 
     category: '限制',
     graphTypes: ['query'],
     inputs: [
@@ -425,7 +430,6 @@ export const NODE_TYPES = {
   limit_percent_bottom: { 
     label: '取后N%', 
     icon: Percent, 
-    color: '#17a2b8', 
     category: '限制',
     graphTypes: ['query'],
     inputs: [
@@ -437,7 +441,6 @@ export const NODE_TYPES = {
   output: { 
     label: '输出', 
     icon: Database, 
-    color: '#5cb85c', 
     category: '输出',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
@@ -448,7 +451,6 @@ export const NODE_TYPES = {
   get_entity_attribute: {
     label: '获取实体属性',
     icon: Eye,
-    color: '#9b6bb3',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
@@ -457,7 +459,6 @@ export const NODE_TYPES = {
   get_entity_tags: {
     label: '获取实体标签',
     icon: Tag,
-    color: '#ffc000',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
@@ -466,7 +467,6 @@ export const NODE_TYPES = {
   get_entity_relations: {
     label: '获取实体关系',
     icon: Link,
-    color: '#e67e22',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
@@ -475,7 +475,6 @@ export const NODE_TYPES = {
   get_relation_attribute: {
     label: '获取关系属性',
     icon: Network,
-    color: '#e67e22',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'relation', label: '关系', type: 'relation' }],
@@ -484,7 +483,6 @@ export const NODE_TYPES = {
   get_relation_tags: {
     label: '获取关系标签',
     icon: Network,
-    color: '#ffc000',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'relation', label: '关系', type: 'relation' }],
@@ -493,7 +491,6 @@ export const NODE_TYPES = {
   get_related_entities: {
     label: '获取关联实体',
     icon: Database,
-    color: '#0e639c',
     category: '函数-获取',
     graphTypes: ['function'],
     inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
@@ -504,7 +501,6 @@ export const NODE_TYPES = {
   compare_equal: {
     label: '等于',
     icon: Equal,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -516,7 +512,6 @@ export const NODE_TYPES = {
   compare_not_equal: {
     label: '不等于',
     icon: X,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -528,7 +523,6 @@ export const NODE_TYPES = {
   compare_greater: {
     label: '大于',
     icon: ChevronRight,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -540,7 +534,6 @@ export const NODE_TYPES = {
   compare_less: {
     label: '小于',
     icon: ChevronLeft,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -552,7 +545,6 @@ export const NODE_TYPES = {
   compare_greater_equal: {
     label: '大于等于',
     icon: ChevronRight,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -564,7 +556,6 @@ export const NODE_TYPES = {
   compare_less_equal: {
     label: '小于等于',
     icon: ChevronLeft,
-    color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
     inputs: [
@@ -578,7 +569,6 @@ export const NODE_TYPES = {
   set_contains: {
     label: '包含',
     icon: CircleDot,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -590,7 +580,6 @@ export const NODE_TYPES = {
   set_not_contains: {
     label: '不包含',
     icon: XCircle,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -602,7 +591,6 @@ export const NODE_TYPES = {
   set_intersect: {
     label: '交集',
     icon: GitMerge,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -614,7 +602,6 @@ export const NODE_TYPES = {
   set_union: {
     label: '并集',
     icon: GitMerge,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -626,7 +613,6 @@ export const NODE_TYPES = {
   set_difference: {
     label: '差集',
     icon: GitMerge,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -638,7 +624,6 @@ export const NODE_TYPES = {
   set_is_subset: {
     label: '子集判断',
     icon: Layers,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [
@@ -650,7 +635,6 @@ export const NODE_TYPES = {
   set_size: {
     label: '集合大小',
     icon: Hash,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [{ id: 'set', label: '集合', type: 'array' }],
@@ -659,7 +643,6 @@ export const NODE_TYPES = {
   set_is_empty: {
     label: '判空',
     icon: XCircle,
-    color: '#d9534f',
     category: '函数-集合',
     graphTypes: ['function'],
     inputs: [{ id: 'set', label: '集合', type: 'array' }],
@@ -670,7 +653,6 @@ export const NODE_TYPES = {
   logic_and: {
     label: '与',
     icon: CheckCircle,
-    color: '#70ad47',
     category: '函数-逻辑',
     graphTypes: ['function'],
     inputs: [
@@ -682,7 +664,6 @@ export const NODE_TYPES = {
   logic_or: {
     label: '或',
     icon: CheckCircle,
-    color: '#70ad47',
     category: '函数-逻辑',
     graphTypes: ['function'],
     inputs: [
@@ -694,7 +675,6 @@ export const NODE_TYPES = {
   logic_not: {
     label: '非',
     icon: XCircle,
-    color: '#70ad47',
     category: '函数-逻辑',
     graphTypes: ['function'],
     inputs: [{ id: 'value', label: '值', type: 'boolean' }],
@@ -705,7 +685,6 @@ export const NODE_TYPES = {
   if_else: {
     label: '条件分支',
     icon: GitBranch, 
-    color: '#c97fff',
     category: '函数-条件',
     graphTypes: ['function'],
     inputs: [
@@ -720,7 +699,6 @@ export const NODE_TYPES = {
   has_tag: {
     label: '拥有标签',
     icon: Tag,
-    color: '#ffc000',
     category: '函数-标签',
     graphTypes: ['function'],
     inputs: [
@@ -732,7 +710,6 @@ export const NODE_TYPES = {
   has_any_tags: {
     label: '拥有任意标签',
     icon: Tag,
-    color: '#ffc000',
     category: '函数-标签',
     graphTypes: ['function'],
     inputs: [
@@ -744,7 +721,6 @@ export const NODE_TYPES = {
   has_all_tags: {
     label: '拥有所有标签',
     icon: Tag,
-    color: '#ffc000',
     category: '函数-标签',
     graphTypes: ['function'],
     inputs: [
@@ -773,13 +749,17 @@ export function getNodeConfig(nodeType) {
   return NODE_TYPES[nodeType];
 }
 
-// 获取节点颜色
-export function getNodeColor(nodeType) {
-  return NODE_TYPES[nodeType]?.color || '#6c757d';
-}
-
 // 获取节点标签
 export function getNodeLabel(nodeType) {
   return NODE_TYPES[nodeType]?.label || nodeType;
 }
 
+// 获取类型颜色
+export function getTypeColor(type) {
+  return TYPE_COLORS[type] || TYPE_COLORS.any;
+}
+
+// 获取类型形状
+export function getTypeShape(type) {
+  return TYPE_SHAPES[type] || TYPE_SHAPES.any;
+}
