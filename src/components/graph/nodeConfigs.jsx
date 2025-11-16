@@ -1,3 +1,4 @@
+
 import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat } from 'lucide-react';
 
 // 类型颜色映射
@@ -493,7 +494,10 @@ export const NODE_TYPES = {
     icon: Database,
     category: '函数-获取',
     graphTypes: ['function'],
-    inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
+    inputs: [
+      { id: 'entity', label: '实体', type: 'entity' },
+      { id: 'relation', label: '关系', type: 'relation' }
+    ],
     outputs: [{ id: 'entities', label: '实体列表', type: 'entities' }]
   },
   
