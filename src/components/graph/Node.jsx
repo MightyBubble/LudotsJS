@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from './NodePort';
@@ -75,6 +76,7 @@ export default function Node({
   node,
   selected = false,
   connectedInputPorts,
+  connectedValues, // Added new prop
   onUpdatePosition,
   onUpdateData,
   onDelete,
@@ -150,11 +152,21 @@ export default function Node({
     return connectedInputPorts && connectedInputPorts.has(`${node.id}-${portId}`);
   };
 
+  const getConnectedValue = (portId) => {
+    // node.connectedValues is expected to be an object where keys are portIds and values are the computed values
+    const conn = (connectedValues || {})[portId];
+    return conn;
+  };
+
   const renderInputWithPort = (portId, placeholder, value) => {
     const isConnected = isPortConnected(portId);
     const inputPort = node.inputs?.find(i => i.id === portId);
-    
+    const connectedVal = getConnectedValue(portId); // Use connectedValues prop
+
     if (!inputPort) return null;
+    
+    // Display connected value if port is connected, otherwise display local node data value.
+    const displayValue = isConnected ? (connectedVal ?? '') : (value ?? '');
     
     return (
       <div className="flex items-center gap-2 mb-1.5">
@@ -165,15 +177,18 @@ export default function Node({
           onStartConnection={onStartConnection}
           onEndConnection={onEndConnection}
         />
-        {!isConnected && (
-          <Input
-            type="number"
-            placeholder={placeholder}
-            value={value ?? 0}
-            onChange={(e) => onUpdateData(node.id, { [portId]: parseFloat(e.target.value) || 0 })}
-            className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white/90 flex-1 px-2"
-          />
-        )}
+        <Input
+          type="number"
+          placeholder={placeholder}
+          value={displayValue}
+          onChange={(e) => onUpdateData(node.id, { [portId]: parseFloat(e.target.value) || 0 })}
+          disabled={isConnected} // Disable input if connected
+          className={`h-6 text-xs border-[#434343] flex-1 px-2 ${
+            isConnected 
+              ? 'bg-[#2d2d30]/50 text-white/60 cursor-not-allowed' 
+              : 'bg-[#2d2d30] text-white/90'
+          }`}
+        />
       </div>
     );
   };

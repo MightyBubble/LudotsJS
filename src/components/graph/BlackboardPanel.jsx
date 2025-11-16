@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Database, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +16,30 @@ import {
 export default function BlackboardPanel({ blackboard, onChange }) {
   const [isAdding, setIsAdding] = useState(false);
   const [newVar, setNewVar] = useState({ name: '', value: 0, type: 'number', public: true });
+
+  const { data: attributes = [] } = useQuery({
+    queryKey: ['attributes'],
+    queryFn: () => base44.entities.Attribute.list(),
+    initialData: [],
+  });
+
+  const { data: relations = [] } = useQuery({
+    queryKey: ['entityRelations'],
+    queryFn: () => base44.entities.EntityRelation.list(),
+    initialData: [],
+  });
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ['gameplayTags'],
+    queryFn: () => base44.entities.GameplayTag.list(),
+    initialData: [],
+  });
+
+  const { data: prototypes = [] } = useQuery({
+    queryKey: ['entityPrototypes'],
+    queryFn: () => base44.entities.EntityPrototype.list(),
+    initialData: [],
+  });
 
   const variables = Object.entries(blackboard || {}).map(([key, data]) => ({
     key,
@@ -168,13 +194,73 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     </SelectContent>
                   </Select>
                 )}
-                {(newVar.type === 'relation' || newVar.type === 'attribute' || newVar.type === 'tag' || newVar.type === 'entityPrototype') && (
-                  <Input
+                {newVar.type === 'relation' && (
+                  <Select
                     value={newVar.value}
-                    onChange={(e) => setNewVar({ ...newVar, value: e.target.value })}
-                    placeholder="ID或路径"
-                    className="bg-[#3c3c3c] border-[#434343] text-white"
-                  />
+                    onValueChange={(val) => setNewVar({ ...newVar, value: val })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                      <SelectValue placeholder="选择关系" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                      {relations.map(r => (
+                        <SelectItem key={r.id} value={r.relation_id} className="text-white">
+                          {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {newVar.type === 'attribute' && (
+                  <Select
+                    value={newVar.value}
+                    onValueChange={(val) => setNewVar({ ...newVar, value: val })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                      <SelectValue placeholder="选择属性" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                      {attributes.map(a => (
+                        <SelectItem key={a.id} value={a.attribute_id} className="text-white">
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {newVar.type === 'tag' && (
+                  <Select
+                    value={newVar.value}
+                    onValueChange={(val) => setNewVar({ ...newVar, value: val })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                      <SelectValue placeholder="选择标签" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                      {tags.map(t => (
+                        <SelectItem key={t.id} value={t.full_path} className="text-white">
+                          {t.full_path}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {newVar.type === 'entityPrototype' && (
+                  <Select
+                    value={newVar.value}
+                    onValueChange={(val) => setNewVar({ ...newVar, value: val })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                      <SelectValue placeholder="选择原型" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                      {prototypes.map(p => (
+                        <SelectItem key={p.id} value={p.prototype_id} className="text-white">
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
                 {newVar.type === 'entitySet' && (
                   <div className="text-xs text-white/50">实体集（初始为空数组）</div>
@@ -266,13 +352,76 @@ export default function BlackboardPanel({ blackboard, onChange }) {
               </Select>
             )}
 
-            {(variable.type === 'relation' || variable.type === 'attribute' || variable.type === 'tag' || variable.type === 'entityPrototype') && (
-              <Input
+            {variable.type === 'relation' && (
+              <Select
                 value={variable.value ?? ''}
-                onChange={(e) => handleUpdate(variable.key, 'value', e.target.value)}
-                placeholder="ID或路径"
-                className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white font-mono"
-              />
+                onValueChange={(val) => handleUpdate(variable.key, 'value', val)}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
+                  <SelectValue placeholder="选择" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  {relations.map(r => (
+                    <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
+                      {r.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {variable.type === 'attribute' && (
+              <Select
+                value={variable.value ?? ''}
+                onValueChange={(val) => handleUpdate(variable.key, 'value', val)}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
+                  <SelectValue placeholder="选择" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  {attributes.map(a => (
+                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
+                      {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {variable.type === 'tag' && (
+              <Select
+                value={variable.value ?? ''}
+                onValueChange={(val) => handleUpdate(variable.key, 'value', val)}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
+                  <SelectValue placeholder="选择" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  {tags.map(t => (
+                    <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
+                      {t.full_path}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {variable.type === 'entityPrototype' && (
+              <Select
+                value={variable.value ?? ''}
+                onValueChange={(val) => handleUpdate(variable.key, 'value', val)}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
+                  <SelectValue placeholder="选择" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  {prototypes.map(p => (
+                    <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
 
             {variable.type === 'entitySet' && (
