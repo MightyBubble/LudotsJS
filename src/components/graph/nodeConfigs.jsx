@@ -1,4 +1,4 @@
-import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, NotEqual, ChevronRight, ChevronLeft, Layers, List, Shuffle } from 'lucide-react';
+import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, List, Shuffle } from 'lucide-react';
 
 // 节点类型定义
 export const NODE_TYPES = {
@@ -514,7 +514,7 @@ export const NODE_TYPES = {
   },
   compare_not_equal: {
     label: '不等于',
-    icon: NotEqual,
+    icon: X,
     color: '#5bc0de',
     category: '函数-比较',
     graphTypes: ['function'],
