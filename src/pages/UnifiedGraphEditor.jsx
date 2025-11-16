@@ -1,8 +1,9 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Network, Filter } from "lucide-react";
+import { Search, Plus, Network, Filter, Database } from "lucide-react"; // Added Database icon
 import GraphCanvas from '../components/graph/GraphCanvas';
 import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
@@ -30,7 +31,7 @@ export default function UnifiedGraphEditorPage() {
   const [showLibrary, setShowLibrary] = useState(true);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data' });
+  const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Added return_type
   const [connectionValues, setConnectionValues] = useState({});
 
   const queryClient = useQueryClient();
@@ -47,12 +48,19 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
+  const { data: functionGraphs = [] } = useQuery({ // Added functionGraphs query
+    queryKey: ['functionGraphs'],
+    queryFn: () => base44.entities.FunctionGraph.list(),
+    initialData: [],
+  });
+
   const allGraphs = useMemo(() => {
     return [
       ...dataGraphs.map(g => ({ ...g, graph_type: 'data', entity_type: 'DataGraph' })),
-      ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' }))
+      ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
+      ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' })) // Added FunctionGraph mapping
     ];
-  }, [dataGraphs, queryGraphs]);
+  }, [dataGraphs, queryGraphs, functionGraphs]); // Added functionGraphs dependency
 
   const createMutation = useMutation({
     mutationFn: (data) => {
@@ -64,23 +72,29 @@ export default function UnifiedGraphEditorPage() {
           graph_type: 'curve',
           graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
         });
-      } else {
+      } else if (data.graph_type === 'query') { // Added else if for query type
         return base44.entities.EntityQuery.create({
           query_name: data.name,
           description: data.description,
           graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
         });
+      } else { // Handle function graph creation
+        return base44.entities.FunctionGraph.create({
+          function_id: data.name.toLowerCase().replace(/\s+/g, '_'),
+          name: data.name,
+          description: data.description,
+          return_type: data.return_type || 'void',
+          parameters: [], // Default empty parameters for now
+          graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
+        });
       }
     },
     onSuccess: (graph, variables) => {
-      if (variables.graph_type === 'data') {
-        queryClient.invalidateQueries({ queryKey: ['dataGraphs'] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['entityQueries'] });
-      }
+      // Invalidate the correct query key based on graph_type
+      queryClient.invalidateQueries({ queryKey: variables.graph_type === 'data' ? ['dataGraphs'] : variables.graph_type === 'query' ? ['entityQueries'] : ['functionGraphs'] });
       setIsCreating(false);
-      setNewGraph({ name: '', description: '', graph_type: 'data' });
-      openGraph({ ...graph, graph_type: variables.graph_type, entity_type: variables.graph_type === 'data' ? 'DataGraph' : 'EntityQuery' });
+      setNewGraph({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Reset newGraph state, including return_type
+      openGraph({ ...graph, graph_type: variables.graph_type, entity_type: variables.graph_type === 'data' ? 'DataGraph' : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph' });
     },
   });
 
@@ -88,16 +102,15 @@ export default function UnifiedGraphEditorPage() {
     mutationFn: ({ id, data, entity_type }) => {
       if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.update(id, data);
-      } else {
+      } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.update(id, data);
+      } else { // Handle FunctionGraph update
+        return base44.entities.FunctionGraph.update(id, data);
       }
     },
     onSuccess: (_, variables) => {
-      if (variables.entity_type === 'DataGraph') {
-        queryClient.invalidateQueries({ queryKey: ['dataGraphs'] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['entityQueries'] });
-      }
+      // Invalidate the correct query key based on entity_type
+      queryClient.invalidateQueries({ queryKey: variables.entity_type === 'DataGraph' ? ['dataGraphs'] : variables.entity_type === 'EntityQuery' ? ['entityQueries'] : ['functionGraphs'] });
     },
   });
 
@@ -105,16 +118,15 @@ export default function UnifiedGraphEditorPage() {
     mutationFn: ({ id, entity_type }) => {
       if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.delete(id);
-      } else {
+      } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.delete(id);
+      } else { // Handle FunctionGraph delete
+        return base44.entities.FunctionGraph.delete(id);
       }
     },
     onSuccess: (_, variables) => {
-      if (variables.entity_type === 'DataGraph') {
-        queryClient.invalidateQueries({ queryKey: ['dataGraphs'] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['entityQueries'] });
-      }
+      // Invalidate the correct query key based on entity_type
+      queryClient.invalidateQueries({ queryKey: variables.entity_type === 'DataGraph' ? ['dataGraphs'] : variables.entity_type === 'EntityQuery' ? ['entityQueries'] : ['functionGraphs'] });
     },
   });
 
@@ -428,7 +440,10 @@ export default function UnifiedGraphEditorPage() {
             />
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
-              <div>类型: {currentGraph.graph_type === 'data' ? 'Data Graph' : 'Entity Query'}</div>
+              <div>类型: {currentGraph.graph_type === 'data' ? 'Data Graph' : currentGraph.graph_type === 'query' ? 'Entity Query' : 'Function Graph'}</div>
+              {currentGraph.graph_type === 'function' && currentGraph.return_type && ( // Display return type for function graphs
+                <div>返回: {currentGraph.return_type}</div>
+              )}
               <div>节点: {nodes.length}</div>
               <div>连接: {connections.length}</div>
               <div>缩放: {(zoom * 100).toFixed(0)}%</div>
@@ -475,6 +490,7 @@ export default function UnifiedGraphEditorPage() {
                   <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
                     <SelectItem value="data" className="text-white">Data Graph (数据图)</SelectItem>
                     <SelectItem value="query" className="text-white">Entity Query (实体查询)</SelectItem>
+                    <SelectItem value="function" className="text-white">Function Graph (函数图)</SelectItem> {/* Added Function Graph option */}
                   </SelectContent>
                 </Select>
               </div>
@@ -486,6 +502,26 @@ export default function UnifiedGraphEditorPage() {
                 <label className="text-sm text-white/70 mb-1.5 block">描述</label>
                 <Input value={newGraph.description} onChange={(e) => setNewGraph({ ...newGraph, description: e.target.value })} className="bg-[#3c3c3c] border-[#434343] text-white" />
               </div>
+              {newGraph.graph_type === 'function' && ( // Conditionally render return type select for function graphs
+                <div>
+                  <label className="text-sm text-white/70 mb-1.5 block">返回类型</label>
+                  <Select value={newGraph.return_type} onValueChange={(v) => setNewGraph({ ...newGraph, return_type: v })}>
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                      <SelectItem value="void" className="text-white">void (无返回)</SelectItem>
+                      <SelectItem value="number" className="text-white">number (数值)</SelectItem>
+                      <SelectItem value="boolean" className="text-white">boolean (布尔)</SelectItem>
+                      <SelectItem value="string" className="text-white">string (字符串)</SelectItem>
+                      <SelectItem value="array" className="text-white">array (数组)</SelectItem>
+                      <SelectItem value="object" className="text-white">object (对象)</SelectItem>
+                      <SelectItem value="entity" className="text-white">entity (实体)</SelectItem>
+                      <SelectItem value="entities" className="text-white">entities (实体集)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <Button onClick={handleCreate} className="w-full bg-[#0e639c] hover:bg-[#1177bb]">创建</Button>
             </div>
           </DialogContent>
@@ -499,12 +535,14 @@ export default function UnifiedGraphEditorPage() {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    {graph.graph_type === 'data' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : <Filter className="w-4 h-4 text-[#70ad47]" />}
+                    {/* Conditional rendering for icons based on graph_type */}
+                    {graph.graph_type === 'data' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : <Database className="w-4 h-4 text-[#c97fff]" />}
                     <h3 className="text-white font-medium">{graph.name}</h3>
                   </div>
                   {graph.description && <p className="text-white/60 text-xs mt-1">{graph.description}</p>}
                   <div className="text-[10px] text-white/40 mt-2">
-                    {graph.graph_type === 'data' ? 'Data Graph' : 'Entity Query'}
+                    {/* Conditional rendering for graph type display */}
+                    {graph.graph_type === 'data' ? 'Data Graph' : graph.graph_type === 'query' ? 'Entity Query' : `Function Graph (${graph.return_type || 'void'})`}
                   </div>
                 </div>
               </div>

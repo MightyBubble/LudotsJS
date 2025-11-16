@@ -1,4 +1,4 @@
-import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X } from 'lucide-react';
+import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, NotEqual, ChevronRight, ChevronLeft, Layers, List, Shuffle } from 'lucide-react';
 
 // 节点类型定义
 export const NODE_TYPES = {
@@ -8,7 +8,7 @@ export const NODE_TYPES = {
     icon: Hash, 
     color: '#5b9bd5', 
     category: '基础',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [],
     outputs: [{ id: 'value', label: '值', type: 'number' }]
   },
@@ -17,7 +17,7 @@ export const NODE_TYPES = {
     icon: Plus, 
     color: '#9b6bb3', 
     category: '数学',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'a', label: 'A', type: 'number' },
       { id: 'b', label: 'B', type: 'number' }
@@ -29,7 +29,7 @@ export const NODE_TYPES = {
     icon: Minus, 
     color: '#9b6bb3', 
     category: '数学',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'a', label: 'A', type: 'number' },
       { id: 'b', label: 'B', type: 'number' }
@@ -41,7 +41,7 @@ export const NODE_TYPES = {
     icon: X, 
     color: '#9b6bb3', 
     category: '数学',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'a', label: 'A', type: 'number' },
       { id: 'b', label: 'B', type: 'number' }
@@ -53,7 +53,7 @@ export const NODE_TYPES = {
     icon: Divide, 
     color: '#9b6bb3', 
     category: '数学',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'a', label: 'A', type: 'number' },
       { id: 'b', label: 'B', type: 'number' }
@@ -65,7 +65,7 @@ export const NODE_TYPES = {
     icon: TrendingUp, 
     color: '#9b6bb3', 
     category: '数学',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'base', label: '底数', type: 'number' },
       { id: 'exponent', label: '指数', type: 'number' }
@@ -77,7 +77,7 @@ export const NODE_TYPES = {
     icon: Sigma, 
     color: '#e67e22', 
     category: '聚合',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
     outputs: [{ id: 'result', label: '总和', type: 'number' }]
   },
@@ -86,7 +86,7 @@ export const NODE_TYPES = {
     icon: Sigma, 
     color: '#e67e22', 
     category: '聚合',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
     outputs: [{ id: 'result', label: '乘积', type: 'number' }]
   },
@@ -95,7 +95,7 @@ export const NODE_TYPES = {
     icon: TrendingUp, 
     color: '#e67e22', 
     category: '聚合',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
     outputs: [{ id: 'result', label: '最大值', type: 'number' }]
   },
@@ -104,7 +104,7 @@ export const NODE_TYPES = {
     icon: TrendingUp, 
     color: '#e67e22', 
     category: '聚合',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'array', label: '数组', type: 'array' }],
     outputs: [{ id: 'result', label: '最小值', type: 'number' }]
   },
@@ -113,7 +113,7 @@ export const NODE_TYPES = {
     icon: TrendingUp, 
     color: '#e67e22', 
     category: '聚合',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'value', label: '值', type: 'number' },
       { id: 'min', label: '最小值', type: 'number' },
@@ -128,7 +128,7 @@ export const NODE_TYPES = {
     icon: Move, 
     color: '#70ad47', 
     category: '向量',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'x', label: 'X', type: 'number' },
       { id: 'y', label: 'Y', type: 'number' }
@@ -140,7 +140,7 @@ export const NODE_TYPES = {
     icon: Move, 
     color: '#70ad47', 
     category: '向量',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'x', label: 'X', type: 'number' },
       { id: 'y', label: 'Y', type: 'number' },
@@ -153,7 +153,7 @@ export const NODE_TYPES = {
     icon: Move, 
     color: '#70ad47', 
     category: '向量',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'x', label: 'X', type: 'number' },
       { id: 'y', label: 'Y', type: 'number' },
@@ -167,7 +167,7 @@ export const NODE_TYPES = {
     icon: Move, 
     color: '#c97fff', 
     category: '高级',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'x', label: 'X', type: 'number' },
       { id: 'y', label: 'Y', type: 'number' },
@@ -181,7 +181,7 @@ export const NODE_TYPES = {
     icon: Palette, 
     color: '#ffc000', 
     category: '高级',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [
       { id: 'r', label: 'R', type: 'number' },
       { id: 'g', label: 'G', type: 'number' },
@@ -196,7 +196,7 @@ export const NODE_TYPES = {
     icon: Download, 
     color: '#0e639c', 
     category: '黑板',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [],
     outputs: [{ id: 'value', label: '值', type: 'any' }]
   },
@@ -205,7 +205,7 @@ export const NODE_TYPES = {
     icon: Upload, 
     color: '#16825d', 
     category: '黑板',
-    graphTypes: ['data', 'query'],
+    graphTypes: ['data', 'query', 'function'],
     inputs: [{ id: 'value', label: '值', type: 'any' }],
     outputs: []
   },
@@ -441,6 +441,316 @@ export const NODE_TYPES = {
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
     outputs: []
+  },
+  
+  // 函数图专用节点 - 获取类
+  get_entity_attribute: {
+    label: '获取实体属性',
+    icon: Eye,
+    color: '#9b6bb3',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
+    outputs: [{ id: 'value', label: '属性值', type: 'any' }]
+  },
+  get_entity_tags: {
+    label: '获取实体标签',
+    icon: Tag,
+    color: '#ffc000',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
+    outputs: [{ id: 'tags', label: '标签列表', type: 'array' }]
+  },
+  get_entity_relations: {
+    label: '获取实体关系',
+    icon: Link,
+    color: '#e67e22',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
+    outputs: [{ id: 'relations', label: '关系列表', type: 'array' }]
+  },
+  get_relation_attribute: {
+    label: '获取关系属性',
+    icon: Network,
+    color: '#e67e22',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'relation', label: '关系', type: 'relation' }],
+    outputs: [{ id: 'value', label: '属性值', type: 'any' }]
+  },
+  get_relation_tags: {
+    label: '获取关系标签',
+    icon: Network,
+    color: '#ffc000',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'relation', label: '关系', type: 'relation' }],
+    outputs: [{ id: 'tags', label: '标签列表', type: 'array' }]
+  },
+  get_related_entities: {
+    label: '获取关联实体',
+    icon: Database,
+    color: '#0e639c',
+    category: '函数-获取',
+    graphTypes: ['function'],
+    inputs: [{ id: 'entity', label: '实体', type: 'entity' }],
+    outputs: [{ id: 'entities', label: '实体列表', type: 'entities' }]
+  },
+  
+  // 函数图专用节点 - 比较类
+  compare_equal: {
+    label: '等于',
+    icon: Equal,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'any' },
+      { id: 'b', label: 'B', type: 'any' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  compare_not_equal: {
+    label: '不等于',
+    icon: NotEqual,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'any' },
+      { id: 'b', label: 'B', type: 'any' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  compare_greater: {
+    label: '大于',
+    icon: ChevronRight,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'number' },
+      { id: 'b', label: 'B', type: 'number' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  compare_less: {
+    label: '小于',
+    icon: ChevronLeft,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'number' },
+      { id: 'b', label: 'B', type: 'number' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  compare_greater_equal: {
+    label: '大于等于',
+    icon: ChevronRight,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'number' },
+      { id: 'b', label: 'B', type: 'number' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  compare_less_equal: {
+    label: '小于等于',
+    icon: ChevronLeft,
+    color: '#5bc0de',
+    category: '函数-比较',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'number' },
+      { id: 'b', label: 'B', type: 'number' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  
+  // 函数图专用节点 - 集合类
+  set_contains: {
+    label: '包含',
+    icon: CircleDot,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'set', label: '集合', type: 'array' },
+      { id: 'item', label: '元素', type: 'any' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  set_not_contains: {
+    label: '不包含',
+    icon: XCircle,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'set', label: '集合', type: 'array' },
+      { id: 'item', label: '元素', type: 'any' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  set_intersect: {
+    label: '交集',
+    icon: GitMerge,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'array' },
+      { id: 'b', label: 'B', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'array' }]
+  },
+  set_union: {
+    label: '并集',
+    icon: GitMerge,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'array' },
+      { id: 'b', label: 'B', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'array' }]
+  },
+  set_difference: {
+    label: '差集',
+    icon: GitMerge,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A (被减)', type: 'array' },
+      { id: 'b', label: 'B (减去)', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'array' }]
+  },
+  set_is_subset: {
+    label: '子集判断',
+    icon: Layers,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'subset', label: '子集', type: 'array' },
+      { id: 'superset', label: '父集', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  set_size: {
+    label: '集合大小',
+    icon: Hash,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [{ id: 'set', label: '集合', type: 'array' }],
+    outputs: [{ id: 'result', label: '大小', type: 'number' }]
+  },
+  set_is_empty: {
+    label: '判空',
+    icon: XCircle,
+    color: '#d9534f',
+    category: '函数-集合',
+    graphTypes: ['function'],
+    inputs: [{ id: 'set', label: '集合', type: 'array' }],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  
+  // 函数图专用节点 - 逻辑类
+  logic_and: {
+    label: '与',
+    icon: CheckCircle,
+    color: '#70ad47',
+    category: '函数-逻辑',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'boolean' },
+      { id: 'b', label: 'B', type: 'boolean' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  logic_or: {
+    label: '或',
+    icon: CheckCircle,
+    color: '#70ad47',
+    category: '函数-逻辑',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'a', label: 'A', type: 'boolean' },
+      { id: 'b', label: 'B', type: 'boolean' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  logic_not: {
+    label: '非',
+    icon: XCircle,
+    color: '#70ad47',
+    category: '函数-逻辑',
+    graphTypes: ['function'],
+    inputs: [{ id: 'value', label: '值', type: 'boolean' }],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  
+  // 函数图专用节点 - 条件类
+  if_else: {
+    label: '条件分支',
+    icon: Shuffle,
+    color: '#c97fff',
+    category: '函数-条件',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'condition', label: '条件', type: 'boolean' },
+      { id: 'true_value', label: '真值', type: 'any' },
+      { id: 'false_value', label: '假值', type: 'any' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'any' }]
+  },
+  
+  // 函数图专用节点 - 标签判断
+  has_tag: {
+    label: '拥有标签',
+    icon: Tag,
+    color: '#ffc000',
+    category: '函数-标签',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'tags', label: '标签列表', type: 'array' },
+      { id: 'tag_path', label: '标签路径', type: 'string' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  has_any_tags: {
+    label: '拥有任意标签',
+    icon: Tag,
+    color: '#ffc000',
+    category: '函数-标签',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'tags', label: '标签列表', type: 'array' },
+      { id: 'tag_paths', label: '标签路径列表', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  has_all_tags: {
+    label: '拥有所有标签',
+    icon: Tag,
+    color: '#ffc000',
+    category: '函数-标签',
+    graphTypes: ['function'],
+    inputs: [
+      { id: 'tags', label: '标签列表', type: 'array' },
+      { id: 'tag_paths', label: '标签路径列表', type: 'array' }
+    ],
+    outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
   }
 };
 

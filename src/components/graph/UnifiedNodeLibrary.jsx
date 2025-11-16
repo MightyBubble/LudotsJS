@@ -3,22 +3,30 @@ import { X } from 'lucide-react';
 import { getAvailableNodes, getCategories } from './nodeConfigs';
 
 export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
-  const [activeTab, setActiveTab] = useState(graphType === 'query' ? 'query' : 'compute');
+  const [activeTab, setActiveTab] = useState(
+    graphType === 'query' ? 'query' : graphType === 'function' ? 'function' : 'compute'
+  );
   
   const availableNodes = getAvailableNodes(graphType);
   const categories = getCategories(graphType);
   
-  // 区分查询节点和运算节点（对于query图）
+  // 区分不同类型的节点
   const queryNodes = availableNodes.filter(n => 
     ['源', '过滤', '空间', '逻辑', '排序', '限制', '输出'].includes(n.category)
+  );
+  const functionNodes = availableNodes.filter(n => 
+    n.category.startsWith('函数-')
   );
   const computeNodes = availableNodes.filter(n => 
     ['基础', '数学', '聚合', '向量', '高级', '黑板'].includes(n.category)
   );
   
-  const currentNodes = graphType === 'query' 
-    ? (activeTab === 'query' ? queryNodes : computeNodes)
-    : availableNodes;
+  let currentNodes = availableNodes;
+  if (graphType === 'query') {
+    currentNodes = activeTab === 'query' ? queryNodes : computeNodes;
+  } else if (graphType === 'function') {
+    currentNodes = activeTab === 'function' ? functionNodes : computeNodes;
+  }
     
   const currentCategories = [...new Set(currentNodes.map(n => n.category))];
 
@@ -36,17 +44,17 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
         </button>
       </div>
       
-      {graphType === 'query' && (
+      {(graphType === 'query' || graphType === 'function') && (
         <div className="flex border-b border-[#3e3e42]">
           <button
-            onClick={() => setActiveTab('query')}
+            onClick={() => setActiveTab(graphType === 'query' ? 'query' : 'function')}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-              activeTab === 'query' 
+              activeTab === (graphType === 'query' ? 'query' : 'function')
                 ? 'bg-[#0e639c] text-white' 
                 : 'text-white/60 hover:text-white/90 hover:bg-[#2d2d30]'
             }`}
           >
-            查询节点
+            {graphType === 'query' ? '查询节点' : '函数节点'}
           </button>
           <button
             onClick={() => setActiveTab('compute')}
