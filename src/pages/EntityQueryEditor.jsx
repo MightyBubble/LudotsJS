@@ -150,7 +150,6 @@ export default function EntityQueryEditorPage() {
       ],
       'output': [{ id: 'entities', label: '实体集', type: 'entities' }],
       
-      // DataGraph 节点
       'number': [],
       'add': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
       'subtract': [{ id: 'a', label: 'A', type: 'number' }, { id: 'b', label: 'B', type: 'number' }],
@@ -198,7 +197,6 @@ export default function EntityQueryEditorPage() {
       'limit_percent_bottom': [{ id: 'limited', label: '限制结果', type: 'entities' }],
       'output': [],
       
-      // DataGraph 节点
       'number': [{ id: 'value', label: '值', type: 'number' }],
       'add': [{ id: 'result', label: '结果', type: 'number' }],
       'subtract': [{ id: 'result', label: '结果', type: 'number' }],
@@ -242,7 +240,6 @@ export default function EntityQueryEditorPage() {
       limit_percent_top: { percent: 10 },
       limit_percent_bottom: { percent: 10 },
       
-      // DataGraph 节点
       number: { value: 0 },
       add: { a: 0, b: 0 },
       subtract: { a: 0, b: 0 },
