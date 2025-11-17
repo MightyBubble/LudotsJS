@@ -391,6 +391,21 @@ export default function ValidatorEditorPage() {
                 </SelectContent>
               </Select>
             )}
+            {(cfg.source_entity === 'relation' && ['attribute_value', 'tag_count'].includes(cfg.compare_type)) && (
+              <Select
+                value={cfg.source_relation_id || ""}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_relation_id: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
+                  <SelectValue placeholder="选择关系" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  {relations.map(r => (
+                    <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             {cfg.compare_type === 'constant' && (
               <Select
                 value={cfg.constant_key || ""}
@@ -573,6 +588,21 @@ export default function ValidatorEditorPage() {
                   </SelectContent>
                 </Select>
               )}
+              {(cfg.target_entity === 'relation' && ['attribute_key', 'tag_count'].includes(cfg.value_source)) && (
+                <Select
+                  value={cfg.target_relation_id_for_type || ""}
+                  onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_id_for_type: v } })}
+                >
+                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
+                    <SelectValue placeholder="选择关系" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                    {relations.map(r => (
+                      <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               {cfg.value_source === 'constant' && (
                 <Select
                   value={cfg.target_constant_key || ""}
@@ -639,8 +669,8 @@ export default function ValidatorEditorPage() {
               )}
               {['relation_attribute', 'relation_count'].includes(cfg.value_source) && (
                 <Select
-                  value={cfg.target_relation_id || ""}
-                  onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_id: v } })}
+                  value={cfg.target_relation_id_for_type || ""}
+                  onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_id_for_type: v } })}
                 >
                   <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
                     <SelectValue placeholder="选择关系" />
