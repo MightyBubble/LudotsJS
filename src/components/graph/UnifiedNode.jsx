@@ -1,6 +1,7 @@
 import React from 'react';
 import Node from './Node';
 import QueryNode from '../queryGraph/QueryNode';
+import DataTableNode from './DataTableNode';
 
 const queryNodeTypes = [
   'entity_source', 'filter_prototype', 'filter_attribute', 'filter_tag', 'filter_relation', 
@@ -11,6 +12,9 @@ const queryNodeTypes = [
 ];
 
 export default function UnifiedNode(props) {
+  if (props.node.type === 'data_table_read') {
+    return <DataTableNode {...props} />;
+  }
   if (queryNodeTypes.includes(props.node.type)) {
     return <QueryNode {...props} />;
   }
