@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Box, Link as LinkIcon, Globe, Menu, X, Settings } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Network, Box, Link as LinkIcon, Globe, Menu, X, Settings, GitMerge } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,6 +37,9 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("UnifiedGraphEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "UnifiedGraphEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
           <Globe className="w-4 h-4" />图编辑器
         </Link>
+        <Link to={createPageUrl("ConditionEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "ConditionEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+          <GitMerge className="w-4 h-4" />条件编辑器
+        </Link>
         <Link to={createPageUrl("AttributeEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "AttributeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
           <Layers className="w-4 h-4" />属性编辑器
         </Link>
@@ -68,6 +71,7 @@ export default function Layout({ children, currentPageName }) {
           {currentPageName === "UnlockableCommands" && "指令解锁器"}
           {currentPageName === "InteractionEffects" && "效果编辑器"}
           {currentPageName === "UnifiedGraphEditor" && "图编辑器"}
+          {currentPageName === "ConditionEditor" && "条件编辑器"}
           {currentPageName === "AttributeEditor" && "属性编辑器"}
           {currentPageName === "ModifierDefinitionEditor" && "修饰器定义"}
           {currentPageName === "EntityPrototypeEditor" && "实体原型"}
@@ -98,6 +102,9 @@ export default function Layout({ children, currentPageName }) {
           </Link>
           <Link to={createPageUrl("UnifiedGraphEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "UnifiedGraphEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Globe className="w-4 h-4" />图编辑器
+          </Link>
+          <Link to={createPageUrl("ConditionEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "ConditionEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+            <GitMerge className="w-4 h-4" />条件编辑器
           </Link>
           <Link to={createPageUrl("AttributeEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "AttributeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Layers className="w-4 h-4" />属性编辑器

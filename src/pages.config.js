@@ -15,6 +15,7 @@ import EntityQueryEditor from './pages/EntityQueryEditor';
 import UnifiedGraphEditor from './pages/UnifiedGraphEditor';
 import GameEventEditor from './pages/GameEventEditor';
 import GlobalConstantEditor from './pages/GlobalConstantEditor';
+import ConditionEditor from './pages/ConditionEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "UnifiedGraphEditor": UnifiedGraphEditor,
     "GameEventEditor": GameEventEditor,
     "GlobalConstantEditor": GlobalConstantEditor,
+    "ConditionEditor": ConditionEditor,
 }
 
 export const pagesConfig = {
