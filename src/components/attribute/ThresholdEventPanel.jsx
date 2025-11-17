@@ -96,6 +96,25 @@ export default function ThresholdEventPanel({ attributeId, attributeKeys = [] })
     setEditData({ ...editData, parameter_bindings: bindings });
   };
 
+  const getThresholdLabel = (mode) => {
+    if (mode === 'absolute') return '阈值';
+    if (mode === 'ratio') return '比例 (0-1)';
+    if (mode === 'compare_key') return '系数';
+    return '阈值';
+  };
+
+  const getThresholdPlaceholder = (mode) => {
+    if (mode === 'absolute') return '输入阈值';
+    if (mode === 'ratio') return '0.0-1.0';
+    if (mode === 'compare_key') return '1.0=直接比较';
+    return '';
+  };
+
+  const getThresholdStep = (mode) => {
+    if (mode === 'ratio' || mode === 'compare_key') return '0.01';
+    return '0.1';
+  };
+
   if (!attributeId) return null;
 
   return (
@@ -134,7 +153,7 @@ export default function ThresholdEventPanel({ attributeId, attributeKeys = [] })
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
                     {isEditing ? (
                       <>
-                        <Select value={data.comparison_mode || 'absolute'} onValueChange={(v) => setEditData({ ...data, comparison_mode: v })}>
+                        <Select value={data.comparison_mode || 'absolute'} onValueChange={(v) => setEditData({ ...data, comparison_mode: v, threshold_value: v === 'compare_key' ? 1.0 : v === 'ratio' ? 0.5 : 0 })}>
                           <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                             <SelectValue />
                           </SelectTrigger>
@@ -196,14 +215,17 @@ export default function ThresholdEventPanel({ attributeId, attributeKeys = [] })
                             <SelectItem value="neq" className="text-white text-xs">≠</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Input
-                          type="number"
-                          step={data.comparison_mode === 'ratio' ? '0.01' : '0.1'}
-                          value={data.threshold_value || 0}
-                          onChange={(e) => setEditData({ ...data, threshold_value: parseFloat(e.target.value) || 0 })}
-                          className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-                          placeholder={data.comparison_mode === 'ratio' ? '0.0-1.0' : '阈值'}
-                        />
+                        <div className="flex flex-col">
+                          <Input
+                            type="number"
+                            step={getThresholdStep(data.comparison_mode)}
+                            value={data.threshold_value ?? (data.comparison_mode === 'compare_key' ? 1 : 0)}
+                            onChange={(e) => setEditData({ ...data, threshold_value: parseFloat(e.target.value) || 0 })}
+                            className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+                            placeholder={getThresholdPlaceholder(data.comparison_mode)}
+                          />
+                          <span className="text-[10px] text-white/40 mt-0.5">{getThresholdLabel(data.comparison_mode)}</span>
+                        </div>
                         <Select value={data.event_id} onValueChange={(v) => setEditData({ ...data, event_id: v })}>
                           <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                             <SelectValue />
@@ -218,11 +240,19 @@ export default function ThresholdEventPanel({ attributeId, attributeKeys = [] })
                     ) : (
                       <>
                         <div className="text-xs text-white/70">{data.operator}</div>
-                        <div className="text-xs text-white/70">{data.threshold_value}</div>
+                        <div className="text-xs text-white/70">
+                          {data.threshold_value} <span className="text-white/40">({getThresholdLabel(data.comparison_mode)})</span>
+                        </div>
                         <div className="text-xs text-white/70 truncate">{gameEvents.find(e => e.event_id === data.event_id)?.name || data.event_id}</div>
                       </>
                     )}
                   </div>
+
+                  {data.comparison_mode === 'compare_key' && (
+                    <div className="text-[10px] text-white/40 bg-[#2d2d30] rounded px-2 py-1">
+                      比较逻辑: {data.attribute_key} {data.operator} ({data.compare_target_key} × {data.threshold_value ?? 1})
+                    </div>
+                  )}
 
                   {isEditing && selectedEvent?.output_parameters?.length > 0 && (
                     <div className="space-y-1 mt-2">
