@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MinusSquare, MaximizeSquare } from 'lucide-react';
+import { Minimize2 } from 'lucide-react';
 
 export default function ClampConfigPanel({ config, keys, onChange }) {
   const clampConfig = config || { enabled: false };
@@ -14,7 +14,7 @@ export default function ClampConfigPanel({ config, keys, onChange }) {
     <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e] space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MinusSquare className="w-4 h-4 text-orange-400" />
+          <Minimize2 className="w-4 h-4 text-orange-400" />
           <span className="text-sm font-semibold text-white/90">钳制约束</span>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
