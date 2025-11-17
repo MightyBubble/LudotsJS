@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,6 +65,9 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("GlobalConstantEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
           <Settings className="w-4 h-4" />常量
         </Link>
+        <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+          <Table className="w-4 h-4" />数据表
+        </Link>
       </div>
 
       {/* 移动端导航 */}
@@ -84,6 +87,7 @@ export default function Layout({ children, currentPageName }) {
           {currentPageName === "NewAttributeSimulator" && "计算器"}
           {currentPageName === "GameEventEditor" && "事件"}
           {currentPageName === "GlobalConstantEditor" && "常量"}
+          {currentPageName === "DataTableEditor" && "数据表"}
         </span>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -131,8 +135,11 @@ export default function Layout({ children, currentPageName }) {
           <Link to={createPageUrl("GameEventEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "GameEventEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Zap className="w-4 h-4" />事件
           </Link>
-          <Link to={createPageUrl("GlobalConstantEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+          <Link to={createPageUrl("GlobalConstantEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Settings className="w-4 h-4" />常量
+          </Link>
+          <Link to={createPageUrl("DataTableEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+            <Table className="w-4 h-4" />数据表
           </Link>
         </div>
       )}
