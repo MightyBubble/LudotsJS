@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tantml:react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -172,8 +172,7 @@ export default function ValidatorEditorPage() {
       const cfg = validator.entity_check_config || {};
       return (
         <div className="text-xs text-gray-300">
-          {cfg.source_entity && <div>实体: {cfg.source_entity}</div>}
-          {cfg.check_type && <div>检查: {cfg.check_type}</div>}
+          <div>[{cfg.source_entity || 'source'}] {cfg.check_type}</div>
           {cfg.tag_path && <div>标签: {cfg.tag_path}</div>}
           {cfg.tag_paths && <div>标签: {cfg.tag_paths.length}个</div>}
         </div>
@@ -181,9 +180,12 @@ export default function ValidatorEditorPage() {
     }
     if (validator.validator_type === 'entity_compare') {
       const cfg = validator.entity_compare_config || {};
+      const rightSide = cfg.value_source === 'literal' ? cfg.compare_value : 
+                        cfg.value_source === 'constant' ? `常量[${cfg.constant_key}]` : 
+                        `[${cfg.target_entity}].${cfg.target_attribute_id}.${cfg.target_attribute_key}`;
       return (
         <div className="text-xs text-gray-300">
-          <div>{cfg.source_entity || 'source'}.{cfg.attribute_key || '?'} {cfg.operator} {cfg.value_source === 'literal' ? cfg.compare_value : cfg.value_source === 'constant' ? `常量[${cfg.constant_key}]` : `${cfg.target_entity}.${cfg.target_attribute_key}`}</div>
+          <div>[{cfg.source_entity}].{cfg.attribute_id}.{cfg.attribute_key} {cfg.operator} {rightSide}</div>
         </div>
       );
     }
@@ -213,18 +215,21 @@ export default function ValidatorEditorPage() {
       const cfg = data.entity_check_config || {};
       return (
         <div className="space-y-1">
-          <Select
-            value={cfg.source_entity || "source"}
-            onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, source_entity: v } })}
-          >
-            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-              <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
-              <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-1 items-center">
+            <span className="text-xs text-gray-400">实体:</span>
+            <Select
+              value={cfg.source_entity || "source"}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, source_entity: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+                <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Select
             value={cfg.check_type || "has_tag"}
             onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, check_type: v } })}
@@ -350,122 +355,133 @@ export default function ValidatorEditorPage() {
       
       return (
         <div className="space-y-1">
-          <div className="flex gap-1">
-            <Select
-              value={cfg.source_entity || "source"}
-              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
-            >
-              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
-                <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={cfg.compare_type || "attribute_value"}
-              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_type: v } })}
-            >
-              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                <SelectItem value="attribute_value" className="text-white text-xs">属性值</SelectItem>
-                <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
-                <SelectItem value="relation_count" className="text-white text-xs">关系计数</SelectItem>
-                <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {cfg.compare_type === 'attribute_value' && (
-            <div className="flex gap-1">
+          {/* 左侧：源实体配置 */}
+          <div className="bg-[#2d2d2d] p-1.5 rounded">
+            <div className="text-xs text-gray-400 mb-1">左侧比较对象:</div>
+            <div className="flex gap-1 mb-1">
               <Select
-                value={cfg.attribute_id || ""}
-                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_id: v, attribute_key: "" } })}
+                value={cfg.source_entity || "source"}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
-                  <SelectValue placeholder="属性" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                  {attributes.map(a => (
-                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={cfg.attribute_key || ""}
-                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_key: v } })}
-                disabled={!cfg.attribute_id}
-              >
-                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
-                  <SelectValue placeholder="键" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                  {attributeKeys.map(k => (
-                    <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          {cfg.compare_type === 'tag_count' && (
-            <Input
-              value={cfg.tag_path || ""}
-              onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, tag_path: e.target.value } })}
-              placeholder="标签路径"
-              className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-              list="tags-list"
-            />
-          )}
-          {cfg.compare_type === 'relation_count' && (
-            <Select
-              value={cfg.relation_id || ""}
-              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_id: v } })}
-            >
-              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                <SelectValue placeholder="选择关系" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                {relations.map(r => (
-                  <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {cfg.compare_type === 'function_graph' && (
-            <Select
-              value={cfg.function_graph_id || ""}
-              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, function_graph_id: v } })}
-            >
-              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-                <SelectValue placeholder="选择函数图" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                {booleanFunctionGraphs.map(g => (
-                  <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {cfg.compare_type !== 'function_graph' && (
-            <>
-              <Select
-                value={cfg.operator || "gt"}
-                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, operator: v } })}
-              >
-                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                  <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
-                  <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
-                  <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
-                  <SelectItem value="lte" className="text-white text-xs">&lt;=</SelectItem>
-                  <SelectItem value="eq" className="text-white text-xs">=</SelectItem>
-                  <SelectItem value="neq" className="text-white text-xs">!=</SelectItem>
+                  <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+                  <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
                 </SelectContent>
               </Select>
+              <Select
+                value={cfg.compare_type || "attribute_value"}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_type: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  <SelectItem value="attribute_value" className="text-white text-xs">属性值</SelectItem>
+                  <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
+                  <SelectItem value="relation_count" className="text-white text-xs">关系计数</SelectItem>
+                  <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {cfg.compare_type === 'attribute_value' && (
+              <div className="flex gap-1">
+                <Select
+                  value={cfg.attribute_id || ""}
+                  onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_id: v, attribute_key: "" } })}
+                >
+                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                    <SelectValue placeholder="属性" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                    {attributes.map(a => (
+                      <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={cfg.attribute_key || ""}
+                  onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_key: v } })}
+                  disabled={!cfg.attribute_id}
+                >
+                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                    <SelectValue placeholder="键" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                    {attributeKeys.map(k => (
+                      <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {cfg.compare_type === 'tag_count' && (
+              <Input
+                value={cfg.tag_path || ""}
+                onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, tag_path: e.target.value } })}
+                placeholder="标签路径"
+                className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                list="tags-list"
+              />
+            )}
+            {cfg.compare_type === 'relation_count' && (
+              <Select
+                value={cfg.relation_id || ""}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_id: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                  <SelectValue placeholder="选择关系" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  {relations.map(r => (
+                    <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {cfg.compare_type === 'function_graph' && (
+              <Select
+                value={cfg.function_graph_id || ""}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, function_graph_id: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                  <SelectValue placeholder="选择函数图" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  {booleanFunctionGraphs.map(g => (
+                    <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          
+          {/* 操作符 */}
+          {cfg.compare_type !== 'function_graph' && (
+            <Select
+              value={cfg.operator || "gt"}
+              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, operator: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
+                <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
+                <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
+                <SelectItem value="lte" className="text-white text-xs">&lt;=</SelectItem>
+                <SelectItem value="eq" className="text-white text-xs">=</SelectItem>
+                <SelectItem value="neq" className="text-white text-xs">!=</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* 右侧：比较值配置 */}
+          {cfg.compare_type !== 'function_graph' && (
+            <div className="bg-[#2d2d2d] p-1.5 rounded">
+              <div className="text-xs text-gray-400 mb-1">右侧比较对象:</div>
               <Select
                 value={cfg.value_source || "literal"}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, value_source: v } })}
@@ -484,8 +500,8 @@ export default function ValidatorEditorPage() {
                   type="number"
                   value={cfg.compare_value ?? 0}
                   onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_value: parseFloat(e.target.value) || 0 } })}
-                  placeholder="值"
-                  className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                  placeholder="输入值"
+                  className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white mt-1"
                 />
               )}
               {cfg.value_source === 'constant' && (
@@ -493,7 +509,7 @@ export default function ValidatorEditorPage() {
                   value={cfg.constant_key || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, constant_key: v } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                  <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mt-1">
                     <SelectValue placeholder="选择常量" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -504,7 +520,7 @@ export default function ValidatorEditorPage() {
                 </Select>
               )}
               {cfg.value_source === 'attribute_key' && (
-                <>
+                <div className="space-y-1 mt-1">
                   <Select
                     value={cfg.target_entity || "target"}
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_entity: v } })}
@@ -546,9 +562,9 @@ export default function ValidatorEditorPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </>
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       );
