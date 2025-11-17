@@ -5,8 +5,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Trash2, Layers, Edit3, Save, X, Zap } from "lucide-react";
+import { Search, Plus, Trash2, Layers, Edit3, Save, X, Zap, MinusSquare, Activity } from "lucide-react";
 import ThresholdEventPanel from "../components/attribute/ThresholdEventPanel";
+import ClampConfigPanel from "../components/attribute/ClampConfigPanel";
+import RecoveryConfigPanel from "../components/attribute/RecoveryConfigPanel";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +21,8 @@ export default function AttributeEditorPage() {
   const [editingRow, setEditingRow] = useState(null);
   const [editData, setEditData] = useState(null);
   const [selectedAttribute, setSelectedAttribute] = useState(null);
+  const [showClampPanel, setShowClampPanel] = useState(false);
+  const [showRecoveryPanel, setShowRecoveryPanel] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -61,6 +65,9 @@ export default function AttributeEditorPage() {
       queryClient.invalidateQueries({ queryKey: ['attributes'] });
       setEditingRow(null);
       setEditData(null);
+      setSelectedAttribute(null); // Clear selected attribute after update
+      setShowClampPanel(false);
+      setShowRecoveryPanel(false);
     },
     onError: (error) => {
       console.error('保存失败:', error);
@@ -102,7 +109,9 @@ export default function AttributeEditorPage() {
       ...attr, 
       keys: attr.keys || [],
       input_mappings: attr.input_mappings || {},
-      description: attr.description || ""
+      description: attr.description || "",
+      clamp_config: attr.clamp_config || { enabled: false },
+      recovery_config: attr.recovery_config || { enabled: false }
     });
   };
 
@@ -129,7 +138,9 @@ export default function AttributeEditorPage() {
       default_base_value: editData.default_base_value,
       keys: uniqueKeys,
       input_mappings: editData.input_mappings || {},
-      final_calculation_data_graph_id: editData.final_calculation_data_graph_id
+      final_calculation_data_graph_id: editData.final_calculation_data_graph_id,
+      clamp_config: editData.clamp_config,
+      recovery_config: editData.recovery_config
     };
     
     console.log('准备保存的数据:', dataToSave);
@@ -273,7 +284,7 @@ export default function AttributeEditorPage() {
               <th className="text-left p-2 font-medium text-white/70">键</th>
               <th className="text-left p-2 font-medium text-white/70 w-48">计算图</th>
               <th className="text-left p-2 font-medium text-white/70">输入映射</th>
-              <th className="text-right p-2 font-medium text-white/70 w-32"></th>
+              <th className="text-right p-2 font-medium text-white/70 w-40"></th>
             </tr>
           </thead>
           <tbody>
@@ -467,6 +478,20 @@ export default function AttributeEditorPage() {
                           <Zap className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => { setSelectedAttribute(attr); setShowClampPanel(true); }}
+                          className="text-white/30 hover:text-orange-400"
+                          title="钳制"
+                        >
+                          <MinusSquare className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => { setSelectedAttribute(attr); setShowRecoveryPanel(true); }}
+                          className="text-white/30 hover:text-green-400"
+                          title="回复"
+                        >
+                          <Activity className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleEdit(attr)}
                           className="text-white/30 hover:text-blue-400"
                         >
@@ -515,6 +540,20 @@ export default function AttributeEditorPage() {
                         <button onClick={() => setSelectedAttribute(attr)} className="text-white/30 hover:text-yellow-400 p-1">
                           <Zap className="w-4 h-4" />
                         </button>
+                        <button
+                          onClick={() => { setSelectedAttribute(attr); setShowClampPanel(true); }}
+                          className="text-white/30 hover:text-orange-400 p-1"
+                          title="钳制"
+                        >
+                          <MinusSquare className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => { setSelectedAttribute(attr); setShowRecoveryPanel(true); }}
+                          className="text-white/30 hover:text-green-400 p-1"
+                          title="回复"
+                        >
+                          <Activity className="w-4 h-4" />
+                        </button>
                         <button onClick={() => handleEdit(attr)} className="text-white/30 hover:text-blue-400 p-1">
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -542,7 +581,7 @@ export default function AttributeEditorPage() {
       </div>
 
       {/* 阈值事件弹窗 */}
-      <Dialog open={!!selectedAttribute} onOpenChange={(open) => !open && setSelectedAttribute(null)}>
+      <Dialog open={selectedAttribute && !showClampPanel && !showRecoveryPanel} onOpenChange={(open) => !open && setSelectedAttribute(null)}>
         <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
@@ -552,7 +591,62 @@ export default function AttributeEditorPage() {
           </DialogHeader>
           <div className="py-4">
             {selectedAttribute && (
-              <ThresholdEventPanel attributeId={selectedAttribute.attribute_id} />
+              <ThresholdEventPanel 
+                attributeId={selectedAttribute.attribute_id} 
+                attributeKeys={selectedAttribute.keys || []}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 钳制配置弹窗 */}
+      <Dialog open={showClampPanel} onOpenChange={(open) => { setShowClampPanel(open); if (!open) setSelectedAttribute(null); }}>
+        <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <MinusSquare className="w-4 h-4 text-orange-400" />
+              {selectedAttribute?.name} - 钳制约束
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedAttribute && (
+              <ClampConfigPanel
+                config={selectedAttribute.clamp_config}
+                keys={selectedAttribute.keys || []}
+                onChange={(config) => {
+                  updateMutation.mutate({
+                    id: selectedAttribute.id,
+                    data: { clamp_config: config }
+                  });
+                }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 回复行为弹窗 */}
+      <Dialog open={showRecoveryPanel} onOpenChange={(open) => { setShowRecoveryPanel(open); if (!open) setSelectedAttribute(null); }}>
+        <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Activity className="w-4 h-4 text-green-400" />
+              {selectedAttribute?.name} - 回复行为
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedAttribute && (
+              <RecoveryConfigPanel
+                config={selectedAttribute.recovery_config}
+                keys={selectedAttribute.keys || []}
+                onChange={(config) => {
+                  updateMutation.mutate({
+                    id: selectedAttribute.id,
+                    data: { recovery_config: config }
+                  });
+                }}
+              />
             )}
           </div>
         </DialogContent>

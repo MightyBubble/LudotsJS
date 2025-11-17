@@ -6,7 +6,7 @@ import { Plus, Trash2, Zap, Edit2, Save, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-export default function ThresholdEventPanel({ attributeId }) {
+export default function ThresholdEventPanel({ attributeId, attributeKeys = [] }) {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState(null);
   const queryClient = useQueryClient();
@@ -50,7 +50,8 @@ export default function ThresholdEventPanel({ attributeId }) {
     const newEvent = {
       rule_name: '新阈值事件',
       attribute_id: attributeId,
-      attribute_key: '',
+      attribute_key: attributeKeys[0]?.name || '',
+      comparison_mode: 'absolute',
       operator: 'gte',
       threshold_value: 0,
       event_id: gameEvents[0]?.event_id || '',
@@ -130,15 +131,58 @@ export default function ThresholdEventPanel({ attributeId }) {
                     <div className="text-sm text-white/90 font-medium">{data.rule_name}</div>
                   )}
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
                     {isEditing ? (
                       <>
-                        <Input
-                          value={data.attribute_key || ''}
-                          onChange={(e) => setEditData({ ...data, attribute_key: e.target.value })}
-                          className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-                          placeholder="键"
-                        />
+                        <Select value={data.comparison_mode || 'absolute'} onValueChange={(v) => setEditData({ ...data, comparison_mode: v })}>
+                          <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                            <SelectItem value="absolute" className="text-white text-xs">绝对值</SelectItem>
+                            <SelectItem value="ratio" className="text-white text-xs">比例</SelectItem>
+                            <SelectItem value="compare_key" className="text-white text-xs">比较键</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select value={data.attribute_key || ''} onValueChange={(v) => setEditData({ ...data, attribute_key: v })}>
+                          <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                            <SelectValue placeholder="键" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                            {attributeKeys.map(k => (
+                              <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {data.comparison_mode === 'compare_key' && (
+                          <Select value={data.compare_target_key || ''} onValueChange={(v) => setEditData({ ...data, compare_target_key: v })}>
+                            <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                              <SelectValue placeholder="目标键" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                              {attributeKeys.map(k => (
+                                <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-xs text-white/70">
+                          {data.comparison_mode === 'absolute' ? '绝对值' : data.comparison_mode === 'ratio' ? '比例' : '比较键'}
+                        </div>
+                        <div className="text-xs text-white/70 font-mono">{data.attribute_key}</div>
+                        {data.comparison_mode === 'compare_key' && (
+                          <div className="text-xs text-white/70 font-mono">{data.compare_target_key}</div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {isEditing ? (
+                      <>
                         <Select value={data.operator} onValueChange={(v) => setEditData({ ...data, operator: v })}>
                           <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
                             <SelectValue />
@@ -154,9 +198,11 @@ export default function ThresholdEventPanel({ attributeId }) {
                         </Select>
                         <Input
                           type="number"
+                          step={data.comparison_mode === 'ratio' ? '0.01' : '0.1'}
                           value={data.threshold_value || 0}
                           onChange={(e) => setEditData({ ...data, threshold_value: parseFloat(e.target.value) || 0 })}
                           className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+                          placeholder={data.comparison_mode === 'ratio' ? '0.0-1.0' : '阈值'}
                         />
                         <Select value={data.event_id} onValueChange={(v) => setEditData({ ...data, event_id: v })}>
                           <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
@@ -171,10 +217,9 @@ export default function ThresholdEventPanel({ attributeId }) {
                       </>
                     ) : (
                       <>
-                        <div className="text-xs text-white/70 font-mono">{data.attribute_key}</div>
                         <div className="text-xs text-white/70">{data.operator}</div>
                         <div className="text-xs text-white/70">{data.threshold_value}</div>
-                        <div className="text-xs text-white/70">{gameEvents.find(e => e.event_id === data.event_id)?.name || data.event_id}</div>
+                        <div className="text-xs text-white/70 truncate">{gameEvents.find(e => e.event_id === data.event_id)?.name || data.event_id}</div>
                       </>
                     )}
                   </div>
