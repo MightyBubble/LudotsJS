@@ -513,18 +513,18 @@ export default function ValidatorEditorPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
                     {constants.map(c => (
-                      <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.constant_key}</SelectItem>
+                      <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
               {cfg.value_source === 'attribute_key' && (
-                <div className="space-y-1">
+                <>
                   <Select
                     value={cfg.target_entity || "target"}
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_entity: v } })}
                   >
-                    <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                    <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
@@ -561,7 +561,7 @@ export default function ValidatorEditorPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </>
               )}
             </div>
           )}
