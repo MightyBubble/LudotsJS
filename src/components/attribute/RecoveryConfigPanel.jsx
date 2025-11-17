@@ -29,7 +29,7 @@ export default function RecoveryConfigPanel({ config, keys, onChange }) {
       </div>
 
       {recoveryConfig.enabled && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div>
             <label className="text-xs text-white/50 mb-1 block">目标键</label>
             <Select
@@ -47,26 +47,69 @@ export default function RecoveryConfigPanel({ config, keys, onChange }) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-white/50 mb-1 block">回复速率/秒</label>
-              <Input
-                type="number"
-                step="0.1"
-                value={recoveryConfig.recovery_rate ?? 1}
-                onChange={(e) => handleChange('recovery_rate', parseFloat(e.target.value) || 0)}
-                className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-              />
+          <div>
+            <label className="text-xs text-white/50 mb-1 block">回复速率/秒</label>
+            <div className="space-y-1.5">
+              <Select
+                value={recoveryConfig.recovery_rate_key || ''}
+                onValueChange={(v) => {
+                  handleChange('recovery_rate_key', v);
+                  if (v) handleChange('recovery_rate_value', undefined);
+                }}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键或固定值" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  <SelectItem value={null} className="text-white text-xs">固定值</SelectItem>
+                  {keys.map(k => (
+                    <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!recoveryConfig.recovery_rate_key && (
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={recoveryConfig.recovery_rate_value ?? 1}
+                  onChange={(e) => handleChange('recovery_rate_value', parseFloat(e.target.value) || 0)}
+                  className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+                  placeholder="回复速率"
+                />
+              )}
             </div>
-            <div>
-              <label className="text-xs text-white/50 mb-1 block">延迟（秒）</label>
-              <Input
-                type="number"
-                step="0.1"
-                value={recoveryConfig.recovery_delay ?? 0}
-                onChange={(e) => handleChange('recovery_delay', parseFloat(e.target.value) || 0)}
-                className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
-              />
+          </div>
+
+          <div>
+            <label className="text-xs text-white/50 mb-1 block">回复延迟（秒）</label>
+            <div className="space-y-1.5">
+              <Select
+                value={recoveryConfig.recovery_delay_key || ''}
+                onValueChange={(v) => {
+                  handleChange('recovery_delay_key', v);
+                  if (v) handleChange('recovery_delay_value', undefined);
+                }}
+              >
+                <SelectTrigger className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white">
+                  <SelectValue placeholder="选择键或固定值" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
+                  <SelectItem value={null} className="text-white text-xs">固定值</SelectItem>
+                  {keys.map(k => (
+                    <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!recoveryConfig.recovery_delay_key && (
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={recoveryConfig.recovery_delay_value ?? 0}
+                  onChange={(e) => handleChange('recovery_delay_value', parseFloat(e.target.value) || 0)}
+                  className="h-6 text-xs bg-[#2d2d30] border-[#434343] text-white"
+                  placeholder="回复延迟"
+                />
+              )}
             </div>
           </div>
         </div>
