@@ -101,6 +101,7 @@ export default function ValidatorEditorPage() {
       name: "",
       description: "",
       validator_type: "unit_test",
+      unit_test_config: { test_type: "has_tag", tag_path: "" },
       negate: false,
       failure_result: "false"
     });
@@ -134,6 +135,21 @@ export default function ValidatorEditorPage() {
     if (window.confirm('确定删除此验证器吗？')) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleTypeChange = (newType) => {
+    const defaults = {
+      unit_test: { unit_test_config: { test_type: "has_tag", tag_path: "" } },
+      unit_compare: { unit_compare_config: { compare_type: "attribute_value", operator: "gt" } },
+      combine: { combine_config: { logic_operator: "AND", sub_validator_ids: [] } },
+      function_graph: { function_graph_config: { function_graph_id: "", parameter_bindings: {} } }
+    };
+    
+    setEditData({
+      ...editData,
+      validator_type: newType,
+      ...(defaults[newType] || {})
+    });
   };
 
   const getTypeName = (type) => {
@@ -191,6 +207,193 @@ export default function ValidatorEditorPage() {
     return <span className="text-gray-600">-</span>;
   };
 
+  const renderConfigEditor = (data) => {
+    if (data.validator_type === 'unit_test') {
+      const cfg = data.unit_test_config || {};
+      return (
+        <div className="space-y-1">
+          <Select
+            value={cfg.test_type || "has_tag"}
+            onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, test_type: v } })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="has_tag" className="text-white text-xs">有标签</SelectItem>
+              <SelectItem value="has_any_tags" className="text-white text-xs">有任意标签</SelectItem>
+              <SelectItem value="has_all_tags" className="text-white text-xs">有所有标签</SelectItem>
+              <SelectItem value="is_prototype" className="text-white text-xs">是原型</SelectItem>
+              <SelectItem value="is_alive" className="text-white text-xs">存活</SelectItem>
+              <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+            </SelectContent>
+          </Select>
+          {(cfg.test_type === 'has_tag' || !cfg.test_type) && (
+            <Input
+              value={cfg.tag_path || ""}
+              onChange={(e) => setEditData({ ...data, unit_test_config: { ...cfg, tag_path: e.target.value } })}
+              placeholder="标签路径"
+              className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+              list="tags-list"
+            />
+          )}
+          {cfg.test_type === 'is_prototype' && (
+            <Select
+              value={cfg.prototype_id || ""}
+              onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, prototype_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择原型" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {prototypes.map(p => (
+                  <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {cfg.test_type === 'function_graph' && (
+            <Select
+              value={cfg.function_graph_id || ""}
+              onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, function_graph_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择函数图" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {booleanFunctionGraphs.map(g => (
+                  <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      );
+    }
+
+    if (data.validator_type === 'unit_compare') {
+      const cfg = data.unit_compare_config || {};
+      return (
+        <div className="space-y-1">
+          <Select
+            value={cfg.compare_type || "attribute_value"}
+            onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, compare_type: v } })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="attribute_value" className="text-white text-xs">属性值</SelectItem>
+              <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
+              <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+            </SelectContent>
+          </Select>
+          {cfg.compare_type === 'attribute_value' && (
+            <>
+              <Select
+                value={cfg.attribute_id || ""}
+                onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, attribute_id: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                  <SelectValue placeholder="选择属性" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  {attributes.map(a => (
+                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                value={cfg.attribute_key || ""}
+                onChange={(e) => setEditData({ ...data, unit_compare_config: { ...cfg, attribute_key: e.target.value } })}
+                placeholder="属性键"
+                className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+              />
+            </>
+          )}
+          {cfg.compare_type === 'function_graph' && (
+            <Select
+              value={cfg.function_graph_id || ""}
+              onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, function_graph_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择函数图" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {booleanFunctionGraphs.map(g => (
+                  <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Select
+            value={cfg.operator || "gt"}
+            onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, operator: v } })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
+              <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
+              <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
+              <SelectItem value="lte" className="text-white text-xs">&lt;=</SelectItem>
+              <SelectItem value="eq" className="text-white text-xs">=</SelectItem>
+              <SelectItem value="neq" className="text-white text-xs">!=</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    }
+
+    if (data.validator_type === 'combine') {
+      const cfg = data.combine_config || {};
+      return (
+        <div className="space-y-1">
+          <Select
+            value={cfg.logic_operator || "AND"}
+            onValueChange={(v) => setEditData({ ...data, combine_config: { ...cfg, logic_operator: v } })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="AND" className="text-white text-xs">AND</SelectItem>
+              <SelectItem value="OR" className="text-white text-xs">OR</SelectItem>
+              <SelectItem value="NOT" className="text-white text-xs">NOT</SelectItem>
+              <SelectItem value="XOR" className="text-white text-xs">XOR</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="text-xs text-gray-500">子验证器: {(cfg.sub_validator_ids || []).length}个</div>
+        </div>
+      );
+    }
+
+    if (data.validator_type === 'function_graph') {
+      const cfg = data.function_graph_config || {};
+      return (
+        <div className="space-y-1">
+          <Select
+            value={cfg.function_graph_id || ""}
+            onValueChange={(v) => setEditData({ ...data, function_graph_config: { ...cfg, function_graph_id: v } })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue placeholder="选择函数图" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              {booleanFunctionGraphs.map(g => (
+                <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="text-xs text-gray-500">参数绑定: {Object.keys(cfg.parameter_bindings || {}).length}个</div>
+        </div>
+      );
+    }
+
+    return <span className="text-xs text-gray-500">选择类型后配置</span>;
+  };
+
   const renderEditRow = (data) => {
     return (
       <tr className="border-b border-[#3d3d3d] bg-[#252526]">
@@ -213,7 +416,7 @@ export default function ValidatorEditorPage() {
         <td className="p-2">
           <Select
             value={data.validator_type}
-            onValueChange={(val) => setEditData({ ...data, validator_type: val })}
+            onValueChange={handleTypeChange}
           >
             <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
               <SelectValue />
@@ -221,16 +424,13 @@ export default function ValidatorEditorPage() {
             <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
               <SelectItem value="unit_test" className="text-white text-xs">单位测试</SelectItem>
               <SelectItem value="unit_compare" className="text-white text-xs">单位比较</SelectItem>
-              <SelectItem value="unit_filters" className="text-white text-xs">单位过滤</SelectItem>
-              <SelectItem value="location" className="text-white text-xs">位置</SelectItem>
-              <SelectItem value="player" className="text-white text-xs">玩家</SelectItem>
               <SelectItem value="combine" className="text-white text-xs">组合</SelectItem>
               <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
             </SelectContent>
           </Select>
         </td>
         <td className="p-2">
-          <span className="text-xs text-gray-500">编辑配置...</span>
+          {renderConfigEditor(data)}
         </td>
         <td className="p-2">
           <input
@@ -325,6 +525,10 @@ export default function ValidatorEditorPage() {
             })}
           </tbody>
         </table>
+
+        <datalist id="tags-list">
+          {tags.map(t => <option key={t.id} value={t.full_path} />)}
+        </datalist>
         
         {filteredValidators.length === 0 && !creatingNew && (
           <div className="text-center py-12 text-gray-500">
