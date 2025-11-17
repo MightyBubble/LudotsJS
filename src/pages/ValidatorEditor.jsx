@@ -360,18 +360,6 @@ export default function ValidatorEditorPage() {
           <div className="bg-[#2d2d2d] p-1.5 rounded">
             <div className="text-xs text-gray-400 mb-1">比较值A:</div>
             <Select
-              value={cfg.source_entity || "source"}
-              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
-            >
-              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
-                <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
               value={cfg.compare_type || "attribute_value"}
               onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_type: v } })}
             >
@@ -385,6 +373,20 @@ export default function ValidatorEditorPage() {
                 <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
               </SelectContent>
             </Select>
+            {cfg.compare_type !== 'function_graph' && (
+              <Select
+                value={cfg.source_entity || "source"}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
+              >
+                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs mb-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                  <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+                  <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
             {cfg.compare_type === 'attribute_value' && (
               <div className="flex gap-1">
                 <Select
@@ -513,7 +515,7 @@ export default function ValidatorEditorPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
                     {constants.map(c => (
-                      <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.constant_key}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
