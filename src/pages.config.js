@@ -18,6 +18,7 @@ import GlobalConstantEditor from './pages/GlobalConstantEditor';
 import ConditionEditor from './pages/ConditionEditor';
 import ValidatorEditor from './pages/ValidatorEditor';
 import RequirementEditor from './pages/RequirementEditor';
+import DataTableEditor from './pages/DataTableEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "ConditionEditor": ConditionEditor,
     "ValidatorEditor": ValidatorEditor,
     "RequirementEditor": RequirementEditor,
+    "DataTableEditor": DataTableEditor,
 }
 
 export const pagesConfig = {
