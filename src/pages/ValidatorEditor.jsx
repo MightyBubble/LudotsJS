@@ -106,7 +106,7 @@ export default function ValidatorEditorPage() {
       name: "",
       description: "",
       validator_type: "entity_check",
-      entity_check_config: { source_entity: "caster", check_type: "has_tag", tag_path: "" },
+      entity_check_config: { source_entity: "source", check_type: "has_tag", tag_path: "" },
       negate: false,
       failure_result: "false"
     });
@@ -144,8 +144,8 @@ export default function ValidatorEditorPage() {
 
   const handleTypeChange = (newType) => {
     const defaults = {
-      entity_check: { entity_check_config: { source_entity: "caster", check_type: "has_tag", tag_path: "" } },
-      entity_compare: { entity_compare_config: { source_entity: "caster", compare_type: "attribute_value", operator: "gt", value_source: "literal", compare_value: 0 } },
+      entity_check: { entity_check_config: { source_entity: "source", check_type: "has_tag", tag_path: "" } },
+      entity_compare: { entity_compare_config: { source_entity: "source", compare_type: "attribute_value", operator: "gt", value_source: "literal", compare_value: 0 } },
       combine: { combine_config: { logic_operator: "AND", sub_validator_ids: [] } },
       function_graph: { function_graph_config: { function_graph_id: "", parameter_bindings: {} } }
     };
@@ -167,22 +167,12 @@ export default function ValidatorEditorPage() {
     return map[type] || type;
   };
 
-  const getEntityName = (entity) => {
-    const map = {
-      caster: '施法者',
-      target: '目标',
-      player: '玩家',
-      global: '全局'
-    };
-    return map[entity] || entity;
-  };
-
   const renderConfigCell = (validator) => {
     if (validator.validator_type === 'entity_check') {
       const cfg = validator.entity_check_config || {};
       return (
         <div className="text-xs text-gray-300">
-          {cfg.source_entity && <div>实体: {getEntityName(cfg.source_entity)}</div>}
+          {cfg.source_entity && <div>实体: {cfg.source_entity}</div>}
           {cfg.check_type && <div>检查: {cfg.check_type}</div>}
           {cfg.tag_path && <div>标签: {cfg.tag_path}</div>}
           {cfg.tag_paths && <div>标签: {cfg.tag_paths.length}个</div>}
@@ -193,7 +183,7 @@ export default function ValidatorEditorPage() {
       const cfg = validator.entity_compare_config || {};
       return (
         <div className="text-xs text-gray-300">
-          <div>{getEntityName(cfg.source_entity || 'caster')}.{cfg.attribute_key || '?'} {cfg.operator} {cfg.value_source === 'literal' ? cfg.compare_value : cfg.value_source === 'constant' ? `常量[${cfg.constant_key}]` : `${getEntityName(cfg.target_entity)}.${cfg.target_attribute_key}`}</div>
+          <div>{cfg.source_entity || 'source'}.{cfg.attribute_key || '?'} {cfg.operator} {cfg.value_source === 'literal' ? cfg.compare_value : cfg.value_source === 'constant' ? `常量[${cfg.constant_key}]` : `${cfg.target_entity}.${cfg.target_attribute_key}`}</div>
         </div>
       );
     }
@@ -224,17 +214,15 @@ export default function ValidatorEditorPage() {
       return (
         <div className="space-y-1">
           <Select
-            value={cfg.source_entity || "caster"}
+            value={cfg.source_entity || "source"}
             onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, source_entity: v } })}
           >
             <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-              <SelectItem value="caster" className="text-white text-xs">施法者</SelectItem>
-              <SelectItem value="target" className="text-white text-xs">目标</SelectItem>
-              <SelectItem value="player" className="text-white text-xs">玩家</SelectItem>
-              <SelectItem value="global" className="text-white text-xs">全局</SelectItem>
+              <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+              <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -364,17 +352,15 @@ export default function ValidatorEditorPage() {
         <div className="space-y-1">
           <div className="flex gap-1">
             <Select
-              value={cfg.source_entity || "caster"}
+              value={cfg.source_entity || "source"}
               onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
             >
               <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                <SelectItem value="caster" className="text-white text-xs">施法者</SelectItem>
-                <SelectItem value="target" className="text-white text-xs">目标</SelectItem>
-                <SelectItem value="player" className="text-white text-xs">玩家</SelectItem>
-                <SelectItem value="global" className="text-white text-xs">全局</SelectItem>
+                <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+                <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -527,10 +513,8 @@ export default function ValidatorEditorPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-                      <SelectItem value="caster" className="text-white text-xs">施法者</SelectItem>
-                      <SelectItem value="target" className="text-white text-xs">目标</SelectItem>
-                      <SelectItem value="player" className="text-white text-xs">玩家</SelectItem>
-                      <SelectItem value="global" className="text-white text-xs">全局</SelectItem>
+                      <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
+                      <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="flex gap-1">
