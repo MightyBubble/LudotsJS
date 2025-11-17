@@ -50,12 +50,6 @@ export default function ValidatorEditorPage() {
     initialData: [],
   });
 
-  const { data: constants = [] } = useQuery({
-    queryKey: ['globalConstants'],
-    queryFn: () => base44.entities.GlobalConstant.list(),
-    initialData: [],
-  });
-
   const booleanFunctionGraphs = useMemo(() => {
     return functionGraphs.filter(g => g.return_type === 'boolean');
   }, [functionGraphs]);
@@ -100,8 +94,8 @@ export default function ValidatorEditorPage() {
       validator_id: "",
       name: "",
       description: "",
-      validator_type: "unit_test",
-      unit_test_config: { test_type: "has_tag", tag_path: "" },
+      validator_type: "entity_check",
+      entity_check_config: { check_type: "has_tag", tag_path: "" },
       negate: false,
       failure_result: "false"
     });
@@ -139,8 +133,8 @@ export default function ValidatorEditorPage() {
 
   const handleTypeChange = (newType) => {
     const defaults = {
-      unit_test: { unit_test_config: { test_type: "has_tag", tag_path: "" } },
-      unit_compare: { unit_compare_config: { compare_type: "attribute_value", operator: "gt" } },
+      entity_check: { entity_check_config: { check_type: "has_tag", tag_path: "" } },
+      entity_compare: { entity_compare_config: { compare_type: "attribute_value", operator: "gt", compare_value: 0 } },
       combine: { combine_config: { logic_operator: "AND", sub_validator_ids: [] } },
       function_graph: { function_graph_config: { function_graph_id: "", parameter_bindings: {} } }
     };
@@ -154,11 +148,8 @@ export default function ValidatorEditorPage() {
 
   const getTypeName = (type) => {
     const map = {
-      unit_compare: '单位比较',
-      unit_test: '单位测试',
-      unit_filters: '单位过滤',
-      location: '位置',
-      player: '玩家',
+      entity_check: '实体检查',
+      entity_compare: '实体比较',
       combine: '组合',
       function_graph: '函数图'
     };
@@ -166,23 +157,25 @@ export default function ValidatorEditorPage() {
   };
 
   const renderConfigCell = (validator) => {
-    if (validator.validator_type === 'unit_compare') {
-      const cfg = validator.unit_compare_config || {};
+    if (validator.validator_type === 'entity_check') {
+      const cfg = validator.entity_check_config || {};
+      return (
+        <div className="text-xs text-gray-300">
+          {cfg.check_type && <div>检查: {cfg.check_type}</div>}
+          {cfg.tag_path && <div>标签: {cfg.tag_path}</div>}
+          {cfg.prototype_id && <div>原型: {cfg.prototype_id}</div>}
+          {cfg.function_graph_id && <div>图: {cfg.function_graph_id}</div>}
+        </div>
+      );
+    }
+    if (validator.validator_type === 'entity_compare') {
+      const cfg = validator.entity_compare_config || {};
       return (
         <div className="text-xs text-gray-300">
           {cfg.compare_type && <div>类型: {cfg.compare_type}</div>}
           {cfg.attribute_id && <div>属性: {cfg.attribute_id}.{cfg.attribute_key}</div>}
-          {cfg.operator && <div>操作: {cfg.operator}</div>}
-        </div>
-      );
-    }
-    if (validator.validator_type === 'unit_test') {
-      const cfg = validator.unit_test_config || {};
-      return (
-        <div className="text-xs text-gray-300">
-          {cfg.test_type && <div>测试: {cfg.test_type}</div>}
-          {cfg.tag_path && <div>标签: {cfg.tag_path}</div>}
-          {cfg.prototype_id && <div>原型: {cfg.prototype_id}</div>}
+          {cfg.operator && cfg.compare_value !== undefined && <div>{cfg.operator} {cfg.compare_value}</div>}
+          {cfg.function_graph_id && <div>图: {cfg.function_graph_id}</div>}
         </div>
       );
     }
@@ -208,13 +201,13 @@ export default function ValidatorEditorPage() {
   };
 
   const renderConfigEditor = (data) => {
-    if (data.validator_type === 'unit_test') {
-      const cfg = data.unit_test_config || {};
+    if (data.validator_type === 'entity_check') {
+      const cfg = data.entity_check_config || {};
       return (
         <div className="space-y-1">
           <Select
-            value={cfg.test_type || "has_tag"}
-            onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, test_type: v } })}
+            value={cfg.check_type || "has_tag"}
+            onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, check_type: v } })}
           >
             <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
               <SelectValue />
@@ -224,23 +217,24 @@ export default function ValidatorEditorPage() {
               <SelectItem value="has_any_tags" className="text-white text-xs">有任意标签</SelectItem>
               <SelectItem value="has_all_tags" className="text-white text-xs">有所有标签</SelectItem>
               <SelectItem value="is_prototype" className="text-white text-xs">是原型</SelectItem>
-              <SelectItem value="is_alive" className="text-white text-xs">存活</SelectItem>
+              <SelectItem value="has_attribute" className="text-white text-xs">有属性</SelectItem>
+              <SelectItem value="has_relation" className="text-white text-xs">有关系</SelectItem>
               <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
             </SelectContent>
           </Select>
-          {(cfg.test_type === 'has_tag' || !cfg.test_type) && (
+          {(cfg.check_type === 'has_tag' || !cfg.check_type) && (
             <Input
               value={cfg.tag_path || ""}
-              onChange={(e) => setEditData({ ...data, unit_test_config: { ...cfg, tag_path: e.target.value } })}
+              onChange={(e) => setEditData({ ...data, entity_check_config: { ...cfg, tag_path: e.target.value } })}
               placeholder="标签路径"
               className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
               list="tags-list"
             />
           )}
-          {cfg.test_type === 'is_prototype' && (
+          {cfg.check_type === 'is_prototype' && (
             <Select
               value={cfg.prototype_id || ""}
-              onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, prototype_id: v } })}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, prototype_id: v } })}
             >
               <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                 <SelectValue placeholder="选择原型" />
@@ -252,10 +246,40 @@ export default function ValidatorEditorPage() {
               </SelectContent>
             </Select>
           )}
-          {cfg.test_type === 'function_graph' && (
+          {cfg.check_type === 'has_attribute' && (
+            <Select
+              value={cfg.attribute_id || ""}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, attribute_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择属性" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {attributes.map(a => (
+                  <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {cfg.check_type === 'has_relation' && (
+            <Select
+              value={cfg.relation_id || ""}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, relation_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {relations.map(r => (
+                  <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {cfg.check_type === 'function_graph' && (
             <Select
               value={cfg.function_graph_id || ""}
-              onValueChange={(v) => setEditData({ ...data, unit_test_config: { ...cfg, function_graph_id: v } })}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, function_graph_id: v } })}
             >
               <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                 <SelectValue placeholder="选择函数图" />
@@ -271,13 +295,13 @@ export default function ValidatorEditorPage() {
       );
     }
 
-    if (data.validator_type === 'unit_compare') {
-      const cfg = data.unit_compare_config || {};
+    if (data.validator_type === 'entity_compare') {
+      const cfg = data.entity_compare_config || {};
       return (
         <div className="space-y-1">
           <Select
             value={cfg.compare_type || "attribute_value"}
-            onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, compare_type: v } })}
+            onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_type: v } })}
           >
             <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
               <SelectValue />
@@ -285,6 +309,7 @@ export default function ValidatorEditorPage() {
             <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
               <SelectItem value="attribute_value" className="text-white text-xs">属性值</SelectItem>
               <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
+              <SelectItem value="relation_count" className="text-white text-xs">关系计数</SelectItem>
               <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
             </SelectContent>
           </Select>
@@ -292,7 +317,7 @@ export default function ValidatorEditorPage() {
             <>
               <Select
                 value={cfg.attribute_id || ""}
-                onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, attribute_id: v } })}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_id: v } })}
               >
                 <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                   <SelectValue placeholder="选择属性" />
@@ -305,16 +330,40 @@ export default function ValidatorEditorPage() {
               </Select>
               <Input
                 value={cfg.attribute_key || ""}
-                onChange={(e) => setEditData({ ...data, unit_compare_config: { ...cfg, attribute_key: e.target.value } })}
+                onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_key: e.target.value } })}
                 placeholder="属性键"
                 className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
               />
             </>
           )}
+          {cfg.compare_type === 'tag_count' && (
+            <Input
+              value={cfg.tag_path || ""}
+              onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, tag_path: e.target.value } })}
+              placeholder="标签路径"
+              className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+              list="tags-list"
+            />
+          )}
+          {cfg.compare_type === 'relation_count' && (
+            <Select
+              value={cfg.relation_id || ""}
+              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_id: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                <SelectValue placeholder="选择关系" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {relations.map(r => (
+                  <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {cfg.compare_type === 'function_graph' && (
             <Select
               value={cfg.function_graph_id || ""}
-              onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, function_graph_id: v } })}
+              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, function_graph_id: v } })}
             >
               <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
                 <SelectValue placeholder="选择函数图" />
@@ -326,22 +375,31 @@ export default function ValidatorEditorPage() {
               </SelectContent>
             </Select>
           )}
-          <Select
-            value={cfg.operator || "gt"}
-            onValueChange={(v) => setEditData({ ...data, unit_compare_config: { ...cfg, operator: v } })}
-          >
-            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-              <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
-              <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
-              <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
-              <SelectItem value="lte" className="text-white text-xs">&lt;=</SelectItem>
-              <SelectItem value="eq" className="text-white text-xs">=</SelectItem>
-              <SelectItem value="neq" className="text-white text-xs">!=</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-1">
+            <Select
+              value={cfg.operator || "gt"}
+              onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, operator: v } })}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
+                <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
+                <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
+                <SelectItem value="lte" className="text-white text-xs">&lt;=</SelectItem>
+                <SelectItem value="eq" className="text-white text-xs">=</SelectItem>
+                <SelectItem value="neq" className="text-white text-xs">!=</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="number"
+              value={cfg.compare_value ?? 0}
+              onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_value: parseFloat(e.target.value) || 0 } })}
+              placeholder="值"
+              className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white flex-1"
+            />
+          </div>
         </div>
       );
     }
@@ -422,8 +480,8 @@ export default function ValidatorEditorPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-              <SelectItem value="unit_test" className="text-white text-xs">单位测试</SelectItem>
-              <SelectItem value="unit_compare" className="text-white text-xs">单位比较</SelectItem>
+              <SelectItem value="entity_check" className="text-white text-xs">实体检查</SelectItem>
+              <SelectItem value="entity_compare" className="text-white text-xs">实体比较</SelectItem>
               <SelectItem value="combine" className="text-white text-xs">组合</SelectItem>
               <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
             </SelectContent>
