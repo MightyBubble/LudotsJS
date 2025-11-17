@@ -5,12 +5,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Trash2, Layers, Edit3, Save, X } from "lucide-react";
+import { Search, Plus, Trash2, Layers, Edit3, Save, X, Zap } from "lucide-react";
+import ThresholdEventPanel from "../components/attribute/ThresholdEventPanel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function AttributeEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [selectedAttribute, setSelectedAttribute] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -265,7 +273,7 @@ export default function AttributeEditorPage() {
               <th className="text-left p-2 font-medium text-white/70">键</th>
               <th className="text-left p-2 font-medium text-white/70 w-48">计算图</th>
               <th className="text-left p-2 font-medium text-white/70">输入映射</th>
-              <th className="text-right p-2 font-medium text-white/70 w-24"></th>
+              <th className="text-right p-2 font-medium text-white/70 w-32"></th>
             </tr>
           </thead>
           <tbody>
@@ -452,6 +460,13 @@ export default function AttributeEditorPage() {
                     ) : (
                       <div className="flex gap-1 justify-end">
                         <button
+                          onClick={() => setSelectedAttribute(attr)}
+                          className="text-white/30 hover:text-yellow-400"
+                          title="事件"
+                        >
+                          <Zap className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleEdit(attr)}
                           className="text-white/30 hover:text-blue-400"
                         >
@@ -497,6 +512,9 @@ export default function AttributeEditorPage() {
                       </>
                     ) : (
                       <>
+                        <button onClick={() => setSelectedAttribute(attr)} className="text-white/30 hover:text-yellow-400 p-1">
+                          <Zap className="w-4 h-4" />
+                        </button>
                         <button onClick={() => handleEdit(attr)} className="text-white/30 hover:text-blue-400 p-1">
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -507,7 +525,6 @@ export default function AttributeEditorPage() {
                     )}
                   </div>
                 </div>
-                {/* 简化的移动端显示 */}
                 <div className="text-xs text-white/50">
                   基础值: {currentData.default_base_value} | 键: {(currentData.keys || []).length}个
                 </div>
@@ -523,6 +540,23 @@ export default function AttributeEditorPage() {
           </div>
         )}
       </div>
+
+      {/* 阈值事件弹窗 */}
+      <Dialog open={!!selectedAttribute} onOpenChange={(open) => !open && setSelectedAttribute(null)}>
+        <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Zap className="w-4 h-4 text-yellow-400" />
+              {selectedAttribute?.name} - 阈值事件
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedAttribute && (
+              <ThresholdEventPanel attributeId={selectedAttribute.attribute_id} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -9,10 +9,11 @@ import {
   ChevronRight, ChevronDown, Plus,
   Search, Trash2, Edit3, Copy, FolderTree, GripVertical, Save, X, MoveUp,
   List, Network, CheckSquare, Square, Lock, Unlock, Download, Upload, Palette, Settings,
-  Shield, Ban, Link, Trash, Power, Eraser
+  Shield, Ban, Link, Trash, Power, Eraser, Zap
 } from "lucide-react";
 import GraphView from "../components/tagEditor/GraphView";
 import CategoryManager from "../components/tagEditor/CategoryManager";
+import TagCountEventPanel from "../components/tag/TagCountEventPanel";
 
 // 简单规则组件
 function SimpleRuleSection({ type, icon, title, description, color, tags, inputValue, onAddTag, onRemoveTag, onInputChange, allTags, currentTagId }) {
@@ -182,6 +183,8 @@ export default function TagEditor() {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [importing, setImporting] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showEventPanel, setShowEventPanel] = useState(false);
+
 
   // 规则输入状态
   const [ruleInputs, setRuleInputs] = useState({
@@ -893,51 +896,50 @@ export default function TagEditor() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      {/* 顶部工具栏 */}
-      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
-        <span className="text-sm font-semibold text-gray-300">GameplayTag 编辑器</span>
+      {/* 顶部工具栏 - 移动端适配 */}
+      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-1 md:gap-3 overflow-x-auto">
+        <span className="text-sm font-semibold text-gray-300 whitespace-nowrap">Tag编辑器</span>
 
         {/* 视图切换 */}
-        <div className="flex gap-1 ml-4 bg-[#1e1e1e] rounded p-1">
+        <div className="flex gap-1 bg-[#1e1e1e] rounded p-1">
           <Button
             size="sm"
             variant={viewMode === 'tree' ? 'default' : 'ghost'}
             onClick={() => setViewMode('tree')}
-            className={`h-6 px-3 text-xs ${viewMode === 'tree' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
+            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'tree' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
           >
-            <List className="w-3 h-3 mr-1" />
-            树形
+            <List className="w-3 h-3 md:mr-1" />
+            <span className="hidden md:inline">树形</span>
           </Button>
           <Button
             size="sm"
             variant={viewMode === 'graph' ? 'default' : 'ghost'}
             onClick={() => setViewMode('graph')}
-            className={`h-6 px-3 text-xs ${viewMode === 'graph' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
+            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'graph' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
           >
-            <Network className="w-3 h-3 mr-1" />
-            图形
+            <Network className="w-3 h-3 md:mr-1" />
+            <span className="hidden md:inline">图形</span>
           </Button>
         </div>
 
-        {/* 分类管理 */}
+        {/* 工具按钮 - 隐藏部分移动端 */}
         <Button
           size="sm"
           variant="outline"
           onClick={() => setShowCategoryManager(true)}
-          className="h-6 px-3 text-xs bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+          className="h-6 px-2 md:px-3 text-xs bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300 hidden md:flex"
         >
-          <Palette className="w-3 h-3 mr-1" />
-          分类管理
+          <Palette className="w-3 h-3 md:mr-1" />
+          <span className="hidden md:inline">分类</span>
         </Button>
 
-        {/* 导入/导出 */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 hidden md:flex">
           <Button
             size="sm"
             variant="outline"
             onClick={exportToJSON}
             className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
-            title="导出为 JSON"
+            title="导出"
           >
             <Download className="w-3 h-3" />
           </Button>
@@ -955,14 +957,13 @@ export default function TagEditor() {
               className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
               disabled={importing}
               onClick={(e) => e.currentTarget.previousElementSibling.click()}
-              title="导入 JSON"
+              title="导入"
             >
               <Upload className="w-3 h-3" />
             </Button>
           </label>
         </div>
 
-        {/* 批量操作模式 */}
         {viewMode === 'tree' && (
           <Button
             size="sm"
@@ -973,37 +974,36 @@ export default function TagEditor() {
                 setSelectedTags(new Set());
               }
             }}
-            className={`h-6 px-3 text-xs ${isMultiSelectMode ? 'bg-[#0e639c] text-white' : 'bg-[#2d2d2d] border-[#3d3d3d] text-gray-300'}`}
+            className={`h-6 px-2 md:px-3 text-xs hidden md:flex ${isMultiSelectMode ? 'bg-[#0e639c] text-white' : 'bg-[#2d2d2d] border-[#3d3d3d] text-gray-300'}`}
           >
-            {isMultiSelectMode ? <CheckSquare className="w-3 h-3 mr-1" /> : <Square className="w-3 h-3 mr-1" />}
-            批量操作
+            {isMultiSelectMode ? <CheckSquare className="w-3 h-3 md:mr-1" /> : <Square className="w-3 h-3 md:mr-1" />}
+            <span className="hidden md:inline">批量</span>
           </Button>
         )}
 
-        {/* 批量操作按钮 */}
         {isMultiSelectMode && selectedTags.size > 0 && (
-          <div className="flex gap-2">
-            <span className="text-xs text-gray-400 flex items-center">
-              已选 {selectedTags.size} 项
+          <div className="flex gap-1 md:gap-2">
+            <span className="text-xs text-gray-400 flex items-center whitespace-nowrap">
+              {selectedTags.size}
             </span>
             <Button
               size="sm"
               onClick={() => handleBatchLock(true)}
-              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-1.5 md:px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
               <Lock className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={() => handleBatchLock(false)}
-              className="h-6 px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-1.5 md:px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
               <Unlock className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={handleBatchDelete}
-              className="h-6 px-2 bg-red-900/50 hover:bg-red-900 text-xs text-red-400"
+              className="h-6 px-1.5 md:px-2 bg-red-900/50 hover:bg-red-900 text-xs text-red-400"
             >
               <Trash2 className="w-3 h-3" />
             </Button>
@@ -1011,56 +1011,81 @@ export default function TagEditor() {
         )}
 
         {hasUnsavedChanges && (
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-1 md:gap-2 hidden md:flex">
             <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-            <span className="text-xs text-yellow-400">有未保存的更改</span>
+            <span className="text-xs text-yellow-400 whitespace-nowrap hidden lg:inline">未保存</span>
             <Button
               size="sm"
               onClick={handleSaveChanges}
-              className="h-6 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs"
+              className="h-6 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs"
             >
-              <Save className="w-3 h-3 mr-1" />
-              保存
+              <Save className="w-3 h-3 md:mr-1" />
+              <span className="hidden md:inline">保存</span>
             </Button>
             <Button
               size="sm"
               onClick={handleDiscardChanges}
               variant="outline"
-              className="h-6 px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-2 md:px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-xs text-gray-300"
             >
-              <X className="w-3 h-3 mr-1" />
-              撤销
+              <X className="w-3 h-3 md:mr-1" />
+              <span className="hidden md:inline">撤销</span>
             </Button>
           </div>
         )}
 
         <div className="flex-1" />
 
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
             placeholder="搜索标签..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-8 w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-7 pl-8 w-48 lg:w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
           />
         </div>
 
-        <div className="text-xs text-gray-500">
-          Ctrl+N 新建 | F2 重命名 | Del 删除 | Ctrl+S 保存
+        <div className="text-xs text-gray-500 hidden lg:block whitespace-nowrap">
+          Ctrl+N | F2 | Del | Ctrl+S
         </div>
       </div>
 
+      {/* 移动端搜索和工具栏 */}
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d] space-y-2">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+          <Input
+            placeholder="搜索标签..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          />
+        </div>
+        {hasUnsavedChanges && (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <span className="text-xs text-yellow-400 flex-1">有未保存的更改</span>
+            <Button size="sm" onClick={handleSaveChanges} className="h-6 px-2 bg-[#0e639c] text-xs">
+              <Save className="w-3 h-3 mr-1" />保存
+            </Button>
+            <Button size="sm" onClick={handleDiscardChanges} className="h-6 px-2 bg-[#3d3d3d] text-xs">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
+      </div>
+
       {/* 主要内容区 */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
         {viewMode === 'tree' ? (
           <>
             {/* 左侧树形视图 */}
-            <div className="w-96 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
-              <div className="p-3 border-b border-[#3d3d3d]">
+            <div className="w-full md:w-96 bg-[#252526] border-b md:border-r md:border-b-0 border-[#3d3d3d] flex flex-col max-h-[40vh] md:max-h-none">
+              <div className="p-2 md:p-3 border-b border-[#3d3d3d]">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="输入标签路径 (例: Ability.Combat.Skill)"
+                    placeholder="输入标签路径"
                     value={newTagPath}
                     onChange={(e) => setNewTagPath(e.target.value)}
                     onKeyDown={(e) => {
@@ -1076,7 +1101,7 @@ export default function TagEditor() {
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1 hidden md:block">
                   拖拽标签调整层级，拖到下方空白区域移至根级
                 </p>
               </div>
@@ -1112,7 +1137,7 @@ export default function TagEditor() {
               <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
                 总计: {localTags.length} 个标签
                 {hasUnsavedChanges && (
-                  <span className="ml-3 text-yellow-400">
+                  <span className="ml-3 text-yellow-400 hidden md:inline">
                     • 有未保存的更改
                   </span>
                 )}
@@ -1120,39 +1145,39 @@ export default function TagEditor() {
             </div>
 
             {/* 右侧详情面板 */}
-            <div className="flex-1 bg-[#1e1e1e] overflow-auto p-4">
+            <div className="flex-1 bg-[#1e1e1e] overflow-auto p-2 md:p-4">
               {selectedTag ? (
                 <div className="space-y-4">
-                  {/* 紧凑型 Header - 左右两栏 */}
+                  {/* Header - 移动端单栏布局 */}
                   <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded">
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* 左栏：只读信息 + 操作按钮 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* 左栏 */}
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h2 className="text-base font-semibold text-white mb-0.5">
                               {selectedTag.name}
                             </h2>
-                            <p className="text-xs text-gray-400 font-mono">{selectedTag.full_path}</p>
+                            <p className="text-xs text-gray-400 font-mono break-all">{selectedTag.full_path}</p>
                           </div>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs pt-2 border-t border-[#3d3d3d]">
                           <div>
-                            <span className="text-gray-500">父级路径:</span>
-                            <span className="ml-1 text-gray-300">{selectedTag.parent_path || "(根级)"}</span>
+                            <span className="text-gray-500">父级:</span>
+                            <span className="ml-1 text-gray-300 truncate">{selectedTag.parent_path || "(根级)"}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">层级深度:</span>
+                            <span className="text-gray-500">深度:</span>
                             <span className="ml-1 text-gray-300">{selectedTag.depth}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">使用次数:</span>
+                            <span className="text-gray-500">使用:</span>
                             <span className="ml-1 text-gray-300">{selectedTag.usage_count || 0}</span>
                           </div>
                         </div>
 
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex gap-2 pt-2 flex-wrap">
                           <Button
                             size="sm"
                             variant="outline"
@@ -1172,16 +1197,17 @@ export default function TagEditor() {
                             删除
                           </Button>
                           <button
-                            onClick={() => navigator.clipboard.writeText(selectedTag.full_path)}
-                            className="h-6 px-2 text-xs text-gray-500 hover:text-gray-300 transition-colors border border-[#3d3d3d] rounded hover:bg-[#3d3d3d]"
-                            title="复制路径"
+                            onClick={() => setShowEventPanel(!showEventPanel)}
+                            className="h-6 px-2 text-xs text-gray-300 hover:text-yellow-400 transition-colors border border-[#3d3d3d] rounded hover:bg-[#3d3d3d] flex items-center gap-1"
+                            title="事件"
                           >
-                            <Copy className="w-3 h-3" />
+                            <Zap className="w-3 h-3" />
+                            <span className="hidden md:inline">事件</span>
                           </button>
                         </div>
                       </div>
 
-                      {/* 右栏：可编辑信息 */}
+                      {/* 右栏 */}
                       <div className="space-y-2">
                         <div>
                           <label className="text-xs text-gray-400 mb-1 block">分类</label>
@@ -1228,8 +1254,15 @@ export default function TagEditor() {
                     </div>
                   </div>
 
-                  {/* 三栏规则布局 */}
-                  <div className="grid grid-cols-3 gap-4">
+                  {/* 事件面板 */}
+                  {showEventPanel && (
+                    <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded">
+                      <TagCountEventPanel tagPath={selectedTag.full_path} />
+                    </div>
+                  )}
+
+                  {/* 规则布局 - 移动端单栏 */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     {/* 第一栏：验证规则 */}
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-gray-300 px-1">验证规则</h3>
@@ -1339,7 +1372,7 @@ export default function TagEditor() {
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm py-12 md:py-0">
                   选择一个标签查看详情
                 </div>
               )}
