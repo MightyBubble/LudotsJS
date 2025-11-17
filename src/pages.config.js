@@ -16,6 +16,8 @@ import UnifiedGraphEditor from './pages/UnifiedGraphEditor';
 import GameEventEditor from './pages/GameEventEditor';
 import GlobalConstantEditor from './pages/GlobalConstantEditor';
 import ConditionEditor from './pages/ConditionEditor';
+import ValidatorEditor from './pages/ValidatorEditor';
+import RequirementEditor from './pages/RequirementEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +40,8 @@ export const PAGES = {
     "GameEventEditor": GameEventEditor,
     "GlobalConstantEditor": GlobalConstantEditor,
     "ConditionEditor": ConditionEditor,
+    "ValidatorEditor": ValidatorEditor,
+    "RequirementEditor": RequirementEditor,
 }
 
 export const pagesConfig = {
