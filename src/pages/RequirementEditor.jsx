@@ -3,15 +3,14 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Trash2, CheckSquare, Edit3, Save, X, ChevronDown, ChevronUp } from "lucide-react";
-import RequirementNodeEditor from "../components/requirement/RequirementNodeEditor";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Edit3, Trash2, X, Save, CheckSquare } from "lucide-react";
 
 export default function RequirementEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [creatingNew, setCreatingNew] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [expandedRows, setExpandedRows] = useState(new Set());
 
   const queryClient = useQueryClient();
 
@@ -21,10 +20,18 @@ export default function RequirementEditorPage() {
     initialData: [],
   });
 
+  const { data: validators = [] } = useQuery({
+    queryKey: ['validators'],
+    queryFn: () => base44.entities.Validator.list(),
+    initialData: [],
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Requirement.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['requirements'] });
+      setCreatingNew(false);
+      setEditData(null);
     },
   });
 
@@ -52,32 +59,22 @@ export default function RequirementEditorPage() {
     );
   }, [requirements, searchQuery]);
 
-  const handleCreate = (type) => {
-    const newRequirement = {
-      requirement_id: `requirement_${Date.now()}`,
-      name: "新需求",
+  const handleCreate = () => {
+    setCreatingNew(true);
+    setEditingId(null);
+    setEditData({
+      requirement_id: "",
+      name: "",
       description: "",
-      requirement_type: type,
+      requirement_type: "node",
       state: "active",
-      ...(type === 'node' && { 
-        node_config: { 
-          logic_operator: 'AND', 
-          sub_requirements: [] 
-        } 
-      }),
-      ...(type === 'count' && { 
-        count_config: { 
-          count_type: 'validator_true_count',
-          operator: 'gte',
-          count_value: 1
-        } 
-      })
-    };
-    createMutation.mutate(newRequirement);
+      node_config: { logic_operator: 'AND', sub_requirements: [] }
+    });
   };
 
   const handleEdit = (requirement) => {
     setEditingId(requirement.id);
+    setCreatingNew(false);
     setEditData({ ...requirement });
   };
 
@@ -86,10 +83,15 @@ export default function RequirementEditorPage() {
       alert('请填写需求ID和名称');
       return;
     }
-    updateMutation.mutate({ id: editData.id, data: editData });
+    if (creatingNew) {
+      createMutation.mutate(editData);
+    } else {
+      updateMutation.mutate({ id: editData.id, data: editData });
+    }
   };
 
   const handleCancel = () => {
+    setCreatingNew(false);
     setEditingId(null);
     setEditData(null);
   };
@@ -100,25 +102,104 @@ export default function RequirementEditorPage() {
     }
   };
 
-  const toggleExpand = (id) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const renderConfigCell = (requirement) => {
+    if (requirement.requirement_type === 'node') {
+      const cfg = requirement.node_config || {};
+      return (
+        <div className="text-xs text-gray-300">
+          {cfg.logic_operator && <div>逻辑: {cfg.logic_operator}</div>}
+          {cfg.sub_requirements && <div>子项: {cfg.sub_requirements.length}个</div>}
+        </div>
+      );
+    }
+    if (requirement.requirement_type === 'count') {
+      const cfg = requirement.count_config || {};
+      return (
+        <div className="text-xs text-gray-300">
+          {cfg.count_type && <div>类型: {cfg.count_type}</div>}
+          {cfg.operator && <div>操作: {cfg.operator}</div>}
+          {cfg.count_value !== undefined && <div>值: {cfg.count_value}</div>}
+        </div>
+      );
+    }
+    return <span className="text-gray-600">-</span>;
+  };
+
+  const renderEditRow = (data) => {
+    return (
+      <tr className="border-b border-[#3d3d3d] bg-[#252526]">
+        <td className="p-2">
+          <Input
+            value={data.requirement_id}
+            onChange={(e) => setEditData({ ...data, requirement_id: e.target.value })}
+            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            placeholder="需求ID"
+          />
+        </td>
+        <td className="p-2">
+          <Input
+            value={data.name}
+            onChange={(e) => setEditData({ ...data, name: e.target.value })}
+            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            placeholder="名称"
+          />
+        </td>
+        <td className="p-2">
+          <Select
+            value={data.requirement_type}
+            onValueChange={(val) => setEditData({ ...data, requirement_type: val })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="node" className="text-white text-xs">节点</SelectItem>
+              <SelectItem value="count" className="text-white text-xs">计数</SelectItem>
+            </SelectContent>
+          </Select>
+        </td>
+        <td className="p-2">
+          <span className="text-xs text-gray-500">编辑配置...</span>
+        </td>
+        <td className="p-2">
+          <Select
+            value={data.state}
+            onValueChange={(val) => setEditData({ ...data, state: val })}
+          >
+            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+              <SelectItem value="active" className="text-white text-xs">激活</SelectItem>
+              <SelectItem value="disabled" className="text-white text-xs">禁用</SelectItem>
+              <SelectItem value="hidden" className="text-white text-xs">隐藏</SelectItem>
+            </SelectContent>
+          </Select>
+        </td>
+        <td className="p-2">
+          <div className="flex gap-1">
+            <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+              <Save className="w-3 h-3" />
+            </Button>
+            <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        </td>
+      </tr>
+    );
   };
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
         <CheckSquare className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">需求编辑器</span>
-        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredRequirements.length} 个</span>
+        <span className="text-xs text-gray-500">共 {filteredRequirements.length} 个</span>
         
         <div className="flex-1" />
 
-        <div className="relative hidden md:block">
+        <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
@@ -128,159 +209,60 @@ export default function RequirementEditorPage() {
           />
         </div>
 
-        <div className="flex gap-1">
-          <Button size="sm" onClick={() => handleCreate('node')} className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
-            <Plus className="w-3 h-3 mr-1" />
-            <span className="hidden md:inline">节点</span>
-          </Button>
-          <Button size="sm" onClick={() => handleCreate('count')} className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs hidden md:flex">
-            计数
-          </Button>
-        </div>
-      </div>
-
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
-          />
-        </div>
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-white text-xs">
+          <Plus className="w-3 h-3 mr-1" />
+          新建
+        </Button>
       </div>
 
       <div className="flex-1 overflow-auto">
-        <div className="space-y-2 p-2 md:p-4">
-          {filteredRequirements.map((requirement) => {
-            const isEditing = editingId === requirement.id;
-            const isExpanded = expandedRows.has(requirement.id);
-            const currentData = isEditing ? editData : requirement;
-
-            return (
-              <div key={requirement.id} className="bg-[#252526] rounded border border-[#3e3e42]">
-                <div className="p-3 flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    {isEditing ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editData.requirement_id}
-                          onChange={(e) => setEditData({ ...editData, requirement_id: e.target.value })}
-                          placeholder="需求ID"
-                          className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                        />
-                        <Input
-                          value={editData.name}
-                          onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                          placeholder="名称"
-                          className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                        />
-                        <Textarea
-                          value={editData.description || ''}
-                          onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                          placeholder="描述"
-                          className="h-16 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                        />
-                        <Input
-                          value={editData.tooltip || ''}
-                          onChange={(e) => setEditData({ ...editData, tooltip: e.target.value })}
-                          placeholder="提示文本"
-                          className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                        />
-                        <Input
-                          value={editData.error_message || ''}
-                          onChange={(e) => setEditData({ ...editData, error_message: e.target.value })}
-                          placeholder="错误消息"
-                          className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        <div className="text-sm font-semibold text-white mb-1">
-                          {requirement.name}
-                          <span className="text-xs text-white/50 ml-2 font-mono">{requirement.requirement_id}</span>
-                        </div>
-                        <div className="text-xs text-white/70 mb-1">
-                          类型: {requirement.requirement_type === 'node' ? '节点' : '计数'}
-                          {requirement.state !== 'active' && <span className="text-yellow-400 ml-2">({requirement.state})</span>}
-                        </div>
-                        {requirement.description && (
-                          <div className="text-xs text-white/50">{requirement.description}</div>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex gap-1 ml-3">
-                    {isEditing ? (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={handleSave}
-                          disabled={updateMutation.isPending}
-                          className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb]"
-                        >
-                          <Save className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={handleCancel}
-                          className="h-7 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => toggleExpand(requirement.id)}
-                          className="text-white/30 hover:text-blue-400"
-                        >
-                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(requirement)}
-                          className="text-white/30 hover:text-blue-400"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(requirement.id)}
-                          className="text-white/30 hover:text-red-400"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {(isExpanded || isEditing) && (
-                  <div className="px-3 pb-3 pt-0 border-t border-[#3e3e42]">
-                    <div className="mt-3">
-                      {currentData.requirement_type === 'node' && (
-                        <RequirementNodeEditor
-                          config={currentData.node_config}
-                          onChange={(val) => isEditing && setEditData({ ...editData, node_config: val })}
-                        />
-                      )}
-
-                      {currentData.requirement_type === 'count' && (
-                        <div className="text-xs text-white/50">计数需求编辑器正在开发中...</div>
-                      )}
+        <table className="w-full text-xs">
+          <thead className="sticky top-0 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+            <tr>
+              <th className="text-left p-2 font-semibold text-gray-300 w-48">需求ID</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-24">类型</th>
+              <th className="text-left p-2 font-semibold text-gray-300">配置</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-24">状态</th>
+              <th className="text-left p-2 font-semibold text-gray-300 w-20">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {creatingNew && editData && renderEditRow(editData)}
+            
+            {filteredRequirements.map((requirement) => {
+              const isEditing = editingId === requirement.id;
+              
+              if (isEditing && editData) {
+                return <React.Fragment key={requirement.id}>{renderEditRow(editData)}</React.Fragment>;
+              }
+              
+              return (
+                <tr key={requirement.id} className="border-b border-[#3d3d3d] hover:bg-[#252526]">
+                  <td className="p-2 text-gray-300 font-mono">{requirement.requirement_id}</td>
+                  <td className="p-2 text-gray-300">{requirement.name}</td>
+                  <td className="p-2 text-gray-300">{requirement.requirement_type === 'node' ? '节点' : '计数'}</td>
+                  <td className="p-2">{renderConfigCell(requirement)}</td>
+                  <td className="p-2 text-gray-300">{requirement.state}</td>
+                  <td className="p-2">
+                    <div className="flex gap-1">
+                      <Button size="sm" onClick={() => handleEdit(requirement)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+                        <Edit3 className="w-3 h-3" />
+                      </Button>
+                      <Button size="sm" onClick={() => handleDelete(requirement.id)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#5a1e1e]">
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
         
-        {filteredRequirements.length === 0 && (
+        {filteredRequirements.length === 0 && !creatingNew && (
           <div className="text-center py-12 text-gray-500">
-            <CheckSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>暂无需求</p>
+            <div className="text-sm">暂无需求</div>
           </div>
         )}
       </div>
