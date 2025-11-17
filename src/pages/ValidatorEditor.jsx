@@ -721,6 +721,11 @@ export default function ValidatorEditorPage() {
 
     if (data.validator_type === 'combine') {
       const cfg = data.combine_config || {};
+      const availableValidators = validators.filter(v => v.id !== data.id);
+      const selectedValidators = (cfg.sub_validator_ids || [])
+        .map(id => validators.find(v => v.validator_id === id))
+        .filter(Boolean);
+      
       return (
         <div className="space-y-1">
           <Select
@@ -737,7 +742,53 @@ export default function ValidatorEditorPage() {
               <SelectItem value="XOR" className="text-white text-xs">XOR</SelectItem>
             </SelectContent>
           </Select>
-          <div className="text-xs text-gray-500">子验证器: {(cfg.sub_validator_ids || []).length}个</div>
+          
+          <div className="space-y-1">
+            {selectedValidators.map((v) => (
+              <div key={v.validator_id} className="flex items-center gap-1 bg-[#3d3d3d] px-2 py-0.5 rounded text-xs">
+                <span className="flex-1 text-white">{v.name}</span>
+                <button
+                  onClick={() => {
+                    const ids = (cfg.sub_validator_ids || []).filter(id => id !== v.validator_id);
+                    setEditData({ ...data, combine_config: { ...cfg, sub_validator_ids: ids } });
+                  }}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex gap-1">
+            <Select
+              value=""
+              onValueChange={(validatorId) => {
+                if (validatorId && !cfg.sub_validator_ids?.includes(validatorId)) {
+                  setEditData({
+                    ...data,
+                    combine_config: {
+                      ...cfg,
+                      sub_validator_ids: [...(cfg.sub_validator_ids || []), validatorId]
+                    }
+                  });
+                }
+              }}
+            >
+              <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                <SelectValue placeholder="添加验证器..." />
+              </SelectTrigger>
+              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                {availableValidators
+                  .filter(v => !cfg.sub_validator_ids?.includes(v.validator_id))
+                  .map(v => (
+                    <SelectItem key={v.id} value={v.validator_id} className="text-white text-xs">
+                      {v.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       );
     }
