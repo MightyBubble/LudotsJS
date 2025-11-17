@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -73,6 +72,19 @@ export default function GameEventEditor() {
     setEditData(null);
   };
 
+  const getDefaultValueForType = (type) => {
+    switch (type) {
+      case 'number': return '0';
+      case 'boolean': return 'false';
+      case 'string': return '""';
+      case 'array': return '[]';
+      case 'object': return '{}';
+      case 'entity': return 'null';
+      case 'entities': return '[]';
+      default: return 'null';
+    }
+  };
+
   const addParameter = (type) => {
     const paramList = type === 'input' ? 'input_parameters' : 'output_parameters';
     const newParam = {
@@ -80,7 +92,7 @@ export default function GameEventEditor() {
       type: 'number',
       description: ''
     };
-    if (type === 'input') newParam.default_value = 0;
+    if (type === 'input') newParam.default_value = '0';
     
     setEditData({
       ...editData,
@@ -91,7 +103,17 @@ export default function GameEventEditor() {
   const updateParameter = (type, index, field, value) => {
     const paramList = type === 'input' ? 'input_parameters' : 'output_parameters';
     const params = [...(editData[paramList] || [])];
-    params[index] = { ...params[index], [field]: value };
+    
+    if (field === 'type' && type === 'input') {
+      params[index] = { 
+        ...params[index], 
+        [field]: value,
+        default_value: getDefaultValueForType(value)
+      };
+    } else {
+      params[index] = { ...params[index], [field]: value };
+    }
+    
     setEditData({ ...editData, [paramList]: params });
   };
 
@@ -123,7 +145,6 @@ export default function GameEventEditor() {
         </Button>
       </div>
 
-      {/* 移动端搜索 */}
       <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -275,8 +296,8 @@ export default function GameEventEditor() {
                             <div className="text-xs">
                               <span className="text-white/90 font-mono">{param.name}</span>
                               <span className="text-white/50 ml-2">{param.type}</span>
-                              {param.default_value !== undefined && (
-                                <span className="text-white/40 ml-2">= {String(param.default_value)}</span>
+                              {param.default_value !== undefined && param.default_value !== null && (
+                                <span className="text-white/40 ml-2">= {param.default_value}</span>
                               )}
                             </div>
                           )}
