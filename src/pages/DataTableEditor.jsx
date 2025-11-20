@@ -61,8 +61,45 @@ export default function DataTableEditorPage() {
     createMutation.mutate(newTable);
   };
 
-  const handleEdit = (table) => {
+  const handleEditHeader = (table) => {
     setEditingTable({ ...table });
+  };
+
+  const handleCellEdit = (tableId, rowIndex, colName, value) => {
+    const table = tables.find(t => t.id === tableId);
+    if (!table) return;
+    
+    const col = table.columns.find(c => c.name === colName);
+    let parsedValue = value;
+    
+    if (col.type === "number") {
+      parsedValue = parseFloat(value) || 0;
+    } else if (col.type === "boolean") {
+      parsedValue = value === "true" || value === true;
+    }
+    
+    const newRows = [...table.rows];
+    newRows[rowIndex] = { ...newRows[rowIndex], [colName]: parsedValue };
+    
+    updateMutation.mutate({ id: tableId, data: { ...table, rows: newRows } });
+  };
+
+  const handleAddRowToTable = (table) => {
+    const newRow = {};
+    table.columns.forEach(col => {
+      newRow[col.name] = col.type === "number" ? 0 : col.type === "boolean" ? false : "";
+    });
+    updateMutation.mutate({ 
+      id: table.id, 
+      data: { ...table, rows: [...table.rows, newRow] } 
+    });
+  };
+
+  const handleRemoveRowFromTable = (table, rowIndex) => {
+    updateMutation.mutate({ 
+      id: table.id, 
+      data: { ...table, rows: table.rows.filter((_, i) => i !== rowIndex) } 
+    });
   };
 
   const handleSave = () => {
@@ -312,9 +349,16 @@ export default function DataTableEditorPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={() => handleEdit(selectedTable)} className="bg-[#0e639c] hover:bg-[#1177bb]">
+                  <Button onClick={() => handleEditHeader(selectedTable)} className="bg-[#0e639c] hover:bg-[#1177bb]">
                     <Edit3 className="w-4 h-4 mr-1" />
-                    编辑
+                    编辑表头
+                  </Button>
+                  <Button
+                    onClick={() => handleAddRowToTable(selectedTable)}
+                    className="bg-[#3d3d3d] hover:bg-[#4d4d4d]"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    添加行
                   </Button>
                   <Button
                     onClick={() => {
@@ -334,23 +378,56 @@ export default function DataTableEditorPage() {
                 <table className="w-full text-xs">
                   <thead className="bg-[#2d2d2d]">
                     <tr>
-                      <th className="text-left p-2 border-r border-[#3d3d3d]">#</th>
+                      <th className="text-left p-2 border-r border-[#3d3d3d] w-12">#</th>
                       {selectedTable.columns.map((col, idx) => (
-                        <th key={idx} className="text-left p-2 border-r border-[#3d3d3d]">
+                        <th key={idx} className="text-left p-2 border-r border-[#3d3d3d] min-w-[150px]">
                           {col.name} <span className="text-gray-500">({col.type})</span>
                         </th>
                       ))}
+                      <th className="text-left p-2 w-20">操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     {selectedTable.rows.map((row, rowIdx) => (
-                      <tr key={rowIdx} className="border-t border-[#3d3d3d]">
+                      <tr key={rowIdx} className="border-t border-[#3d3d3d] hover:bg-[#2d2d2d]">
                         <td className="p-2 border-r border-[#3d3d3d] text-gray-400">{rowIdx}</td>
                         {selectedTable.columns.map((col, colIdx) => (
                           <td key={colIdx} className="p-2 border-r border-[#3d3d3d]">
-                            {String(row[col.name] ?? "")}
+                            {col.type === "boolean" ? (
+                              <Select
+                                value={String(row[col.name])}
+                                onValueChange={(v) => handleCellEdit(selectedTable.id, rowIdx, col.name, v)}
+                              >
+                                <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                  <SelectItem value="true" className="text-white">true</SelectItem>
+                                  <SelectItem value="false" className="text-white">false</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                type={col.type === "number" ? "number" : "text"}
+                                value={row[col.name] ?? ""}
+                                onChange={(e) => handleCellEdit(selectedTable.id, rowIdx, col.name, e.target.value)}
+                                className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white"
+                              />
+                            )}
                           </td>
                         ))}
+                        <td className="p-2">
+                          <button
+                            onClick={() => {
+                              if (window.confirm('确定删除此行吗？')) {
+                                handleRemoveRowFromTable(selectedTable, rowIdx);
+                              }
+                            }}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
