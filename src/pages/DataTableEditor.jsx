@@ -28,9 +28,12 @@ export default function DataTableEditorPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.DataTable.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['dataTables'] });
       setEditingTable(null);
+      if (selectedTable?.id === variables.id) {
+        setSelectedTable({ ...selectedTable, ...variables.data });
+      }
     },
   });
 
