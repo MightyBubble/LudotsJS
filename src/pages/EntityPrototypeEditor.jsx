@@ -25,6 +25,12 @@ export default function EntityPrototypeEditorPage() {
     initialData: [],
   });
 
+  const { data: structures = [] } = useQuery({
+    queryKey: ['structureDefinitions'],
+    queryFn: () => base44.entities.StructureDefinition.list(),
+    initialData: [],
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.EntityPrototype.create(data),
     onSuccess: () => {

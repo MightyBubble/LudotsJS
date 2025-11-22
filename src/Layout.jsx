@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -56,6 +56,9 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("EntityRelationEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "EntityRelationEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
           <LinkIcon className="w-4 h-4" />关系
         </Link>
+        <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "StructureEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+          <Network className="w-4 h-4" />结构
+        </Link>
         <Link to={createPageUrl("NewAttributeSimulator")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
           <Calculator className="w-4 h-4" />计算器
         </Link>
@@ -84,6 +87,7 @@ export default function Layout({ children, currentPageName }) {
           {currentPageName === "ModifierDefinitionEditor" && "修饰器"}
           {currentPageName === "EntityPrototypeEditor" && "原型"}
           {currentPageName === "EntityRelationEditor" && "关系"}
+          {currentPageName === "StructureEditor" && "结构"}
           {currentPageName === "NewAttributeSimulator" && "计算器"}
           {currentPageName === "GameEventEditor" && "事件"}
           {currentPageName === "GlobalConstantEditor" && "常量"}
@@ -128,6 +132,9 @@ export default function Layout({ children, currentPageName }) {
           </Link>
           <Link to={createPageUrl("EntityRelationEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "EntityRelationEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <LinkIcon className="w-4 h-4" />关系
+          </Link>
+          <Link to={createPageUrl("StructureEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "StructureEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+            <Network className="w-4 h-4" />结构
           </Link>
           <Link to={createPageUrl("NewAttributeSimulator")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Calculator className="w-4 h-4" />计算器

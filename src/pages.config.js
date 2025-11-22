@@ -19,6 +19,7 @@ import ConditionEditor from './pages/ConditionEditor';
 import ValidatorEditor from './pages/ValidatorEditor';
 import RequirementEditor from './pages/RequirementEditor';
 import DataTableEditor from './pages/DataTableEditor';
+import StructureEditor from './pages/StructureEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "ValidatorEditor": ValidatorEditor,
     "RequirementEditor": RequirementEditor,
     "DataTableEditor": DataTableEditor,
+    "StructureEditor": StructureEditor,
 }
 
 export const pagesConfig = {
