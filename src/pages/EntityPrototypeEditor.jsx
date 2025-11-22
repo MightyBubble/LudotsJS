@@ -69,14 +69,19 @@ export default function EntityPrototypeEditorPage() {
       prototype_id: "new_prototype",
       name: "新原型",
       description: "",
-      referenced_attributes: []
+      referenced_attributes: [],
+      structure_bindings: []
     };
     createMutation.mutate(newPrototype);
   };
 
   const handleEdit = (prototype) => {
     setEditingRow(prototype.id);
-    setEditData({ ...prototype, referenced_attributes: prototype.referenced_attributes || [] });
+    setEditData({ 
+      ...prototype, 
+      referenced_attributes: prototype.referenced_attributes || [],
+      structure_bindings: prototype.structure_bindings || []
+    });
   };
 
   const handleSave = () => {
@@ -89,7 +94,8 @@ export default function EntityPrototypeEditorPage() {
       prototype_id: editData.prototype_id,
       name: editData.name,
       description: editData.description || "",
-      referenced_attributes: editData.referenced_attributes || []
+      referenced_attributes: editData.referenced_attributes || [],
+      structure_bindings: editData.structure_bindings || []
     };
     
     updateMutation.mutate({ id: editData.id, data: dataToSave });
@@ -165,6 +171,7 @@ export default function EntityPrototypeEditorPage() {
               <th className="text-left p-2 font-medium text-white/70 w-40">名称</th>
               <th className="text-left p-2 font-medium text-white/70">描述</th>
               <th className="text-left p-2 font-medium text-white/70">引用的属性</th>
+              <th className="text-left p-2 font-medium text-white/70">结构绑定</th>
               <th className="text-right p-2 font-medium text-white/70 w-24"></th>
             </tr>
           </thead>
@@ -259,6 +266,91 @@ export default function EntityPrototypeEditorPage() {
                         })}
                         {(proto.referenced_attributes || []).length === 0 && (
                           <span className="text-gray-600 text-xs">无引用</span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    {isEditing ? (
+                      <div className="space-y-1 min-w-[200px]">
+                        {(editData.structure_bindings || []).map((binding, idx) => {
+                          const structure = structures.find(s => s.structure_id === binding.structure_id);
+                          const nodes = structure?.nodes || [];
+                          return (
+                            <div key={idx} className="flex gap-1 items-center bg-[#3d3d3d]/30 p-1 rounded">
+                              <Select
+                                value={binding.structure_id}
+                                onValueChange={(v) => {
+                                  const newBindings = [...editData.structure_bindings];
+                                  newBindings[idx] = { ...binding, structure_id: v, node_id: "" };
+                                  setEditData({ ...editData, structure_bindings: newBindings });
+                                }}
+                              >
+                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                  <SelectValue placeholder="结构" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                  {structures.map(s => (
+                                    <SelectItem key={s.id} value={s.structure_id} className="text-white text-xs">{s.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                value={binding.node_id}
+                                onValueChange={(v) => {
+                                  const newBindings = [...editData.structure_bindings];
+                                  newBindings[idx] = { ...binding, node_id: v };
+                                  setEditData({ ...editData, structure_bindings: newBindings });
+                                }}
+                                disabled={!binding.structure_id}
+                              >
+                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                  <SelectValue placeholder="节点" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                  {nodes.map(n => (
+                                    <SelectItem key={n.node_id} value={n.node_id} className="text-white text-xs">{n.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <button
+                                onClick={() => {
+                                  const newBindings = [...editData.structure_bindings];
+                                  newBindings.splice(idx, 1);
+                                  setEditData({ ...editData, structure_bindings: newBindings });
+                                }}
+                                className="text-white/30 hover:text-red-400"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <Button
+                          size="sm"
+                          onClick={() => setEditData({
+                            ...editData,
+                            structure_bindings: [...(editData.structure_bindings || []), { structure_id: "", node_id: "" }]
+                          })}
+                          className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs w-full"
+                        >
+                          <Plus className="w-3 h-3 mr-1" /> 绑定结构
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {(proto.structure_bindings || []).map((b, i) => {
+                          const structName = structures.find(s => s.structure_id === b.structure_id)?.name || b.structure_id;
+                          return (
+                            <div key={i} className="text-[10px] bg-[#3d3d3d] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
+                              <span className="text-blue-300">{structName}</span>
+                              <span className="text-gray-500">→</span>
+                              <span>{b.node_id}</span>
+                            </div>
+                          );
+                        })}
+                        {(proto.structure_bindings || []).length === 0 && (
+                          <span className="text-gray-600 text-xs">无绑定</span>
                         )}
                       </div>
                     )}
