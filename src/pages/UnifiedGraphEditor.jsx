@@ -477,7 +477,7 @@ export default function UnifiedGraphEditorPage() {
 
   if (currentGraph) {
     return (
-      <div className="h-screen w-full bg-[#1e1e1e] flex flex-col overflow-hidden">
+      <div className="h-screen w-full bg-[#0a0a0a] flex flex-col overflow-hidden">
         <Toolbar
           onSave={saveGraph}
           onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
@@ -504,7 +504,7 @@ export default function UnifiedGraphEditorPage() {
           {/* 移动端节点库弹窗 */}
           {showLibraryMobile && (
             <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowLibraryMobile(false)}>
-              <div className="absolute bottom-0 left-0 right-0 bg-[#252526] max-h-[60vh] overflow-hidden rounded-t-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute bottom-0 left-0 right-0 bg-[#141414] max-h-[60vh] overflow-hidden rounded-t-xl" onClick={(e) => e.stopPropagation()}>
                 <UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={(type) => { addNode(type); setShowLibraryMobile(false); }} onClose={() => setShowLibraryMobile(false)} />
               </div>
             </div>
@@ -538,26 +538,26 @@ export default function UnifiedGraphEditorPage() {
                   <span>返回:</span>
                   <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
                     <DialogTrigger asChild>
-                      <button className="text-[#0e639c] hover:text-[#1177bb] underline">
+                      <button className="text-[#f97316] hover:text-[#ea580c] underline">
                         {currentGraph.return_type || 'void'}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white">
-                      <DialogHeader><DialogTitle className="text-white">修改返回类型</DialogTitle></DialogHeader>
+                    <DialogContent className="bg-[#141414] border-[#262626] text-[#e5e5e5]">
+                      <DialogHeader><DialogTitle className="text-[#e5e5e5]">修改返回类型</DialogTitle></DialogHeader>
                       <div className="space-y-4 py-4">
                         <Select value={currentGraph.return_type || 'void'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
-                          <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                          <SelectTrigger className="bg-[#0a0a0a] border-[#262626] text-[#e5e5e5]">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
-                            <SelectItem value="void" className="text-white">void (无返回)</SelectItem>
-                            <SelectItem value="number" className="text-white">number (数值)</SelectItem>
-                            <SelectItem value="boolean" className="text-white">boolean (布尔)</SelectItem>
-                            <SelectItem value="string" className="text-white">string (字符串)</SelectItem>
-                            <SelectItem value="array" className="text-white">array (数组)</SelectItem>
-                            <SelectItem value="object" className="text-white">object (对象)</SelectItem>
-                            <SelectItem value="entity" className="text-white">entity (实体)</SelectItem>
-                            <SelectItem value="entities" className="text-white">entities (实体集)</SelectItem>
+                          <SelectContent className="bg-[#141414] border-[#262626]">
+                            <SelectItem value="void" className="text-[#e5e5e5]">void (无返回)</SelectItem>
+                            <SelectItem value="number" className="text-[#e5e5e5]">number (数值)</SelectItem>
+                            <SelectItem value="boolean" className="text-[#e5e5e5]">boolean (布尔)</SelectItem>
+                            <SelectItem value="string" className="text-[#e5e5e5]">string (字符串)</SelectItem>
+                            <SelectItem value="array" className="text-[#e5e5e5]">array (数组)</SelectItem>
+                            <SelectItem value="object" className="text-[#e5e5e5]">object (对象)</SelectItem>
+                            <SelectItem value="entity" className="text-[#e5e5e5]">entity (实体)</SelectItem>
+                            <SelectItem value="entities" className="text-[#e5e5e5]">entities (实体集)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -575,9 +575,9 @@ export default function UnifiedGraphEditorPage() {
           {showBlackboard && (
             <div className="hidden md:block h-full">
               {currentGraph.graph_type === 'structure' ? (
-                <div className="w-64 bg-[#252526] border-l border-[#3d3d3d] p-4 h-full overflow-y-auto">
+                <div className="w-64 bg-[#141414] border-l border-[#262626] p-4 h-full overflow-y-auto">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-bold text-gray-200">结构属性</h3>
+                    <h3 className="text-sm font-bold text-[#e5e5e5]">结构属性</h3>
                   </div>
                   
                   {editingNodeId ? (
@@ -586,13 +586,13 @@ export default function UnifiedGraphEditorPage() {
                       if (!node) return null;
                       return (
                         <div className="space-y-4">
-                          <div className="text-xs text-gray-400 mb-2">编辑节点</div>
+                          <div className="text-xs text-gray-500 mb-2">编辑节点</div>
                           <div>
                             <label className="text-xs text-gray-500 block mb-1">节点ID</label>
                             <Input 
                               value={node.data.nodeId || ''} 
                               onChange={e => updateNodeData(node.id, { nodeId: e.target.value })}
-                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                              className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-[#e5e5e5]"
                             />
                           </div>
                           <div>
@@ -600,7 +600,7 @@ export default function UnifiedGraphEditorPage() {
                             <Input 
                               value={node.data.label || ''} 
                               onChange={e => updateNodeData(node.id, { label: e.target.value })}
-                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                              className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-[#e5e5e5]"
                             />
                           </div>
                           <div>
@@ -608,11 +608,11 @@ export default function UnifiedGraphEditorPage() {
                             <Input 
                               value={node.data.description || ''} 
                               onChange={e => updateNodeData(node.id, { description: e.target.value })}
-                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                              className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-[#e5e5e5]"
                             />
                           </div>
                           <Button 
-                            className="w-full bg-red-900/50 hover:bg-red-900 text-xs h-7 mt-4"
+                            className="w-full bg-red-900/20 hover:bg-red-900/40 text-xs h-7 mt-4 text-red-400"
                             onClick={() => {
                               deleteNode(node.id);
                               setEditingNodeId(null);
@@ -625,7 +625,7 @@ export default function UnifiedGraphEditorPage() {
                     })()
                   ) : (
                     <div className="space-y-4">
-                      <div className="text-xs text-gray-400 mb-2">连接列表 ({connections.length})</div>
+                      <div className="text-xs text-gray-500 mb-2">连接列表 ({connections.length})</div>
                       {connections.length === 0 && <div className="text-xs text-gray-600">暂无连接</div>}
                       {connections.map(conn => {
                         const fromNode = nodes.find(n => n.id === conn.fromNode);
@@ -634,7 +634,7 @@ export default function UnifiedGraphEditorPage() {
                         const toLabel = toNode?.data?.label || 'Unknown';
                         
                         return (
-                          <div key={conn.id} className="bg-[#1e1e1e] p-2 rounded border border-[#3d3d3d] text-xs">
+                          <div key={conn.id} className="bg-[#0a0a0a] p-2 rounded border border-[#262626] text-xs">
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-gray-400">{label} → {toLabel}</span>
                               <button onClick={() => deleteConnection(conn.id)} className="text-red-400 hover:text-white">×</button>
@@ -646,12 +646,12 @@ export default function UnifiedGraphEditorPage() {
                                 setConnections(newConns);
                               }}
                             >
-                              <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs w-full text-white">
+                              <SelectTrigger className="h-6 bg-[#141414] border-[#262626] text-xs w-full text-[#e5e5e5]">
                                 <SelectValue placeholder="选择关系" />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                              <SelectContent className="bg-[#141414] border-[#262626]">
                                 {relations.map(r => (
-                                  <SelectItem key={r.id} value={r.relation_id} className="text-xs text-white">{r.name}</SelectItem>
+                                  <SelectItem key={r.id} value={r.relation_id} className="text-xs text-[#e5e5e5] hover:bg-[#262626]">{r.name}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
@@ -670,7 +670,7 @@ export default function UnifiedGraphEditorPage() {
           {/* 移动端黑板弹窗 */}
           {showBlackboardMobile && (
             <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowBlackboardMobile(false)}>
-              <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-[#252526]" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-[#141414]" onClick={(e) => e.stopPropagation()}>
                 <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
               </div>
             </div>
@@ -681,8 +681,8 @@ export default function UnifiedGraphEditorPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-[#e5e5e5]">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Network className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">图编辑器</span>
         <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredGraphs.length} 个</span>
@@ -693,76 +693,76 @@ export default function UnifiedGraphEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-[#e5e5e5]"
           />
         </div>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
+            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-black text-xs">
               <Plus className="w-3 h-3 md:mr-1" />
               <span className="hidden md:inline">新建图</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#2d2d30] border-[#3e3e42] text-white">
-            <DialogHeader><DialogTitle className="text-white">新建图</DialogTitle></DialogHeader>
+          <DialogContent className="bg-[#141414] border-[#262626] text-[#e5e5e5]">
+            <DialogHeader><DialogTitle className="text-[#e5e5e5]">新建图</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <label className="text-sm text-white/70 mb-1.5 block">类型</label>
+                <label className="text-sm text-gray-400 mb-1.5 block">类型</label>
                 <Select value={newGraph.graph_type} onValueChange={(v) => setNewGraph({ ...newGraph, graph_type: v })}>
-                  <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                  <SelectTrigger className="bg-[#0a0a0a] border-[#262626] text-[#e5e5e5]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
-                    <SelectItem value="data" className="text-white">Data Graph (数据图)</SelectItem>
-                    <SelectItem value="query" className="text-white">Entity Query (实体查询)</SelectItem>
-                    <SelectItem value="function" className="text-white">Function Graph (函数图)</SelectItem>
-                    <SelectItem value="structure" className="text-white">Structure Graph (结构图)</SelectItem>
+                  <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectItem value="data" className="text-[#e5e5e5] hover:bg-[#262626]">Data Graph (数据图)</SelectItem>
+                    <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#262626]">Entity Query (实体查询)</SelectItem>
+                    <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#262626]">Function Graph (函数图)</SelectItem>
+                    <SelectItem value="structure" className="text-[#e5e5e5] hover:bg-[#262626]">Structure Graph (结构图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm text-white/70 mb-1.5 block">名称</label>
-                <Input value={newGraph.name} onChange={(e) => setNewGraph({ ...newGraph, name: e.target.value })} placeholder="我的图" className="bg-[#3c3c3c] border-[#434343] text-white" />
+                <label className="text-sm text-gray-400 mb-1.5 block">名称</label>
+                <Input value={newGraph.name} onChange={(e) => setNewGraph({ ...newGraph, name: e.target.value })} placeholder="我的图" className="bg-[#0a0a0a] border-[#262626] text-[#e5e5e5]" />
               </div>
               <div>
-                <label className="text-sm text-white/70 mb-1.5 block">描述</label>
-                <Input value={newGraph.description} onChange={(e) => setNewGraph({ ...newGraph, description: e.target.value })} className="bg-[#3c3c3c] border-[#434343] text-white" />
+                <label className="text-sm text-gray-400 mb-1.5 block">描述</label>
+                <Input value={newGraph.description} onChange={(e) => setNewGraph({ ...newGraph, description: e.target.value })} className="bg-[#0a0a0a] border-[#262626] text-[#e5e5e5]" />
               </div>
               {newGraph.graph_type === 'function' && ( // Conditionally render return type select for function graphs
                 <div>
-                  <label className="text-sm text-white/70 mb-1.5 block">返回类型</label>
+                  <label className="text-sm text-gray-400 mb-1.5 block">返回类型</label>
                   <Select value={newGraph.return_type} onValueChange={(v) => setNewGraph({ ...newGraph, return_type: v })}>
-                    <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
+                    <SelectTrigger className="bg-[#0a0a0a] border-[#262626] text-[#e5e5e5]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
-                      <SelectItem value="void" className="text-white">void (无返回)</SelectItem>
-                      <SelectItem value="number" className="text-white">number (数值)</SelectItem>
-                      <SelectItem value="boolean" className="text-white">boolean (布尔)</SelectItem>
-                      <SelectItem value="string" className="text-white">string (字符串)</SelectItem>
-                      <SelectItem value="array" className="text-white">array (数组)</SelectItem>
-                      <SelectItem value="object" className="text-white">object (对象)</SelectItem>
-                      <SelectItem value="entity" className="text-white">entity (实体)</SelectItem>
-                      <SelectItem value="entities" className="text-white">entities (实体集)</SelectItem>
+                    <SelectContent className="bg-[#141414] border-[#262626]">
+                      <SelectItem value="void" className="text-[#e5e5e5] hover:bg-[#262626]">void (无返回)</SelectItem>
+                      <SelectItem value="number" className="text-[#e5e5e5] hover:bg-[#262626]">number (数值)</SelectItem>
+                      <SelectItem value="boolean" className="text-[#e5e5e5] hover:bg-[#262626]">boolean (布尔)</SelectItem>
+                      <SelectItem value="string" className="text-[#e5e5e5] hover:bg-[#262626]">string (字符串)</SelectItem>
+                      <SelectItem value="array" className="text-[#e5e5e5] hover:bg-[#262626]">array (数组)</SelectItem>
+                      <SelectItem value="object" className="text-[#e5e5e5] hover:bg-[#262626]">object (对象)</SelectItem>
+                      <SelectItem value="entity" className="text-[#e5e5e5] hover:bg-[#262626]">entity (实体)</SelectItem>
+                      <SelectItem value="entities" className="text-[#e5e5e5] hover:bg-[#262626]">entities (实体集)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               )}
-              <Button onClick={handleCreate} className="w-full bg-[#0e639c] hover:bg-[#1177bb]">创建</Button>
+              <Button onClick={handleCreate} className="w-full bg-[#f97316] hover:bg-[#ea580c] text-black">创建</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* 移动端搜索 */}
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+      <div className="md:hidden px-2 py-2 bg-[#141414] border-b border-[#262626]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-[#e5e5e5]"
           />
         </div>
       </div>
@@ -770,7 +770,7 @@ export default function UnifiedGraphEditorPage() {
       <div className="flex-1 overflow-auto p-2 md:p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredGraphs.map((graph) => (
-            <div key={graph.id} className="bg-[#252526] rounded border border-[#3e3e42] p-4 hover:border-[#0e639c] transition-colors group">
+            <div key={graph.id} className="bg-[#141414] rounded border border-[#262626] p-4 hover:border-[#f97316] transition-colors group">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -779,10 +779,10 @@ export default function UnifiedGraphEditorPage() {
                      graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : 
                      graph.graph_type === 'structure' ? <Share2 className="w-4 h-4 text-[#ffc000]" /> :
                      <Database className="w-4 h-4 text-[#c97fff]" />}
-                    <h3 className="text-white font-medium">{graph.name}</h3>
+                    <h3 className="text-[#e5e5e5] font-medium">{graph.name}</h3>
                   </div>
-                  {graph.description && <p className="text-white/60 text-xs mt-1">{graph.description}</p>}
-                  <div className="text-[10px] text-white/40 mt-2">
+                  {graph.description && <p className="text-gray-500 text-xs mt-1">{graph.description}</p>}
+                  <div className="text-[10px] text-gray-600 mt-2">
                     {/* Conditional rendering for graph type display */}
                     {graph.graph_type === 'data' ? 'Data Graph' : 
                      graph.graph_type === 'query' ? 'Entity Query' : 
@@ -791,7 +791,7 @@ export default function UnifiedGraphEditorPage() {
                   </div>
                 </div>
               </div>
-              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#0e639c] hover:bg-[#1177bb]">
+              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#f97316] hover:bg-[#ea580c] text-black">
                 <Network className="w-3 h-3 mr-1" />可视化编辑
               </Button>
             </div>
