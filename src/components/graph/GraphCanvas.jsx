@@ -190,8 +190,9 @@ export default function GraphCanvas({
     } else {
       setSelectedNodes(new Set([nodeId]));
       setSelectedConnections(new Set());
+      if (onSelectNode) onSelectNode(nodeId);
     }
-  }, []);
+  }, [onSelectNode]);
 
   const handleSelectConnection = useCallback((connId, multiSelect) => {
     if (multiSelect) {
@@ -207,8 +208,9 @@ export default function GraphCanvas({
     } else {
       setSelectedConnections(new Set([connId]));
       setSelectedNodes(new Set());
+      if (onSelectConnection) onSelectConnection(connId);
     }
-  }, []);
+  }, [onSelectConnection]);
 
   const getPortPosition = (nodeId, portId, portType) => {
     const node = nodes.find(n => n.id === nodeId);
