@@ -36,22 +36,22 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
   };
 
   return (
-    <div className="w-64 bg-[#252526] border-r border-[#3e3e42] flex flex-col">
-      <div className="flex items-center justify-between p-3 border-b border-[#3e3e42]">
-        <span className="text-sm font-semibold text-white/90">节点库</span>
-        <button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors">
+    <div className="w-64 bg-[#141414] border-r border-[#262626] flex flex-col">
+      <div className="flex items-center justify-between p-3 border-b border-[#262626]">
+        <span className="text-sm font-semibold text-[#e5e5e5]">节点库</span>
+        <button onClick={onClose} className="text-gray-500 hover:text-[#e5e5e5] transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
       
       {(graphType === 'query' || graphType === 'function') && (
-        <div className="flex border-b border-[#3e3e42]">
+        <div className="flex border-b border-[#262626]">
           <button
             onClick={() => setActiveTab(graphType === 'query' ? 'query' : 'function')}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
               activeTab === (graphType === 'query' ? 'query' : 'function')
-                ? 'bg-[#0e639c] text-white' 
-                : 'text-white/60 hover:text-white/90 hover:bg-[#2d2d30]'
+                ? 'bg-[#f97316] text-black' 
+                : 'text-gray-400 hover:text-[#e5e5e5] hover:bg-[#262626]'
             }`}
           >
             {graphType === 'query' ? '查询节点' : '函数节点'}
@@ -60,8 +60,8 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
             onClick={() => setActiveTab('compute')}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
               activeTab === 'compute' 
-                ? 'bg-[#0e639c] text-white' 
-                : 'text-white/60 hover:text-white/90 hover:bg-[#2d2d30]'
+                ? 'bg-[#f97316] text-black' 
+                : 'text-gray-400 hover:text-[#e5e5e5] hover:bg-[#262626]'
             }`}
           >
             运算节点
@@ -71,17 +71,17 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
       
       <div className="flex-1 overflow-y-auto p-3 space-y-4" style={{
         scrollbarWidth: 'thin',
-        scrollbarColor: '#4a4a4a #2d2d2d'
+        scrollbarColor: '#333 #141414'
       }}>
         <style>{`
           .flex-1::-webkit-scrollbar { width: 8px; }
-          .flex-1::-webkit-scrollbar-track { background: #2d2d2d; }
-          .flex-1::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 4px; }
-          .flex-1::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
+          .flex-1::-webkit-scrollbar-track { background: #141414; }
+          .flex-1::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+          .flex-1::-webkit-scrollbar-thumb:hover { background: #444; }
         `}</style>
         {currentCategories.map(category => (
           <div key={category}>
-            <div className="text-xs font-semibold text-white/50 mb-2 px-1">{category}</div>
+            <div className="text-xs font-semibold text-gray-500 mb-2 px-1">{category}</div>
             <div className="space-y-1">
               {currentNodes.filter(n => n.category === category).map(nodeType => {
                 const Icon = nodeType.icon;
@@ -91,10 +91,10 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, nodeType.type)}
                     onClick={() => onAddNode(nodeType.type)}
-                    className="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all hover:bg-[#2d2d30] active:scale-95 border-l-2 border-[#3e3e42] hover:border-white/20"
+                    className="flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#262626] hover:border-[#f97316]"
                   >
-                    <Icon className="w-4 h-4 text-white/60" />
-                    <span className="text-xs text-white/90">{nodeType.label}</span>
+                    <Icon className="w-4 h-4 text-gray-400" />
+                    <span className="text-xs text-[#e5e5e5]">{nodeType.label}</span>
                   </div>
                 );
               })}
@@ -102,7 +102,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
           </div>
         ))}
       </div>
-      <div className="p-3 border-t border-[#3e3e42] text-[10px] text-white/40">拖拽或点击添加节点</div>
+      <div className="p-3 border-t border-[#262626] text-[10px] text-gray-600">拖拽或点击添加节点</div>
     </div>
   );
 }
