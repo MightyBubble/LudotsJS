@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,14 +17,14 @@ import TagCountEventPanel from "../components/tag/TagCountEventPanel";
 // 简单规则组件
 function SimpleRuleSection({ type, icon, title, description, color, tags, inputValue, onAddTag, onRemoveTag, onInputChange, allTags, currentTagId }) {
   return (
-    <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
+    <div className="border border-[#262626] rounded p-3 bg-[#0a0a0a]">
       <div className="flex items-start gap-2 mb-2">
         <div className={`mt-0.5 ${color}`}>
           {icon}
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-white">{title}</h4>
-          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+          <h4 className="text-sm font-semibold text-[#e5e5e5]">{title}</h4>
+          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
       </div>
 
@@ -33,7 +32,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
         {(tags || []).map((t, index) => (
           <div
             key={index}
-            className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
+            className="flex items-center justify-between bg-[#141414] px-2 py-1 rounded text-xs border border-[#262626]"
           >
             <span className="text-gray-300 font-mono">{t}</span>
             <button
@@ -57,7 +56,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
             if (e.key === 'Enter') onAddTag();
           }}
           placeholder="输入标签路径"
-          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+          className="h-7 flex-1 bg-[#141414] border-[#262626] text-sm text-[#e5e5e5]"
           list={`${type}-suggestions`}
         />
         <datalist id={`${type}-suggestions`}>
@@ -70,7 +69,7 @@ function SimpleRuleSection({ type, icon, title, description, color, tags, inputV
         <Button
           size="sm"
           onClick={onAddTag}
-          className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+          className="h-7 px-2 bg-[#f97316] hover:bg-[#ea580c] text-black"
         >
           <Plus className="w-3 h-3" />
         </Button>
@@ -84,31 +83,31 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
   const safeConfig = config || { tags: [], match_mode: "any" };
   
   return (
-    <div className="border border-[#3d3d3d] rounded p-3 bg-[#1e1e1e]">
+    <div className="border border-[#262626] rounded p-3 bg-[#0a0a0a]">
       <div className="flex items-start gap-2 mb-2">
         <div className={`mt-0.5 ${color}`}>
           {icon}
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-white">{title}</h4>
-          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+          <h4 className="text-sm font-semibold text-[#e5e5e5]">{title}</h4>
+          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
         </div>
       </div>
 
       <div className="mb-2">
-        <label className="text-xs text-gray-400 mb-1 block">匹配模式</label>
+        <label className="text-xs text-gray-500 mb-1 block">匹配模式</label>
         <Select
           value={safeConfig.match_mode || "any"}
           onValueChange={onMatchModeChange}
         >
-          <SelectTrigger className="h-7 bg-[#2d2d2d] border-[#3d3d3d] text-white text-xs">
+          <SelectTrigger className="h-7 bg-[#141414] border-[#262626] text-[#e5e5e5] text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
-            <SelectItem value="any" className="text-white hover:bg-[#3d3d3d] text-xs">
+          <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectItem value="any" className="text-[#e5e5e5] hover:bg-[#262626] text-xs">
               Any（满足任一即可）
             </SelectItem>
-            <SelectItem value="all" className="text-white hover:bg-[#3d3d3d] text-xs">
+            <SelectItem value="all" className="text-[#e5e5e5] hover:bg-[#262626] text-xs">
               All（需满足全部）
             </SelectItem>
           </SelectContent>
@@ -119,7 +118,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
         {(safeConfig.tags || []).map((t, index) => (
           <div
             key={index}
-            className="flex items-center justify-between bg-[#2d2d2d] px-2 py-1 rounded text-xs"
+            className="flex items-center justify-between bg-[#141414] px-2 py-1 rounded text-xs border border-[#262626]"
           >
             <span className="text-gray-300 font-mono">{t}</span>
             <button
@@ -143,7 +142,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
             if (e.key === 'Enter') onAddTag();
           }}
           placeholder="输入标签路径"
-          className="h-7 flex-1 bg-[#2d2d2d] border-[#3d3d3d] text-sm text-white"
+          className="h-7 flex-1 bg-[#141414] border-[#262626] text-sm text-[#e5e5e5]"
           list={`${type}-suggestions-cond`}
         />
         <datalist id={`${type}-suggestions-cond`}>
@@ -156,7 +155,7 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
         <Button
           size="sm"
           onClick={onAddTag}
-          className="h-7 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+          className="h-7 px-2 bg-[#f97316] hover:bg-[#ea580c] text-black"
         >
           <Plus className="w-3 h-3" />
         </Button>
@@ -807,10 +806,10 @@ export default function TagEditor() {
           onDrop={(e) => handleDrop(e, node)}
           className={`flex items-center gap-1 py-1 px-2 cursor-pointer group relative ${
             isDragging ? 'opacity-40' :
-            isSelected ? 'bg-[#094771]' :
-            isDragTarget ? 'bg-[#0e639c]' :
-            isMultiSelected ? 'bg-[#0e639c]/50' :
-            'hover:bg-[#2d2d2d]'
+            isSelected ? 'bg-[#f97316]/20 border-l-2 border-[#f97316]' :
+            isDragTarget ? 'bg-[#f97316]/40' :
+            isMultiSelected ? 'bg-[#f97316]/30' :
+            'hover:bg-[#141414]'
           }`}
           style={{ paddingLeft: `${level * 16 + 8}px` }}
           onClick={(e) => {
@@ -872,7 +871,7 @@ export default function TagEditor() {
                 if (e.key === 'Escape') setEditingTag(null);
               }}
               autoFocus
-              className="h-5 text-sm bg-[#2d2d2d] border-[#094771] text-white px-1 flex-1"
+              className="h-5 text-sm bg-[#141414] border-[#f97316] text-[#e5e5e5] px-1 flex-1"
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
@@ -895,18 +894,18 @@ export default function TagEditor() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-[#e5e5e5]">
       {/* 顶部工具栏 - 移动端适配 */}
-      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-1 md:gap-3 overflow-x-auto">
+      <div className="h-12 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-1 md:gap-3 overflow-x-auto">
         <span className="text-sm font-semibold text-gray-300 whitespace-nowrap">Tag编辑器</span>
 
         {/* 视图切换 */}
-        <div className="flex gap-1 bg-[#1e1e1e] rounded p-1">
+        <div className="flex gap-1 bg-[#0a0a0a] rounded p-1 border border-[#262626]">
           <Button
             size="sm"
             variant={viewMode === 'tree' ? 'default' : 'ghost'}
             onClick={() => setViewMode('tree')}
-            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'tree' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
+            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'tree' ? 'bg-[#f97316] text-black hover:bg-[#ea580c]' : 'text-gray-400 hover:bg-[#262626] hover:text-white'}`}
           >
             <List className="w-3 h-3 md:mr-1" />
             <span className="hidden md:inline">树形</span>
@@ -915,7 +914,7 @@ export default function TagEditor() {
             size="sm"
             variant={viewMode === 'graph' ? 'default' : 'ghost'}
             onClick={() => setViewMode('graph')}
-            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'graph' ? 'bg-[#0e639c] text-white hover:bg-[#1177bb]' : 'text-gray-300 hover:bg-[#2d2d2d] hover:text-white'}`}
+            className={`h-6 px-2 md:px-3 text-xs ${viewMode === 'graph' ? 'bg-[#f97316] text-black hover:bg-[#ea580c]' : 'text-gray-400 hover:bg-[#262626] hover:text-white'}`}
           >
             <Network className="w-3 h-3 md:mr-1" />
             <span className="hidden md:inline">图形</span>
@@ -927,7 +926,7 @@ export default function TagEditor() {
           size="sm"
           variant="outline"
           onClick={() => setShowCategoryManager(true)}
-          className="h-6 px-2 md:px-3 text-xs bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300 hidden md:flex"
+          className="h-6 px-2 md:px-3 text-xs bg-[#141414] border-[#262626] hover:bg-[#262626] text-gray-300 hidden md:flex"
         >
           <Palette className="w-3 h-3 md:mr-1" />
           <span className="hidden md:inline">分类</span>
@@ -938,7 +937,7 @@ export default function TagEditor() {
             size="sm"
             variant="outline"
             onClick={exportToJSON}
-            className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+            className="h-6 px-2 bg-[#141414] border-[#262626] hover:bg-[#262626] text-gray-300"
             title="导出"
           >
             <Download className="w-3 h-3" />
@@ -954,7 +953,7 @@ export default function TagEditor() {
             <Button
               size="sm"
               variant="outline"
-              className="h-6 px-2 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+              className="h-6 px-2 bg-[#141414] border-[#262626] hover:bg-[#262626] text-gray-300"
               disabled={importing}
               onClick={(e) => e.currentTarget.previousElementSibling.click()}
               title="导入"
@@ -974,7 +973,7 @@ export default function TagEditor() {
                 setSelectedTags(new Set());
               }
             }}
-            className={`h-6 px-2 md:px-3 text-xs hidden md:flex ${isMultiSelectMode ? 'bg-[#0e639c] text-white' : 'bg-[#2d2d2d] border-[#3d3d3d] text-gray-300'}`}
+            className={`h-6 px-2 md:px-3 text-xs hidden md:flex ${isMultiSelectMode ? 'bg-[#f97316] text-black' : 'bg-[#141414] border-[#262626] text-gray-300'}`}
           >
             {isMultiSelectMode ? <CheckSquare className="w-3 h-3 md:mr-1" /> : <Square className="w-3 h-3 md:mr-1" />}
             <span className="hidden md:inline">批量</span>
@@ -989,21 +988,21 @@ export default function TagEditor() {
             <Button
               size="sm"
               onClick={() => handleBatchLock(true)}
-              className="h-6 px-1.5 md:px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-1.5 md:px-2 bg-[#141414] hover:bg-[#262626] text-xs text-gray-300"
             >
               <Lock className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={() => handleBatchLock(false)}
-              className="h-6 px-1.5 md:px-2 bg-[#2d2d2d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-1.5 md:px-2 bg-[#141414] hover:bg-[#262626] text-xs text-gray-300"
             >
               <Unlock className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={handleBatchDelete}
-              className="h-6 px-1.5 md:px-2 bg-red-900/50 hover:bg-red-900 text-xs text-red-400"
+              className="h-6 px-1.5 md:px-2 bg-red-900/20 hover:bg-red-900/40 text-xs text-red-400"
             >
               <Trash2 className="w-3 h-3" />
             </Button>
@@ -1017,7 +1016,7 @@ export default function TagEditor() {
             <Button
               size="sm"
               onClick={handleSaveChanges}
-              className="h-6 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs"
+              className="h-6 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-black text-xs"
             >
               <Save className="w-3 h-3 md:mr-1" />
               <span className="hidden md:inline">保存</span>
@@ -1026,7 +1025,7 @@ export default function TagEditor() {
               size="sm"
               onClick={handleDiscardChanges}
               variant="outline"
-              className="h-6 px-2 md:px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-xs text-gray-300"
+              className="h-6 px-2 md:px-3 bg-[#141414] border-[#262626] hover:bg-[#262626] text-xs text-gray-300"
             >
               <X className="w-3 h-3 md:mr-1" />
               <span className="hidden md:inline">撤销</span>
@@ -1042,7 +1041,7 @@ export default function TagEditor() {
             placeholder="搜索标签..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-8 w-48 lg:w-64 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-7 pl-8 w-48 lg:w-64 bg-[#0a0a0a] border-[#262626] text-sm text-[#e5e5e5]"
           />
         </div>
 
@@ -1052,24 +1051,24 @@ export default function TagEditor() {
       </div>
 
       {/* 移动端搜索和工具栏 */}
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d] space-y-2">
+      <div className="md:hidden px-2 py-2 bg-[#141414] border-b border-[#262626] space-y-2">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索标签..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-[#e5e5e5]"
           />
         </div>
         {hasUnsavedChanges && (
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
             <span className="text-xs text-yellow-400 flex-1">有未保存的更改</span>
-            <Button size="sm" onClick={handleSaveChanges} className="h-6 px-2 bg-[#0e639c] text-xs">
+            <Button size="sm" onClick={handleSaveChanges} className="h-6 px-2 bg-[#f97316] text-black text-xs">
               <Save className="w-3 h-3 mr-1" />保存
             </Button>
-            <Button size="sm" onClick={handleDiscardChanges} className="h-6 px-2 bg-[#3d3d3d] text-xs">
+            <Button size="sm" onClick={handleDiscardChanges} className="h-6 px-2 bg-[#141414] border border-[#262626] text-xs">
               <X className="w-3 h-3" />
             </Button>
           </div>
@@ -1081,8 +1080,8 @@ export default function TagEditor() {
         {viewMode === 'tree' ? (
           <>
             {/* 左侧树形视图 */}
-            <div className="w-full md:w-96 bg-[#252526] border-b md:border-r md:border-b-0 border-[#3d3d3d] flex flex-col max-h-[40vh] md:max-h-none">
-              <div className="p-2 md:p-3 border-b border-[#3d3d3d]">
+            <div className="w-full md:w-96 bg-[#141414] border-b md:border-r md:border-b-0 border-[#262626] flex flex-col max-h-[40vh] md:max-h-none">
+              <div className="p-2 md:p-3 border-b border-[#262626]">
                 <div className="flex gap-2">
                   <Input
                     placeholder="输入标签路径"
@@ -1091,12 +1090,12 @@ export default function TagEditor() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') createTagsFromPath(newTagPath);
                     }}
-                    className="flex-1 h-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                    className="flex-1 h-8 bg-[#0a0a0a] border-[#262626] text-sm text-[#e5e5e5]"
                   />
                   <Button
                     size="sm"
                     onClick={() => createTagsFromPath(newTagPath)}
-                    className="h-8 bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                    className="h-8 bg-[#f97316] hover:bg-[#ea580c] text-black"
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -1125,16 +1124,16 @@ export default function TagEditor() {
                     </div>
 
                     {draggedTag && isDraggingOverRoot && (
-                      <div className="sticky bottom-0 left-0 right-0 mt-4 mx-3 mb-3 p-4 border-2 border-dashed border-blue-500 bg-[#0e639c]/20 rounded flex items-center justify-center gap-2">
-                        <MoveUp className="w-5 h-5 text-blue-400" />
-                        <span className="text-sm text-blue-300 font-medium">松开鼠标移至根级</span>
+                      <div className="sticky bottom-0 left-0 right-0 mt-4 mx-3 mb-3 p-4 border-2 border-dashed border-orange-500 bg-[#f97316]/20 rounded flex items-center justify-center gap-2">
+                        <MoveUp className="w-5 h-5 text-orange-400" />
+                        <span className="text-sm text-orange-300 font-medium">松开鼠标移至根级</span>
                       </div>
                     )}
                   </>
                 )}
               </div>
 
-              <div className="h-8 bg-[#2d2d2d] border-t border-[#3d3d3d] flex items-center px-3 text-xs text-gray-400">
+              <div className="h-8 bg-[#141414] border-t border-[#262626] flex items-center px-3 text-xs text-gray-400">
                 总计: {localTags.length} 个标签
                 {hasUnsavedChanges && (
                   <span className="ml-3 text-yellow-400 hidden md:inline">
@@ -1145,24 +1144,24 @@ export default function TagEditor() {
             </div>
 
             {/* 右侧详情面板 */}
-            <div className="flex-1 bg-[#1e1e1e] overflow-auto p-2 md:p-4">
+            <div className="flex-1 bg-[#0a0a0a] overflow-auto p-2 md:p-4">
               {selectedTag ? (
                 <div className="space-y-4">
                   {/* Header - 移动端单栏布局 */}
-                  <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded">
+                  <div className="p-3 bg-[#141414] border border-[#262626] rounded">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* 左栏 */}
                       <div className="space-y-2">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h2 className="text-base font-semibold text-white mb-0.5">
+                            <h2 className="text-base font-semibold text-[#e5e5e5] mb-0.5">
                               {selectedTag.name}
                             </h2>
                             <p className="text-xs text-gray-400 font-mono break-all">{selectedTag.full_path}</p>
                           </div>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs pt-2 border-t border-[#3d3d3d]">
+
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs pt-2 border-t border-[#262626]">
                           <div>
                             <span className="text-gray-500">父级:</span>
                             <span className="ml-1 text-gray-300 truncate">{selectedTag.parent_path || "(根级)"}</span>
@@ -1182,7 +1181,7 @@ export default function TagEditor() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleRename(selectedTag)}
-                            className="h-6 text-xs bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+                            className="h-6 text-xs bg-[#141414] border-[#262626] hover:bg-[#262626] text-gray-300"
                           >
                             <Edit3 className="w-3 h-3 mr-1" />
                             重命名
@@ -1191,14 +1190,14 @@ export default function TagEditor() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(selectedTag)}
-                            className="h-6 text-xs bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#5a1e1e] text-red-400"
+                            className="h-6 text-xs bg-[#141414] border-[#262626] hover:bg-[#5a1e1e] text-red-400"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
                             删除
                           </Button>
                           <button
                             onClick={() => setShowEventPanel(!showEventPanel)}
-                            className="h-6 px-2 text-xs text-gray-300 hover:text-yellow-400 transition-colors border border-[#3d3d3d] rounded hover:bg-[#3d3d3d] flex items-center gap-1"
+                            className="h-6 px-2 text-xs text-gray-300 hover:text-yellow-400 transition-colors border border-[#262626] rounded hover:bg-[#262626] flex items-center gap-1"
                             title="事件"
                           >
                             <Zap className="w-3 h-3" />
@@ -1220,12 +1219,12 @@ export default function TagEditor() {
                               });
                             }}
                           >
-                            <SelectTrigger className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                            <SelectTrigger className="h-7 bg-[#0a0a0a] border-[#262626] text-[#e5e5e5] text-xs">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                            <SelectContent className="bg-[#141414] border-[#262626]">
                               {categories.map(cat => (
-                                <SelectItem key={cat.key} value={cat.key} className="text-white hover:bg-[#3d3d3d] text-xs">
+                                <SelectItem key={cat.key} value={cat.key} className="text-[#e5e5e5] hover:bg-[#262626] text-xs">
                                   <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded" style={{ backgroundColor: cat.color }} />
                                     <span>{cat.name}</span>
@@ -1247,7 +1246,7 @@ export default function TagEditor() {
                               });
                             }}
                             placeholder="添加描述..."
-                            className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                            className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-[#e5e5e5]"
                           />
                         </div>
                       </div>
@@ -1256,7 +1255,7 @@ export default function TagEditor() {
 
                   {/* 事件面板 */}
                   {showEventPanel && (
-                    <div className="p-3 bg-[#252526] border border-[#3d3d3d] rounded">
+                    <div className="p-3 bg-[#141414] border border-[#262626] rounded">
                       <TagCountEventPanel tagPath={selectedTag.full_path} />
                     </div>
                   )}
@@ -1397,7 +1396,7 @@ export default function TagEditor() {
       {/* 右键菜单 */}
       {contextMenu && (
         <div
-          className="fixed bg-[#2d2d2d] border border-[#3d3d3d] shadow-lg rounded z-50 py-1"
+          className="fixed bg-[#141414] border border-[#262626] shadow-lg rounded z-50 py-1"
           style={{
             left: contextMenu.x,
             top: contextMenu.y,
@@ -1406,14 +1405,14 @@ export default function TagEditor() {
         >
           <button
             onClick={() => handleRename(contextMenu.tag)}
-            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#094771] flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#262626] flex items-center gap-2"
           >
             <Edit3 className="w-4 h-4" />
             重命名
           </button>
           <button
             onClick={() => handleDuplicate(contextMenu.tag)}
-            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#094771] flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#262626] flex items-center gap-2"
           >
             <Copy className="w-4 h-4" />
             复制
@@ -1426,12 +1425,12 @@ export default function TagEditor() {
               });
               setContextMenu(null);
             }}
-            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#094771] flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-sm text-gray-200 hover:bg-[#262626] flex items-center gap-2"
           >
             {contextMenu.tag.is_locked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
             {contextMenu.tag.is_locked ? '解锁' : '锁定'}
           </button>
-          <div className="h-px bg-[#3d3d3d] my-1" />
+          <div className="h-px bg-[#262626] my-1" />
           <button
             onClick={() => handleDelete(contextMenu.tag)}
             className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-[#5a1e1e] flex items-center gap-2"

@@ -7,75 +7,76 @@ export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#1e1e1e] flex flex-col">
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
       <style>{`
         body {
-          background: #1e1e1e;
+          background: #0a0a0a;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: #e5e5e5;
         }
-        ::-webkit-scrollbar { width: 12px; height: 12px; }
-        ::-webkit-scrollbar-track { background: #2d2d2d; }
-        ::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 0; }
-        ::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
       `}</style>
 
       {/* 桌面端导航 */}
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] hidden md:flex items-center px-4 gap-2 overflow-x-auto">
-        <Link to={createPageUrl("TagEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "TagEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+      <div className="h-12 bg-[#141414] border-b border-[#262626] hidden md:flex items-center px-4 gap-2 overflow-x-auto">
+        <Link to={createPageUrl("TagEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "TagEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Edit3 className="w-4 h-4" />标签
         </Link>
-        <Link to={createPageUrl("TagSimulator")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "TagSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("TagSimulator")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "TagSimulator" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Zap className="w-4 h-4" />模拟器
         </Link>
-        <div className="h-6 w-px bg-[#3d3d3d]" />
-        <Link to={createPageUrl("ValidatorEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "ValidatorEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <div className="h-6 w-px bg-[#262626]" />
+        <Link to={createPageUrl("ValidatorEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "ValidatorEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Shield className="w-4 h-4" />验证器
         </Link>
-        <Link to={createPageUrl("RequirementEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "RequirementEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("RequirementEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "RequirementEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <CheckSquare className="w-4 h-4" />需求
         </Link>
-        <Link to={createPageUrl("UnlockableCommands")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "UnlockableCommands" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("UnlockableCommands")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "UnlockableCommands" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <KeyRound className="w-4 h-4" />指令
         </Link>
-        <Link to={createPageUrl("InteractionEffects")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "InteractionEffects" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("InteractionEffects")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "InteractionEffects" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Sparkles className="w-4 h-4" />效果
         </Link>
-        <div className="h-6 w-px bg-[#3d3d3d]" />
-        <Link to={createPageUrl("UnifiedGraphEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "UnifiedGraphEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <div className="h-6 w-px bg-[#262626]" />
+        <Link to={createPageUrl("UnifiedGraphEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "UnifiedGraphEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Globe className="w-4 h-4" />图
         </Link>
-        <Link to={createPageUrl("AttributeEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "AttributeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("AttributeEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "AttributeEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Layers className="w-4 h-4" />属性
         </Link>
-        <Link to={createPageUrl("ModifierDefinitionEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "ModifierDefinitionEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("ModifierDefinitionEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "ModifierDefinitionEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <GitBranch className="w-4 h-4" />修饰器
         </Link>
-        <Link to={createPageUrl("EntityPrototypeEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "EntityPrototypeEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("EntityPrototypeEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "EntityPrototypeEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Box className="w-4 h-4" />原型
         </Link>
-        <Link to={createPageUrl("EntityRelationEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "EntityRelationEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("EntityRelationEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "EntityRelationEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <LinkIcon className="w-4 h-4" />关系
         </Link>
-        <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "StructureEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "StructureEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Network className="w-4 h-4" />结构
         </Link>
-        <Link to={createPageUrl("NewAttributeSimulator")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("NewAttributeSimulator")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "NewAttributeSimulator" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Calculator className="w-4 h-4" />计算器
         </Link>
-        <Link to={createPageUrl("GameEventEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "GameEventEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("GameEventEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "GameEventEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Zap className="w-4 h-4" />事件
         </Link>
-        <Link to={createPageUrl("GlobalConstantEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("GlobalConstantEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "GlobalConstantEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Settings className="w-4 h-4" />常量
         </Link>
-        <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300 hover:bg-[#3d3d3d] hover:text-white"}`}>
+        <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors whitespace-nowrap font-medium ${currentPageName === "DataTableEditor" ? "bg-[#f97316] text-black" : "text-gray-400 hover:bg-[#262626] hover:text-white"}`}>
           <Table className="w-4 h-4" />数据表
         </Link>
       </div>
 
       {/* 移动端导航 */}
-      <div className="h-14 bg-[#2d2d2d] border-b border-[#3d3d3d] md:hidden flex items-center px-4 justify-between">
-        <span className="text-sm font-semibold text-white">
+      <div className="h-14 bg-[#141414] border-b border-[#262626] md:hidden flex items-center px-4 justify-between">
+        <span className="text-sm font-semibold text-[#e5e5e5]">
           {currentPageName === "TagEditor" && "标签"}
           {currentPageName === "TagSimulator" && "模拟器"}
           {currentPageName === "ValidatorEditor" && "验证器"}
@@ -99,8 +100,8 @@ export default function Layout({ children, currentPageName }) {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#2d2d2d] border-b border-[#3d3d3d] overflow-y-auto max-h-[50vh]">
-          <Link to={createPageUrl("TagEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "TagEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+        <div className="md:hidden bg-[#141414] border-b border-[#262626] overflow-y-auto max-h-[50vh]">
+          <Link to={createPageUrl("TagEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#262626] ${currentPageName === "TagEditor" ? "bg-[#f97316] text-black" : "text-gray-400"}`}>
             <Edit3 className="w-4 h-4" />标签
           </Link>
           <Link to={createPageUrl("TagSimulator")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "TagSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
