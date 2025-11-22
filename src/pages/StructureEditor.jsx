@@ -188,16 +188,15 @@ export default function StructureEditorPage() {
   };
 
   const handleAddNode = () => {
-    const id = `node_${nodes.length + 1}`;
+    const id = `node_${Date.now()}`;
     // Calculate position relative to the current view (center of the visible area)
-    // Assuming a default view size if refs aren't available, or just offsetting by pan
-    const x = (-pan.x + 100) / zoom; 
-    const y = (-pan.y + 100) / zoom;
+    const x = (-pan.x + 150) / zoom; 
+    const y = (-pan.y + 150) / zoom;
     
     const newNode = {
       id,
       position: { x, y },
-      data: { label: `新节点 ${nodes.length + 1}`, nodeId: id },
+      data: { label: `节点 ${nodes.length + 1}`, nodeId: id },
     };
     setNodes(prev => [...prev, newNode]);
   };
@@ -335,8 +334,8 @@ export default function StructureEditorPage() {
                 NodeComponent={(props) => (
                   <StructureNode 
                     {...props} 
-                    onSelect={(id) => {
-                      props.onSelect(id);
+                    onSelect={(id, multiSelect) => {
+                      props.onSelect(id, multiSelect);
                       handleSelectNode(id);
                     }}
                   />
