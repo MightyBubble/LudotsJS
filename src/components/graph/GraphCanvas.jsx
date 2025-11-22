@@ -17,6 +17,8 @@ export default function GraphCanvas({
   onAddConnection,
   onDeleteConnection,
   onAddNodeAtPosition,
+  onSelectNode,
+  onSelectConnection,
   NodeComponent
 }) {
   const canvasRef = useRef(null);

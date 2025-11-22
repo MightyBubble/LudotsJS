@@ -742,6 +742,16 @@ export const NODE_TYPES = {
       { id: 'tag_paths', label: '标签路径列表', type: 'array' }
     ],
     outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
+  },
+  
+  // 结构图专用节点
+  structure_node: {
+    label: '结构节点',
+    icon: Network,
+    category: '结构',
+    graphTypes: ['structure'],
+    inputs: [{ id: 'in', label: '入', type: 'relation' }],
+    outputs: [{ id: 'out', label: '出', type: 'relation' }]
   }
 };
 

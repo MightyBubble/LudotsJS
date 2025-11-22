@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Network, Filter, Database } from "lucide-react"; // Added Database icon
+import { Search, Plus, Network, Filter, Database, Share2, Link, Trash2, Edit3, Save, X } from "lucide-react"; // Added Database icon and others
 import GraphCanvas from '../components/graph/GraphCanvas';
 import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
@@ -36,8 +35,18 @@ export default function UnifiedGraphEditorPage() {
   const [isEditingType, setIsEditingType] = useState(false);
   const [showLibraryMobile, setShowLibraryMobile] = useState(false);
   const [showBlackboardMobile, setShowBlackboardMobile] = useState(false);
+  
+  // Structure Editor State
+  const [editingNodeId, setEditingNodeId] = useState(null);
+  const [selectedConnectionId, setSelectedConnectionId] = useState(null);
 
   const queryClient = useQueryClient();
+
+  const { data: relations = [] } = useQuery({
+    queryKey: ['entityRelations'],
+    queryFn: () => base44.entities.EntityRelation.list(),
+    initialData: [],
+  });
 
   const { data: dataGraphs = [] } = useQuery({
     queryKey: ['dataGraphs'],
@@ -57,22 +66,35 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
+  // Structure graphs are stored in DataGraph with graph_type='structure'
+  // We need to separate them from 'data' type DataGraphs in UI if needed, or just treat them as DataGraphs
+  // But DataGraph.list() returns all. The backend filter isn't applied here.
+  // We will filter them in allGraphs.
+
   const allGraphs = useMemo(() => {
+    // DataGraph entity contains both 'data' and 'structure' graphs (and potentially others)
+    // We need to respect the graph_type field from the entity.
+    const dataGraphEntities = dataGraphs.map(g => ({ 
+      ...g, 
+      graph_type: g.graph_type || 'data', // Default to data if not set
+      entity_type: 'DataGraph' 
+    }));
+
     return [
-      ...dataGraphs.map(g => ({ ...g, graph_type: 'data', entity_type: 'DataGraph' })),
+      ...dataGraphEntities,
       ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
-      ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' })) // Added FunctionGraph mapping
+      ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' }))
     ];
-  }, [dataGraphs, queryGraphs, functionGraphs]); // Added functionGraphs dependency
+  }, [dataGraphs, queryGraphs, functionGraphs]);
 
   const createMutation = useMutation({
     mutationFn: (data) => {
-      if (data.graph_type === 'data') {
+      if (data.graph_type === 'data' || data.graph_type === 'structure') {
         return base44.entities.DataGraph.create({
           graph_id: data.name.toLowerCase().replace(/\s+/g, '_'),
           name: data.name,
           description: data.description,
-          graph_type: 'curve',
+          graph_type: data.graph_type,
           graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
         });
       } else if (data.graph_type === 'query') { // Added else if for query type
@@ -94,10 +116,12 @@ export default function UnifiedGraphEditorPage() {
     },
     onSuccess: (graph, variables) => {
       // Invalidate the correct query key based on graph_type
-      queryClient.invalidateQueries({ queryKey: variables.graph_type === 'data' ? ['dataGraphs'] : variables.graph_type === 'query' ? ['entityQueries'] : ['functionGraphs'] });
+      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
       setIsCreating(false);
       setNewGraph({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Reset newGraph state, including return_type
-      openGraph({ ...graph, graph_type: variables.graph_type, entity_type: variables.graph_type === 'data' ? 'DataGraph' : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph' });
+      // entity_type for structure is also DataGraph
+      const entityType = (variables.graph_type === 'data' || variables.graph_type === 'structure') ? 'DataGraph' : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
+      openGraph({ ...graph, graph_type: variables.graph_type, entity_type: entityType });
     },
   });
 
@@ -113,7 +137,7 @@ export default function UnifiedGraphEditorPage() {
     },
     onSuccess: (_, variables) => {
       // Invalidate the correct query key based on entity_type
-      queryClient.invalidateQueries({ queryKey: variables.entity_type === 'DataGraph' ? ['dataGraphs'] : variables.entity_type === 'EntityQuery' ? ['entityQueries'] : ['functionGraphs'] });
+      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
     },
   });
 
@@ -129,7 +153,7 @@ export default function UnifiedGraphEditorPage() {
     },
     onSuccess: (_, variables) => {
       // Invalidate the correct query key based on entity_type
-      queryClient.invalidateQueries({ queryKey: variables.entity_type === 'DataGraph' ? ['dataGraphs'] : variables.entity_type === 'EntityQuery' ? ['entityQueries'] : ['functionGraphs'] });
+      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
     },
   });
 
@@ -210,6 +234,7 @@ export default function UnifiedGraphEditorPage() {
       color: { r: 1, g: 1, b: 1 },
       blackboard_get: { key: '' },
       blackboard_set: { key: '' },
+      structure_node: { label: '新节点', nodeId: `node_${Date.now()}` },
       // Query node defaults
       entity_source: {},
       filter_prototype: { prototypeId: '' },
@@ -234,13 +259,14 @@ export default function UnifiedGraphEditorPage() {
     const newNode = {
       id: `node-${Date.now()}`,
       type,
-      position: { x: 300, y: 200 + nodes.length * 100 },
+      // Center the node in the current view
+      position: { x: (-pan.x + 300) / zoom, y: (-pan.y + 200) / zoom },
       data: defaultData[type] || {},
       inputs: config.inputs || [],
       outputs: config.outputs || []
     };
     setNodes(prev => [...prev, newNode]);
-  }, [nodes.length]);
+  }, [nodes.length, pan, zoom]);
 
   const addNodeAtPosition = useCallback((type, position, blackboardKey = null) => {
     const config = getNodeConfig(type);
@@ -499,11 +525,13 @@ export default function UnifiedGraphEditorPage() {
               onAddNodeAtPosition={addNodeAtPosition}
               NodeComponent={UnifiedNode}
               connectionValues={connectionValues}
+              onSelectNode={(id) => setEditingNodeId(id)}
+              onSelectConnection={(id) => setSelectedConnectionId(id)}
             />
 
-            <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
+            <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1 pointer-events-none">
               <div className="flex items-center gap-2">
-                <span>类型: {currentGraph.graph_type === 'data' ? 'Data' : currentGraph.graph_type === 'query' ? 'Query' : 'Function'}</span>
+                <span>类型: {currentGraph.graph_type === 'data' ? 'Data' : currentGraph.graph_type === 'query' ? 'Query' : currentGraph.graph_type === 'structure' ? 'Structure' : 'Function'}</span>
               </div>
               {currentGraph.graph_type === 'function' && (
                 <div className="flex items-center gap-2">
@@ -543,8 +571,101 @@ export default function UnifiedGraphEditorPage() {
             </div>
           </div>
 
-          {/* 桌面端显示 */}
-          {showBlackboard && <div className="hidden md:block"><BlackboardPanel blackboard={blackboard} onChange={setBlackboard} /></div>}
+          {/* 桌面端显示 - 普通黑板 或 结构图属性面板 */}
+          {showBlackboard && (
+            <div className="hidden md:block h-full">
+              {currentGraph.graph_type === 'structure' ? (
+                <div className="w-64 bg-[#252526] border-l border-[#3d3d3d] p-4 h-full overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-bold text-gray-200">结构属性</h3>
+                  </div>
+                  
+                  {editingNodeId ? (
+                    (() => {
+                      const node = nodes.find(n => n.id === editingNodeId);
+                      if (!node) return null;
+                      return (
+                        <div className="space-y-4">
+                          <div className="text-xs text-gray-400 mb-2">编辑节点</div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-1">节点ID</label>
+                            <Input 
+                              value={node.data.nodeId || ''} 
+                              onChange={e => updateNodeData(node.id, { nodeId: e.target.value })}
+                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-1">显示名称</label>
+                            <Input 
+                              value={node.data.label || ''} 
+                              onChange={e => updateNodeData(node.id, { label: e.target.value })}
+                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500 block mb-1">描述</label>
+                            <Input 
+                              value={node.data.description || ''} 
+                              onChange={e => updateNodeData(node.id, { description: e.target.value })}
+                              className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                            />
+                          </div>
+                          <Button 
+                            className="w-full bg-red-900/50 hover:bg-red-900 text-xs h-7 mt-4"
+                            onClick={() => {
+                              deleteNode(node.id);
+                              setEditingNodeId(null);
+                            }}
+                          >
+                            删除节点
+                          </Button>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="text-xs text-gray-400 mb-2">连接列表 ({connections.length})</div>
+                      {connections.length === 0 && <div className="text-xs text-gray-600">暂无连接</div>}
+                      {connections.map(conn => {
+                        const fromNode = nodes.find(n => n.id === conn.fromNode);
+                        const toNode = nodes.find(n => n.id === conn.toNode);
+                        const label = fromNode?.data?.label || 'Unknown';
+                        const toLabel = toNode?.data?.label || 'Unknown';
+                        
+                        return (
+                          <div key={conn.id} className="bg-[#1e1e1e] p-2 rounded border border-[#3d3d3d] text-xs">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-gray-400">{label} → {toLabel}</span>
+                              <button onClick={() => deleteConnection(conn.id)} className="text-red-400 hover:text-white">×</button>
+                            </div>
+                            <Select 
+                              value={conn.data?.relation_definition_id || ""}
+                              onValueChange={v => {
+                                const newConns = connections.map(c => c.id === conn.id ? { ...c, data: { ...c.data, relation_definition_id: v } } : c);
+                                setConnections(newConns);
+                              }}
+                            >
+                              <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs w-full text-white">
+                                <SelectValue placeholder="选择关系" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                {relations.map(r => (
+                                  <SelectItem key={r.id} value={r.relation_id} className="text-xs text-white">{r.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
+              )}
+            </div>
+          )}
 
           {/* 移动端黑板弹窗 */}
           {showBlackboardMobile && (
@@ -594,7 +715,8 @@ export default function UnifiedGraphEditorPage() {
                   <SelectContent className="bg-[#2d2d30] border-[#3e3e42]">
                     <SelectItem value="data" className="text-white">Data Graph (数据图)</SelectItem>
                     <SelectItem value="query" className="text-white">Entity Query (实体查询)</SelectItem>
-                    <SelectItem value="function" className="text-white">Function Graph (函数图)</SelectItem> {/* Added Function Graph option */}
+                    <SelectItem value="function" className="text-white">Function Graph (函数图)</SelectItem>
+                    <SelectItem value="structure" className="text-white">Structure Graph (结构图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -653,13 +775,19 @@ export default function UnifiedGraphEditorPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {/* Conditional rendering for icons based on graph_type */}
-                    {graph.graph_type === 'data' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : <Database className="w-4 h-4 text-[#c97fff]" />}
+                    {graph.graph_type === 'data' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : 
+                     graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : 
+                     graph.graph_type === 'structure' ? <Share2 className="w-4 h-4 text-[#ffc000]" /> :
+                     <Database className="w-4 h-4 text-[#c97fff]" />}
                     <h3 className="text-white font-medium">{graph.name}</h3>
                   </div>
                   {graph.description && <p className="text-white/60 text-xs mt-1">{graph.description}</p>}
                   <div className="text-[10px] text-white/40 mt-2">
                     {/* Conditional rendering for graph type display */}
-                    {graph.graph_type === 'data' ? 'Data Graph' : graph.graph_type === 'query' ? 'Entity Query' : `Function Graph (${graph.return_type || 'void'})`}
+                    {graph.graph_type === 'data' ? 'Data Graph' : 
+                     graph.graph_type === 'query' ? 'Entity Query' : 
+                     graph.graph_type === 'structure' ? 'Structure Graph' :
+                     `Function Graph (${graph.return_type || 'void'})`}
                   </div>
                 </div>
               </div>
