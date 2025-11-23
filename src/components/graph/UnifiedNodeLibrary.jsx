@@ -36,8 +36,8 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
   };
 
   return (
-    <div className="w-56 bg-[#141414] border-r border-[#262626] flex flex-col">
-      <div className="flex items-center justify-between p-2 border-b border-[#262626]">
+    <div className="w-56 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
+      <div className="flex items-center justify-between p-2 border-b border-[#2A2E37]">
         <span className="text-xs font-semibold text-[#e5e5e5]">节点库</span>
         <button onClick={onClose} className="text-gray-500 hover:text-[#e5e5e5] transition-colors">
           <X className="w-3.5 h-3.5" />
@@ -45,7 +45,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
       </div>
       
       {(graphType === 'query' || graphType === 'function') && (
-        <div className="flex border-b border-[#262626]">
+        <div className="flex border-b border-[#2A2E37]">
           <button
             onClick={() => setActiveTab(graphType === 'query' ? 'query' : 'function')}
             className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
@@ -75,7 +75,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
       }}>
         <style>{`
           .flex-1::-webkit-scrollbar { width: 8px; }
-          .flex-1::-webkit-scrollbar-track { background: #141414; }
+          .flex-1::-webkit-scrollbar-track { background: #15171C; }
           .flex-1::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
           .flex-1::-webkit-scrollbar-thumb:hover { background: #444; }
         `}</style>
@@ -91,7 +91,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, nodeType.type)}
                     onClick={() => onAddNode(nodeType.type)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#262626] hover:border-[#D97706]"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#2A2E37] hover:border-[#D97706]"
                   >
                     <Icon className="w-3.5 h-3.5 text-gray-400" />
                     <span className="text-[11px] text-[#e5e5e5]">{nodeType.label}</span>
@@ -102,7 +102,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
           </div>
         ))}
       </div>
-      <div className="p-2 border-t border-[#262626] text-[10px] text-gray-600 text-center">拖拽或点击添加</div>
+      <div className="p-2 border-t border-[#2A2E37] text-[10px] text-gray-600 text-center">拖拽或点击添加</div>
     </div>
   );
 }

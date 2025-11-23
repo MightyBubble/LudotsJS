@@ -139,8 +139,8 @@ export default function EntityPrototypeEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <Box className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">实体原型编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredPrototypes.length} 个</span>
@@ -153,7 +153,7 @@ export default function EntityPrototypeEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -165,7 +165,7 @@ export default function EntityPrototypeEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs text-white">
-          <thead className="bg-[#141414] border-b border-[#262626] sticky top-0 z-10">
+          <thead className="bg-[#15171C] border-b border-[#2A2E37] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-40">原型ID</th>
               <th className="text-left p-2 font-medium text-white/70 w-40">名称</th>
@@ -181,13 +181,13 @@ export default function EntityPrototypeEditorPage() {
               const currentData = isEditing ? editData : proto;
               
               return (
-                <tr key={proto.id} className="border-b border-[#262626] hover:bg-[#141414]">
+                <tr key={proto.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2">
                     {isEditing ? (
                       <Input
                         value={editData.prototype_id}
                         onChange={(e) => setEditData({ ...editData, prototype_id: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90 font-mono">{proto.prototype_id}</span>
@@ -198,7 +198,7 @@ export default function EntityPrototypeEditorPage() {
                       <Input
                         value={editData.name}
                         onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{proto.name}</span>
@@ -209,7 +209,7 @@ export default function EntityPrototypeEditorPage() {
                       <Input
                         value={editData.description || ""}
                         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/70">{proto.description || "-"}</span>
@@ -226,10 +226,10 @@ export default function EntityPrototypeEditorPage() {
                                 value={attrId}
                                 onValueChange={(val) => handleUpdateAttribute(idx, val)}
                               >
-                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626]">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                   {attributes.map(a => (
                                     <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                                       {a.name} ({a.attribute_id})
@@ -286,10 +286,10 @@ export default function EntityPrototypeEditorPage() {
                                   setEditData({ ...editData, structure_bindings: newBindings });
                                 }}
                               >
-                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
+                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-24">
                                   <SelectValue placeholder="结构" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626]">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                   {structures.map(s => (
                                     <SelectItem key={s.id} value={s.structure_id} className="text-white text-xs">{s.name}</SelectItem>
                                   ))}
@@ -304,10 +304,10 @@ export default function EntityPrototypeEditorPage() {
                                 }}
                                 disabled={!binding.structure_id}
                               >
-                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
+                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-24">
                                   <SelectValue placeholder="节点" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626]">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                   {nodes.map(n => (
                                     <SelectItem key={n.node_id} value={n.node_id} className="text-white text-xs">{n.name}</SelectItem>
                                   ))}

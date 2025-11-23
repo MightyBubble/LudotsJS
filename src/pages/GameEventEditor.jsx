@@ -124,8 +124,8 @@ export default function GameEventEditor() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Zap className="w-4 h-4 text-yellow-400" />
         <span className="text-sm font-semibold text-gray-300">事件编辑器</span>
         <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredEvents.length} 个</span>
@@ -136,7 +136,7 @@ export default function GameEventEditor() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
         <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-xs">
@@ -145,14 +145,14 @@ export default function GameEventEditor() {
         </Button>
       </div>
 
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#262626]">
+      <div className="md:hidden px-2 py-2 bg-[#15171C] border-b border-[#2A2E37]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0D0F14] border-[#2A2E37] text-sm text-white"
           />
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function GameEventEditor() {
             const data = isEditing ? editData : event;
 
             return (
-              <div key={event.id} className="bg-[#252526] rounded border border-[#3e3e42] p-3 md:p-4">
+              <div key={event.id} className="bg-[#15171C] rounded border border-[#3e3e42] p-3 md:p-4">
                 <div className="flex items-start justify-between mb-3 gap-2">
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
@@ -254,7 +254,7 @@ export default function GameEventEditor() {
                     </div>
                     <div className="space-y-1.5">
                       {(data.input_parameters || []).map((param, idx) => (
-                        <div key={idx} className="bg-[#0a0a0a] rounded p-2 border border-[#3e3e42]">
+                        <div key={idx} className="bg-[#0D0F14] rounded p-2 border border-[#3e3e42]">
                           {isEditing ? (
                             <div className="space-y-1.5">
                               <div className="flex gap-1.5">
@@ -320,7 +320,7 @@ export default function GameEventEditor() {
                     </div>
                     <div className="space-y-1.5">
                       {(data.output_parameters || []).map((param, idx) => (
-                        <div key={idx} className="bg-[#0a0a0a] rounded p-2 border border-[#3e3e42]">
+                        <div key={idx} className="bg-[#0D0F14] rounded p-2 border border-[#3e3e42]">
                           {isEditing ? (
                             <div className="flex gap-1.5">
                               <Input

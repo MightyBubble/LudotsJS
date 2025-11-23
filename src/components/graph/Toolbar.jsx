@@ -18,7 +18,7 @@ export default function Toolbar({
   showBlackboard
 }) {
   return (
-    <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center justify-between px-3">
+    <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center justify-between px-3">
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
@@ -60,7 +60,7 @@ export default function Toolbar({
         <h1 className="text-[#e5e5e5] font-medium text-xs ml-2">{projectName || '数据图编辑器'}</h1>
       </div>
 
-      <div className="flex items-center gap-0.5 bg-[#0a0a0a] rounded p-0.5 border border-[#262626]">
+      <div className="flex items-center gap-0.5 bg-[#0D0F14] rounded p-0.5 border border-[#2A2E37]">
         <Button
           variant="ghost"
           size="icon"
@@ -105,7 +105,7 @@ export default function Toolbar({
         <Button
           onClick={onSave}
           size="sm"
-          className="bg-[#141414] border border-[#262626] hover:bg-[#262626] text-[#e5e5e5] h-7 px-3 text-xs"
+          className="bg-[#15171C] border border-[#2A2E37] hover:bg-[#262626] text-[#e5e5e5] h-7 px-3 text-xs"
         >
           <Save className="w-3 h-3 mr-1.5" />
           保存

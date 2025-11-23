@@ -15,7 +15,7 @@ function TagInput({ value, onChange, onAdd, onBlur }) {
         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAdd(); }}}
         onBlur={onBlur}
         placeholder="输入或选择标签"
-        className="h-6 bg-[#141414] border-[#262626] text-xs text-white flex-1"
+        className="h-6 bg-[#15171C] border-[#2A2E37] text-xs text-white flex-1"
         list="tags-datalist"
       />
       <Button
@@ -249,8 +249,8 @@ export default function InteractionEffectsPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <Zap className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">效果编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredEffects.length} 个</span>
@@ -263,7 +263,7 @@ export default function InteractionEffectsPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -275,7 +275,7 @@ export default function InteractionEffectsPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626]">
+          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">效果名称</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-40">触发效果ID</th>
@@ -293,12 +293,12 @@ export default function InteractionEffectsPage() {
           </thead>
           <tbody>
             {creatingNew && editData && (
-              <tr className="border-b border-[#262626] bg-[#252526]">
+              <tr className="border-b border-[#2A2E37] bg-[#252526]">
                 <td className="p-2">
-                  <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white" />
+                  <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" />
                 </td>
                 <td className="p-2">
-                  <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white" list="tags-datalist" />
+                  <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" list="tags-datalist" />
                 </td>
                 <td className="p-2">
                   <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
@@ -364,7 +364,7 @@ export default function InteractionEffectsPage() {
                   />
                 </td>
                 <td className="p-2">
-                  <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white w-16" />
+                  <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white w-16" />
                 </td>
                 <td className="p-2">
                   <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
@@ -387,12 +387,12 @@ export default function InteractionEffectsPage() {
               
               if (isEditing && editData) {
                 return (
-                  <tr key={effect.id} className="border-b border-[#262626] bg-[#252526]">
+                  <tr key={effect.id} className="border-b border-[#2A2E37] bg-[#252526]">
                     <td className="p-2">
-                      <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white" />
+                      <Input value={editData.effect_name} onChange={(e) => setEditData({ ...editData, effect_name: e.target.value })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" />
                     </td>
                     <td className="p-2">
-                      <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white" list="tags-datalist" />
+                      <Input value={editData.triggering_effect_tag_path} onChange={(e) => setEditData({ ...editData, triggering_effect_tag_path: e.target.value })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" list="tags-datalist" />
                     </td>
                     <td className="p-2">
                       <TagList tags={editData.interactor_conditions?.has_any_tags} onRemove={(i) => removeTag('interactor', 'any', i)} canEdit />
@@ -458,7 +458,7 @@ export default function InteractionEffectsPage() {
                       />
                     </td>
                     <td className="p-2">
-                      <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white w-16" />
+                      <Input type="number" value={editData.priority} onChange={(e) => setEditData({ ...editData, priority: parseInt(e.target.value) || 0 })} className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white w-16" />
                     </td>
                     <td className="p-2">
                       <input type="checkbox" checked={editData.is_active} onChange={(e) => setEditData({ ...editData, is_active: e.target.checked })} className="w-3 h-3" />
@@ -478,7 +478,7 @@ export default function InteractionEffectsPage() {
               }
               
               return (
-                <tr key={effect.id} className="border-b border-[#262626] hover:bg-[#252526]">
+                <tr key={effect.id} className="border-b border-[#2A2E37] hover:bg-[#252526]">
                   <td className="p-2 text-gray-300">{effect.effect_name}</td>
                   <td className="p-2 text-gray-300 font-mono">{effect.triggering_effect_tag_path}</td>
                   <td className="p-2"><TagList tags={effect.interactor_conditions?.has_any_tags} /></td>

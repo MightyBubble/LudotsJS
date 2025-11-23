@@ -165,8 +165,8 @@ export default function DataTableEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <Table className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">数据表编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredTables.length} 个</span>
@@ -179,7 +179,7 @@ export default function DataTableEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -190,13 +190,13 @@ export default function DataTableEditorPage() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="w-64 bg-[#252526] border-r border-[#262626] overflow-auto">
+        <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] overflow-auto">
           <div className="p-2 space-y-1">
             {filteredTables.map((table) => (
               <div
                 key={table.id}
                 onClick={() => { setSelectedTable(table); setEditingTable(null); }}
-                className={`p-2 rounded cursor-pointer hover:bg-[#141414] ${
+                className={`p-2 rounded cursor-pointer hover:bg-[#15171C] ${
                   selectedTable?.id === table.id ? 'bg-[#094771]' : ''
                 }`}
               >
@@ -218,30 +218,30 @@ export default function DataTableEditorPage() {
                   value={editingTable.table_id}
                   onChange={(e) => setEditingTable({ ...editingTable, table_id: e.target.value })}
                   placeholder="表ID"
-                  className="h-8 bg-[#141414] border-[#262626] text-white"
+                  className="h-8 bg-[#15171C] border-[#2A2E37] text-white"
                 />
                 <Input
                   value={editingTable.name}
                   onChange={(e) => setEditingTable({ ...editingTable, name: e.target.value })}
                   placeholder="表名称"
-                  className="h-8 bg-[#141414] border-[#262626] text-white"
+                  className="h-8 bg-[#15171C] border-[#2A2E37] text-white"
                 />
                 <Button onClick={handleSave} className="bg-[#D97706] hover:bg-[#B45309]">
                   <Save className="w-4 h-4 mr-1" />
                   保存
                 </Button>
-                <Button onClick={() => setEditingTable(null)} variant="outline" className="border-[#262626]">
+                <Button onClick={() => setEditingTable(null)} variant="outline" className="border-[#2A2E37]">
                   取消
                 </Button>
               </div>
 
-              <div className="border border-[#262626] rounded overflow-auto">
+              <div className="border border-[#2A2E37] rounded overflow-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-[#141414] sticky top-0">
+                  <thead className="bg-[#15171C] sticky top-0">
                     <tr>
-                      <th className="text-left p-2 w-12 border-r border-[#262626]">#</th>
+                      <th className="text-left p-2 w-12 border-r border-[#2A2E37]">#</th>
                       {editingTable.columns.map((col, idx) => (
-                        <th key={idx} className="text-left p-2 border-r border-[#262626] min-w-[150px]">
+                        <th key={idx} className="text-left p-2 border-r border-[#2A2E37] min-w-[150px]">
                           <div className="space-y-1">
                             <div className="flex items-center gap-1">
                               <Input
@@ -257,7 +257,7 @@ export default function DataTableEditorPage() {
                                   });
                                   setEditingTable({ ...editingTable, columns: newCols, rows: newRows });
                                 }}
-                                className="h-5 bg-[#0a0a0a] border-[#262626] text-white flex-1"
+                                className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white flex-1"
                               />
                               <button
                                 onClick={() => handleRemoveColumn(idx)}
@@ -274,10 +274,10 @@ export default function DataTableEditorPage() {
                                 setEditingTable({ ...editingTable, columns: newCols });
                               }}
                             >
-                              <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white">
+                              <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141414] border-[#262626]">
+                              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                 <SelectItem value="string" className="text-white">文本</SelectItem>
                                 <SelectItem value="number" className="text-white">数字</SelectItem>
                                 <SelectItem value="boolean" className="text-white">布尔</SelectItem>
@@ -295,19 +295,19 @@ export default function DataTableEditorPage() {
                   </thead>
                   <tbody>
                     {editingTable.rows.map((row, rowIdx) => (
-                      <tr key={rowIdx} className="border-t border-[#262626] hover:bg-[#141414]">
-                        <td className="p-2 border-r border-[#262626] text-gray-400">{rowIdx}</td>
+                      <tr key={rowIdx} className="border-t border-[#2A2E37] hover:bg-[#15171C]">
+                        <td className="p-2 border-r border-[#2A2E37] text-gray-400">{rowIdx}</td>
                         {editingTable.columns.map((col, colIdx) => (
-                          <td key={colIdx} className="p-2 border-r border-[#262626]">
+                          <td key={colIdx} className="p-2 border-r border-[#2A2E37]">
                             {col.type === "boolean" ? (
                               <Select
                                 value={String(row[col.name])}
                                 onValueChange={(v) => handleCellChange(rowIdx, col.name, v)}
                               >
-                                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white">
+                                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626]">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                   <SelectItem value="true" className="text-white">true</SelectItem>
                                   <SelectItem value="false" className="text-white">false</SelectItem>
                                 </SelectContent>
@@ -317,7 +317,7 @@ export default function DataTableEditorPage() {
                                 type={col.type === "number" ? "number" : "text"}
                                 value={row[col.name] ?? ""}
                                 onChange={(e) => handleCellChange(rowIdx, col.name, e.target.value)}
-                                className="h-6 bg-[#0a0a0a] border-[#262626] text-white"
+                                className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white"
                               />
                             )}
                           </td>
@@ -377,13 +377,13 @@ export default function DataTableEditorPage() {
                 </div>
               </div>
 
-              <div className="border border-[#262626] rounded overflow-auto">
+              <div className="border border-[#2A2E37] rounded overflow-auto">
                 <table className="w-full text-xs">
-                  <thead className="bg-[#141414]">
+                  <thead className="bg-[#15171C]">
                     <tr>
-                      <th className="text-left p-2 border-r border-[#262626] w-12">#</th>
+                      <th className="text-left p-2 border-r border-[#2A2E37] w-12">#</th>
                       {selectedTable.columns.map((col, idx) => (
-                        <th key={idx} className="text-left p-2 border-r border-[#262626] min-w-[150px]">
+                        <th key={idx} className="text-left p-2 border-r border-[#2A2E37] min-w-[150px]">
                           {col.name} <span className="text-gray-500">({col.type})</span>
                         </th>
                       ))}
@@ -392,19 +392,19 @@ export default function DataTableEditorPage() {
                   </thead>
                   <tbody>
                     {selectedTable.rows.map((row, rowIdx) => (
-                      <tr key={rowIdx} className="border-t border-[#262626] hover:bg-[#141414]">
-                        <td className="p-2 border-r border-[#262626] text-gray-400">{rowIdx}</td>
+                      <tr key={rowIdx} className="border-t border-[#2A2E37] hover:bg-[#15171C]">
+                        <td className="p-2 border-r border-[#2A2E37] text-gray-400">{rowIdx}</td>
                         {selectedTable.columns.map((col, colIdx) => (
-                          <td key={colIdx} className="p-2 border-r border-[#262626]">
+                          <td key={colIdx} className="p-2 border-r border-[#2A2E37]">
                             {col.type === "boolean" ? (
                               <Select
                                 value={String(row[col.name])}
                                 onValueChange={(v) => handleCellEdit(selectedTable.id, rowIdx, col.name, v)}
                               >
-                                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white">
+                                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626]">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                   <SelectItem value="true" className="text-white">true</SelectItem>
                                   <SelectItem value="false" className="text-white">false</SelectItem>
                                 </SelectContent>
@@ -414,7 +414,7 @@ export default function DataTableEditorPage() {
                                 type={col.type === "number" ? "number" : "text"}
                                 value={row[col.name] ?? ""}
                                 onChange={(e) => handleCellEdit(selectedTable.id, rowIdx, col.name, e.target.value)}
-                                className="h-6 bg-[#0a0a0a] border-[#262626] text-white"
+                                className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white"
                               />
                             )}
                           </td>

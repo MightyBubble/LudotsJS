@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { X } from 'lucide-react';
 import NodePort from './NodePort';
@@ -354,9 +353,9 @@ export default function Node({
         left: node.position.x ?? 0,
         top: node.position.y ?? 0,
         width: '220px',
-        backgroundColor: '#3c3c3c',
+        backgroundColor: '#15171C',
         borderLeft: `3px solid ${accentColor}`,
-        border: selected ? `2px solid ${accentColor}` : '1px solid #1a1a1a',
+        border: selected ? `2px solid ${accentColor}` : '1px solid #2A2E37',
         boxShadow: selected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
         opacity: isLocked ? 0.9 : 1,
         transition: 'border 0.2s, box-shadow 0.2s'
@@ -366,11 +365,11 @@ export default function Node({
       <div 
         className="flex items-center justify-between px-3 py-2 border-b"
         style={{ 
-          borderColor: '#2a2a2a',
-          background: 'linear-gradient(180deg, #3e3e42 0%, #3a3a3a 100%)'
+          borderColor: '#2A2E37',
+          background: 'linear-gradient(180deg, #1F2329 0%, #1A1D24 100%)'
         }}
       >
-        <span className="font-medium text-xs text-white/95">
+        <span className="font-medium text-xs text-[#E2D8B3]">
           {node.data?.label || nodeLabels[node.type] || node.type}
         </span>
         {!isLocked && (

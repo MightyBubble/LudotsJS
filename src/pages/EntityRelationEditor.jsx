@@ -12,14 +12,14 @@ export default function EntityRelationEditorPage() {
   const [activeTab, setActiveTab] = useState("definitions");
   
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-12 bg-[#141414] border-b border-[#262626] flex items-center px-4 justify-between">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-12 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 justify-between">
         <div className="flex items-center gap-3">
           <LinkIcon className="w-5 h-5 text-gray-400" />
           <span className="text-lg font-semibold text-gray-200">关系编辑器</span>
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-          <TabsList className="bg-[#0a0a0a] border border-[#262626] h-8">
+          <TabsList className="bg-[#0D0F14] border border-[#2A2E37] h-8">
             <TabsTrigger value="definitions" className="text-xs px-3 data-[state=active]:bg-[#D97706] data-[state=active]:text-white">
               <Settings2 className="w-3 h-3 mr-2" />
               关系定义 (Definitions)
@@ -143,12 +143,12 @@ function RelationDefinitionsView() {
 
   const renderEditRow = (data) => {
     return (
-      <tr className="border-b border-[#262626] bg-[#252526]">
+      <tr className="border-b border-[#2A2E37] bg-[#15171C]">
         <td className="p-2 align-top">
           <Input
             value={data.relation_id}
             onChange={(e) => setEditData({ ...data, relation_id: e.target.value })}
-            className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white font-mono"
+            className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white font-mono"
             placeholder="relation_id"
           />
         </td>
@@ -156,7 +156,7 @@ function RelationDefinitionsView() {
           <Input
             value={data.name}
             onChange={(e) => setEditData({ ...data, name: e.target.value })}
-            className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             placeholder="名称"
           />
         </td>
@@ -168,7 +168,7 @@ function RelationDefinitionsView() {
                   type="checkbox"
                   checked={data.is_directional ?? true}
                   onChange={(e) => setEditData({ ...data, is_directional: e.target.checked })}
-                  className="rounded bg-[#0a0a0a] border-[#262626]"
+                  className="rounded bg-[#0D0F14] border-[#2A2E37]"
                 />
                 有向关系
               </label>
@@ -176,7 +176,7 @@ function RelationDefinitionsView() {
                  <Input
                    value={data.inverse_relation_id || ""}
                    onChange={(e) => setEditData({ ...data, inverse_relation_id: e.target.value })}
-                   className="h-6 w-32 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                   className="h-6 w-32 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                    placeholder="反向关系ID"
                  />
               )}
@@ -208,10 +208,10 @@ function RelationDefinitionsView() {
                   }
                 }}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                   <SelectValue placeholder="添加属性..." />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {attributes.map(a => (
                     <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                       {a.name} ({a.attribute_id})
@@ -238,7 +238,7 @@ function RelationDefinitionsView() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 bg-[#252526] border-b border-[#262626] flex justify-between items-center">
+      <div className="p-4 bg-[#15171C] border-b border-[#2A2E37] flex justify-between items-center">
         <div className="text-sm text-gray-400">
           在此定义系统中存在的<span className="text-white font-bold">关系类型</span>（如：父子、盟友、宿敌）。
           <br/>这些定义将被用于原型配置和运行时实例。
@@ -250,7 +250,7 @@ function RelationDefinitionsView() {
               placeholder="搜索定义..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-8 pl-8 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+              className="h-8 pl-8 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             />
           </div>
           <Button size="sm" onClick={() => {
@@ -267,7 +267,7 @@ function RelationDefinitionsView() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626] text-left">
+          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37] text-left">
             <tr>
               <th className="p-2 font-semibold text-gray-300 w-48">关系ID</th>
               <th className="p-2 font-semibold text-gray-300 w-40">名称</th>
@@ -280,7 +280,7 @@ function RelationDefinitionsView() {
             {filteredRelations.map(relation => {
               if (editingId === relation.id && editData) return <React.Fragment key={relation.id}>{renderEditRow(editData)}</React.Fragment>;
               return (
-                <tr key={relation.id} className="border-b border-[#262626] hover:bg-[#252526]">
+                <tr key={relation.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2 font-mono text-blue-400">{relation.relation_id}</td>
                   <td className="p-2 text-white font-medium">{relation.name}</td>
                   <td className="p-2">{renderConfigCell(relation)}</td>
@@ -369,14 +369,14 @@ function StaticRelationsView() {
   return (
     <div className="flex h-full">
       {/* 左侧：原型列表 */}
-      <div className="w-64 bg-[#252526] border-r border-[#262626] flex flex-col">
-        <div className="p-3 border-b border-[#262626]">
+      <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
+        <div className="p-3 border-b border-[#2A2E37]">
           <div className="text-xs font-bold text-gray-400 mb-2 uppercase">选择源原型</div>
           <Select value={selectedPrototypeId || ""} onValueChange={setSelectedPrototypeId}>
-            <SelectTrigger className="w-full bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="w-full bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue placeholder="选择原型..." />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626] max-h-[300px]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37] max-h-[300px]">
               {prototypes.map(p => (
                 <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">
                   {p.name} <span className="text-gray-500">({p.prototype_id})</span>
@@ -403,10 +403,10 @@ function StaticRelationsView() {
       </div>
 
       {/* 右侧：关系配置 */}
-      <div className="flex-1 bg-[#0a0a0a] flex flex-col overflow-hidden">
+      <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden">
         {selectedPrototype ? (
           <>
-            <div className="p-4 border-b border-[#262626] bg-[#252526] flex justify-between items-start">
+            <div className="p-4 border-b border-[#2A2E37] bg-[#15171C] flex justify-between items-start">
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   {selectedPrototype.name}
@@ -425,7 +425,7 @@ function StaticRelationsView() {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {(selectedPrototype.static_relations || []).length === 0 ? (
-                <div className="text-center py-12 text-gray-500 border border-dashed border-[#262626] rounded-lg">
+                <div className="text-center py-12 text-gray-500 border border-dashed border-[#2A2E37] rounded-lg">
                   <LinkIcon className="w-8 h-8 mx-auto mb-2 opacity-20" />
                   <p>暂无静态关系配置</p>
                 </div>
@@ -434,7 +434,7 @@ function StaticRelationsView() {
                   const relDef = relations.find(r => r.relation_id === rel.relation_definition_id);
                   
                   return (
-                    <Card key={idx} className="bg-[#252526] border-[#262626] shadow-none">
+                    <Card key={idx} className="bg-[#15171C] border-[#2A2E37] shadow-none">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
                           {/* 连接线图示 */}
@@ -452,10 +452,10 @@ function StaticRelationsView() {
                                   value={rel.relation_definition_id} 
                                   onValueChange={(v) => handleUpdateRelation(idx, { ...rel, relation_definition_id: v, attribute_values: {} })}
                                 >
-                                  <SelectTrigger className="h-8 bg-[#0a0a0a] border-[#262626] text-xs text-white">
+                                  <SelectTrigger className="h-8 bg-[#0D0F14] border-[#2A2E37] text-xs text-white">
                                     <SelectValue placeholder="选择类型" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {relations.map(r => (
                                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                                         {r.name}
@@ -475,10 +475,10 @@ function StaticRelationsView() {
                                   value={rel.target_prototype_id} 
                                   onValueChange={(v) => handleUpdateRelation(idx, { ...rel, target_prototype_id: v })}
                                 >
-                                  <SelectTrigger className="h-8 bg-[#0a0a0a] border-[#262626] text-xs text-white">
+                                  <SelectTrigger className="h-8 bg-[#0D0F14] border-[#2A2E37] text-xs text-white">
                                     <SelectValue placeholder="选择目标" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {prototypes.filter(p => p.prototype_id !== selectedPrototype.prototype_id).map(p => (
                                       <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">
                                         {p.name}
@@ -491,7 +491,7 @@ function StaticRelationsView() {
 
                             {/* 属性配置 */}
                             {relDef?.attributes?.length > 0 && (
-                              <div className="bg-[#0a0a0a] p-3 rounded border border-[#262626]">
+                              <div className="bg-[#0D0F14] p-3 rounded border border-[#2A2E37]">
                                 <div className="text-[10px] text-gray-500 uppercase mb-2">关系属性配置</div>
                                 <div className="grid grid-cols-2 gap-2">
                                   {relDef.attributes.map(attrId => {
@@ -513,7 +513,7 @@ function StaticRelationsView() {
                                               } 
                                             });
                                           }}
-                                          className="h-7 bg-[#141414] border-[#262626] text-xs text-white"
+                                          className="h-7 bg-[#15171C] border-[#2A2E37] text-xs text-white"
                                         />
                                       </div>
                                     );

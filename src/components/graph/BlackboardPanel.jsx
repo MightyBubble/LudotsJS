@@ -137,7 +137,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
   };
 
   return (
-    <div className="w-64 bg-[#141414] border-l border-[#262626] flex flex-col">
+    <div className="w-64 bg-[#15171C] border-l border-[#2A2E37] flex flex-col">
       <style>{`
         .blackboard-scroll::-webkit-scrollbar { width: 8px; }
         .blackboard-scroll::-webkit-scrollbar-track { background: #2d2d2d; }
@@ -145,7 +145,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         .blackboard-scroll::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
       `}</style>
 
-      <div className="flex items-center justify-between p-3 border-b border-[#262626]">
+      <div className="flex items-center justify-between p-3 border-b border-[#2A2E37]">
         <div className="flex items-center gap-2">
           <Database className="w-4 h-4 text-white/70" />
           <span className="text-sm font-semibold text-white/90">黑板变量</span>
@@ -156,7 +156,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
               <Plus className="w-3 h-3" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#141414] border-[#262626] text-white">
+          <DialogContent className="bg-[#15171C] border-[#2A2E37] text-white">
             <DialogHeader>
               <DialogTitle className="text-white">添加黑板变量</DialogTitle>
             </DialogHeader>
@@ -179,7 +179,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                   <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     <SelectItem value="number" className="text-white">数值</SelectItem>
                     <SelectItem value="string" className="text-white">字符串</SelectItem>
                     <SelectItem value="boolean" className="text-white">布尔</SelectItem>
@@ -220,7 +220,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       <SelectItem value="true" className="text-white">true</SelectItem>
                       <SelectItem value="false" className="text-white">false</SelectItem>
                     </SelectContent>
@@ -234,7 +234,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                       <SelectValue placeholder="选择关系" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {relations.map(r => (
                         <SelectItem key={r.id} value={r.relation_id} className="text-white">
                           {r.name}
@@ -251,7 +251,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                       <SelectValue placeholder="选择属性" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {attributes.map(a => (
                         <SelectItem key={a.id} value={a.attribute_id} className="text-white">
                           {a.name}
@@ -268,7 +268,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                       <SelectValue placeholder="选择标签" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {tags.map(t => (
                         <SelectItem key={t.id} value={t.full_path} className="text-white">
                           {t.full_path}
@@ -285,7 +285,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                     <SelectTrigger className="bg-[#3c3c3c] border-[#434343] text-white">
                       <SelectValue placeholder="选择原型" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {prototypes.map(p => (
                         <SelectItem key={p.id} value={p.prototype_id} className="text-white">
                           {p.name}
@@ -328,7 +328,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
             key={variable.key}
             draggable={variable.public}
             onDragStart={(e) => handleDragStart(e, variable.key)}
-            className={`bg-[#141414] rounded px-2 py-1.5 border border-[#262626] ${
+            className={`bg-[#15171C] rounded px-2 py-1.5 border border-[#2A2E37] ${
               variable.public ? 'cursor-move hover:border-[#D97706]' : 'cursor-default'
             } transition-colors`}
           >
@@ -376,7 +376,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   <SelectItem value="true" className="text-white text-xs">true</SelectItem>
                   <SelectItem value="false" className="text-white text-xs">false</SelectItem>
                 </SelectContent>
@@ -391,7 +391,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
                   <SelectValue placeholder="选择" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {relations.map(r => (
                     <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                       {r.name}
@@ -409,7 +409,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
                   <SelectValue placeholder="选择" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {attributes.map(a => (
                     <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                       {a.name}
@@ -427,7 +427,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
                   <SelectValue placeholder="选择" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {tags.map(t => (
                     <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
                       {t.full_path}
@@ -445,7 +445,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 <SelectTrigger className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white">
                   <SelectValue placeholder="选择" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {prototypes.map(p => (
                     <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">
                       {p.name}
@@ -464,7 +464,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         ))}
       </div>
 
-      <div className="p-3 border-t border-[#262626] text-[10px] text-white/40">
+      <div className="p-3 border-t border-[#2A2E37] text-[10px] text-white/40">
         拖拽公开变量到画布创建Get/Set节点
       </div>
     </div>

@@ -195,8 +195,8 @@ export default function ModifierDefinitionEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <GitBranch className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">修饰器定义</span>
         <span className="text-xs text-gray-500">共 {filteredModifiers.length} 个</span>
@@ -209,7 +209,7 @@ export default function ModifierDefinitionEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -221,7 +221,7 @@ export default function ModifierDefinitionEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs text-white">
-          <thead className="bg-[#141414] border-b border-[#262626] sticky top-0 z-10">
+          <thead className="bg-[#15171C] border-b border-[#2A2E37] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-32">名称</th>
               <th className="text-left p-2 font-medium text-white/70 w-32">曲线图</th>
@@ -242,13 +242,13 @@ export default function ModifierDefinitionEditorPage() {
               const targetRelation = relations.find(r => r.relation_id === currentData.target_relation_id);
               
               return (
-                <tr key={mod.id} className="border-b border-[#262626] hover:bg-[#141414]">
+                <tr key={mod.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2">
                     {isEditing ? (
                       <Input
                         value={editData.modifier_name}
                         onChange={(e) => setEditData({ ...editData, modifier_name: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{mod.modifier_name}</span>
@@ -260,10 +260,10 @@ export default function ModifierDefinitionEditorPage() {
                         value={editData.curve_data_graph_id}
                         onValueChange={(val) => setEditData({ ...editData, curve_data_graph_id: val })}
                       >
-                        <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                        <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#141414] border-[#262626]">
+                        <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                           {curveGraphs.map(g => (
                             <SelectItem key={g.id} value={g.graph_id} className="text-white hover:bg-[#262626] text-xs">
                               {g.name}
@@ -287,10 +287,10 @@ export default function ModifierDefinitionEditorPage() {
                                 value={mapping.tag_path || ''}
                                 onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
                               >
-                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-32">
+                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-32">
                                   <SelectValue placeholder="选择标签" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#141414] border-[#262626] max-h-48">
+                                <SelectContent className="bg-[#15171C] border-[#2A2E37] max-h-48">
                                   {tags.map(t => (
                                     <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
                                       {t.full_path}
@@ -306,10 +306,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="属性" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {attributes.map(a => (
                                       <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                                         {a.name}
@@ -321,10 +321,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_key || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="键" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {getAttributeKeys(mapping.attribute_id).map(k => (
                                       <SelectItem key={k} value={k} className="text-white text-xs">
                                         {k}
@@ -341,7 +341,7 @@ export default function ModifierDefinitionEditorPage() {
                                 step="0.1"
                                 value={mapping.constant_value || 0}
                                 onChange={(e) => handleUpdateMapping(idx, 'constant_value', parseFloat(e.target.value) || 0)}
-                                className="h-5 w-16 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                                className="h-5 w-16 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                               />
                             )}
 
@@ -351,10 +351,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.relation_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="关系" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {relations.map(r => (
                                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                                         {r.name}
@@ -366,10 +366,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="属性" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {attributes.map(a => (
                                       <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                                         {a.name}
@@ -381,10 +381,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_key || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="键" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {getAttributeKeys(mapping.attribute_id).map(k => (
                                       <SelectItem key={k} value={k} className="text-white text-xs">
                                         {k}
@@ -401,10 +401,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.relation_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="关系" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {relations.map(r => (
                                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                                         {r.name}
@@ -416,10 +416,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="属性" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {getRelationAttributes(mapping.relation_id).map(attrId => {
                                       const attr = attributes.find(a => a.attribute_id === attrId);
                                       return (
@@ -434,10 +434,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.attribute_key || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'attribute_key', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="键" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {getAttributeKeys(mapping.attribute_id).map(k => (
                                       <SelectItem key={k} value={k} className="text-white text-xs">
                                         {k}
@@ -454,10 +454,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.relation_id || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'relation_id', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-20">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-20">
                                     <SelectValue placeholder="关系" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626]">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                     {relations.map(r => (
                                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                                         {r.name}
@@ -469,10 +469,10 @@ export default function ModifierDefinitionEditorPage() {
                                   value={mapping.tag_path || ''}
                                   onValueChange={(val) => handleUpdateMapping(idx, 'tag_path', val)}
                                 >
-                                  <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-32">
+                                  <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-32">
                                     <SelectValue placeholder="选择标签" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#141414] border-[#262626] max-h-48">
+                                  <SelectContent className="bg-[#15171C] border-[#2A2E37] max-h-48">
                                     {tags.map(t => (
                                       <SelectItem key={t.id} value={t.full_path} className="text-white text-xs">
                                         {t.full_path}
@@ -487,10 +487,10 @@ export default function ModifierDefinitionEditorPage() {
                               value={mapping.source_type}
                               onValueChange={(val) => handleUpdateMapping(idx, 'source_type', val)}
                             >
-                              <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-16">
+                              <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-16">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#141414] border-[#262626]">
+                              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                                 <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
                                 <SelectItem value="attribute_key" className="text-white text-xs">属性键</SelectItem>
                                 <SelectItem value="constant" className="text-white text-xs">常量</SelectItem>
@@ -532,10 +532,10 @@ export default function ModifierDefinitionEditorPage() {
                         value={editData.target_type}
                         onValueChange={(val) => setEditData({ ...editData, target_type: val })}
                       >
-                        <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                        <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#141414] border-[#262626]">
+                        <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                           <SelectItem value="entity_attribute" className="text-white text-xs">实体自身属性</SelectItem>
                           <SelectItem value="related_entity_attribute" className="text-white text-xs">关联实体属性</SelectItem>
                           <SelectItem value="relation_attribute" className="text-white text-xs">关系属性</SelectItem>
@@ -555,10 +555,10 @@ export default function ModifierDefinitionEditorPage() {
                             value={editData.target_relation_id || ''}
                             onValueChange={(val) => setEditData({ ...editData, target_relation_id: val })}
                           >
-                            <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                            <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                               <SelectValue placeholder="关系" />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#141414] border-[#262626]">
+                            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                               {relations.map(r => (
                                 <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">
                                   {r.name}
@@ -571,10 +571,10 @@ export default function ModifierDefinitionEditorPage() {
                           value={editData.target_attribute_id}
                           onValueChange={(val) => setEditData({ ...editData, target_attribute_id: val, output_key: '' })}
                         >
-                          <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                          <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#141414] border-[#262626]">
+                          <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                             {attributes.map(a => (
                               <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                                 {a.name}
@@ -586,10 +586,10 @@ export default function ModifierDefinitionEditorPage() {
                           value={editData.output_key}
                           onValueChange={(val) => setEditData({ ...editData, output_key: val })}
                         >
-                          <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                          <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#141414] border-[#262626]">
+                          <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                             {availableKeys.map(k => (
                               <SelectItem key={k} value={k} className="text-white text-xs">
                                 {k}
@@ -614,7 +614,7 @@ export default function ModifierDefinitionEditorPage() {
                         value={editData.max_trigger_times || ""}
                         onChange={(e) => setEditData({ ...editData, max_trigger_times: e.target.value ? parseInt(e.target.value) : null })}
                         placeholder="∞"
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white text-center"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white text-center"
                       />
                     ) : (
                       <span className="text-white/70">{mod.max_trigger_times || '∞'}</span>

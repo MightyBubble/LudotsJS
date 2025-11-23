@@ -221,10 +221,10 @@ export default function ValidatorEditorPage() {
               value={cfg.source_entity || "source"}
               onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, source_entity: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
                 <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
               </SelectContent>
@@ -234,10 +234,10 @@ export default function ValidatorEditorPage() {
             value={cfg.check_type || "has_tag"}
             onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, check_type: v } })}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               <SelectItem value="has_tag" className="text-white text-xs">有标签</SelectItem>
               <SelectItem value="has_any_tags" className="text-white text-xs">有任意标签</SelectItem>
               <SelectItem value="has_all_tags" className="text-white text-xs">有所有标签</SelectItem>
@@ -252,7 +252,7 @@ export default function ValidatorEditorPage() {
               value={cfg.tag_path || ""}
               onChange={(e) => setEditData({ ...data, entity_check_config: { ...cfg, tag_path: e.target.value } })}
               placeholder="标签路径"
-              className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+              className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
               list="tags-list"
             />
           )}
@@ -260,7 +260,7 @@ export default function ValidatorEditorPage() {
             <div className="space-y-1">
               <Input
                 placeholder="输入标签路径后回车"
-                className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                 list="tags-list"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.target.value) {
@@ -289,10 +289,10 @@ export default function ValidatorEditorPage() {
               value={cfg.prototype_id || ""}
               onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, prototype_id: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                 <SelectValue placeholder="选择原型" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 {prototypes.map(p => (
                   <SelectItem key={p.id} value={p.prototype_id} className="text-white text-xs">{p.name}</SelectItem>
                 ))}
@@ -304,10 +304,10 @@ export default function ValidatorEditorPage() {
               value={cfg.attribute_id || ""}
               onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, attribute_id: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                 <SelectValue placeholder="选择属性" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 {attributes.map(a => (
                   <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
                 ))}
@@ -319,10 +319,10 @@ export default function ValidatorEditorPage() {
               value={cfg.relation_id || ""}
               onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, relation_id: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                 <SelectValue placeholder="选择关系" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 {relations.map(r => (
                   <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
                 ))}
@@ -334,10 +334,10 @@ export default function ValidatorEditorPage() {
               value={cfg.function_graph_id || ""}
               onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, function_graph_id: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                 <SelectValue placeholder="选择函数图" />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 {booleanFunctionGraphs.map(g => (
                   <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
                 ))}
@@ -356,16 +356,16 @@ export default function ValidatorEditorPage() {
       return (
         <div className="space-y-1">
           {/* 比较值A */}
-          <div className="bg-[#141414] p-1.5 rounded">
+          <div className="bg-[#15171C] p-1.5 rounded">
             <div className="text-xs text-gray-400 mb-1">比较值A:</div>
             <Select
               value={cfg.compare_type || "attribute_value"}
               onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_type: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 <SelectItem value="constant" className="text-white text-xs">全局常量</SelectItem>
                 <SelectItem value="literal" className="text-white text-xs">固定值</SelectItem>
                 <SelectItem value="attribute_value" className="text-white text-xs">属性值</SelectItem>
@@ -380,10 +380,10 @@ export default function ValidatorEditorPage() {
                 value={cfg.source_entity || "source"}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_entity: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
                   <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
                   <SelectItem value="relation" className="text-white text-xs">关系关联实体</SelectItem>
@@ -395,10 +395,10 @@ export default function ValidatorEditorPage() {
                 value={cfg.source_relation_id || ""}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, source_relation_id: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                   <SelectValue placeholder="选择关系" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {relations.map(r => (
                     <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
                   ))}
@@ -410,10 +410,10 @@ export default function ValidatorEditorPage() {
                 value={cfg.constant_key || ""}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, constant_key: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                   <SelectValue placeholder="选择常量" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {constants.map(c => (
                     <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.constant_key}</SelectItem>
                   ))}
@@ -426,7 +426,7 @@ export default function ValidatorEditorPage() {
                 value={cfg.compare_value ?? 0}
                 onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_value: parseFloat(e.target.value) || 0 } })}
                 placeholder="输入值"
-                className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
               />
             )}
             {cfg.compare_type === 'attribute_value' && (
@@ -435,10 +435,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.attribute_id || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_id: v, attribute_key: "" } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                     <SelectValue placeholder="属性" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {attributes.map(a => (
                       <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
                     ))}
@@ -449,10 +449,10 @@ export default function ValidatorEditorPage() {
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, attribute_key: v } })}
                   disabled={!cfg.attribute_id}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                     <SelectValue placeholder="键" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {attributeKeys.map(k => (
                       <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
                     ))}
@@ -465,7 +465,7 @@ export default function ValidatorEditorPage() {
                 value={cfg.tag_path || ""}
                 onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, tag_path: e.target.value } })}
                 placeholder="标签路径"
-                className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                 list="tags-list"
               />
             )}
@@ -474,10 +474,10 @@ export default function ValidatorEditorPage() {
                 value={cfg.relation_id || ""}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_id: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                   <SelectValue placeholder="选择关系" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {relations.map(r => (
                     <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
                   ))}
@@ -490,10 +490,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.relation_attribute_id || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_attribute_id: v, relation_attribute_key: "" } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                     <SelectValue placeholder="属性" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {attributes.map(a => (
                       <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
                     ))}
@@ -504,10 +504,10 @@ export default function ValidatorEditorPage() {
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, relation_attribute_key: v } })}
                   disabled={!cfg.relation_attribute_id}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                     <SelectValue placeholder="键" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {(cfg.relation_attribute_id ? getAttributeKeys(cfg.relation_attribute_id) : []).map(k => (
                       <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
                     ))}
@@ -520,10 +520,10 @@ export default function ValidatorEditorPage() {
                 value={cfg.function_graph_id || ""}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, function_graph_id: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                   <SelectValue placeholder="选择函数图" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   {booleanFunctionGraphs.map(g => (
                     <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
                   ))}
@@ -538,10 +538,10 @@ export default function ValidatorEditorPage() {
               value={cfg.operator || "gt"}
               onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, operator: v } })}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 <SelectItem value="gt" className="text-white text-xs">&gt;</SelectItem>
                 <SelectItem value="lt" className="text-white text-xs">&lt;</SelectItem>
                 <SelectItem value="gte" className="text-white text-xs">&gt;=</SelectItem>
@@ -554,16 +554,16 @@ export default function ValidatorEditorPage() {
 
           {/* 比较值B */}
           {cfg.compare_type !== 'function_graph' && (
-            <div className="bg-[#141414] p-1.5 rounded">
+            <div className="bg-[#15171C] p-1.5 rounded">
               <div className="text-xs text-gray-400 mb-1">比较值B:</div>
               <Select
                 value={cfg.value_source || "literal"}
                 onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, value_source: v } })}
               >
-                <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#141414] border-[#262626]">
+                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                   <SelectItem value="constant" className="text-white text-xs">全局常量</SelectItem>
                   <SelectItem value="literal" className="text-white text-xs">固定值</SelectItem>
                   <SelectItem value="attribute_key" className="text-white text-xs">属性值</SelectItem>
@@ -577,10 +577,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.target_entity || "target"}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_entity: v } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     <SelectItem value="source" className="text-white text-xs">源实体</SelectItem>
                     <SelectItem value="target" className="text-white text-xs">目标实体</SelectItem>
                     <SelectItem value="relation" className="text-white text-xs">关系关联实体</SelectItem>
@@ -592,10 +592,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.target_relation_id_for_type || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_id_for_type: v } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                     <SelectValue placeholder="选择关系" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {relations.map(r => (
                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
                     ))}
@@ -607,10 +607,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.target_constant_key || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_constant_key: v } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                     <SelectValue placeholder="选择常量" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {constants.map(c => (
                       <SelectItem key={c.id} value={c.constant_key} className="text-white text-xs">{c.constant_key}</SelectItem>
                     ))}
@@ -623,7 +623,7 @@ export default function ValidatorEditorPage() {
                   value={cfg.compare_value ?? 0}
                   onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, compare_value: parseFloat(e.target.value) || 0 } })}
                   placeholder="输入值"
-                  className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                  className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                 />
               )}
               {cfg.value_source === 'attribute_key' && (
@@ -632,10 +632,10 @@ export default function ValidatorEditorPage() {
                     value={cfg.target_attribute_id || ""}
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_attribute_id: v, target_attribute_key: "" } })}
                   >
-                    <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                    <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                       <SelectValue placeholder="属性" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {attributes.map(a => (
                         <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
                       ))}
@@ -646,10 +646,10 @@ export default function ValidatorEditorPage() {
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_attribute_key: v } })}
                     disabled={!cfg.target_attribute_id}
                   >
-                    <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                    <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                       <SelectValue placeholder="键" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {targetAttributeKeys.map(k => (
                         <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
                       ))}
@@ -662,7 +662,7 @@ export default function ValidatorEditorPage() {
                   value={cfg.target_tag_path || ""}
                   onChange={(e) => setEditData({ ...data, entity_compare_config: { ...cfg, target_tag_path: e.target.value } })}
                   placeholder="标签路径"
-                  className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                  className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                   list="tags-list"
                 />
               )}
@@ -671,10 +671,10 @@ export default function ValidatorEditorPage() {
                   value={cfg.target_relation_id_for_type || ""}
                   onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_id_for_type: v } })}
                 >
-                  <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs mb-1">
+                  <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs mb-1">
                     <SelectValue placeholder="选择关系" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#141414] border-[#262626]">
+                  <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     {relations.map(r => (
                       <SelectItem key={r.id} value={r.relation_id} className="text-white text-xs">{r.name}</SelectItem>
                     ))}
@@ -687,10 +687,10 @@ export default function ValidatorEditorPage() {
                     value={cfg.target_relation_attribute_id || ""}
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_attribute_id: v, target_relation_attribute_key: "" } })}
                   >
-                    <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                    <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                       <SelectValue placeholder="属性" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {attributes.map(a => (
                         <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">{a.name}</SelectItem>
                       ))}
@@ -701,10 +701,10 @@ export default function ValidatorEditorPage() {
                     onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, target_relation_attribute_key: v } })}
                     disabled={!cfg.target_relation_attribute_id}
                   >
-                    <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+                    <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                       <SelectValue placeholder="键" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#141414] border-[#262626]">
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {(cfg.target_relation_attribute_id ? getAttributeKeys(cfg.target_relation_attribute_id) : []).map(k => (
                         <SelectItem key={k.name} value={k.name} className="text-white text-xs">{k.name}</SelectItem>
                       ))}
@@ -731,10 +731,10 @@ export default function ValidatorEditorPage() {
             value={cfg.logic_operator || "AND"}
             onValueChange={(v) => setEditData({ ...data, combine_config: { ...cfg, logic_operator: v } })}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               <SelectItem value="AND" className="text-white text-xs">AND</SelectItem>
               <SelectItem value="OR" className="text-white text-xs">OR</SelectItem>
               <SelectItem value="NOT" className="text-white text-xs">NOT</SelectItem>
@@ -774,10 +774,10 @@ export default function ValidatorEditorPage() {
                 }
               }}
             >
-              <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
+              <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
                 <SelectValue placeholder="添加验证器..." />
               </SelectTrigger>
-              <SelectContent className="bg-[#141414] border-[#262626]">
+              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                 {availableValidators
                   .filter(v => !cfg.sub_validator_ids?.includes(v.validator_id))
                   .map(v => (
@@ -800,10 +800,10 @@ export default function ValidatorEditorPage() {
             value={cfg.function_graph_id || ""}
             onValueChange={(v) => setEditData({ ...data, function_graph_config: { ...cfg, function_graph_id: v } })}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue placeholder="选择函数图" />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               {booleanFunctionGraphs.map(g => (
                 <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
               ))}
@@ -819,12 +819,12 @@ export default function ValidatorEditorPage() {
 
   const renderEditRow = (data) => {
     return (
-      <tr className="border-b border-[#262626] bg-[#141414]">
+      <tr className="border-b border-[#2A2E37] bg-[#15171C]">
         <td className="p-2">
           <Input
             value={data.validator_id}
             onChange={(e) => setEditData({ ...data, validator_id: e.target.value })}
-            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             placeholder="验证器ID"
           />
         </td>
@@ -832,7 +832,7 @@ export default function ValidatorEditorPage() {
           <Input
             value={data.name}
             onChange={(e) => setEditData({ ...data, name: e.target.value })}
-            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             placeholder="名称"
           />
         </td>
@@ -841,10 +841,10 @@ export default function ValidatorEditorPage() {
             value={data.validator_type}
             onValueChange={handleTypeChange}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               <SelectItem value="entity_check" className="text-white text-xs">实体检查</SelectItem>
               <SelectItem value="entity_compare" className="text-white text-xs">实体比较</SelectItem>
               <SelectItem value="combine" className="text-white text-xs">组合</SelectItem>
@@ -878,8 +878,8 @@ export default function ValidatorEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <Shield className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">验证器编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredValidators.length} 个</span>
@@ -892,7 +892,7 @@ export default function ValidatorEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -904,7 +904,7 @@ export default function ValidatorEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626]">
+          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-48">验证器ID</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
@@ -925,7 +925,7 @@ export default function ValidatorEditorPage() {
               }
               
               return (
-                <tr key={validator.id} className="border-b border-[#262626] hover:bg-[#141414]">
+                <tr key={validator.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2 text-gray-300 font-mono">{validator.validator_id}</td>
                   <td className="p-2 text-gray-300">{validator.name}</td>
                   <td className="p-2 text-gray-300">{getTypeName(validator.validator_type)}</td>

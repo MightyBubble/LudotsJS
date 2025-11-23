@@ -16,7 +16,7 @@ function TagInput({ value, onChange, onAdd, onBlur, allTags }) {
         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAdd(); }}}
         onBlur={onBlur}
         placeholder="输入或选择标签"
-        className="h-6 bg-[#141414] border-[#262626] text-xs text-white flex-1"
+        className="h-6 bg-[#15171C] border-[#2A2E37] text-xs text-white flex-1"
         list="tags-datalist"
       />
       <Button
@@ -230,8 +230,8 @@ export default function UnlockableCommandsPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <KeyRound className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">指令解锁编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredRules.length} 条</span>
@@ -244,7 +244,7 @@ export default function UnlockableCommandsPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -256,7 +256,7 @@ export default function UnlockableCommandsPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626]">
+          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">规则名称</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-40">解锁指令</th>
@@ -272,19 +272,19 @@ export default function UnlockableCommandsPage() {
           </thead>
           <tbody>
             {creatingNew && editData && (
-              <tr className="border-b border-[#262626] bg-[#252526]">
+              <tr className="border-b border-[#2A2E37] bg-[#252526]">
                 <td className="p-2">
                   <Input
                     value={editData.rule_name}
                     onChange={(e) => setEditData({ ...editData, rule_name: e.target.value })}
-                    className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                    className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                   />
                 </td>
                 <td className="p-2">
                   <Input
                     value={editData.unlocked_command_tag_path}
                     onChange={(e) => setEditData({ ...editData, unlocked_command_tag_path: e.target.value })}
-                    className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                    className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                     list="tags-datalist"
                   />
                 </td>
@@ -369,19 +369,19 @@ export default function UnlockableCommandsPage() {
               
               if (isEditing && editData) {
                 return (
-                  <tr key={rule.id} className="border-b border-[#262626] bg-[#252526]">
+                  <tr key={rule.id} className="border-b border-[#2A2E37] bg-[#252526]">
                     <td className="p-2">
                       <Input
                         value={editData.rule_name}
                         onChange={(e) => setEditData({ ...editData, rule_name: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                       />
                     </td>
                     <td className="p-2">
                       <Input
                         value={editData.unlocked_command_tag_path}
                         onChange={(e) => setEditData({ ...editData, unlocked_command_tag_path: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                         list="tags-datalist"
                       />
                     </td>
@@ -463,7 +463,7 @@ export default function UnlockableCommandsPage() {
               }
               
               return (
-                <tr key={rule.id} className="border-b border-[#262626] hover:bg-[#252526]">
+                <tr key={rule.id} className="border-b border-[#2A2E37] hover:bg-[#252526]">
                   <td className="p-2 text-gray-300">{rule.rule_name}</td>
                   <td className="p-2 text-gray-300 font-mono">{rule.unlocked_command_tag_path}</td>
                   <td className="p-2"><TagList tags={rule.interactor_conditions?.has_any_tags} /></td>

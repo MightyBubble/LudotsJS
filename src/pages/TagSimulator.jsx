@@ -136,17 +136,17 @@ export default function TagSimulator() {
   const simulation = selectedTag ? simulateAddTag(selectedTag) : null;
 
   return (
-    <div className="h-screen flex bg-[#0a0a0a] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
+    <div className="h-screen flex bg-[#0D0F14] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #141414; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #15171C; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #444; }
       `}</style>
 
       {/* Left Sidebar: Active Tags (Entity State) */}
-      <div className="w-80 bg-[#141414] border-r border-[#262626] flex flex-col">
-        <div className="p-4 border-b border-[#262626] bg-[#141414]">
+      <div className="w-80 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
+        <div className="p-4 border-b border-[#2A2E37] bg-[#15171C]">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded bg-[#D97706]/10 flex items-center justify-center text-[#D97706]">
               <Zap className="w-4 h-4" />
@@ -159,7 +159,7 @@ export default function TagSimulator() {
           <Input
             value={entityName}
             onChange={(e) => setEntityName(e.target.value)}
-            className="h-8 bg-[#0a0a0a] border-[#262626] text-sm text-white focus:border-[#D97706]"
+            className="h-8 bg-[#0D0F14] border-[#2A2E37] text-sm text-white focus:border-[#D97706]"
             placeholder="Entity Name"
           />
         </div>
@@ -171,7 +171,7 @@ export default function TagSimulator() {
           </div>
 
           {activeTags.size === 0 ? (
-            <div className="text-center py-8 text-gray-600 text-xs border border-dashed border-[#262626] rounded">
+            <div className="text-center py-8 text-gray-600 text-xs border border-dashed border-[#2A2E37] rounded">
               No active tags
             </div>
           ) : (
@@ -186,8 +186,8 @@ export default function TagSimulator() {
                     key={tagPath} 
                     className={`group relative p-2.5 rounded border transition-all ${
                       disabled 
-                        ? 'bg-[#1a1a1a] border-[#262626] opacity-60' 
-                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#D97706]/50'
+                        ? 'bg-[#1a1a1a] border-[#2A2E37] opacity-60' 
+                        : 'bg-[#0D0F14] border-[#2A2E37] hover:border-[#D97706]/50'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1.5">
@@ -217,7 +217,7 @@ export default function TagSimulator() {
           )}
         </div>
         
-        <div className="p-3 border-t border-[#262626] bg-[#141414]">
+        <div className="p-3 border-t border-[#2A2E37] bg-[#15171C]">
           <Button 
             variant="ghost" 
             size="sm" 
@@ -231,16 +231,16 @@ export default function TagSimulator() {
       </div>
 
       {/* Main Content: Library */}
-      <div className="flex-1 flex flex-col bg-[#0a0a0a] min-w-0">
+      <div className="flex-1 flex flex-col bg-[#0D0F14] min-w-0">
         {/* Search Header */}
-        <div className="h-14 border-b border-[#262626] flex items-center px-4 gap-4 bg-[#0a0a0a]">
+        <div className="h-14 border-b border-[#2A2E37] flex items-center px-4 gap-4 bg-[#0D0F14]">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <Input
               placeholder="Search tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 bg-[#141414] border-[#262626] text-sm text-[#e5e5e5] focus:border-[#D97706] rounded-md"
+              className="h-9 pl-9 bg-[#15171C] border-[#2A2E37] text-sm text-[#e5e5e5] focus:border-[#D97706] rounded-md"
             />
           </div>
           <div className="flex gap-4 text-xs text-gray-500">
@@ -258,7 +258,7 @@ export default function TagSimulator() {
         {/* Library Grid */}
         <div className="flex-1 overflow-hidden flex">
           {/* Available Tags Column */}
-          <div className="flex-1 overflow-y-auto p-4 border-r border-[#262626] custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 border-r border-[#2A2E37] custom-scrollbar">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
               <Check className="w-3.5 h-3.5 text-green-500" /> Available
             </h3>
@@ -270,7 +270,7 @@ export default function TagSimulator() {
                   className={`group p-3 rounded border cursor-pointer transition-all ${
                     selectedTag?.id === tag.id
                       ? 'bg-[#D97706]/10 border-[#D97706]'
-                      : 'bg-[#141414] border-[#262626] hover:border-[#D97706]/50 hover:bg-[#1a1a1a]'
+                      : 'bg-[#15171C] border-[#2A2E37] hover:border-[#D97706]/50 hover:bg-[#1a1a1a]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -285,7 +285,7 @@ export default function TagSimulator() {
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                      <div className="text-[10px] text-gray-500 font-mono truncate bg-[#0a0a0a] px-1.5 py-0.5 rounded w-fit">
+                      <div className="text-[10px] text-gray-500 font-mono truncate bg-[#0D0F14] px-1.5 py-0.5 rounded w-fit">
                         {tag.full_path}
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export default function TagSimulator() {
                 <div
                   key={tag.id}
                   onClick={() => setSelectedTag(tag)}
-                  className={`p-3 rounded border border-[#262626] bg-[#141414] opacity-70 hover:opacity-100 transition-all cursor-pointer ${
+                  className={`p-3 rounded border border-[#2A2E37] bg-[#15171C] opacity-70 hover:opacity-100 transition-all cursor-pointer ${
                     selectedTag?.id === tag.id ? 'border-[#D97706] opacity-100' : ''
                   }`}
                 >
@@ -336,8 +336,8 @@ export default function TagSimulator() {
       </div>
 
       {/* Right Sidebar: Inspector */}
-      <div className="w-80 bg-[#141414] border-l border-[#262626] flex flex-col">
-        <div className="p-4 border-b border-[#262626]">
+      <div className="w-80 bg-[#15171C] border-l border-[#2A2E37] flex flex-col">
+        <div className="p-4 border-b border-[#2A2E37]">
           <h2 className="text-xs font-bold text-[#D97706] uppercase tracking-wider flex items-center gap-2">
             <Info className="w-3.5 h-3.5" /> Inspector
           </h2>
@@ -352,7 +352,7 @@ export default function TagSimulator() {
                   <h3 className="text-lg font-bold text-white">{selectedTag.name}</h3>
                   <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: getCategoryColor(selectedTag.category_key) }} />
                 </div>
-                <div className="p-2 bg-[#0a0a0a] rounded border border-[#262626]">
+                <div className="p-2 bg-[#0D0F14] rounded border border-[#2A2E37]">
                   <p className="font-mono text-[10px] text-gray-400 break-all">{selectedTag.full_path}</p>
                 </div>
                 {selectedTag.description && (
@@ -373,7 +373,7 @@ export default function TagSimulator() {
                         <ArrowRight className="w-3 h-3" /> Auto-Attach
                       </div>
                       {simulation.willAttach.map((t, i) => (
-                        <div key={i} className="px-2 py-1.5 bg-[#0a0a0a] border-l-2 border-green-500 text-xs text-gray-300 ml-4">
+                        <div key={i} className="px-2 py-1.5 bg-[#0D0F14] border-l-2 border-green-500 text-xs text-gray-300 ml-4">
                           {t}
                         </div>
                       ))}
@@ -387,7 +387,7 @@ export default function TagSimulator() {
                         <Trash2 className="w-3 h-3" /> Auto-Remove
                       </div>
                       {simulation.willRemove.map((t, i) => (
-                        <div key={i} className="px-2 py-1.5 bg-[#0a0a0a] border-l-2 border-red-500 text-xs text-gray-300 ml-4">
+                        <div key={i} className="px-2 py-1.5 bg-[#0D0F14] border-l-2 border-red-500 text-xs text-gray-300 ml-4">
                           {t}
                         </div>
                       ))}
@@ -431,7 +431,7 @@ export default function TagSimulator() {
 
         {/* Bottom Action */}
         {selectedTag && (
-          <div className="p-4 border-t border-[#262626] bg-[#141414]">
+          <div className="p-4 border-t border-[#2A2E37] bg-[#15171C]">
             {!activeTags.has(selectedTag.full_path) ? (
               canAddTag(selectedTag).canAdd ? (
                 <Button 

@@ -133,10 +133,10 @@ export default function GlobalConstantEditorPage() {
     if (data.value_type === 'boolean') {
       return (
         <Select value={data.constant_value} onValueChange={(v) => setEditData({ ...editData, constant_value: v })}>
-          <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+          <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#141414] border-[#262626]">
+          <SelectContent className="bg-[#15171C] border-[#2A2E37]">
             <SelectItem value="true" className="text-white text-xs">true</SelectItem>
             <SelectItem value="false" className="text-white text-xs">false</SelectItem>
           </SelectContent>
@@ -149,7 +149,7 @@ export default function GlobalConstantEditorPage() {
         <Textarea
           value={data.constant_value}
           onChange={(e) => setEditData({ ...editData, constant_value: e.target.value })}
-          className="h-20 bg-[#0a0a0a] border-[#262626] text-xs text-white font-mono"
+          className="h-20 bg-[#0D0F14] border-[#2A2E37] text-xs text-white font-mono"
           placeholder={data.value_type === 'object' ? '{}' : '[]'}
         />
       );
@@ -161,14 +161,14 @@ export default function GlobalConstantEditorPage() {
         step={data.value_type === 'number' ? '0.1' : undefined}
         value={data.constant_value}
         onChange={(e) => setEditData({ ...editData, constant_value: e.target.value })}
-        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
       />
     );
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Settings className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">全局常量</span>
         <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredConstants.length} 个</span>
@@ -181,7 +181,7 @@ export default function GlobalConstantEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -191,21 +191,21 @@ export default function GlobalConstantEditorPage() {
         </Button>
       </div>
 
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#262626]">
+      <div className="md:hidden px-2 py-2 bg-[#15171C] border-b border-[#2A2E37]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0D0F14] border-[#2A2E37] text-sm text-white"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs text-white hidden md:table">
-          <thead className="bg-[#141414] border-b border-[#262626] sticky top-0 z-10">
+          <thead className="bg-[#15171C] border-b border-[#2A2E37] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-48">常量键</th>
               <th className="text-left p-2 font-medium text-white/70 w-24">类型</th>
@@ -221,13 +221,13 @@ export default function GlobalConstantEditorPage() {
               const currentData = isEditing ? editData : constant;
               
               return (
-                <tr key={constant.id} className="border-b border-[#262626] hover:bg-[#141414]">
+                <tr key={constant.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2">
                     {isEditing ? (
                       <Input
                         value={editData.constant_key}
                         onChange={(e) => setEditData({ ...editData, constant_key: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white font-mono"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white font-mono"
                       />
                     ) : (
                       <span className="text-white/90 font-mono">{constant.constant_key}</span>
@@ -236,10 +236,10 @@ export default function GlobalConstantEditorPage() {
                   <td className="p-2">
                     {isEditing ? (
                       <Select value={editData.value_type} onValueChange={handleTypeChange}>
-                        <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+                        <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#141414] border-[#262626]">
+                        <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                           <SelectItem value="number" className="text-white text-xs">数值</SelectItem>
                           <SelectItem value="string" className="text-white text-xs">字符串</SelectItem>
                           <SelectItem value="boolean" className="text-white text-xs">布尔</SelectItem>
@@ -259,7 +259,7 @@ export default function GlobalConstantEditorPage() {
                       <Input
                         value={editData.category || ''}
                         onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                         placeholder="分类"
                       />
                     ) : (
@@ -271,7 +271,7 @@ export default function GlobalConstantEditorPage() {
                       <Input
                         value={editData.description || ''}
                         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                         placeholder="说明"
                       />
                     ) : (
@@ -326,7 +326,7 @@ export default function GlobalConstantEditorPage() {
             const currentData = isEditing ? editData : constant;
 
             return (
-              <div key={constant.id} className="bg-[#252526] rounded border border-[#3e3e42] p-3">
+              <div key={constant.id} className="bg-[#15171C] rounded border border-[#3e3e42] p-3">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
                     <div className="text-sm font-semibold text-white font-mono">{currentData.constant_key}</div>

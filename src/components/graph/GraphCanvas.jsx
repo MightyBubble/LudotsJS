@@ -273,7 +273,7 @@ export default function GraphCanvas({
   return (
     <div
       ref={canvasRef}
-      className="w-full h-full bg-[#0a0a0a] relative overflow-hidden"
+      className="w-full h-full bg-[#0B0D12] relative overflow-hidden"
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
@@ -294,7 +294,7 @@ export default function GraphCanvas({
               x={pan.x % (20 * zoom)}
               y={pan.y % (20 * zoom)}
             >
-              <circle cx="1" cy="1" r="1" fill="#262626" />
+              <circle cx="1" cy="1" r="1" fill="#1E2128" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />

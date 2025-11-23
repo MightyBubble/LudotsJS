@@ -127,12 +127,12 @@ export default function RequirementEditorPage() {
 
   const renderEditRow = (data) => {
     return (
-      <tr className="border-b border-[#262626] bg-[#141414]">
+      <tr className="border-b border-[#2A2E37] bg-[#15171C]">
         <td className="p-2">
           <Input
             value={data.requirement_id}
             onChange={(e) => setEditData({ ...data, requirement_id: e.target.value })}
-            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             placeholder="需求ID"
           />
         </td>
@@ -140,7 +140,7 @@ export default function RequirementEditorPage() {
           <Input
             value={data.name}
             onChange={(e) => setEditData({ ...data, name: e.target.value })}
-            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
             placeholder="名称"
           />
         </td>
@@ -149,10 +149,10 @@ export default function RequirementEditorPage() {
             value={data.requirement_type}
             onValueChange={(val) => setEditData({ ...data, requirement_type: val })}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               <SelectItem value="node" className="text-white text-xs">节点</SelectItem>
               <SelectItem value="count" className="text-white text-xs">计数</SelectItem>
             </SelectContent>
@@ -166,10 +166,10 @@ export default function RequirementEditorPage() {
             value={data.state}
             onValueChange={(val) => setEditData({ ...data, state: val })}
           >
-            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
+            <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-24">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#141414] border-[#262626]">
+            <SelectContent className="bg-[#15171C] border-[#2A2E37]">
               <SelectItem value="active" className="text-white text-xs">激活</SelectItem>
               <SelectItem value="disabled" className="text-white text-xs">禁用</SelectItem>
               <SelectItem value="hidden" className="text-white text-xs">隐藏</SelectItem>
@@ -191,8 +191,8 @@ export default function RequirementEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
-      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <CheckSquare className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">需求编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredRequirements.length} 个</span>
@@ -205,7 +205,7 @@ export default function RequirementEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
           />
         </div>
 
@@ -217,7 +217,7 @@ export default function RequirementEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626]">
+          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-48">需求ID</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
@@ -238,7 +238,7 @@ export default function RequirementEditorPage() {
               }
               
               return (
-                <tr key={requirement.id} className="border-b border-[#262626] hover:bg-[#141414]">
+                <tr key={requirement.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
                   <td className="p-2 text-gray-300 font-mono">{requirement.requirement_id}</td>
                   <td className="p-2 text-gray-300">{requirement.name}</td>
                   <td className="p-2 text-gray-300">{requirement.requirement_type === 'node' ? '节点' : '计数'}</td>

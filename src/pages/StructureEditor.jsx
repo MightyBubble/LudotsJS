@@ -26,10 +26,10 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
         top: node.position.y,
         cursor: 'move',
       }}
-      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#262626] bg-[#0a0a0a]'}`}
+      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#2A2E37] bg-[#0D0F14]'}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#262626]">
+      <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#2A2E37]">
         <span className="text-xs font-bold text-white truncate max-w-[100px]">{node.data.label}</span>
         <div className="w-2 h-2 rounded-full bg-[#D97706]" />
       </div>
@@ -242,7 +242,7 @@ export default function StructureEditorPage() {
   }, [nodes]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
       <Toolbar
         onSave={handleSave}
         onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
@@ -257,15 +257,15 @@ export default function StructureEditorPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Structure List */}
         {(!selectedStructure || showLibrary) && (
-          <div className="w-64 bg-[#141414] border-r border-[#262626] flex flex-col">
-            <div className="p-3 border-b border-[#262626] flex gap-2">
+          <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
+            <div className="p-3 border-b border-[#2A2E37] flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                 <Input 
                   placeholder="搜索结构..." 
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="h-8 pl-7 bg-[#0a0a0a] border-[#262626] text-xs" 
+                  className="h-8 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs" 
                 />
               </div>
               <Button size="sm" onClick={() => setIsCreating(true)} className="h-8 px-2 bg-[#262626]">
@@ -342,7 +342,7 @@ export default function StructureEditorPage() {
                 )}
               />
               
-              <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#262626] flex gap-2">
+              <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#2A2E37] flex gap-2">
                 <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#262626] hover:bg-[#4d4d4d] text-xs text-white">
                   <Plus className="w-3 h-3 mr-1" /> 添加节点
                 </Button>
@@ -360,7 +360,7 @@ export default function StructureEditorPage() {
 
         {/* Right Sidebar: Properties */}
         {selectedStructure && (
-          <div className="w-64 bg-[#141414] border-l border-[#262626] p-4 overflow-y-auto">
+          <div className="w-64 bg-[#15171C] border-l border-[#2A2E37] p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold text-gray-200">
                 {editingNode ? "节点属性" : "连接列表"}
@@ -380,7 +380,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, nodeId: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, nodeId: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                    className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                   />
                 </div>
                 <div>
@@ -391,7 +391,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, label: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, label: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                    className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                   />
                 </div>
                 <div>
@@ -402,7 +402,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, description: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, description: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
+                    className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
                   />
                 </div>
                 <Button 
@@ -420,7 +420,7 @@ export default function StructureEditorPage() {
                   const sourceLabel = nodes.find(n => n.id === conn.fromNode)?.data.label || conn.fromNode;
                   const targetLabel = nodes.find(n => n.id === conn.toNode)?.data.label || conn.toNode;
                   return (
-                    <div key={conn.id} className="bg-[#0a0a0a] p-2 rounded border border-[#262626] text-xs">
+                    <div key={conn.id} className="bg-[#0D0F14] p-2 rounded border border-[#2A2E37] text-xs">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-gray-400">{sourceLabel} → {targetLabel}</span>
                         <button onClick={() => onDeleteConnection(conn.id)} className="text-red-400 hover:text-white">×</button>
@@ -432,10 +432,10 @@ export default function StructureEditorPage() {
                           setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, data: { ...c.data, relation_definition_id: v, label: relName } } : c));
                         }}
                       >
-                        <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#262626] text-xs w-full text-white">
+                        <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#2A2E37] text-xs w-full text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2d2d2d] border-[#262626]">
+                        <SelectContent className="bg-[#2d2d2d] border-[#2A2E37]">
                           {relations.map(r => (
                             <SelectItem key={r.id} value={r.relation_id} className="text-xs text-white">{r.name}</SelectItem>
                           ))}
