@@ -137,7 +137,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
   };
 
   return (
-    <div className="w-72 bg-[#141414] border-l border-[#262626] flex flex-col">
+    <div className="w-64 bg-[#141414] border-l border-[#262626] flex flex-col">
       <style>{`
         .blackboard-scroll::-webkit-scrollbar { width: 8px; }
         .blackboard-scroll::-webkit-scrollbar-track { background: #2d2d2d; }
@@ -315,10 +315,10 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         </Dialog>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 blackboard-scroll">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1.5 blackboard-scroll">
         {variables.length === 0 && (
           <div className="text-center py-8 text-white/40 text-xs">
-            <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <Database className="w-6 h-6 mx-auto mb-2 opacity-50" />
             <p>暂无变量</p>
           </div>
         )}
@@ -328,37 +328,35 @@ export default function BlackboardPanel({ blackboard, onChange }) {
             key={variable.key}
             draggable={variable.public}
             onDragStart={(e) => handleDragStart(e, variable.key)}
-            className={`bg-[#141414] rounded p-2 border border-[#262626] ${
+            className={`bg-[#141414] rounded px-2 py-1.5 border border-[#262626] ${
               variable.public ? 'cursor-move hover:border-[#f97316]' : 'cursor-default'
             } transition-colors`}
           >
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1">
                 {renderTypeIndicator(variable.type)}
-                <span className="text-xs font-mono text-white/90">{variable.key}</span>
+                <span className="text-[11px] font-mono text-white/90">{variable.key}</span>
                 <button
                   onClick={() => handleUpdate(variable.key, 'public', !variable.public)}
                   className="text-white/30 hover:text-white/70"
                 >
-                  {variable.public ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                  {variable.public ? <Eye className="w-2.5 h-2.5" /> : <EyeOff className="w-2.5 h-2.5" />}
                 </button>
               </div>
               <button
                 onClick={() => handleDelete(variable.key)}
                 className="text-white/30 hover:text-red-400"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash2 className="w-2.5 h-2.5" />
               </button>
             </div>
-
-            <div className="text-[10px] text-white/40 mb-1">{variable.type}</div>
 
             {variable.type === 'number' && (
               <Input
                 type="number"
                 value={variable.value ?? 0}
                 onChange={(e) => handleUpdate(variable.key, 'value', parseFloat(e.target.value) || 0)}
-                className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white"
+                className="h-5 text-[10px] px-1.5 bg-[#1e1e1e] border-[#434343] text-white"
               />
             )}
 
@@ -366,7 +364,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
               <Input
                 value={variable.value ?? ''}
                 onChange={(e) => handleUpdate(variable.key, 'value', e.target.value)}
-                className="h-6 text-xs bg-[#1e1e1e] border-[#434343] text-white"
+                className="h-5 text-[10px] px-1.5 bg-[#1e1e1e] border-[#434343] text-white"
               />
             )}
 
