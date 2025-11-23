@@ -21,7 +21,7 @@ function TagInput({ value, onChange, onAdd, onBlur }) {
       <Button
         size="sm"
         onClick={onAdd}
-        className="h-6 w-6 p-0 bg-[#f97316] hover:bg-[#ea580c]"
+        className="h-6 w-6 p-0 bg-[#D97706] hover:bg-[#B45309]"
         type="button"
       >
         <Plus className="w-3 h-3" />
@@ -371,7 +371,7 @@ export default function InteractionEffectsPage() {
                 </td>
                 <td className="p-2">
                   <div className="flex gap-1">
-                    <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+                    <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
                       <Save className="w-3 h-3" />
                     </Button>
                     <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">
@@ -465,7 +465,7 @@ export default function InteractionEffectsPage() {
                     </td>
                     <td className="p-2">
                       <div className="flex gap-1">
-                        <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+                        <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
                           <Save className="w-3 h-3" />
                         </Button>
                         <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">

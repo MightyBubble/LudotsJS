@@ -20,11 +20,11 @@ export default function EntityRelationEditorPage() {
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
           <TabsList className="bg-[#0a0a0a] border border-[#262626] h-8">
-            <TabsTrigger value="definitions" className="text-xs px-3 data-[state=active]:bg-[#f97316] data-[state=active]:text-white">
+            <TabsTrigger value="definitions" className="text-xs px-3 data-[state=active]:bg-[#D97706] data-[state=active]:text-white">
               <Settings2 className="w-3 h-3 mr-2" />
               关系定义 (Definitions)
             </TabsTrigger>
-            <TabsTrigger value="static" className="text-xs px-3 data-[state=active]:bg-[#f97316] data-[state=active]:text-white">
+            <TabsTrigger value="static" className="text-xs px-3 data-[state=active]:bg-[#D97706] data-[state=active]:text-white">
               <Share2 className="w-3 h-3 mr-2" />
               静态关系 (Static Relations)
             </TabsTrigger>
@@ -224,7 +224,7 @@ function RelationDefinitionsView() {
         </td>
         <td className="p-2 align-top">
           <div className="flex gap-1">
-            <Button size="sm" onClick={handleSave} className="h-7 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+            <Button size="sm" onClick={handleSave} className="h-7 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
               <Save className="w-3 h-3" />
             </Button>
             <Button size="sm" onClick={() => { setCreatingNew(false); setEditingId(null); setEditData(null); }} className="h-7 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">
@@ -391,7 +391,7 @@ function StaticRelationsView() {
             <div 
               key={p.id}
               onClick={() => setSelectedPrototypeId(p.prototype_id)}
-              className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center ${selectedPrototypeId === p.prototype_id ? 'bg-[#f97316] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
+              className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center ${selectedPrototypeId === p.prototype_id ? 'bg-[#D97706] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
             >
               <span className="truncate">{p.name}</span>
               {p.static_relations?.length > 0 && (
@@ -418,7 +418,7 @@ function StaticRelationsView() {
                   <span className="text-yellow-500/80">注意：实例间的动态关系（如战场上的位置、即时仇恨）请在关卡数据或运行时逻辑中处理。</span>
                 </p>
               </div>
-              <Button onClick={handleAddRelation} className="bg-[#f97316] hover:bg-[#ea580c] text-xs">
+              <Button onClick={handleAddRelation} className="bg-[#D97706] hover:bg-[#B45309] text-xs">
                 <Plus className="w-3 h-3 mr-1" /> 添加关系
               </Button>
             </div>

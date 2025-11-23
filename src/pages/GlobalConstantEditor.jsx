@@ -185,7 +185,7 @@ export default function GlobalConstantEditorPage() {
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
           <Plus className="w-3 h-3 md:mr-1" />
           <span className="hidden md:inline">新建</span>
         </Button>
@@ -285,7 +285,7 @@ export default function GlobalConstantEditorPage() {
                           size="sm"
                           onClick={handleSave}
                           disabled={updateMutation.isPending}
-                          className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]"
+                          className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309]"
                         >
                           <Save className="w-3 h-3" />
                         </Button>
@@ -335,7 +335,7 @@ export default function GlobalConstantEditorPage() {
                   <div className="flex gap-1">
                     {isEditing ? (
                       <>
-                        <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]">
+                        <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309]">
                           <Save className="w-3 h-3" />
                         </Button>
                         <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]">

@@ -213,7 +213,7 @@ export default function ModifierDefinitionEditorPage() {
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
           <Plus className="w-3 h-3 mr-1" />
           新建
         </Button>
@@ -638,7 +638,7 @@ export default function ModifierDefinitionEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleSave}
-                          className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]"
+                          className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309]"
                         >
                           <Save className="w-3 h-3" />
                         </Button>

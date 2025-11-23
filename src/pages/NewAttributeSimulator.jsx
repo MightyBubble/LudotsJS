@@ -304,7 +304,7 @@ export default function NewAttributeSimulatorPage() {
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="w-8 text-center text-sm font-semibold">{count}</span>
-                        <button onClick={() => updateTagCount(tagPath, 1)} className="w-5 h-5 bg-[#f97316] hover:bg-[#ea580c] rounded flex items-center justify-center">
+                        <button onClick={() => updateTagCount(tagPath, 1)} className="w-5 h-5 bg-[#D97706] hover:bg-[#B45309] rounded flex items-center justify-center">
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>

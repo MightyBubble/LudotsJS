@@ -139,7 +139,7 @@ export default function GameEventEditor() {
             className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
           />
         </div>
-        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-xs">
           <Plus className="w-3 h-3 md:mr-1" />
           <span className="hidden md:inline">新建事件</span>
         </Button>
@@ -247,7 +247,7 @@ export default function GameEventEditor() {
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-white/50">输入参数（订阅）</label>
                       {isEditing && (
-                        <Button onClick={() => addParameter('input')} size="sm" className="h-5 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+                        <Button onClick={() => addParameter('input')} size="sm" className="h-5 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
                           <Plus className="w-2 h-2" />
                         </Button>
                       )}
@@ -313,7 +313,7 @@ export default function GameEventEditor() {
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-white/50">输出参数（触发）</label>
                       {isEditing && (
-                        <Button onClick={() => addParameter('output')} size="sm" className="h-5 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
+                        <Button onClick={() => addParameter('output')} size="sm" className="h-5 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
                           <Plus className="w-2 h-2" />
                         </Button>
                       )}
