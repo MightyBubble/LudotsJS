@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -236,8 +235,8 @@ export default function AttributeEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Layers className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">属性定义</span>
         <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredAttributes.length} 个</span>
@@ -250,25 +249,25 @@ export default function AttributeEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs">
           <Plus className="w-3 h-3 md:mr-1" />
           <span className="hidden md:inline">新建</span>
         </Button>
       </div>
 
       {/* 移动端搜索 */}
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#262626]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-white"
           />
         </div>
       </div>
@@ -276,7 +275,7 @@ export default function AttributeEditorPage() {
       <div className="flex-1 overflow-auto">
         {/* 桌面端表格 */}
         <table className="w-full text-xs text-white hidden md:table">
-          <thead className="bg-[#2d2d2d] border-b border-[#3d3d3d] sticky top-0 z-10">
+          <thead className="bg-[#141414] border-b border-[#262626] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-32">属性ID</th>
               <th className="text-left p-2 font-medium text-white/70 w-32">名称</th>
@@ -294,13 +293,13 @@ export default function AttributeEditorPage() {
               const publicKeys = getPublicBlackboardKeys(currentData.final_calculation_data_graph_id);
               
               return (
-                <tr key={attr.id} className="border-b border-[#3d3d3d] hover:bg-[#2d2d2d]">
+                <tr key={attr.id} className="border-b border-[#262626] hover:bg-[#141414]">
                   <td className="p-2">
                     {isEditing ? (
                       <Input
                         value={editData.attribute_id}
                         onChange={(e) => setEditData({ ...editData, attribute_id: e.target.value })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{attr.attribute_id}</span>
@@ -311,7 +310,7 @@ export default function AttributeEditorPage() {
                       <Input
                         value={editData.name}
                         onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{attr.name}</span>
@@ -324,7 +323,7 @@ export default function AttributeEditorPage() {
                         step="0.1"
                         value={editData.default_base_value}
                         onChange={(e) => setEditData({ ...editData, default_base_value: parseFloat(e.target.value) || 0 })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{attr.default_base_value}</span>
@@ -339,16 +338,16 @@ export default function AttributeEditorPage() {
                               value={key.name}
                               onChange={(e) => handleUpdateKey(idx, 'name', e.target.value)}
                               placeholder="键名"
-                              className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white flex-1"
+                              className="h-5 bg-[#0a0a0a] border-[#262626] text-xs text-white flex-1"
                             />
                             <Select
                               value={key.type}
                               onValueChange={(val) => handleUpdateKey(idx, 'type', val)}
                             >
-                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-16">
+                              <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-16">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                              <SelectContent className="bg-[#141414] border-[#262626]">
                                 <SelectItem value="value" className="text-white text-xs">值</SelectItem>
                                 <SelectItem value="array" className="text-white text-xs">数组</SelectItem>
                               </SelectContent>
@@ -364,7 +363,7 @@ export default function AttributeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleAddKey}
-                          className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
+                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -385,10 +384,10 @@ export default function AttributeEditorPage() {
                         value={editData.final_calculation_data_graph_id}
                         onValueChange={(val) => setEditData({ ...editData, final_calculation_data_graph_id: val })}
                       >
-                        <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+                        <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                        <SelectContent className="bg-[#141414] border-[#262626]">
                           {attributeCalcGraphs.map(g => (
                             <SelectItem key={g.id} value={g.graph_id} className="text-white text-xs">
                               {g.name}
@@ -410,10 +409,10 @@ export default function AttributeEditorPage() {
                               value={attrKey}
                               onValueChange={(val) => handleUpdateMapping(graphKey, val)}
                             >
-                              <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-32">
+                              <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-32">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                              <SelectContent className="bg-[#141414] border-[#262626]">
                                 {editData.keys.filter(k => k.name).map(k => (
                                   <SelectItem key={k.name} value={k.name} className="text-white text-xs">
                                     {k.name}
@@ -433,7 +432,7 @@ export default function AttributeEditorPage() {
                           <Button
                             size="sm"
                             onClick={handleAddMapping}
-                            className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
+                            className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -456,14 +455,14 @@ export default function AttributeEditorPage() {
                           size="sm"
                           onClick={handleSave}
                           disabled={updateMutation.isPending}
-                          className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]"
+                          className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]"
                         >
                           <Save className="w-3 h-3" />
                         </Button>
                         <Button
                           size="sm"
                           onClick={handleCancel}
-                          className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]"
+                          className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]"
                         >
                           <X className="w-3 h-3" />
                         </Button>
@@ -528,10 +527,10 @@ export default function AttributeEditorPage() {
                   <div className="flex gap-1">
                     {isEditing ? (
                       <>
-                        <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]">
+                        <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]">
                           <Save className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]">
                           <X className="w-3 h-3" />
                         </Button>
                       </>

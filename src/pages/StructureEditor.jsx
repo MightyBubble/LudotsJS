@@ -26,12 +26,12 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
         top: node.position.y,
         cursor: 'move',
       }}
-      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#0e639c] bg-[#2d2d2d]' : 'border-[#3d3d3d] bg-[#1e1e1e]'}`}
+      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#f97316] bg-[#2d2d2d]' : 'border-[#262626] bg-[#0a0a0a]'}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#3d3d3d]">
+      <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#262626]">
         <span className="text-xs font-bold text-white truncate max-w-[100px]">{node.data.label}</span>
-        <div className="w-2 h-2 rounded-full bg-[#0e639c]" />
+        <div className="w-2 h-2 rounded-full bg-[#f97316]" />
       </div>
 
       <div className="text-[10px] text-gray-400 font-mono mb-2">{node.data.nodeId}</div>
@@ -40,7 +40,7 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
       <div className="flex justify-between items-center mt-1">
         {/* Input Port */}
         <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#0e639c] border border-[#666] cursor-crosshair flex items-center justify-center"
+          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#f97316] border border-[#666] cursor-crosshair flex items-center justify-center"
           title="Incoming Relations"
           data-node-id={node.id}
           data-port-id="in"
@@ -59,7 +59,7 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
 
         {/* Output Port */}
         <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#0e639c] border border-[#666] cursor-crosshair flex items-center justify-center"
+          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#f97316] border border-[#666] cursor-crosshair flex items-center justify-center"
           title="Outgoing Relations"
           data-node-id={node.id}
           data-port-id="out"
@@ -242,7 +242,7 @@ export default function StructureEditorPage() {
   }, [nodes]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
       <Toolbar
         onSave={handleSave}
         onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
@@ -257,30 +257,30 @@ export default function StructureEditorPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Structure List */}
         {(!selectedStructure || showLibrary) && (
-          <div className="w-64 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
-            <div className="p-3 border-b border-[#3d3d3d] flex gap-2">
+          <div className="w-64 bg-[#141414] border-r border-[#262626] flex flex-col">
+            <div className="p-3 border-b border-[#262626] flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                 <Input 
                   placeholder="搜索结构..." 
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="h-8 pl-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs" 
+                  className="h-8 pl-7 bg-[#0a0a0a] border-[#262626] text-xs" 
                 />
               </div>
-              <Button size="sm" onClick={() => setIsCreating(true)} className="h-8 px-2 bg-[#3d3d3d]">
+              <Button size="sm" onClick={() => setIsCreating(true)} className="h-8 px-2 bg-[#262626]">
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
               {isCreating && (
-                <div className="p-2 bg-[#3d3d3d] rounded space-y-2 mb-2">
+                <div className="p-2 bg-[#262626] rounded space-y-2 mb-2">
                   <Input id="new-id" placeholder="ID (e.g. tech_tree)" className="h-7 text-xs" />
                   <Input id="new-name" placeholder="名称" className="h-7 text-xs" />
                   <div className="flex gap-1 justify-end">
                     <Button size="sm" className="h-6 text-xs" onClick={() => setIsCreating(false)}>取消</Button>
-                    <Button size="sm" className="h-6 text-xs bg-[#0e639c] hover:bg-[#1177bb] text-white" onClick={() => {
+                    <Button size="sm" className="h-6 text-xs bg-[#f97316] hover:bg-[#ea580c] text-white" onClick={() => {
                       const id = document.getElementById('new-id').value;
                       const name = document.getElementById('new-name').value;
                       if(id && name) createMutation.mutate({ structure_id: id, name, nodes: [], edges: [] });
@@ -294,7 +294,7 @@ export default function StructureEditorPage() {
                 <div 
                   key={s.id}
                   onClick={() => loadGraph(s)}
-                  className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center group ${selectedStructure?.id === s.id ? 'bg-[#0e639c] text-white' : 'text-gray-300 hover:bg-[#3d3d3d]'}`}
+                  className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center group ${selectedStructure?.id === s.id ? 'bg-[#f97316] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
                 >
                   <div>
                     <div className="font-medium">{s.name}</div>
@@ -342,8 +342,8 @@ export default function StructureEditorPage() {
                 )}
               />
               
-              <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#3d3d3d] flex gap-2">
-                <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs text-white">
+              <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#262626] flex gap-2">
+                <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#262626] hover:bg-[#4d4d4d] text-xs text-white">
                   <Plus className="w-3 h-3 mr-1" /> 添加节点
                 </Button>
               </div>
@@ -360,7 +360,7 @@ export default function StructureEditorPage() {
 
         {/* Right Sidebar: Properties */}
         {selectedStructure && (
-          <div className="w-64 bg-[#252526] border-l border-[#3d3d3d] p-4 overflow-y-auto">
+          <div className="w-64 bg-[#141414] border-l border-[#262626] p-4 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold text-gray-200">
                 {editingNode ? "节点属性" : "连接列表"}
@@ -380,7 +380,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, nodeId: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, nodeId: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                   />
                 </div>
                 <div>
@@ -391,7 +391,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, label: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, label: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                   />
                 </div>
                 <div>
@@ -402,7 +402,7 @@ export default function StructureEditorPage() {
                       setEditingNode({...editingNode, description: e.target.value});
                       setNodes(nds => nds.map(n => n.id === editingNode.id ? {...n, data: {...n.data, description: e.target.value}} : n));
                     }}
-                    className="h-7 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                    className="h-7 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                   />
                 </div>
                 <Button 
@@ -420,7 +420,7 @@ export default function StructureEditorPage() {
                   const sourceLabel = nodes.find(n => n.id === conn.fromNode)?.data.label || conn.fromNode;
                   const targetLabel = nodes.find(n => n.id === conn.toNode)?.data.label || conn.toNode;
                   return (
-                    <div key={conn.id} className="bg-[#1e1e1e] p-2 rounded border border-[#3d3d3d] text-xs">
+                    <div key={conn.id} className="bg-[#0a0a0a] p-2 rounded border border-[#262626] text-xs">
                       <div className="flex justify-between items-center mb-1">
                         <span className="text-gray-400">{sourceLabel} → {targetLabel}</span>
                         <button onClick={() => onDeleteConnection(conn.id)} className="text-red-400 hover:text-white">×</button>
@@ -432,10 +432,10 @@ export default function StructureEditorPage() {
                           setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, data: { ...c.data, relation_definition_id: v, label: relName } } : c));
                         }}
                       >
-                        <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#3d3d3d] text-xs w-full text-white">
+                        <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#262626] text-xs w-full text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                        <SelectContent className="bg-[#2d2d2d] border-[#262626]">
                           {relations.map(r => (
                             <SelectItem key={r.id} value={r.relation_id} className="text-xs text-white">{r.name}</SelectItem>
                           ))}

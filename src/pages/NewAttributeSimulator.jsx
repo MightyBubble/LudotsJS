@@ -248,8 +248,8 @@ export default function NewAttributeSimulatorPage() {
   }, [tags, referencedInputs.tags]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
         <Calculator className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">属性模拟器</span>
         
@@ -257,10 +257,10 @@ export default function NewAttributeSimulatorPage() {
         
         <span className="text-xs text-gray-500">实体原型:</span>
         <Select value={selectedPrototypeId || ""} onValueChange={setSelectedPrototypeId}>
-          <SelectTrigger className="h-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+          <SelectTrigger className="h-7 w-48 bg-[#0a0a0a] border-[#262626] text-white text-xs">
             <SelectValue placeholder="全部属性" />
           </SelectTrigger>
-          <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+          <SelectContent className="bg-[#141414] border-[#262626]">
             <SelectItem value="all" className="text-white text-xs">全部属性</SelectItem>
             {prototypes.map(p => (
               <SelectItem key={p.id} value={p.id} className="text-white text-xs">
@@ -282,11 +282,11 @@ export default function NewAttributeSimulatorPage() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* 左侧：输入源 */}
-        <div className="w-72 bg-[#252526] border-r border-[#3d3d3d] flex flex-col overflow-hidden">
+        <div className="w-72 bg-[#252526] border-r border-[#262626] flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto">
             {/* 被引用的标签 */}
-            <div className="border-b border-[#3d3d3d]">
-              <div className="p-2 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+            <div className="border-b border-[#262626]">
+              <div className="p-2 bg-[#141414] border-b border-[#262626]">
                 <span className="text-xs font-semibold text-green-400">被引用标签 ({referencedInputs.tags.length})</span>
               </div>
               <div className="p-2 space-y-1">
@@ -294,17 +294,17 @@ export default function NewAttributeSimulatorPage() {
                   const tag = tags.find(t => t.full_path === tagPath);
                   const count = tagCounts[tagPath] || 0;
                   return (
-                    <div key={tagPath} className="bg-[#1e1e1e] border border-green-600/30 rounded p-2 flex items-center justify-between">
+                    <div key={tagPath} className="bg-[#0a0a0a] border border-green-600/30 rounded p-2 flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-white/90 truncate">{tag?.name || tagPath.split('.').pop()}</div>
                         <div className="text-[9px] text-gray-500 font-mono truncate">{tagPath}</div>
                       </div>
                       <div className="flex items-center gap-1 ml-2">
-                        <button onClick={() => updateTagCount(tagPath, -1)} disabled={count === 0} className="w-5 h-5 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
+                        <button onClick={() => updateTagCount(tagPath, -1)} disabled={count === 0} className="w-5 h-5 bg-[#262626] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="w-8 text-center text-sm font-semibold">{count}</span>
-                        <button onClick={() => updateTagCount(tagPath, 1)} className="w-5 h-5 bg-[#0e639c] hover:bg-[#1177bb] rounded flex items-center justify-center">
+                        <button onClick={() => updateTagCount(tagPath, 1)} className="w-5 h-5 bg-[#f97316] hover:bg-[#ea580c] rounded flex items-center justify-center">
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
@@ -318,8 +318,8 @@ export default function NewAttributeSimulatorPage() {
             </div>
 
             {/* 属性键输入 */}
-            <div className="border-b border-[#3d3d3d]">
-              <div className="p-2 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+            <div className="border-b border-[#262626]">
+              <div className="p-2 bg-[#141414] border-b border-[#262626]">
                 <span className="text-xs font-semibold text-purple-400">属性键输入 ({referencedInputs.attributeKeys.length})</span>
               </div>
               <div className="p-2 space-y-1">
@@ -327,7 +327,7 @@ export default function NewAttributeSimulatorPage() {
                   const attrKeyMappings = (mod.curve_input_mappings || []).filter(m => m.source_type === 'attribute_key');
                   if (attrKeyMappings.length === 0) return null;
                   return (
-                    <div key={mod.id} className="bg-[#1e1e1e] border border-purple-600/30 rounded p-2">
+                    <div key={mod.id} className="bg-[#0a0a0a] border border-purple-600/30 rounded p-2">
                       <div className="text-[10px] text-gray-400 mb-1">{mod.modifier_name}</div>
                       {attrKeyMappings.map((mapping, idx) => {
                         const attrKeyPath = `${mapping.attribute_id}.${mapping.attribute_key}`;
@@ -340,7 +340,7 @@ export default function NewAttributeSimulatorPage() {
                               step="0.1"
                               value={attributeKeyValues[attrKeyPath] ?? 0}
                               onChange={(e) => setAttributeKeyValues(prev => ({ ...prev, [attrKeyPath]: parseFloat(e.target.value) || 0 }))}
-                              className="h-6 w-16 bg-[#3d3d3d] border-[#4d4d4d] text-white text-xs"
+                              className="h-6 w-16 bg-[#262626] border-[#4d4d4d] text-white text-xs"
                             />
                           </div>
                         );
@@ -355,8 +355,8 @@ export default function NewAttributeSimulatorPage() {
             </div>
 
             {/* 常量输入（激活） */}
-            <div className="border-b border-[#3d3d3d]">
-              <div className="p-2 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+            <div className="border-b border-[#262626]">
+              <div className="p-2 bg-[#141414] border-b border-[#262626]">
                 <span className="text-xs font-semibold text-blue-400">常量输入 ({referencedInputs.activeConstants.length})</span>
               </div>
               <div className="p-2 space-y-1">
@@ -365,7 +365,7 @@ export default function NewAttributeSimulatorPage() {
                   const constantMappings = (mod.curve_input_mappings || []).filter(m => m.source_type === 'constant');
                   if (constantMappings.length === 0) return null;
                   return (
-                    <div key={mod.id} className="bg-[#1e1e1e] border border-blue-600/30 rounded p-2">
+                    <div key={mod.id} className="bg-[#0a0a0a] border border-blue-600/30 rounded p-2">
                       <div className="text-[10px] text-gray-400 mb-1">{mod.modifier_name}</div>
                       {constantMappings.map((mapping, idx) => {
                         const key = `${mod.id}-${mapping.graph_blackboard_key}`;
@@ -377,7 +377,7 @@ export default function NewAttributeSimulatorPage() {
                               step="0.1"
                               value={constantValues[key] ?? mapping.constant_value ?? 0}
                               onChange={(e) => setConstantValues(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
-                              className="h-6 w-16 bg-[#3d3d3d] border-[#4d4d4d] text-white text-xs"
+                              className="h-6 w-16 bg-[#262626] border-[#4d4d4d] text-white text-xs"
                             />
                           </div>
                         );
@@ -393,8 +393,8 @@ export default function NewAttributeSimulatorPage() {
 
             {/* 常量输入（禁用） */}
             {referencedInputs.disabledConstants.length > 0 && (
-              <div className="border-b border-[#3d3d3d]">
-                <div className="p-2 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+              <div className="border-b border-[#262626]">
+                <div className="p-2 bg-[#141414] border-b border-[#262626]">
                   <span className="text-xs font-semibold text-gray-500">当前禁用 - 常量 ({referencedInputs.disabledConstants.length})</span>
                 </div>
                 <div className="p-2 space-y-1">
@@ -403,7 +403,7 @@ export default function NewAttributeSimulatorPage() {
                     const constantMappings = (mod.curve_input_mappings || []).filter(m => m.source_type === 'constant');
                     if (constantMappings.length === 0) return null;
                     return (
-                      <div key={mod.id} className="bg-[#1e1e1e] border border-gray-600/30 rounded p-2">
+                      <div key={mod.id} className="bg-[#0a0a0a] border border-gray-600/30 rounded p-2">
                         <div className="text-[10px] text-gray-500 mb-1">{mod.modifier_name}</div>
                         {constantMappings.map((mapping, idx) => {
                           const key = `${mod.id}-${mapping.graph_blackboard_key}`;
@@ -415,7 +415,7 @@ export default function NewAttributeSimulatorPage() {
                                 step="0.1"
                                 value={constantValues[key] ?? mapping.constant_value ?? 0}
                                 onChange={(e) => setConstantValues(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
-                                className="h-6 w-16 bg-[#3d3d3d] border-[#4d4d4d] text-white text-xs"
+                                className="h-6 w-16 bg-[#262626] border-[#4d4d4d] text-white text-xs"
                               />
                             </div>
                           );
@@ -429,24 +429,24 @@ export default function NewAttributeSimulatorPage() {
 
             {/* 未引用的标签 */}
             <div>
-              <div className="p-2 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+              <div className="p-2 bg-[#141414] border-b border-[#262626]">
                 <span className="text-xs font-semibold text-gray-500">未引用标签 ({unreferencedTags.length})</span>
               </div>
               <div className="p-2 space-y-1">
                 {unreferencedTags.map(tag => {
                   const count = tagCounts[tag.full_path] || 0;
                   return (
-                    <div key={tag.id} className="bg-[#1e1e1e] border border-[#3d3d3d] rounded p-2 flex items-center justify-between opacity-50">
+                    <div key={tag.id} className="bg-[#0a0a0a] border border-[#262626] rounded p-2 flex items-center justify-between opacity-50">
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-white/70 truncate">{tag.name}</div>
                         <div className="text-[9px] text-gray-600 font-mono truncate">{tag.full_path}</div>
                       </div>
                       <div className="flex items-center gap-1 ml-2">
-                        <button onClick={() => updateTagCount(tag.full_path, -1)} disabled={count === 0} className="w-5 h-5 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
+                        <button onClick={() => updateTagCount(tag.full_path, -1)} disabled={count === 0} className="w-5 h-5 bg-[#262626] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="w-8 text-center text-sm">{count}</span>
-                        <button onClick={() => updateTagCount(tag.full_path, 1)} className="w-5 h-5 bg-[#3d3d3d] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
+                        <button onClick={() => updateTagCount(tag.full_path, 1)} className="w-5 h-5 bg-[#262626] hover:bg-[#4d4d4d] rounded flex items-center justify-center">
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
@@ -473,7 +473,7 @@ export default function NewAttributeSimulatorPage() {
                 const hasInputWarning = output.warnings.some(w => w.type === 'input');
                 const hasTargetWarning = output.warnings.some(w => w.type === 'target');
                 
-                let borderColor = 'border-[#3d3d3d]';
+                let borderColor = 'border-[#262626]';
                 let opacity = '';
                 
                 if (output.isActive) {
@@ -529,11 +529,11 @@ export default function NewAttributeSimulatorPage() {
                       <div className="flex items-center gap-1 flex-wrap">
                         <span>输入:</span>
                         {Object.entries(output.inputs).map(([key, val]) => (
-                          <span key={key} className="bg-[#3d3d3d] px-1 rounded">{key}={val}</span>
+                          <span key={key} className="bg-[#262626] px-1 rounded">{key}={val}</span>
                         ))}
                         {Object.keys(output.inputs).length === 0 && <span className="text-gray-600">无</span>}
                       </div>
-                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#3d3d3d]">
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#262626]">
                         <ArrowRight className="w-3 h-3 text-green-400" />
                         <span className={`font-semibold ${output.isActive ? 'text-green-400' : 'text-gray-600'}`}>{output.magnitude.toFixed(1)}</span>
                         <ArrowRight className="w-3 h-3 text-blue-400" />
@@ -548,8 +548,8 @@ export default function NewAttributeSimulatorPage() {
         </div>
 
         {/* 右侧：属性聚合和最终值 */}
-        <div className="w-96 bg-[#252526] border-l border-[#3d3d3d] flex flex-col overflow-auto">
-          <div className="p-3 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center gap-2">
+        <div className="w-96 bg-[#252526] border-l border-[#262626] flex flex-col overflow-auto">
+          <div className="p-3 bg-[#141414] border-b border-[#262626] flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">2</span>
             <span className="text-sm font-semibold text-white">属性聚合计算</span>
           </div>
@@ -558,19 +558,19 @@ export default function NewAttributeSimulatorPage() {
               const keys = attributeKeys[attr.attribute_id] || {};
               const final = finalValues[attr.attribute_id] || 0;
               return (
-                <div key={attr.id} className="bg-gradient-to-br from-[#1e1e1e] to-[#252526] border-2 border-green-600/30 rounded-lg p-3">
+                <div key={attr.id} className="bg-gradient-to-br from-[#0a0a0a] to-[#252526] border-2 border-green-600/30 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-semibold text-white">{attr.name}</div>
                     <div className="text-3xl font-bold text-green-400">{final.toFixed(0)}</div>
                   </div>
-                  <div className="space-y-1 pt-2 border-t border-[#3d3d3d]/50">
+                  <div className="space-y-1 pt-2 border-t border-[#262626]/50">
                     {Object.entries(keys).map(([keyName, keyValue]) => (
                       <div key={keyName} className="flex items-center justify-between text-[10px]">
                         <span className="text-gray-400">{keyName}:</span>
                         {Array.isArray(keyValue) ? (
                           <div className="flex gap-1 flex-wrap">
                             {keyValue.map((v, i) => (
-                              <span key={i} className="bg-[#3d3d3d] px-1 rounded text-white">{v.toFixed(1)}</span>
+                              <span key={i} className="bg-[#262626] px-1 rounded text-white">{v.toFixed(1)}</span>
                             ))}
                             {keyValue.length === 0 && <span className="text-gray-600">[]</span>}
                           </div>

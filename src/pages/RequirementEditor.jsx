@@ -127,12 +127,12 @@ export default function RequirementEditorPage() {
 
   const renderEditRow = (data) => {
     return (
-      <tr className="border-b border-[#3d3d3d] bg-[#252526]">
+      <tr className="border-b border-[#262626] bg-[#141414]">
         <td className="p-2">
           <Input
             value={data.requirement_id}
             onChange={(e) => setEditData({ ...data, requirement_id: e.target.value })}
-            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
             placeholder="需求ID"
           />
         </td>
@@ -140,7 +140,7 @@ export default function RequirementEditorPage() {
           <Input
             value={data.name}
             onChange={(e) => setEditData({ ...data, name: e.target.value })}
-            className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
             placeholder="名称"
           />
         </td>
@@ -149,10 +149,10 @@ export default function RequirementEditorPage() {
             value={data.requirement_type}
             onValueChange={(val) => setEditData({ ...data, requirement_type: val })}
           >
-            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs">
+            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+            <SelectContent className="bg-[#141414] border-[#262626]">
               <SelectItem value="node" className="text-white text-xs">节点</SelectItem>
               <SelectItem value="count" className="text-white text-xs">计数</SelectItem>
             </SelectContent>
@@ -166,10 +166,10 @@ export default function RequirementEditorPage() {
             value={data.state}
             onValueChange={(val) => setEditData({ ...data, state: val })}
           >
-            <SelectTrigger className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+            <SelectTrigger className="h-6 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+            <SelectContent className="bg-[#141414] border-[#262626]">
               <SelectItem value="active" className="text-white text-xs">激活</SelectItem>
               <SelectItem value="disabled" className="text-white text-xs">禁用</SelectItem>
               <SelectItem value="hidden" className="text-white text-xs">隐藏</SelectItem>
@@ -178,10 +178,10 @@ export default function RequirementEditorPage() {
         </td>
         <td className="p-2">
           <div className="flex gap-1">
-            <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+            <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
               <Save className="w-3 h-3" />
             </Button>
-            <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs">
+            <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">
               <X className="w-3 h-3" />
             </Button>
           </div>
@@ -191,8 +191,8 @@ export default function RequirementEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
         <CheckSquare className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">需求编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredRequirements.length} 个</span>
@@ -205,11 +205,11 @@ export default function RequirementEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#262626] hover:bg-[#4d4d4d] text-white text-xs">
           <Plus className="w-3 h-3 mr-1" />
           新建
         </Button>
@@ -217,7 +217,7 @@ export default function RequirementEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#2d2d2d] border-b border-[#3d3d3d]">
+          <thead className="sticky top-0 bg-[#141414] border-b border-[#262626]">
             <tr>
               <th className="text-left p-2 font-semibold text-gray-300 w-48">需求ID</th>
               <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
@@ -238,7 +238,7 @@ export default function RequirementEditorPage() {
               }
               
               return (
-                <tr key={requirement.id} className="border-b border-[#3d3d3d] hover:bg-[#252526]">
+                <tr key={requirement.id} className="border-b border-[#262626] hover:bg-[#141414]">
                   <td className="p-2 text-gray-300 font-mono">{requirement.requirement_id}</td>
                   <td className="p-2 text-gray-300">{requirement.name}</td>
                   <td className="p-2 text-gray-300">{requirement.requirement_type === 'node' ? '节点' : '计数'}</td>
@@ -246,10 +246,10 @@ export default function RequirementEditorPage() {
                   <td className="p-2 text-gray-300">{requirement.state}</td>
                   <td className="p-2">
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => handleEdit(requirement)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#4d4d4d]">
+                      <Button size="sm" onClick={() => handleEdit(requirement)} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#4d4d4d]">
                         <Edit3 className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" onClick={() => handleDelete(requirement.id)} className="h-6 w-6 p-0 bg-[#3d3d3d] hover:bg-[#5a1e1e]">
+                      <Button size="sm" onClick={() => handleDelete(requirement.id)} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#5a1e1e]">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>

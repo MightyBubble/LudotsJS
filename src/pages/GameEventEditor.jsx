@@ -124,8 +124,8 @@ export default function GameEventEditor() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-2 md:px-4 gap-2 md:gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Zap className="w-4 h-4 text-yellow-400" />
         <span className="text-sm font-semibold text-gray-300">事件编辑器</span>
         <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredEvents.length} 个</span>
@@ -136,23 +136,23 @@ export default function GameEventEditor() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
           />
         </div>
-        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-xs">
           <Plus className="w-3 h-3 md:mr-1" />
           <span className="hidden md:inline">新建事件</span>
         </Button>
       </div>
 
-      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#3d3d3d]">
+      <div className="md:hidden px-2 py-2 bg-[#252526] border-b border-[#262626]">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
           <Input
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+            className="h-8 pl-7 w-full bg-[#0a0a0a] border-[#262626] text-sm text-white"
           />
         </div>
       </div>
@@ -247,14 +247,14 @@ export default function GameEventEditor() {
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-white/50">输入参数（订阅）</label>
                       {isEditing && (
-                        <Button onClick={() => addParameter('input')} size="sm" className="h-5 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+                        <Button onClick={() => addParameter('input')} size="sm" className="h-5 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
                           <Plus className="w-2 h-2" />
                         </Button>
                       )}
                     </div>
                     <div className="space-y-1.5">
                       {(data.input_parameters || []).map((param, idx) => (
-                        <div key={idx} className="bg-[#1e1e1e] rounded p-2 border border-[#3e3e42]">
+                        <div key={idx} className="bg-[#0a0a0a] rounded p-2 border border-[#3e3e42]">
                           {isEditing ? (
                             <div className="space-y-1.5">
                               <div className="flex gap-1.5">
@@ -313,14 +313,14 @@ export default function GameEventEditor() {
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs text-white/50">输出参数（触发）</label>
                       {isEditing && (
-                        <Button onClick={() => addParameter('output')} size="sm" className="h-5 px-2 bg-[#0e639c] hover:bg-[#1177bb] text-xs">
+                        <Button onClick={() => addParameter('output')} size="sm" className="h-5 px-2 bg-[#f97316] hover:bg-[#ea580c] text-xs">
                           <Plus className="w-2 h-2" />
                         </Button>
                       )}
                     </div>
                     <div className="space-y-1.5">
                       {(data.output_parameters || []).map((param, idx) => (
-                        <div key={idx} className="bg-[#1e1e1e] rounded p-2 border border-[#3e3e42]">
+                        <div key={idx} className="bg-[#0a0a0a] rounded p-2 border border-[#3e3e42]">
                           {isEditing ? (
                             <div className="flex gap-1.5">
                               <Input

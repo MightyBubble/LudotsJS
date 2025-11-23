@@ -139,8 +139,8 @@ export default function EntityPrototypeEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
-      <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
+      <div className="h-10 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
         <Box className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">实体原型编辑器</span>
         <span className="text-xs text-gray-500">共 {filteredPrototypes.length} 个</span>
@@ -153,11 +153,11 @@ export default function EntityPrototypeEditorPage() {
             placeholder="搜索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+            className="h-7 pl-7 w-48 bg-[#0a0a0a] border-[#262626] text-xs text-white"
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#0e639c] hover:bg-[#1177bb] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs">
           <Plus className="w-3 h-3 mr-1" />
           新建
         </Button>
@@ -165,7 +165,7 @@ export default function EntityPrototypeEditorPage() {
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs text-white">
-          <thead className="bg-[#2d2d2d] border-b border-[#3d3d3d] sticky top-0 z-10">
+          <thead className="bg-[#141414] border-b border-[#262626] sticky top-0 z-10">
             <tr>
               <th className="text-left p-2 font-medium text-white/70 w-40">原型ID</th>
               <th className="text-left p-2 font-medium text-white/70 w-40">名称</th>
@@ -181,13 +181,13 @@ export default function EntityPrototypeEditorPage() {
               const currentData = isEditing ? editData : proto;
               
               return (
-                <tr key={proto.id} className="border-b border-[#3d3d3d] hover:bg-[#2d2d2d]">
+                <tr key={proto.id} className="border-b border-[#262626] hover:bg-[#141414]">
                   <td className="p-2">
                     {isEditing ? (
                       <Input
                         value={editData.prototype_id}
                         onChange={(e) => setEditData({ ...editData, prototype_id: e.target.value })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90 font-mono">{proto.prototype_id}</span>
@@ -198,7 +198,7 @@ export default function EntityPrototypeEditorPage() {
                       <Input
                         value={editData.name}
                         onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/90">{proto.name}</span>
@@ -209,7 +209,7 @@ export default function EntityPrototypeEditorPage() {
                       <Input
                         value={editData.description || ""}
                         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                        className="h-6 bg-[#1e1e1e] border-[#3d3d3d] text-xs text-white"
+                        className="h-6 bg-[#0a0a0a] border-[#262626] text-xs text-white"
                       />
                     ) : (
                       <span className="text-white/70">{proto.description || "-"}</span>
@@ -226,10 +226,10 @@ export default function EntityPrototypeEditorPage() {
                                 value={attrId}
                                 onValueChange={(val) => handleUpdateAttribute(idx, val)}
                               >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs flex-1">
+                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs flex-1">
                                   <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                <SelectContent className="bg-[#141414] border-[#262626]">
                                   {attributes.map(a => (
                                     <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
                                       {a.name} ({a.attribute_id})
@@ -249,7 +249,7 @@ export default function EntityPrototypeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleAddAttribute}
-                          className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs"
+                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -277,7 +277,7 @@ export default function EntityPrototypeEditorPage() {
                           const structure = structures.find(s => s.structure_id === binding.structure_id);
                           const nodes = structure?.nodes || [];
                           return (
-                            <div key={idx} className="flex gap-1 items-center bg-[#3d3d3d]/30 p-1 rounded">
+                            <div key={idx} className="flex gap-1 items-center bg-[#262626]/30 p-1 rounded">
                               <Select
                                 value={binding.structure_id}
                                 onValueChange={(v) => {
@@ -286,10 +286,10 @@ export default function EntityPrototypeEditorPage() {
                                   setEditData({ ...editData, structure_bindings: newBindings });
                                 }}
                               >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
                                   <SelectValue placeholder="结构" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                <SelectContent className="bg-[#141414] border-[#262626]">
                                   {structures.map(s => (
                                     <SelectItem key={s.id} value={s.structure_id} className="text-white text-xs">{s.name}</SelectItem>
                                   ))}
@@ -304,10 +304,10 @@ export default function EntityPrototypeEditorPage() {
                                 }}
                                 disabled={!binding.structure_id}
                               >
-                                <SelectTrigger className="h-5 bg-[#1e1e1e] border-[#3d3d3d] text-white text-xs w-24">
+                                <SelectTrigger className="h-5 bg-[#0a0a0a] border-[#262626] text-white text-xs w-24">
                                   <SelectValue placeholder="节点" />
                                 </SelectTrigger>
-                                <SelectContent className="bg-[#2d2d2d] border-[#3d3d3d]">
+                                <SelectContent className="bg-[#141414] border-[#262626]">
                                   {nodes.map(n => (
                                     <SelectItem key={n.node_id} value={n.node_id} className="text-white text-xs">{n.name}</SelectItem>
                                   ))}
@@ -332,7 +332,7 @@ export default function EntityPrototypeEditorPage() {
                             ...editData,
                             structure_bindings: [...(editData.structure_bindings || []), { structure_id: "", node_id: "" }]
                           })}
-                          className="h-5 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d] text-xs w-full"
+                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs w-full"
                         >
                           <Plus className="w-3 h-3 mr-1" /> 绑定结构
                         </Button>
@@ -342,7 +342,7 @@ export default function EntityPrototypeEditorPage() {
                         {(proto.structure_bindings || []).map((b, i) => {
                           const structName = structures.find(s => s.structure_id === b.structure_id)?.name || b.structure_id;
                           return (
-                            <div key={i} className="text-[10px] bg-[#3d3d3d] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
+                            <div key={i} className="text-[10px] bg-[#262626] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
                               <span className="text-blue-300">{structName}</span>
                               <span className="text-gray-500">→</span>
                               <span>{b.node_id}</span>
@@ -362,14 +362,14 @@ export default function EntityPrototypeEditorPage() {
                           size="sm"
                           onClick={handleSave}
                           disabled={updateMutation.isPending}
-                          className="h-6 px-2 bg-[#0e639c] hover:bg-[#1177bb]"
+                          className="h-6 px-2 bg-[#f97316] hover:bg-[#ea580c]"
                         >
                           <Save className="w-3 h-3" />
                         </Button>
                         <Button
                           size="sm"
                           onClick={handleCancel}
-                          className="h-6 px-2 bg-[#3d3d3d] hover:bg-[#4d4d4d]"
+                          className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]"
                         >
                           <X className="w-3 h-3" />
                         </Button>

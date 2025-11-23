@@ -206,9 +206,9 @@ export default function TagSimulator() {
   const simulation = selectedTag ? simulateAddTag(selectedTag) : null;
 
   return (
-    <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
+    <div className="h-screen flex flex-col bg-[#0a0a0a] text-white">
       {/* 顶部工具栏 */}
-      <div className="h-12 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
+      <div className="h-12 bg-[#141414] border-b border-[#262626] flex items-center px-4 gap-3">
         <Zap className="w-5 h-5 text-yellow-400" />
         <span className="text-sm font-semibold text-gray-300">GameplayTag 模拟器</span>
         
@@ -218,14 +218,14 @@ export default function TagSimulator() {
           placeholder="实体名称"
           value={entityName}
           onChange={(e) => setEntityName(e.target.value)}
-          className="h-7 w-48 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+          className="h-7 w-48 bg-[#0a0a0a] border-[#262626] text-sm text-white"
         />
 
         <Button
           size="sm"
           variant="outline"
           onClick={handleClearAll}
-          className="h-7 px-3 bg-[#2d2d2d] border-[#3d3d3d] hover:bg-[#3d3d3d] text-gray-300"
+          className="h-7 px-3 bg-[#141414] border-[#262626] hover:bg-[#262626] text-gray-300"
         >
           清空所有标签
         </Button>
@@ -233,8 +233,8 @@ export default function TagSimulator() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* 左侧：当前激活的标签 */}
-        <div className="w-80 bg-[#252526] border-r border-[#3d3d3d] flex flex-col">
-          <div className="p-3 border-b border-[#3d3d3d]">
+        <div className="w-80 bg-[#252526] border-r border-[#262626] flex flex-col">
+          <div className="p-3 border-b border-[#262626]">
             <h2 className="text-sm font-semibold text-white mb-1">
               {entityName} - 当前标签
             </h2>
@@ -261,7 +261,7 @@ export default function TagSimulator() {
                     className={`p-2 rounded border ${
                       disabled 
                         ? 'bg-[#3d2d1e] border-yellow-800/50' 
-                        : 'bg-[#1e1e1e] border-[#3d3d3d] hover:border-[#0e639c]'
+                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#f97316]'
                     } transition-colors`}
                   >
                     <div className="flex items-start gap-2">
@@ -305,14 +305,14 @@ export default function TagSimulator() {
 
         {/* 中间：可添加和不可添加的标签 */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-3 border-b border-[#3d3d3d]">
+          <div className="p-3 border-b border-[#262626]">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <Input
                 placeholder="搜索标签..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-8 pl-8 bg-[#1e1e1e] border-[#3d3d3d] text-sm text-white"
+                className="h-8 pl-8 bg-[#0a0a0a] border-[#262626] text-sm text-white"
               />
             </div>
           </div>
@@ -332,8 +332,8 @@ export default function TagSimulator() {
                     key={tag.id}
                     className={`p-2 rounded border cursor-pointer transition-all ${
                       selectedTag?.id === tag.id
-                        ? 'bg-[#094771] border-[#0e639c]'
-                        : 'bg-[#1e1e1e] border-[#3d3d3d] hover:border-[#0e639c]'
+                        ? 'bg-[#094771] border-[#f97316]'
+                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#f97316]'
                     }`}
                     onClick={() => setSelectedTag(tag)}
                   >
@@ -383,7 +383,7 @@ export default function TagSimulator() {
                   {blockedTags.map(({ tag, reason }) => (
                     <div
                       key={tag.id}
-                      className="p-2 rounded border bg-[#1e1e1e] border-[#3d3d3d] opacity-60"
+                      className="p-2 rounded border bg-[#0a0a0a] border-[#262626] opacity-60"
                     >
                       <div className="flex items-start gap-2">
                         <div
@@ -414,8 +414,8 @@ export default function TagSimulator() {
         </div>
 
         {/* 右侧：选中标签的模拟效果 */}
-        <div className="w-96 bg-[#252526] border-l border-[#3d3d3d] flex flex-col">
-          <div className="p-3 border-b border-[#3d3d3d]">
+        <div className="w-96 bg-[#252526] border-l border-[#262626] flex flex-col">
+          <div className="p-3 border-b border-[#262626]">
             <h2 className="text-sm font-semibold text-white">添加后的效果预览</h2>
           </div>
 
@@ -423,7 +423,7 @@ export default function TagSimulator() {
             {selectedTag && simulation ? (
               <div className="space-y-3">
                 {/* 标签信息 */}
-                <div className="p-3 bg-[#1e1e1e] border border-[#3d3d3d] rounded">
+                <div className="p-3 bg-[#0a0a0a] border border-[#262626] rounded">
                   <div className="flex items-start gap-2 mb-2">
                     <div
                       className="w-1 h-5 rounded-full flex-shrink-0"
@@ -439,7 +439,7 @@ export default function TagSimulator() {
                     </div>
                   </div>
                   {selectedTag.description && (
-                    <p className="text-xs text-gray-300 mt-2 pt-2 border-t border-[#3d3d3d]">
+                    <p className="text-xs text-gray-300 mt-2 pt-2 border-t border-[#262626]">
                       {selectedTag.description}
                     </p>
                   )}
@@ -518,7 +518,7 @@ export default function TagSimulator() {
                  !simulation.willRemove.length && 
                  !simulation.willDisable && 
                  !simulation.willBeRemoved && (
-                  <div className="p-3 bg-[#1e1e1e] border border-[#3d3d3d] rounded">
+                  <div className="p-3 bg-[#0a0a0a] border border-[#262626] rounded">
                     <p className="text-xs text-gray-400 text-center">
                       此标签没有特殊的添加效果
                     </p>
@@ -528,7 +528,7 @@ export default function TagSimulator() {
                 {/* 添加按钮 */}
                 <Button
                   onClick={() => handleAddTag(selectedTag)}
-                  className="w-full bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                  className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   添加此标签
