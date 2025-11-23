@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { getAvailableNodes, getCategories } from './nodeConfigs';
 
-export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
+export default function UnifiedNodeLibrary({ graphType = 'data', onAddNode, onClose }) {
   const [activeTab, setActiveTab] = useState(
     graphType === 'query' ? 'query' : graphType === 'function' ? 'function' : 'compute'
   );
@@ -18,7 +18,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
     n.category.startsWith('函数-')
   );
   const computeNodes = availableNodes.filter(n => 
-    ['基础', '数学', '聚合', '向量', '高级', '黑板'].includes(n.category)
+    ['基础', '数学', '聚合', '向量', '高级', '黑板', '数据表'].includes(n.category)
   );
   
   let currentNodes = availableNodes;
@@ -36,7 +36,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
   };
 
   return (
-    <div className="w-56 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
+    <div className="w-56 bg-[#15171C] border-r border-[#2A2E37] flex flex-col h-full">
       <div className="flex items-center justify-between p-2 border-b border-[#2A2E37]">
         <span className="text-xs font-semibold text-[#e5e5e5]">节点库</span>
         <button onClick={onClose} className="text-gray-500 hover:text-[#e5e5e5] transition-colors">
