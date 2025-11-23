@@ -317,99 +317,106 @@ export default function TagSimulator() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-4 space-y-4">
-            {/* 可添加的标签 */}
-            <div>
-              <div className="flex items-center gap-2 mb-3">
+          <div className="flex-1 flex overflow-hidden">
+            {/* 可添加的标签 - 左栏 */}
+            <div className="flex-1 overflow-y-auto p-4 border-r border-[#262626]">
+              <div className="flex items-center gap-2 mb-3 sticky top-0 bg-[#0a0a0a] z-10 py-2 border-b border-[#262626]">
                 <Check className="w-4 h-4 text-green-400" />
                 <h3 className="text-sm font-semibold text-green-400">
-                  可添加的标签 ({addableTags.length})
+                  可添加标签 ({addableTags.length})
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
                 {addableTags.map(tag => (
                   <div
                     key={tag.id}
-                    className={`p-2 rounded border cursor-pointer transition-all ${
+                    className={`p-3 rounded border cursor-pointer transition-all group ${
                       selectedTag?.id === tag.id
-                        ? 'bg-[#094771] border-[#f97316]'
-                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#f97316]'
+                        ? 'bg-[#f97316]/10 border-[#f97316]'
+                        : 'bg-[#141414] border-[#262626] hover:border-[#f97316]/50 hover:bg-[#1a1a1a]'
                     }`}
                     onClick={() => setSelectedTag(tag)}
                   >
-                    <div className="flex items-start gap-2">
+                    <div className="flex items-start gap-3">
                       <div
-                        className="w-1 h-4 rounded-full flex-shrink-0 mt-0.5"
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
                         style={{ backgroundColor: getCategoryColor(tag.category_key) }}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-white truncate mb-0.5">
-                          {tag.name}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold text-[#e5e5e5] truncate">
+                            {tag.name}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddTag(tag);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#f97316]/20 text-[#f97316] transition-all"
+                            title="添加"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
                         </div>
-                        <p className="text-xs text-gray-400 font-mono truncate">
+                        <p className="text-xs text-gray-500 font-mono truncate bg-[#0a0a0a] px-1.5 py-0.5 rounded inline-block">
                           {tag.full_path}
                         </p>
                         {tag.description && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                          <p className="text-xs text-gray-500 mt-2 line-clamp-2">
                             {tag.description}
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddTag(tag);
-                        }}
-                        className="text-green-500 hover:text-green-400 transition-colors flex-shrink-0"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
                 ))}
+                {addableTags.length === 0 && (
+                  <div className="text-center py-8 text-gray-600 text-xs">没有可添加的标签</div>
+                )}
               </div>
             </div>
 
-            {/* 不可添加的标签 */}
-            {blockedTags.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Ban className="w-4 h-4 text-red-400" />
-                  <h3 className="text-sm font-semibold text-red-400">
-                    无法添加的标签 ({blockedTags.length})
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {blockedTags.map(({ tag, reason }) => (
-                    <div
-                      key={tag.id}
-                      className="p-2 rounded border bg-[#0a0a0a] border-[#262626] opacity-60"
-                    >
-                      <div className="flex items-start gap-2">
-                        <div
-                          className="w-1 h-4 rounded-full flex-shrink-0 mt-0.5"
-                          style={{ backgroundColor: getCategoryColor(tag.category_key) }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-white truncate mb-0.5">
-                            {tag.name}
-                          </div>
-                          <p className="text-xs text-gray-400 font-mono truncate">
-                            {tag.full_path}
-                          </p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <AlertCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
-                            <span className="text-xs text-red-400">
-                              {reason}
-                            </span>
-                          </div>
+            {/* 排除的标签 - 右栏 */}
+            <div className="flex-1 overflow-y-auto p-4 bg-[#0c0c0c]">
+              <div className="flex items-center gap-2 mb-3 sticky top-0 bg-[#0c0c0c] z-10 py-2 border-b border-[#262626]">
+                <Ban className="w-4 h-4 text-red-400" />
+                <h3 className="text-sm font-semibold text-red-400">
+                  排除标签 ({blockedTags.length})
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {blockedTags.map(({ tag, reason }) => (
+                  <div
+                    key={tag.id}
+                    className="p-3 rounded border bg-[#141414] border-[#262626] opacity-75 hover:opacity-100 transition-opacity"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
+                        style={{ backgroundColor: getCategoryColor(tag.category_key) }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-gray-400 truncate mb-1">
+                          {tag.name}
+                        </div>
+                        <p className="text-xs text-gray-600 font-mono truncate mb-2">
+                          {tag.full_path}
+                        </p>
+                        <div className="flex items-center gap-1.5 bg-red-950/20 border border-red-900/30 px-2 py-1 rounded">
+                          <AlertCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
+                          <span className="text-xs text-red-400">
+                            {reason}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+                {blockedTags.length === 0 && (
+                  <div className="text-center py-8 text-gray-600 text-xs">没有被排除的标签</div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
