@@ -538,7 +538,7 @@ export default function UnifiedGraphEditorPage() {
                   <span>返回:</span>
                   <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
                     <DialogTrigger asChild>
-                      <button className="text-[#f97316] hover:text-[#ea580c] underline">
+                      <button className="text-[#D97706] hover:text-[#B45309] underline">
                         {currentGraph.return_type || 'void'}
                       </button>
                     </DialogTrigger>
@@ -698,7 +698,7 @@ export default function UnifiedGraphEditorPage() {
         </div>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#f97316] hover:bg-[#ea580c] text-black text-xs">
+            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-black text-xs">
               <Plus className="w-3 h-3 md:mr-1" />
               <span className="hidden md:inline">新建图</span>
             </Button>
@@ -748,7 +748,7 @@ export default function UnifiedGraphEditorPage() {
                   </Select>
                 </div>
               )}
-              <Button onClick={handleCreate} className="w-full bg-[#f97316] hover:bg-[#ea580c] text-black">创建</Button>
+              <Button onClick={handleCreate} className="w-full bg-[#D97706] hover:bg-[#B45309] text-black">创建</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -770,7 +770,7 @@ export default function UnifiedGraphEditorPage() {
       <div className="flex-1 overflow-auto p-2 md:p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredGraphs.map((graph) => (
-            <div key={graph.id} className="bg-[#141414] rounded border border-[#262626] p-4 hover:border-[#f97316] transition-colors group">
+            <div key={graph.id} className="bg-[#141414] rounded border border-[#262626] p-4 hover:border-[#D97706] transition-colors group">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -791,7 +791,7 @@ export default function UnifiedGraphEditorPage() {
                   </div>
                 </div>
               </div>
-              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#f97316] hover:bg-[#ea580c] text-black">
+              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
                 <Network className="w-3 h-3 mr-1" />可视化编辑
               </Button>
             </div>

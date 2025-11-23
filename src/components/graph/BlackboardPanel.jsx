@@ -152,7 +152,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         </div>
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-6 px-2 bg-[#f97316] hover:bg-[#1177bb] text-white">
+            <Button size="sm" className="h-6 px-2 bg-[#D97706] hover:bg-[#1177bb] text-white">
               <Plus className="w-3 h-3" />
             </Button>
           </DialogTrigger>
@@ -307,7 +307,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
                 />
                 <label className="text-sm text-white/70">公开（可拖拽创建Get/Set节点）</label>
               </div>
-              <Button onClick={handleAdd} className="w-full bg-[#f97316] hover:bg-[#1177bb]">
+              <Button onClick={handleAdd} className="w-full bg-[#D97706] hover:bg-[#1177bb]">
                 添加
               </Button>
             </div>
@@ -329,7 +329,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
             draggable={variable.public}
             onDragStart={(e) => handleDragStart(e, variable.key)}
             className={`bg-[#141414] rounded px-2 py-1.5 border border-[#262626] ${
-              variable.public ? 'cursor-move hover:border-[#f97316]' : 'cursor-default'
+              variable.public ? 'cursor-move hover:border-[#D97706]' : 'cursor-default'
             } transition-colors`}
           >
             <div className="flex items-center justify-between mb-1">

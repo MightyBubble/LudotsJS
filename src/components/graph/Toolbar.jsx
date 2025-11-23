@@ -97,7 +97,7 @@ export default function Toolbar({
           onClick={onSimulate}
           disabled={isSimulating}
           size="sm"
-          className="bg-[#f97316] hover:bg-[#ea580c] text-black h-7 px-3 text-xs"
+          className="bg-[#D97706] hover:bg-[#B45309] text-black h-7 px-3 text-xs"
         >
           <Play className="w-3 h-3 mr-1.5" />
           {isSimulating ? '...' : '运行'}

@@ -26,12 +26,12 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
         top: node.position.y,
         cursor: 'move',
       }}
-      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#f97316] bg-[#2d2d2d]' : 'border-[#262626] bg-[#0a0a0a]'}`}
+      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#262626] bg-[#0a0a0a]'}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#262626]">
         <span className="text-xs font-bold text-white truncate max-w-[100px]">{node.data.label}</span>
-        <div className="w-2 h-2 rounded-full bg-[#f97316]" />
+        <div className="w-2 h-2 rounded-full bg-[#D97706]" />
       </div>
 
       <div className="text-[10px] text-gray-400 font-mono mb-2">{node.data.nodeId}</div>
@@ -40,7 +40,7 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
       <div className="flex justify-between items-center mt-1">
         {/* Input Port */}
         <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#f97316] border border-[#666] cursor-crosshair flex items-center justify-center"
+          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#D97706] border border-[#666] cursor-crosshair flex items-center justify-center"
           title="Incoming Relations"
           data-node-id={node.id}
           data-port-id="in"
@@ -59,7 +59,7 @@ const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConne
 
         {/* Output Port */}
         <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#f97316] border border-[#666] cursor-crosshair flex items-center justify-center"
+          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#D97706] border border-[#666] cursor-crosshair flex items-center justify-center"
           title="Outgoing Relations"
           data-node-id={node.id}
           data-port-id="out"
@@ -280,7 +280,7 @@ export default function StructureEditorPage() {
                   <Input id="new-name" placeholder="名称" className="h-7 text-xs" />
                   <div className="flex gap-1 justify-end">
                     <Button size="sm" className="h-6 text-xs" onClick={() => setIsCreating(false)}>取消</Button>
-                    <Button size="sm" className="h-6 text-xs bg-[#f97316] hover:bg-[#ea580c] text-white" onClick={() => {
+                    <Button size="sm" className="h-6 text-xs bg-[#D97706] hover:bg-[#B45309] text-white" onClick={() => {
                       const id = document.getElementById('new-id').value;
                       const name = document.getElementById('new-name').value;
                       if(id && name) createMutation.mutate({ structure_id: id, name, nodes: [], edges: [] });
@@ -294,7 +294,7 @@ export default function StructureEditorPage() {
                 <div 
                   key={s.id}
                   onClick={() => loadGraph(s)}
-                  className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center group ${selectedStructure?.id === s.id ? 'bg-[#f97316] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
+                  className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center group ${selectedStructure?.id === s.id ? 'bg-[#D97706] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
                 >
                   <div>
                     <div className="font-medium">{s.name}</div>

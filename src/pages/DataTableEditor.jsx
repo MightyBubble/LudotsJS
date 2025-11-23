@@ -183,7 +183,7 @@ export default function DataTableEditorPage() {
           />
         </div>
 
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#f97316] hover:bg-[#ea580c] text-white text-xs">
+        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
           <Plus className="w-3 h-3 mr-1" />
           新建
         </Button>
@@ -226,7 +226,7 @@ export default function DataTableEditorPage() {
                   placeholder="表名称"
                   className="h-8 bg-[#141414] border-[#262626] text-white"
                 />
-                <Button onClick={handleSave} className="bg-[#f97316] hover:bg-[#ea580c]">
+                <Button onClick={handleSave} className="bg-[#D97706] hover:bg-[#B45309]">
                   <Save className="w-4 h-4 mr-1" />
                   保存
                 </Button>
@@ -352,7 +352,7 @@ export default function DataTableEditorPage() {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={() => handleEditHeader(selectedTable)} className="bg-[#f97316] hover:bg-[#ea580c]">
+                  <Button onClick={() => handleEditHeader(selectedTable)} className="bg-[#D97706] hover:bg-[#B45309]">
                     <Edit3 className="w-4 h-4 mr-1" />
                     编辑表头
                   </Button>

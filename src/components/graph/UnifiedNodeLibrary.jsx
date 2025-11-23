@@ -50,7 +50,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
             onClick={() => setActiveTab(graphType === 'query' ? 'query' : 'function')}
             className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
               activeTab === (graphType === 'query' ? 'query' : 'function')
-                ? 'bg-[#f97316] text-black' 
+                ? 'bg-[#D97706] text-black' 
                 : 'text-gray-400 hover:text-[#e5e5e5] hover:bg-[#262626]'
             }`}
           >
@@ -60,7 +60,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
             onClick={() => setActiveTab('compute')}
             className={`flex-1 px-2 py-1.5 text-[10px] font-medium transition-colors ${
               activeTab === 'compute' 
-                ? 'bg-[#f97316] text-black' 
+                ? 'bg-[#D97706] text-black' 
                 : 'text-gray-400 hover:text-[#e5e5e5] hover:bg-[#262626]'
             }`}
           >
@@ -91,7 +91,7 @@ export default function UnifiedNodeLibrary({ graphType, onAddNode, onClose }) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, nodeType.type)}
                     onClick={() => onAddNode(nodeType.type)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#262626] hover:border-[#f97316]"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#262626] hover:border-[#D97706]"
                   >
                     <Icon className="w-3.5 h-3.5 text-gray-400" />
                     <span className="text-[11px] text-[#e5e5e5]">{nodeType.label}</span>

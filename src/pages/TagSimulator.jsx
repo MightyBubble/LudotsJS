@@ -136,7 +136,7 @@ export default function TagSimulator() {
   const simulation = selectedTag ? simulateAddTag(selectedTag) : null;
 
   return (
-    <div className="h-screen flex bg-[#0a0a0a] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#f97316] selection:text-white">
+    <div className="h-screen flex bg-[#0a0a0a] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #141414; }
@@ -148,7 +148,7 @@ export default function TagSimulator() {
       <div className="w-80 bg-[#141414] border-r border-[#262626] flex flex-col">
         <div className="p-4 border-b border-[#262626] bg-[#141414]">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded bg-[#f97316]/10 flex items-center justify-center text-[#f97316]">
+            <div className="w-8 h-8 rounded bg-[#D97706]/10 flex items-center justify-center text-[#D97706]">
               <Zap className="w-4 h-4" />
             </div>
             <div>
@@ -159,7 +159,7 @@ export default function TagSimulator() {
           <Input
             value={entityName}
             onChange={(e) => setEntityName(e.target.value)}
-            className="h-8 bg-[#0a0a0a] border-[#262626] text-sm text-white focus:border-[#f97316]"
+            className="h-8 bg-[#0a0a0a] border-[#262626] text-sm text-white focus:border-[#D97706]"
             placeholder="Entity Name"
           />
         </div>
@@ -167,7 +167,7 @@ export default function TagSimulator() {
         <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
           <div className="flex items-center justify-between mb-3 px-1">
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Tags</span>
-            <span className="text-xs font-mono text-[#f97316] bg-[#f97316]/10 px-1.5 py-0.5 rounded">{activeTags.size}</span>
+            <span className="text-xs font-mono text-[#D97706] bg-[#D97706]/10 px-1.5 py-0.5 rounded">{activeTags.size}</span>
           </div>
 
           {activeTags.size === 0 ? (
@@ -187,7 +187,7 @@ export default function TagSimulator() {
                     className={`group relative p-2.5 rounded border transition-all ${
                       disabled 
                         ? 'bg-[#1a1a1a] border-[#262626] opacity-60' 
-                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#f97316]/50'
+                        : 'bg-[#0a0a0a] border-[#262626] hover:border-[#D97706]/50'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1.5">
@@ -240,7 +240,7 @@ export default function TagSimulator() {
               placeholder="Search tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 bg-[#141414] border-[#262626] text-sm text-[#e5e5e5] focus:border-[#f97316] rounded-md"
+              className="h-9 pl-9 bg-[#141414] border-[#262626] text-sm text-[#e5e5e5] focus:border-[#D97706] rounded-md"
             />
           </div>
           <div className="flex gap-4 text-xs text-gray-500">
@@ -269,8 +269,8 @@ export default function TagSimulator() {
                   onClick={() => setSelectedTag(tag)}
                   className={`group p-3 rounded border cursor-pointer transition-all ${
                     selectedTag?.id === tag.id
-                      ? 'bg-[#f97316]/10 border-[#f97316]'
-                      : 'bg-[#141414] border-[#262626] hover:border-[#f97316]/50 hover:bg-[#1a1a1a]'
+                      ? 'bg-[#D97706]/10 border-[#D97706]'
+                      : 'bg-[#141414] border-[#262626] hover:border-[#D97706]/50 hover:bg-[#1a1a1a]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -280,7 +280,7 @@ export default function TagSimulator() {
                         <span className="text-sm font-medium text-gray-200 truncate">{tag.name}</span>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleAddTag(tag); }}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#f97316]/20 text-[#f97316] transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#D97706]/20 text-[#D97706] transition-all"
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
@@ -311,7 +311,7 @@ export default function TagSimulator() {
                   key={tag.id}
                   onClick={() => setSelectedTag(tag)}
                   className={`p-3 rounded border border-[#262626] bg-[#141414] opacity-70 hover:opacity-100 transition-all cursor-pointer ${
-                    selectedTag?.id === tag.id ? 'border-[#f97316] opacity-100' : ''
+                    selectedTag?.id === tag.id ? 'border-[#D97706] opacity-100' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
@@ -338,7 +338,7 @@ export default function TagSimulator() {
       {/* Right Sidebar: Inspector */}
       <div className="w-80 bg-[#141414] border-l border-[#262626] flex flex-col">
         <div className="p-4 border-b border-[#262626]">
-          <h2 className="text-xs font-bold text-[#f97316] uppercase tracking-wider flex items-center gap-2">
+          <h2 className="text-xs font-bold text-[#D97706] uppercase tracking-wider flex items-center gap-2">
             <Info className="w-3.5 h-3.5" /> Inspector
           </h2>
         </div>
@@ -436,7 +436,7 @@ export default function TagSimulator() {
               canAddTag(selectedTag).canAdd ? (
                 <Button 
                   onClick={() => handleAddTag(selectedTag)}
-                  className="w-full bg-[#f97316] hover:bg-[#ea580c] text-black font-bold h-9 text-xs"
+                  className="w-full bg-[#D97706] hover:bg-[#B45309] text-black font-bold h-9 text-xs"
                 >
                   Add to Entity
                 </Button>
