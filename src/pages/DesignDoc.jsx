@@ -1,0 +1,425 @@
+import React, { useState } from "react";
+import { BookOpen, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+
+const modules = [
+  {
+    id: "overview",
+    title: "系统总览",
+    overview: "本应用是一个游戏设计数据编辑器（Game Design Data Editor），面向策划/设计师，用于可视化定义和管理游戏系统中的核心数据结构。它不是运行时引擎，而是一个纯数据编辑工具——所有编辑结果以结构化JSON持久化，供游戏引擎消费。",
+    definition: "整个系统由 17 个功能模块 + 4 个可视化图编辑器 + 2 个模拟器组成，覆盖了 GAS（Gameplay Ability System）风格的标签、属性、修饰器、验证器、需求、事件、条件、效果、指令、原型、关系、结构、常量、数据表等核心概念。",
+    intent: "为游戏策划提供一个统一的、无需编程的数据编辑环境，使得复杂游戏系统（如技能、Buff、条件判断、属性计算等）可以通过可视化界面完成定义，降低策划与程序之间的沟通成本。",
+    architecture: `核心架构分为四层：
+• 数据层（Entity）：20+ 个 JSON Schema 实体，定义了所有数据模型
+• 编辑层（Editor Pages）：17 个 CRUD 编辑页面，每个对应一个或多个实体
+• 图计算层（Graph Editor）：统一的节点图编辑器，支持 Data/Query/Function/Structure 四种图类型
+• 模拟层（Simulator）：标签模拟器 + 属性模拟器，提供即时反馈
+
+数据引用关系（核心依赖链）：
+GameplayTag → Validator → Requirement
+GameplayTag → UnlockableCommand / InteractionEffect
+Attribute → ModifierDefinition → EntityPrototype
+DataGraph/FunctionGraph → Attribute (计算图)
+EntityRelation → StructureDefinition → EntityPrototype
+GlobalConstant / DataTable → 全局可引用`,
+    questions: []
+  },
+  {
+    id: "tag-editor",
+    title: "标签编辑器 (TagEditor)",
+    overview: "GameplayTag 的可视化树形编辑器，是整个系统的基础模块。",
+    definition: "管理 GameplayTag 实体。支持层级路径创建（如 Ability.Combat.Fireball）、树形/图形视图切换、拖拽层级调整、批量操作、分类管理、导入导出。每个标签可配置 6 类规则：必需标签、阻止标签、附加标签、移除标签、禁用条件、移除条件。",
+    intent: "GameplayTag 是整个 GAS 系统的核心标识符。几乎所有其他模块（验证器、需求、指令、效果、修饰器等）都依赖标签路径进行条件判断。本模块确保标签的层级结构和规则定义的正确性。",
+    architecture: `实体：GameplayTag, TagCategory, TagHistory, TagTemplate, TagCountEvent
+页面：TagEditor（主编辑器）、TagSimulator（模拟器）
+组件：GraphView（图形视图）、CategoryManager（分类管理）、TagCountEventPanel（标签计数事件面板）
+
+关键逻辑：
+• 路径自动创建：输入 A.B.C 时自动创建 A、A.B、A.B.C 三个标签
+• 拖拽重构：拖拽标签到新父节点时，自动级联更新所有子标签的 full_path 和 parent_path
+• 规则系统：required_tags / blocked_tags 控制附加前验证，attached_tags / removed_tags 控制附加后副作用，disabled_if_tags / remove_if_tags 控制条件性状态变更
+• 本地编辑 + 手动保存：拖拽操作先在本地 state 生效，需手动保存才持久化`,
+    questions: [
+      "TagCountEvent 面板引用了 GameEvent 实体，但 TagEditor 中并未直接查询 GameEvent 列表，是否存在缺失的联动？",
+      "TagHistory 实体已定义但未在 TagEditor 中使用，是否计划实现操作历史回溯功能？"
+    ]
+  },
+  {
+    id: "tag-simulator",
+    title: "标签模拟器 (TagSimulator)",
+    overview: "标签规则的即时模拟测试工具。",
+    definition: "模拟一个虚拟实体，允许用户向其添加/移除标签，实时检测标签规则（required/blocked/attached/removed/disabled_if/remove_if）的触发效果。",
+    intent: "让策划在定义标签规则后，无需启动游戏即可验证规则的正确性。例如：验证「添加 Buff.Fire 时是否会自动移除 Buff.Ice」。",
+    architecture: `独立页面，无持久化写入。三栏布局：
+• 左栏：当前实体的活跃标签状态
+• 中栏：标签库（分为可添加/被阻止两组）
+• 右栏：选中标签的 Inspector（显示添加后的副作用预览）
+
+核心逻辑：canAddTag() 检查前置条件，simulateAddTag() 预览副作用，handleAddTag() 执行添加并级联处理 remove_if 规则。`,
+    questions: []
+  },
+  {
+    id: "validator-editor",
+    title: "验证器编辑器 (ValidatorEditor)",
+    overview: "布尔判断单元的定义工具。",
+    definition: "管理 Validator 实体。每个验证器返回 true/false，支持四种类型：entity_check（实体存在性检查）、entity_compare（实体属性比较）、combine（逻辑组合 AND/OR/NOT/XOR）、function_graph（引用函数图）。",
+    intent: "验证器是 Requirement（需求）系统的基础构件。通过将复杂的布尔判断拆分为可复用的验证器单元，策划可以像搭积木一样组合出复杂的前置条件。",
+    architecture: `实体：Validator
+引用：Attribute, GameplayTag, EntityRelation, EntityPrototype, FunctionGraph, GlobalConstant
+
+关键设计：
+• entity_check：支持 has_tag / has_any_tags / has_all_tags / is_prototype / has_attribute / has_relation / function_graph 七种检查方式
+• entity_compare：比较值A 和 比较值B 均支持多种来源（literal/constant/attribute_value/tag_count/relation_attribute/relation_count/function_graph），操作符支持 gt/lt/gte/lte/eq/neq
+• combine：通过引用其他 validator_id 实现逻辑组合
+• negate 字段：取反任意验证器的结果
+• failure_result：验证失败时返回 false 或 unknown`,
+    questions: [
+      "entity_compare 的 value_source 包含 relation_attribute 和 relation_count，但 Schema 中未定义对应的 source_relation_id 等字段——这些扩展字段是否仅在前端使用？"
+    ]
+  },
+  {
+    id: "requirement-editor",
+    title: "需求编辑器 (RequirementEditor)",
+    overview: "前置条件的组合定义工具。",
+    definition: "管理 Requirement 实体。支持两种类型：node（逻辑组合节点，包含 AND/OR/XOR 的子需求列表）和 count（计数型需求，如「拥有 >= 3 个某标签的实体」）。",
+    intent: "Requirement 是面向玩家的「解锁条件」抽象。例如：「建造兵营需要：木材 >= 100 AND 已解锁石器时代」。它复用 Validator 作为原子条件，通过逻辑树组合出复杂需求。",
+    architecture: `实体：Requirement
+引用：Validator
+
+node_config.sub_requirements 中每项可以是 validator 或嵌套 requirement，支持 negate 和 context_binding（指定 source/target/player/global 上下文）。
+count_config 支持 validator_true_count 和 entity_count 两种计数模式。
+
+状态字段 state 支持 active/disabled/hidden 三态。`,
+    questions: [
+      "当前编辑器的配置部分仅显示占位符「编辑配置...」，node_config 和 count_config 的详细编辑 UI 似乎尚未完成？"
+    ]
+  },
+  {
+    id: "unlockable-commands",
+    title: "指令解锁编辑器 (UnlockableCommands)",
+    overview: "基于标签条件的指令可用性规则。",
+    definition: "管理 UnlockableCommand 实体。定义「当交互者和目标满足特定标签条件时，某个指令标签被解锁」的规则。",
+    intent: "控制游戏中可执行指令的可用性。例如：「玩家拥有 Skill.Fireball 标签 且 目标拥有 Type.Enemy 标签时，解锁 Command.Attack.Fireball」。",
+    architecture: `实体：UnlockableCommand
+引用：GameplayTag
+
+每条规则包含：
+• unlocked_command_tag_path：被解锁的指令标签路径
+• interactor_conditions：交互者（通常是玩家）的标签条件（has_any_tags / has_all_tags / not_has_tags）
+• target_conditions：目标对象的标签条件（同上）
+• is_active：是否启用
+
+表格式编辑器，支持内联编辑所有 6 组标签条件。`,
+    questions: []
+  },
+  {
+    id: "interaction-effects",
+    title: "交互效果编辑器 (InteractionEffects)",
+    overview: "效果触发的条件映射表。",
+    definition: "管理 InteractionEffect 实体。定义「当某个效果标签被触发，且发起者/目标满足特定标签条件时，产生哪些后续效果」的规则。",
+    intent: "实现效果的链式反应。例如：「Fire.Burn 效果作用于 Material.Wood 目标时 → 产生 Effect.Ignite + Effect.Damage.Fire」。支持优先级排序。",
+    architecture: `实体：InteractionEffect
+引用：GameplayTag
+
+与 UnlockableCommand 结构类似，但增加了：
+• triggering_effect_tag_path：触发源效果标签
+• resulting_effect_ids：后续效果 ID 列表（这些效果会再次进入效果系统处理，形成链式反应）
+• priority：优先级数值，决定同一触发源的多个效果规则的执行顺序`,
+    questions: [
+      "resulting_effect_ids 的值应为效果标签路径还是 InteractionEffect 记录的 ID？当前 Schema 定义为 string 数组，但命名暗示是 ID。"
+    ]
+  },
+  {
+    id: "unified-graph-editor",
+    title: "统一图编辑器 (UnifiedGraphEditor)",
+    overview: "可视化节点图编辑器，支持四种图类型。",
+    definition: "管理 DataGraph、EntityQuery、FunctionGraph 三个实体（Structure 类型也存储在 DataGraph 中）。提供拖拽式的节点-连线图编辑界面，支持：数学运算节点、黑板（Blackboard）参数、查询节点、函数节点、结构节点。",
+    intent: "用可视化方式定义复杂的数值计算（属性计算曲线）、实体查询逻辑、通用函数和抽象结构关系，取代策划手写公式或表格。",
+    architecture: `实体：DataGraph（graph_type: data/structure）、EntityQuery、FunctionGraph
+组件：GraphCanvas、UnifiedNode、NodePort、Connection、BlackboardPanel、UnifiedNodeLibrary、Toolbar、nodeConfigs
+
+四种图类型：
+• Data Graph：纯数值计算图，用于属性最终值计算、修饰器曲线计算
+• Query Graph：实体查询图，通过 source → filter → sort → limit 管线筛选实体集
+• Function Graph：通用函数图，支持比较、逻辑、集合、条件分支、标签判断等操作
+• Structure Graph：抽象结构图，定义节点间的关系拓扑
+
+核心架构：
+• 每个图的定义存储为 JSON 字符串（graph_definition），包含 nodes、connections、blackboard
+• 节点类型在 nodeConfigs.js 中集中注册，包含输入/输出端口的类型定义
+• 连接时进行端口类型校验（any 类型可接受任何输入）
+• 实时计算：每当节点/连接变化时自动执行拓扑排序 + 前向传播计算`,
+    questions: [
+      "DataGraph 同时存储 data 和 structure 两种图类型，通过 graph_type 字段区分。但 structure 图有自己的专用编辑器（StructureEditor），是否存在数据竞争风险？",
+      "图计算目前是前端模拟执行，仅支持基础数学运算。Query/Function 节点的计算逻辑尚未实现，仅做了端口传递。"
+    ]
+  },
+  {
+    id: "attribute-editor",
+    title: "属性编辑器 (AttributeEditor)",
+    overview: "实体属性的定义和计算配置工具。",
+    definition: "管理 Attribute 实体。每个属性由多个键（keys）组成（如 base_value、add_zone、multiply_zone），通过 input_mappings 将键映射到 Data Graph 的黑板参数，最终由 Data Graph 计算出属性最终值。",
+    intent: "定义游戏中所有可量化的属性（如 attack_power、health、move_speed），并配置其计算管线。属性值不是直接存储的数字，而是通过多个「键」汇总计算得到。",
+    architecture: `实体：Attribute, AttributeThresholdEvent
+引用：DataGraph
+
+关键设计：
+• keys 数组：每个键有 name 和 type（value 或 array），value 型键存储单一数值，array 型键存储数值列表
+• input_mappings：将 Data Graph 黑板的公共参数映射到属性的键（如 graph_base → base_value）
+• final_calculation_data_graph_id：指向负责最终计算的 Data Graph
+• clamp_config：钳制约束（最小/最大值，可引用键或固定值）
+• recovery_config：自动回复行为（目标键、回复速率、延迟）
+• 阈值事件：通过 ThresholdEventPanel 配置，当属性键达到阈值时触发 GameEvent`,
+    questions: [
+      "attributeCalcGraphs 过滤 graph_type === 'attribute_calculation'，但 DataGraph 的 graph_type 枚举中没有这个值（只有 data/structure）。这意味着当前无法选择计算图？"
+    ]
+  },
+  {
+    id: "modifier-definition-editor",
+    title: "修饰器定义编辑器 (ModifierDefinitionEditor)",
+    overview: "属性修饰器（Buff/Debuff 效果）的定义工具。",
+    definition: "管理 ModifierDefinition 实体。定义「输入源 → 曲线计算 → 输出到目标属性的某个键」的修饰管线。",
+    intent: "修饰器是连接「标签/属性等输入」和「属性键变化」的桥梁。例如：「每拥有 1 个 Buff.Strength 标签，attack_power 的 add_zone 增加 10」。",
+    architecture: `实体：ModifierDefinition
+引用：DataGraph（曲线图）、Attribute、GameplayTag、EntityRelation
+
+关键设计：
+• curve_input_mappings：定义曲线图的输入来源，支持 6 种来源类型：
+  - tag_count：标签计数
+  - attribute_key：属性键值
+  - constant：常量
+  - relation_entity_attribute：关联实体的属性
+  - relation_attribute：关系本身的属性
+  - relation_tag_count：关系上的标签计数
+• target_type：修饰目标类型（entity_attribute / related_entity_attribute / relation_attribute）
+• output_key：输出到目标属性的哪个键
+• max_trigger_times：最大生效次数
+
+曲线图对应 DataGraph 的 curve 类型子集。`,
+    questions: [
+      "curveGraphs 过滤 graph_type === 'curve'，但 DataGraph 的 graph_type 枚举中同样没有 curve 值。与 Attribute 面临相同的问题。"
+    ]
+  },
+  {
+    id: "entity-prototype-editor",
+    title: "实体原型编辑器 (EntityPrototypeEditor)",
+    overview: "游戏实体的模板定义工具。",
+    definition: "管理 EntityPrototype 实体。定义实体的「原型」，包含它引用的属性列表和结构绑定。",
+    intent: "原型是游戏实体的蓝图。例如：「战士」原型引用了 health、attack_power、defense 三个属性，并绑定到科技树结构的某个节点。运行时创建实体时，根据原型初始化属性实例。",
+    architecture: `实体：EntityPrototype
+引用：Attribute、StructureDefinition
+
+关键字段：
+• referenced_attributes：引用的属性 ID 列表，决定了该原型的实体拥有哪些属性
+• structure_bindings：绑定到抽象结构图的节点（structure_id + node_id），用于将原型放入拓扑网络（如科技树、势力关系图）
+• static_relations（遗留字段）：直接定义的静态关系，已移至 EntityRelationEditor 的「静态关系」视图管理`,
+    questions: []
+  },
+  {
+    id: "entity-relation-editor",
+    title: "关系编辑器 (EntityRelationEditor)",
+    overview: "实体间关系的定义和配置工具。",
+    definition: "管理 EntityRelation 实体。分为两个视图：关系定义（定义关系类型的 Schema）和静态关系（在原型上配置具体的关系实例）。",
+    intent: "定义游戏世界中实体间的各种关系类型（如父子、盟友、宿敌、装备槽位等），并允许在原型层面预配置静态关系。",
+    architecture: `实体：EntityRelation, EntityPrototype（static_relations 字段）
+引用：Attribute、GameplayTag
+
+关系定义视图：
+• relation_id：关系类型标识符
+• is_directional：是否有向
+• inverse_relation_id：反向关系 ID
+• attributes：关系本身携带的属性列表（引用 Attribute ID）
+
+静态关系视图：
+• 左栏选择源原型，右栏配置该原型的 static_relations
+• 每条静态关系：relation_definition_id + target_prototype_id + attribute_values`,
+    questions: []
+  },
+  {
+    id: "structure-editor",
+    title: "结构编辑器 (StructureEditor)",
+    overview: "抽象拓扑结构的可视化编辑器。",
+    definition: "管理 StructureDefinition 实体。通过拖拽节点和连线定义抽象的图结构（如科技树、势力关系网、地图拓扑等）。",
+    intent: "提供独立于具体实体的抽象结构定义。EntityPrototype 通过 structure_bindings 绑定到结构节点，实现「原型在拓扑中的位置」映射。",
+    architecture: `实体：StructureDefinition
+引用：EntityRelation
+
+使用 GraphCanvas 组件，但自定义了 StructureNode 组件（简化的节点渲染）。
+• nodes 数组：每个节点有 node_id、name、position
+• edges 数组：每条边有 source_node_id、target_node_id、relation_definition_id、attribute_values
+• 右侧属性面板：选中节点时编辑节点属性，未选中时显示所有连接并可修改关系类型
+
+与 UnifiedGraphEditor 中 structure 图类型存在功能重叠。`,
+    questions: [
+      "StructureEditor 和 UnifiedGraphEditor(structure) 编辑的是不同实体（StructureDefinition vs DataGraph），但概念上做的是同一件事。是否考虑统一？"
+    ]
+  },
+  {
+    id: "new-attribute-simulator",
+    title: "属性模拟器 (NewAttributeSimulator)",
+    overview: "修饰器 → 属性计算的端到端模拟工具。",
+    definition: "选择一个实体原型后，显示其引用的所有属性和相关的修饰器。用户可以调整输入源（标签计数、属性键值、常量），实时查看修饰器输出和属性最终值。",
+    intent: "让策划在不启动游戏的情况下验证：「给一个战士叠 5 层力量 Buff 后，攻击力会变成多少？」。",
+    architecture: `三栏布局：
+• 左栏（输入源）：按「被引用标签」「属性键输入」「常量输入」分组显示，标签可 +/- 计数
+• 中栏（修饰器计算）：显示所有修饰器的输入/输出，支持手动开关单个修饰器
+• 右栏（属性聚合）：显示每个属性的所有键值和最终汇总值
+
+核心计算逻辑：
+1. 根据修饰器的 curve_input_mappings 读取输入值
+2. 简化计算 magnitude = inputs * 10 + 5（注意：这是模拟计算，非真实曲线图执行）
+3. 将 magnitude 累加到目标属性的对应键
+4. 汇总所有键值得到最终属性值
+
+缺陷预警系统：当修饰器引用了原型未包含的属性时，显示「输入预警」或「目标预警」。`,
+    questions: [
+      "magnitude 的计算公式 (a * 10 + b * 5) 是硬编码的简化模拟，与实际 Data Graph 曲线计算无关。是否计划接入真实的图执行引擎？"
+    ]
+  },
+  {
+    id: "game-event-editor",
+    title: "事件编辑器 (GameEventEditor)",
+    overview: "游戏事件的定义工具。",
+    definition: "管理 GameEvent 实体。定义事件的唯一 ID、输入参数（订阅时传入）和输出参数（触发时传出）。",
+    intent: "事件是系统间解耦通信的载体。属性阈值事件、标签计数事件等触发器在条件满足时发射 GameEvent，其他系统订阅并响应。",
+    architecture: `实体：GameEvent
+
+每个事件包含：
+• event_id：事件唯一标识
+• input_parameters：订阅者可传入的参数（name, type, default_value）
+• output_parameters：触发时输出的参数（name, type）
+• category：分类标签
+
+参数类型支持：number, boolean, string, array, object, entity, entities。
+卡片式编辑界面，支持内联编辑参数列表。`,
+    questions: []
+  },
+  {
+    id: "global-constant-editor",
+    title: "全局常量编辑器 (GlobalConstantEditor)",
+    overview: "全局共享常量的管理工具。",
+    definition: "管理 GlobalConstant 实体。支持 number、string、boolean、object、array 五种值类型。",
+    intent: "提供全局可引用的常量池。验证器的 entity_compare、修饰器的 curve_input_mappings 等可以引用全局常量，避免硬编码数值。",
+    architecture: `实体：GlobalConstant
+字段：constant_key, constant_value（JSON 字符串）, value_type, description, category
+
+值以 JSON 字符串格式存储，object/array 类型在编辑时提供 Textarea 输入并做 JSON 校验。
+表格式编辑器，移动端切换为卡片视图。`,
+    questions: []
+  },
+  {
+    id: "data-table-editor",
+    title: "数据表编辑器 (DataTableEditor)",
+    overview: "通用的二维数据表管理工具。",
+    definition: "管理 DataTable 实体。支持自定义列（string/number/boolean 类型）和行数据。",
+    intent: "为策划提供类 Excel 的数据表编辑能力，用于存储配置表、成长曲线、掉落表等结构化数据。数据表可被 Data Graph 中的 data_table_read 节点引用。",
+    architecture: `实体：DataTable
+字段：table_id, name, columns（列定义数组）, rows（行数据数组）
+
+左右分栏布局：左侧数据表列表，右侧表格编辑器。
+支持两种模式：查看模式（直接内联编辑单元格）和编辑表头模式（修改列名/类型、增删列行）。`,
+    questions: []
+  },
+  {
+    id: "condition-editor",
+    title: "条件编辑器 (ConditionEditor)",
+    overview: "通用条件定义工具。",
+    definition: "管理 ConditionDefinition 实体。支持三种类型：preset（预设条件）、function_graph（函数图条件）、group（条件组 AND/OR/NOT）。",
+    intent: "条件是比验证器更高层的抽象，支持上下文参数绑定和函数图计算。用于技能释放条件、AI 决策条件等场景。",
+    architecture: `实体：ConditionDefinition
+组件：PresetConditionEditor, FunctionGraphConditionEditor, ConditionGroupEditor
+
+三种类型：
+• preset：内置的预设条件模板（equals, greater_than 等），通过 param_source 配置参数来源
+• function_graph：引用 FunctionGraph 并配置 input_mappings
+• group：通过 AND/OR/NOT 组合多个子条件（sub_conditions 以 JSON 字符串存储）
+
+evaluate_context_parameters：定义评估此条件所需的上下文参数。`,
+    questions: [
+      "此页面的暗色主题尚未更新为新的配色方案（仍使用 #1e1e1e / #2d2d2d / #3d3d3d），与其他页面不一致。"
+    ]
+  }
+];
+
+function ModuleSection({ module }) {
+  const [expanded, setExpanded] = useState(false);
+  
+  return (
+    <div className="border border-[#2A2E37] rounded-lg overflow-hidden bg-[#15171C]">
+      <button 
+        onClick={() => setExpanded(!expanded)}
+        className="w-full p-4 flex items-center gap-3 hover:bg-[#1A1D24] transition-colors text-left"
+      >
+        {expanded ? <ChevronDown className="w-4 h-4 text-[#D97706] flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-[#E2D8B3]">{module.title}</div>
+          <div className="text-xs text-gray-500 mt-0.5 truncate">{module.overview}</div>
+        </div>
+        {module.questions.length > 0 && (
+          <span className="flex items-center gap-1 text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded flex-shrink-0">
+            <AlertTriangle className="w-3 h-3" />
+            {module.questions.length} 疑问
+          </span>
+        )}
+      </button>
+      
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-[#2A2E37] pt-4 space-y-4">
+          <div>
+            <h4 className="text-xs font-bold text-[#D97706] uppercase tracking-wider mb-2">模块定义</h4>
+            <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">{module.definition}</p>
+          </div>
+          
+          <div>
+            <h4 className="text-xs font-bold text-[#D97706] uppercase tracking-wider mb-2">设计意图</h4>
+            <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">{module.intent}</p>
+          </div>
+          
+          <div>
+            <h4 className="text-xs font-bold text-[#D97706] uppercase tracking-wider mb-2">关键架构</h4>
+            <pre className="text-xs text-gray-400 leading-relaxed whitespace-pre-wrap font-mono bg-[#0D0F14] p-3 rounded border border-[#2A2E37] overflow-x-auto">{module.architecture}</pre>
+          </div>
+          
+          {module.questions.length > 0 && (
+            <div>
+              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> 疑问与待确认
+              </h4>
+              <div className="space-y-2">
+                {module.questions.map((q, i) => (
+                  <div key={i} className="text-xs text-amber-300/80 bg-amber-400/5 border border-amber-400/20 rounded p-2.5 leading-relaxed">
+                    {i + 1}. {q}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function DesignDocPage() {
+  const totalQuestions = modules.reduce((sum, m) => sum + m.questions.length, 0);
+  
+  return (
+    <div className="h-screen flex flex-col bg-[#0D0F14] text-[#e5e5e5]">
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
+        <BookOpen className="w-4 h-4 text-[#D97706]" />
+        <span className="text-sm font-semibold text-gray-300">设计文档</span>
+        <span className="text-xs text-gray-500">{modules.length} 个模块</span>
+        {totalQuestions > 0 && (
+          <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">{totalQuestions} 个疑问</span>
+        )}
+      </div>
+      
+      <div className="flex-1 overflow-auto p-4">
+        <div className="max-w-4xl mx-auto space-y-2">
+          {modules.map(module => (
+            <ModuleSection key={module.id} module={module} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
