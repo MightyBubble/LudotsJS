@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network, BookOpen } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -70,9 +70,13 @@ export default function Layout({ children, currentPageName }) {
           <Settings className="w-3.5 h-3.5" />常量
         </Link>
         <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DataTableEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
-          <Table className="w-3.5 h-3.5" />数据表
-        </Link>
-      </div>
+            <Table className="w-3.5 h-3.5" />数据表
+          </Link>
+          <div className="h-5 w-px bg-[#2A2E37]" />
+          <Link to={createPageUrl("DesignDoc")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DesignDoc" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+            <BookOpen className="w-3.5 h-3.5" />文档
+          </Link>
+        </div>
 
       {/* 移动端导航 */}
       <div className="h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between">
@@ -93,6 +97,7 @@ export default function Layout({ children, currentPageName }) {
           {currentPageName === "GameEventEditor" && "事件"}
           {currentPageName === "GlobalConstantEditor" && "常量"}
           {currentPageName === "DataTableEditor" && "数据表"}
+          {currentPageName === "DesignDoc" && "文档"}
         </span>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -146,8 +151,11 @@ export default function Layout({ children, currentPageName }) {
           <Link to={createPageUrl("GlobalConstantEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Settings className="w-4 h-4" />常量
           </Link>
-          <Link to={createPageUrl("DataTableEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+          <Link to={createPageUrl("DataTableEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#2A2E37] ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Table className="w-4 h-4" />数据表
+          </Link>
+          <Link to={createPageUrl("DesignDoc")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 ${currentPageName === "DesignDoc" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+            <BookOpen className="w-4 h-4" />文档
           </Link>
         </div>
       )}
