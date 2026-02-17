@@ -1,12 +1,27 @@
-import React, { useRef, useState, useCallback } from 'react';
-import Node from './Node';
-import Connection from './Connection';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  ReactFlow,
+  Background,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  BackgroundVariant,
+  useReactFlow,
+  ReactFlowProvider,
+  MarkerType,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import RFCustomNode from './RFCustomNode';
+import RFCustomEdge from './RFCustomEdge';
 import ContextMenu from './ContextMenu';
 import { Download, Upload } from 'lucide-react';
 
-export default function GraphCanvas({
-  nodes,
-  connections,
+const nodeTypes = { customNode: RFCustomNode };
+const edgeTypes = { customEdge: RFCustomEdge };
+
+function GraphCanvasInner({
+  nodes: externalNodes,
+  connections: externalConnections,
   connectionValues,
   zoom,
   pan,
@@ -21,50 +36,98 @@ export default function GraphCanvas({
   onSelectConnection,
   NodeComponent
 }) {
-  const canvasRef = useRef(null);
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [connectingFrom, setConnectingFrom] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const reactFlowWrapper = useRef(null);
+  const { screenToFlowPosition } = useReactFlow();
   const [contextMenu, setContextMenu] = useState(null);
   const [pendingDrop, setPendingDrop] = useState(null);
-  const [selectedNodes, setSelectedNodes] = useState(new Set());
-  const [selectedConnections, setSelectedConnections] = useState(new Set());
 
-  const DefaultNodeComponent = NodeComponent || Node;
+  // Convert external nodes to React Flow format
+  const rfNodes = useMemo(() => {
+    return externalNodes.map(node => ({
+      id: node.id,
+      type: 'customNode',
+      position: { x: node.position?.x || 0, y: node.position?.y || 0 },
+      data: {
+        ...node,
+        NodeComponent,
+        onUpdateData: onUpdateNodeData,
+        onDelete: onDeleteNode,
+        connectionValues: connectionValues,
+        connectedInputPorts: new Set(
+          externalConnections
+            .filter(c => c.toNode === node.id)
+            .map(c => `${c.toNode}-${c.toPort}`)
+        ),
+      },
+      selected: false,
+    }));
+  }, [externalNodes, externalConnections, connectionValues, NodeComponent, onUpdateNodeData, onDeleteNode]);
 
-  const handleMouseDown = (e) => {
-    if (e.button === 2) {
-      e.preventDefault();
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-    } else if (e.button === 0 && e.target === e.currentTarget) {
-      setSelectedNodes(new Set());
-      setSelectedConnections(new Set());
-    }
-  };
+  // Convert external connections to React Flow edges
+  const rfEdges = useMemo(() => {
+    return externalConnections.map(conn => ({
+      id: conn.id,
+      source: conn.fromNode,
+      sourceHandle: `output-${conn.fromPort}`,
+      target: conn.toNode,
+      targetHandle: `input-${conn.toPort}`,
+      type: 'customEdge',
+      data: {
+        value: connectionValues?.[conn.id],
+        onDelete: onDeleteConnection,
+      },
+    }));
+  }, [externalConnections, connectionValues, onDeleteConnection]);
 
-  const handleContextMenu = (e) => {
-    e.preventDefault();
-  };
+  const onNodesChange = useCallback((changes) => {
+    changes.forEach(change => {
+      if (change.type === 'position' && change.position && change.dragging) {
+        onUpdateNodePosition(change.id, change.position);
+      }
+      if (change.type === 'select' && change.selected) {
+        onSelectNode?.(change.id);
+      }
+    });
+  }, [onUpdateNodePosition, onSelectNode]);
 
-  const handleDragOver = (e) => {
+  const onEdgesChange = useCallback((changes) => {
+    changes.forEach(change => {
+      if (change.type === 'select' && change.selected) {
+        onSelectConnection?.(change.id);
+      }
+    });
+  }, [onSelectConnection]);
+
+  const onConnect = useCallback((params) => {
+    const fromPort = params.sourceHandle?.replace('output-', '') || 'value';
+    const toPort = params.targetHandle?.replace('input-', '') || 'value';
+    
+    const connection = {
+      id: `conn-${Date.now()}`,
+      fromNode: params.source,
+      fromPort,
+      toNode: params.target,
+      toPort,
+    };
+    onAddConnection(connection);
+  }, [onAddConnection]);
+
+  const onDragOver = useCallback((e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
-  };
+  }, []);
 
-  const handleDrop = (e) => {
+  const onDrop = useCallback((e) => {
     e.preventDefault();
 
+    const position = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+
+    // Check for blackboard key drop
     try {
       const jsonData = e.dataTransfer.getData('application/json');
       if (jsonData) {
         const { blackboardKey } = JSON.parse(jsonData);
         if (blackboardKey) {
-          const canvasRect = canvasRef.current.getBoundingClientRect();
-          const x = (e.clientX - canvasRect.left - pan.x) / zoom;
-          const y = (e.clientY - canvasRect.top - pan.y) / zoom;
-
           setContextMenu({
             x: e.clientX,
             y: e.clientY,
@@ -73,7 +136,7 @@ export default function GraphCanvas({
               { label: 'Set (写入)', value: 'set', icon: Upload }
             ]
           });
-          setPendingDrop({ blackboardKey, position: { x, y } });
+          setPendingDrop({ blackboardKey, position });
           return;
         }
       }
@@ -83,12 +146,9 @@ export default function GraphCanvas({
 
     const nodeType = e.dataTransfer.getData('nodeType');
     if (nodeType) {
-      const canvasRect = canvasRef.current.getBoundingClientRect();
-      const x = (e.clientX - canvasRect.left - pan.x) / zoom;
-      const y = (e.clientY - canvasRect.top - pan.y) / zoom;
-      onAddNodeAtPosition(nodeType, { x, y });
+      onAddNodeAtPosition(nodeType, position);
     }
-  };
+  }, [screenToFlowPosition, onAddNodeAtPosition]);
 
   const handleContextMenuSelect = (value) => {
     if (pendingDrop) {
@@ -99,273 +159,85 @@ export default function GraphCanvas({
     setContextMenu(null);
   };
 
-  const handleMouseMove = useCallback((e) => {
-    if (isPanning) {
-      onPanChange({
-        x: e.clientX - panStart.x,
-        y: e.clientY - panStart.y
-      });
-    }
+  const onNodeDelete = useCallback((deletedNodes) => {
+    deletedNodes.forEach(node => onDeleteNode(node.id));
+  }, [onDeleteNode]);
 
-    if (connectingFrom) {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    }
-  }, [isPanning, panStart, connectingFrom, onPanChange]);
+  const onEdgeDelete = useCallback((deletedEdges) => {
+    deletedEdges.forEach(edge => onDeleteConnection(edge.id));
+  }, [onDeleteConnection]);
 
-  const handleMouseUp = useCallback(() => {
-    setIsPanning(false);
-    if (connectingFrom) {
-      setConnectingFrom(null);
-    }
-  }, [connectingFrom]);
-
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault();
-
-      selectedNodes.forEach(nodeId => {
-        onDeleteNode(nodeId);
-      });
-
-      selectedConnections.forEach(connId => {
-        onDeleteConnection(connId);
-      });
-
-      setSelectedNodes(new Set());
-      setSelectedConnections(new Set());
-    }
-  }, [selectedNodes, selectedConnections, onDeleteNode, onDeleteConnection]);
-
-  React.useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleMouseMove, handleMouseUp, handleKeyDown]);
-
-  const handleStartConnection = useCallback((nodeId, portId, portType, portElement) => {
-    setConnectingFrom({ nodeId, portId, portType, portElement });
+  const isValidConnection = useCallback((connection) => {
+    // Prevent self-connections
+    return connection.source !== connection.target;
   }, []);
 
-  const handleEndConnection = useCallback((nodeId, portId, portType) => {
-    if (!connectingFrom) return;
-
-    if (connectingFrom.nodeId === nodeId) {
-      setConnectingFrom(null);
-      return;
+  // Sync viewport from external zoom/pan
+  const { setViewport, getViewport } = useReactFlow();
+  const lastExternalUpdate = useRef({ zoom, pan });
+  
+  useEffect(() => {
+    const current = getViewport();
+    // Only sync if external values differ significantly from current viewport
+    if (
+      Math.abs(current.zoom - zoom) > 0.01 ||
+      Math.abs(current.x - pan.x) > 1 ||
+      Math.abs(current.y - pan.y) > 1
+    ) {
+      // Only apply if these came from external changes (toolbar buttons)
+      if (
+        lastExternalUpdate.current.zoom !== zoom ||
+        lastExternalUpdate.current.pan.x !== pan.x ||
+        lastExternalUpdate.current.pan.y !== pan.y
+      ) {
+        setViewport({ x: pan.x, y: pan.y, zoom });
+        lastExternalUpdate.current = { zoom, pan };
+      }
     }
+  }, [zoom, pan, setViewport, getViewport]);
 
-    if (connectingFrom.portType === portType) {
-      setConnectingFrom(null);
-      return;
-    }
-
-    const connection = {
-      id: `conn-${Date.now()}`,
-      fromNode: connectingFrom.portType === 'output' ? connectingFrom.nodeId : nodeId,
-      fromPort: connectingFrom.portType === 'output' ? connectingFrom.portId : portId,
-      toNode: connectingFrom.portType === 'output' ? nodeId : connectingFrom.nodeId,
-      toPort: connectingFrom.portType === 'output' ? portId : connectingFrom.portId
-    };
-
-    onAddConnection(connection);
-    setConnectingFrom(null);
-  }, [connectingFrom, onAddConnection]);
-
-  const handleSelectNode = useCallback((nodeId, multiSelect) => {
-    if (multiSelect) {
-      setSelectedNodes(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(nodeId)) {
-          newSet.delete(nodeId);
-        } else {
-          newSet.add(nodeId);
-        }
-        return newSet;
-      });
-    } else {
-      setSelectedNodes(new Set([nodeId]));
-      setSelectedConnections(new Set());
-      if (onSelectNode) onSelectNode(nodeId);
-    }
-  }, [onSelectNode]);
-
-  const handleSelectConnection = useCallback((connId, multiSelect) => {
-    if (multiSelect) {
-      setSelectedConnections(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(connId)) {
-          newSet.delete(connId);
-        } else {
-          newSet.add(connId);
-        }
-        return newSet;
-      });
-    } else {
-      setSelectedConnections(new Set([connId]));
-      setSelectedNodes(new Set());
-      if (onSelectConnection) onSelectConnection(connId);
-    }
-  }, [onSelectConnection]);
-
-  const getPortPosition = (nodeId, portId, portType) => {
-    const node = nodes.find(n => n.id === nodeId);
-    if (!node) return { x: 0, y: 0 };
-
-    const portElement = document.querySelector(`[data-node-id="${nodeId}"][data-port-id="${portId}"][data-port-type="${portType}"]`);
-    if (!portElement) return { x: 0, y: 0 };
-
-    const canvasRect = canvasRef.current.getBoundingClientRect();
-    const portRect = portElement.getBoundingClientRect();
-
-    return {
-      x: (portRect.left + portRect.width / 2 - canvasRect.left - pan.x) / zoom,
-      y: (portRect.top + portRect.height / 2 - canvasRect.top - pan.y) / zoom
-    };
-  };
-
-  const getConnectionPositions = () => {
-    return connections.map(conn => {
-      const fromPos = getPortPosition(conn.fromNode, conn.fromPort, 'output');
-      const toPos = getPortPosition(conn.toNode, conn.toPort, 'input');
-
-      return {
-        ...conn,
-        fromX: fromPos.x,
-        fromY: fromPos.y,
-        toX: toPos.x,
-        toY: toPos.y,
-        value: connectionValues?.[conn.id]
-      };
-    });
-  };
-
-  const getTempConnectionPosition = () => {
-    if (!connectingFrom || !canvasRef.current || !connectingFrom.portElement) return null;
-
-    const canvasRect = canvasRef.current.getBoundingClientRect();
-    const portRect = connectingFrom.portElement.getBoundingClientRect();
-
-    const fromX = (portRect.left + portRect.width / 2 - canvasRect.left - pan.x) / zoom;
-    const fromY = (portRect.top + portRect.height / 2 - canvasRect.top - pan.y) / zoom;
-    const toX = (mousePos.x - canvasRect.left - pan.x) / zoom;
-    const toY = (mousePos.y - canvasRect.top - pan.y) / zoom;
-
-    return { fromX, fromY, toX, toY };
-  };
-
-  const isInputPortConnected = useCallback((nodeId, portId) => {
-    return connections.some(c => c.toNode === nodeId && c.toPort === portId);
-  }, [connections]);
-
-  const connectedInputPorts = React.useMemo(() => {
-    const set = new Set();
-    connections.forEach(conn => {
-      set.add(`${conn.toNode}-${conn.toPort}`);
-    });
-    return set;
-  }, [connections]);
+  const onMoveEnd = useCallback((_, viewport) => {
+    lastExternalUpdate.current = { zoom: viewport.zoom, pan: { x: viewport.x, y: viewport.y } };
+    onPanChange({ x: viewport.x, y: viewport.y });
+  }, [onPanChange]);
 
   return (
-    <div
-      ref={canvasRef}
-      className="w-full h-full bg-[#0B0D12] relative overflow-hidden"
-      onMouseDown={handleMouseDown}
-      onContextMenu={handleContextMenu}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      style={{
-        cursor: isPanning ? 'grabbing' : 'default',
-        position: 'relative'
-      }}
-    >
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <svg className="w-full h-full">
-          <defs>
-            <pattern
-              id="grid"
-              width={20 * zoom}
-              height={20 * zoom}
-              patternUnits="userSpaceOnUse"
-              x={pan.x % (20 * zoom)}
-              y={pan.y % (20 * zoom)}
-            >
-              <circle cx="1" cy="1" r="1" fill="#1E2128" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </div>
-
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <svg
-          className="w-full h-full"
-          style={{
-            overflow: 'visible',
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: '0 0'
-          }}
-        >
-          <g style={{ pointerEvents: 'auto' }}>
-            {getConnectionPositions().map(conn => (
-              <Connection
-                key={conn.id}
-                id={conn.id}
-                fromX={conn.fromX}
-                fromY={conn.fromY}
-                toX={conn.toX}
-                toY={conn.toY}
-                value={conn.value}
-                selected={selectedConnections.has(conn.id)}
-                onSelect={handleSelectConnection}
-                onDelete={onDeleteConnection}
-              />
-            ))}
-
-            {connectingFrom && getTempConnectionPosition() && (() => {
-              const pos = getTempConnectionPosition();
-              return (
-                <Connection
-                  fromX={pos.fromX}
-                  fromY={pos.fromY}
-                  toX={pos.toX}
-                  toY={pos.toY}
-                  temporary
-                />
-              );
-            })()}
-          </g>
-        </svg>
-      </div>
-
-      <div
-        className="absolute inset-0"
-        style={{
-          zIndex: 2,
-          pointerEvents: 'auto',
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-          transformOrigin: '0 0'
-        }}
+    <div ref={reactFlowWrapper} className="w-full h-full">
+      <ReactFlow
+        nodes={rfNodes}
+        edges={rfEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onNodesDelete={onNodeDelete}
+        onEdgesDelete={onEdgeDelete}
+        onMoveEnd={onMoveEnd}
+        isValidConnection={isValidConnection}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        defaultViewport={{ x: pan.x, y: pan.y, zoom }}
+        fitView={false}
+        snapToGrid={true}
+        snapGrid={[20, 20]}
+        deleteKeyCode={['Delete', 'Backspace']}
+        multiSelectionKeyCode="Control"
+        panOnDrag={[2]}
+        selectionOnDrag={false}
+        panOnScroll={false}
+        zoomOnScroll={true}
+        proOptions={{ hideAttribution: true }}
+        style={{ background: '#0B0D12' }}
+        connectionLineStyle={{ stroke: '#666', strokeWidth: 2, strokeDasharray: '5,5' }}
       >
-        {nodes.map(node => (
-          <DefaultNodeComponent
-            key={node.id}
-            node={node}
-            selected={selectedNodes.has(node.id)}
-            connectedInputPorts={connectedInputPorts}
-            onUpdatePosition={onUpdateNodePosition}
-            onUpdateData={onUpdateNodeData}
-            onDelete={onDeleteNode}
-            onSelect={handleSelectNode}
-            onStartConnection={handleStartConnection}
-            onEndConnection={handleEndConnection}
-          />
-        ))}
-      </div>
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="#1E2128"
+        />
+      </ReactFlow>
 
       {contextMenu && (
         <ContextMenu
@@ -377,5 +249,13 @@ export default function GraphCanvas({
         />
       )}
     </div>
+  );
+}
+
+export default function GraphCanvas(props) {
+  return (
+    <ReactFlowProvider>
+      <GraphCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 }
