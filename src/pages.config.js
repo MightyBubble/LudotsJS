@@ -53,7 +53,6 @@ import AttributeSimulator from './pages/AttributeSimulator';
 import ConditionEditor from './pages/ConditionEditor';
 import DataGraphEditor from './pages/DataGraphEditor';
 import DataTableEditor from './pages/DataTableEditor';
-import DesignDoc from './pages/DesignDoc';
 import EntityPrototypeEditor from './pages/EntityPrototypeEditor';
 import EntityQueryEditor from './pages/EntityQueryEditor';
 import EntityRelationEditor from './pages/EntityRelationEditor';
@@ -74,6 +73,7 @@ import UnifiedGraphEditor from './pages/UnifiedGraphEditor';
 import UnlockableCommands from './pages/UnlockableCommands';
 import ValidatorEditor from './pages/ValidatorEditor';
 import VisualGraphEditor from './pages/VisualGraphEditor';
+import DesignDoc from './pages/DesignDoc';
 import __Layout from './Layout.jsx';
 
 
@@ -84,7 +84,6 @@ export const PAGES = {
     "ConditionEditor": ConditionEditor,
     "DataGraphEditor": DataGraphEditor,
     "DataTableEditor": DataTableEditor,
-    "DesignDoc": DesignDoc,
     "EntityPrototypeEditor": EntityPrototypeEditor,
     "EntityQueryEditor": EntityQueryEditor,
     "EntityRelationEditor": EntityRelationEditor,
@@ -105,6 +104,7 @@ export const PAGES = {
     "UnlockableCommands": UnlockableCommands,
     "ValidatorEditor": ValidatorEditor,
     "VisualGraphEditor": VisualGraphEditor,
+    "DesignDoc": DesignDoc,
 }
 
 export const pagesConfig = {

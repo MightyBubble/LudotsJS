@@ -10,9 +10,23 @@ import Toolbar from '@/components/graph/Toolbar';
 
 // Custom Node Component for Structure Editor
 const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConnection, onUpdatePosition }) => {
+  const handleMouseDown = (e) => {
+    if (e.button === 0) {
+      e.stopPropagation();
+      onSelect(node.id, e.shiftKey);
+    }
+  };
+
   return (
     <div
-      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] cursor-grab ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#2A2E37] bg-[#0D0F14]'}`}
+      onMouseDown={handleMouseDown}
+      style={{
+        position: 'absolute',
+        left: node.position.x,
+        top: node.position.y,
+        cursor: 'move',
+      }}
+      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#2A2E37] bg-[#0D0F14]'}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#2A2E37]">
