@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* React Flow dark theme overrides */
+.react-flow__node {
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.react-flow__node.selected {
+  box-shadow: none !important;
+}
+
+.react-flow__handle {
+  z-index: 10;
+}
+
+.react-flow__edge-path {
+  cursor: pointer;
+}
+
+.react-flow__connection-line {
+  stroke: #666;
+  stroke-width: 2;
+  stroke-dasharray: 5, 5;
+}
+
+.react-flow__minimap {
+  background: #15171C;
+}
+
+.react-flow__controls {
+  display: none;
+}
+
+.react-flow__panel {
+  display: none;
+}
