@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network, BookOpen } from "lucide-react";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network, BookOpen, Database } from "lucide-react";
+import NavGroup from "@/components/layout/NavGroup";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,9 +58,6 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("EntityRelationEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "EntityRelationEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
           <LinkIcon className="w-3.5 h-3.5" />关系
         </Link>
-        <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "StructureEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
-          <Network className="w-3.5 h-3.5" />结构
-        </Link>
         <Link to={createPageUrl("NewAttributeSimulator")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "NewAttributeSimulator" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
           <Calculator className="w-3.5 h-3.5" />计算器
         </Link>
@@ -69,9 +67,14 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("GlobalConstantEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "GlobalConstantEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
           <Settings className="w-3.5 h-3.5" />常量
         </Link>
-        <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DataTableEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
-            <Table className="w-3.5 h-3.5" />数据表
-          </Link>
+        <NavGroup icon={Database} label="数据" active={currentPageName === "DataTableEditor" || currentPageName === "StructureEditor"}>
+            <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-2 px-3 py-1.5 text-xs ${currentPageName === "DataTableEditor" ? "text-[#D97706]" : "text-gray-300 hover:bg-[#2A2E37] hover:text-white"}`}>
+              <Table className="w-3.5 h-3.5" />数据表
+            </Link>
+            <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-2 px-3 py-1.5 text-xs ${currentPageName === "StructureEditor" ? "text-[#D97706]" : "text-gray-300 hover:bg-[#2A2E37] hover:text-white"}`}>
+              <Network className="w-3.5 h-3.5" />关系图
+            </Link>
+          </NavGroup>
           <div className="h-5 w-px bg-[#2A2E37]" />
           <Link to={createPageUrl("DesignDoc")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DesignDoc" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
             <BookOpen className="w-3.5 h-3.5" />文档
@@ -92,7 +95,7 @@ export default function Layout({ children, currentPageName }) {
           {currentPageName === "ModifierDefinitionEditor" && "修饰器"}
           {currentPageName === "EntityPrototypeEditor" && "原型"}
           {currentPageName === "EntityRelationEditor" && "关系"}
-          {currentPageName === "StructureEditor" && "结构"}
+          {currentPageName === "StructureEditor" && "关系图"}
           {currentPageName === "NewAttributeSimulator" && "计算器"}
           {currentPageName === "GameEventEditor" && "事件"}
           {currentPageName === "GlobalConstantEditor" && "常量"}
@@ -139,9 +142,6 @@ export default function Layout({ children, currentPageName }) {
           <Link to={createPageUrl("EntityRelationEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "EntityRelationEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <LinkIcon className="w-4 h-4" />关系
           </Link>
-          <Link to={createPageUrl("StructureEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "StructureEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
-            <Network className="w-4 h-4" />结构
-          </Link>
           <Link to={createPageUrl("NewAttributeSimulator")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "NewAttributeSimulator" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Calculator className="w-4 h-4" />计算器
           </Link>
@@ -151,8 +151,12 @@ export default function Layout({ children, currentPageName }) {
           <Link to={createPageUrl("GlobalConstantEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#3d3d3d] ${currentPageName === "GlobalConstantEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Settings className="w-4 h-4" />常量
           </Link>
+          <div className="px-4 py-1.5 text-[10px] text-gray-500 uppercase tracking-wider bg-[#0D0F14] border-b border-[#2A2E37]">数据</div>
           <Link to={createPageUrl("DataTableEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#2A2E37] ${currentPageName === "DataTableEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <Table className="w-4 h-4" />数据表
+          </Link>
+          <Link to={createPageUrl("StructureEditor")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 border-b border-[#2A2E37] ${currentPageName === "StructureEditor" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
+            <Network className="w-4 h-4" />关系图
           </Link>
           <Link to={createPageUrl("DesignDoc")} onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 px-4 py-3 ${currentPageName === "DesignDoc" ? "bg-[#0e639c] text-white" : "text-gray-300"}`}>
             <BookOpen className="w-4 h-4" />文档

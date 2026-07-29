@@ -35,6 +35,8 @@ GlobalConstant / DataTable → 全局可引用`,
 
 • Structure 统一：统一图编辑器的 structure 类型改为直接读写 StructureDefinition（EntityPrototype.structure_bindings 引用的就是它），新增 src/lib/structureAdapter.js 负责 StructureDefinition ↔ 画布(nodes/connections) 双向转换；旧的 DataGraph(structure) 数据已一次性迁移完毕并删除，DataGraph 的 graph_type 枚举已移除 structure，无遗留兼容代码。
 
+• 图 / 数据分层（本次决策）：判定标准是「能否被求值」。能被求值的进图编辑器（Data / Query / Function / 未来的 Action，按 usage 组织）；只描述记录之间关系的进数据层。结构图因此从图编辑器的概念范围移出，归入导航的「数据」分组（数据表 + 关系图），未来的任务流图、progression 解锁图、科技树都复用同一个底座：一个带拓扑关系字段的实体 + 两个视图（表格视图批量编辑 / 拓扑视图看依赖与成环）。两边只通过引用衔接——解锁节点的可解锁性引用 Requirement 或验证图，任务节点的奖励引用动作图，计算逻辑仍只在执行图里定义一次。
+
 待办（按优先级）：
 1. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
 2. Action Graph（第 5 种图，副作用图）：引入 exec 执行引脚、事件入口节点、动作节点（加/移标签、改属性键、施加修饰器、发射事件、增删关系）与真正的顺序 / 分支 / 遍历。之后各处硬编码副作用字段渐进式改为引用 action graph。
