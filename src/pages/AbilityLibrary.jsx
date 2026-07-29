@@ -28,8 +28,16 @@ export default function AbilityLibraryPage() {
 
   return (
     <RecordWorkspace
-      title="能力 Abilities" icon={Wand2} entityName="Ability"
+      entityName="Ability"
       records={records}
+      columns={[
+        { key: 'ability_id', label: '能力ID', width: 200, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.ability_id}</span> },
+        { key: 'name', label: '名称', width: 160 },
+        { key: 'activation_mode', label: '激活模式', width: 120, render: (r) => r.activation_mode || 'active' },
+        { key: 'ability_tags', label: '标签', render: (r) => (r.ability_tags || []).join(', ') || '-' },
+        { key: 'activation_effect_ids', label: '激活效果', width: 100, render: (r) => (r.activation_effect_ids || []).length },
+        { key: 'is_active', label: '启用', width: 70, render: (r) => (r.is_active !== false ? '是' : '否') },
+      ]}
       toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.activation_mode || 'active'} · ${(r.activation_effect_ids || []).length} 效果` })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create}

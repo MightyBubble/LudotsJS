@@ -33,9 +33,17 @@ export default function AssetLibraryPage() {
 
   return (
     <RecordWorkspace
-      title={filterType ? `资源库 · ${TYPE_LABELS[filterType] || filterType}` : '资源库'}
-      icon={ImageIcon} entityName="Asset"
+      entityName="Asset"
       records={visibleRecords}
+      columns={[
+        { key: 'asset_id', label: '资源ID', width: 200, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.asset_id}</span> },
+        { key: 'name', label: '名称', width: 160 },
+        { key: 'asset_type', label: '类型', width: 100 },
+        { key: 'source_type', label: '来源', width: 100 },
+        { key: 'uri', label: '地址', render: (r) => <span className="truncate block max-w-[280px]">{r.uri || '-'}</span> },
+        { key: 'version', label: '版本', width: 70 },
+        { key: 'is_active', label: '启用', width: 70, render: (r) => (r.is_active !== false ? '是' : '否') },
+      ]}
       toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.asset_type} · ${r.source_type}${r.is_active === false ? ' · 停用' : ''}` })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create} onDelete={handleDelete} onSave={save} dirty={dirty}

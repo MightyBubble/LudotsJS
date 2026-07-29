@@ -40,8 +40,17 @@ export default function EffectLibraryPage() {
 
   return (
     <RecordWorkspace
-      title="效果 Effects" icon={Sparkles} entityName="Effect"
+      entityName="Effect"
       records={records}
+      columns={[
+        { key: 'effect_id', label: '效果ID', width: 200, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.effect_id}</span> },
+        { key: 'name', label: '名称', width: 160 },
+        { key: 'lifetime', label: '生命周期', width: 110, render: (r) => r.lifetime?.kind || 'instant' },
+        { key: 'stacking', label: '叠加', width: 140, render: (r) => r.application?.stacking || 'none' },
+        { key: 'tags', label: '标签', render: (r) => (r.tags || []).join(', ') || '-' },
+        { key: 'phases', label: '启用阶段', width: 90, render: (r) => (r.phases || []).filter(p => p.enabled).length },
+        { key: 'is_active', label: '启用', width: 70, render: (r) => (r.is_active !== false ? '是' : '否') },
+      ]}
       toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.lifetime?.kind || 'instant'} · ${(r.phases || []).filter(p => p.enabled).length} phases` })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create}

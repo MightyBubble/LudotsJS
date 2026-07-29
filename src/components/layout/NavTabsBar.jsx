@@ -1,18 +1,37 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { usePageActionsSlot } from "@/components/shell/PageActions";
+
+const itemPath = (item) => `/${item.page}${item.search || ""}`;
 
 export default function NavTabsBar({ groups, currentPageName, leading = null }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentGroup = groups.find(g => g.items.some(i => i.page === currentPageName));
   const [activeKey, setActiveKey] = useState(currentGroup?.key || groups[0]?.key);
   const setSlot = usePageActionsSlot();
+  const lastVisited = useRef({});
 
   useEffect(() => {
     if (currentGroup) setActiveKey(currentGroup.key);
   }, [currentGroup?.key]);
 
+  // 记住每个模块最后访问的条目
+  useEffect(() => {
+    if (!currentGroup) return;
+    const match = currentGroup.items.find(
+      i => i.page === currentPageName && (i.search || "") === (location.search || "")
+    ) || currentGroup.items.find(i => i.page === currentPageName);
+    if (match) lastVisited.current[currentGroup.key] = itemPath(match);
+  }, [currentGroup?.key, currentPageName, location.search]);
+
   const active = groups.find(g => g.key === activeKey) || groups[0];
+
+  const openGroup = (g) => {
+    setActiveKey(g.key);
+    const target = lastVisited.current[g.key] || (g.items[0] && itemPath(g.items[0]));
+    if (target && target !== `${location.pathname}${location.search}`) navigate(target);
+  };
 
   return (
     <>
@@ -23,7 +42,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
         {groups.map(g => (
           <button
             key={g.key}
-            onClick={() => setActiveKey(g.key)}
+            onClick={() => openGroup(g)}
             className={`px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
               g.key === active?.key
                 ? "border-[#D97706] text-[#E2D8B3]"
@@ -44,7 +63,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
           return (
             <Link
               key={item.page + (item.search || "")}
-              to={`/${item.page}${item.search || ""}`}
+              to={itemPath(item)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] whitespace-nowrap ${
                 isActive
                   ? "bg-[#D97706] text-black"
