@@ -700,7 +700,7 @@ export default function UnifiedGraphEditorPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     {/* Conditional rendering for icons based on graph_type */}
-                    {graph.graph_type === 'data' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : 
+                    {graph.entity_type === 'DataGraph' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : 
                      graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : 
                      graph.graph_type === 'structure' ? <Share2 className="w-4 h-4 text-[#ffc000]" /> :
                      <Database className="w-4 h-4 text-[#c97fff]" />}
@@ -709,10 +709,13 @@ export default function UnifiedGraphEditorPage() {
                   {graph.description && <p className="text-gray-500 text-xs mt-1">{graph.description}</p>}
                   <div className="text-[10px] text-gray-600 mt-2">
                     {/* Conditional rendering for graph type display */}
-                    {graph.graph_type === 'data' ? 'Data Graph' : 
-                     graph.graph_type === 'query' ? 'Entity Query' : 
-                     graph.graph_type === 'structure' ? 'Structure Definition' :
-                     `Function Graph (${graph.return_type || 'void'})`}
+                    {graph.entity_type === 'DataGraph'
+                      ? (graph.graph_type === 'curve' ? 'Data Graph (曲线)'
+                        : graph.graph_type === 'attribute_calculation' ? 'Data Graph (属性计算)'
+                        : 'Data Graph')
+                      : graph.graph_type === 'query' ? 'Entity Query'
+                      : graph.graph_type === 'structure' ? 'Structure Definition'
+                      : `Function Graph (${graph.return_type || 'void'})`}
                   </div>
                 </div>
               </div>
