@@ -358,6 +358,36 @@ evaluate_context_parameters：定义评估此条件所需的上下文参数。`,
     questions: [
       "此页面的暗色主题尚未更新为新的配色方案（仍使用 #1e1e1e / #2d2d2d / #3d3d3d），与其他页面不一致。"
     ]
+  },
+  {
+    id: "action-graph",
+    title: "Action Graph（规划中）",
+    overview: "可复用的动作例程库，类似虚幻的 Function Library / Macro。",
+    definition: "第五类图。带执行流（exec 引脚）的可复用动作例程：有签名（输入参数、可选返回值）、有内部执行流与副作用节点，可被其他 Action Graph 调用、也可被触发器调用。它本身不包含任何触发条件。",
+    intent: `明确定位：Action Graph ≠ 触发器。两者严格分层：
+
+• 触发器层（TagCountEvent / AttributeThresholdEvent / InteractionEffect / UnlockableCommand 等）：只负责"什么时候发生"，以及把上下文（source / target / 数值）绑定到被调用例程的参数上。
+• Action Graph 层：只负责"做什么"，是无状态、可复用、可组合的动作单元，像 UE 的蓝图函数库/宏一样被到处调用，不知道自己是被谁触发的。
+
+这样同一个动作（例如"施加灼烧并扣血"）可以被标签事件、属性阈值、交互效果共用，不需要在每个触发器实体里重复配置。`,
+    architecture: `实体：ActionGraph（规划）
+字段：action_id, name, description, parameters[]（名称/类型/默认值）, return_type, is_macro（宏：内联展开，可有多个执行输出；函数：单入单出）, graph_definition（JSON）
+
+节点分类（规划）：
+• 执行流：exec 入口(entry)/返回(return)、分支(branch)、序列(sequence)、循环(for_each，接 Query 图输出的实体集)
+• 副作用：添加/移除标签、施加/移除修饰器、设置属性键值、触发 GameEvent、创建/删除关系
+• 调用：call_action（调用另一个 Action Graph）、call_function（调用 Function 图求值）
+• 取值：复用 Data / Function / Query 图作为纯求值子图；条件判断复用 Validator / Requirement
+
+引脚约定：白色三角 exec 引脚只连 exec，数据引脚沿用现有 TYPE_SHAPES / TYPE_COLORS。
+运行时：新增 actionRuntime.js，按 exec 链顺序执行并产出"副作用日志"（不真的改库），在编辑器右侧面板单步查看。
+
+触发器侧改造（后续）：各触发器实体新增 action_id + parameter_bindings，逐步取代现有各自的固定结果字段。`,
+    questions: [
+      "宏（is_macro，内联展开、允许多个执行输出引脚）第一版是否需要？还是先只做函数形态（单入单出）。",
+      "副作用是否需要事务/回滚语义（一串动作中途失败时前面的是否撤销）。",
+      "循环节点的实体集来源确认为 Query 图输出，是否还需要支持数组类型的黑板变量。"
+    ]
   }
 ];
 
