@@ -2,7 +2,8 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Network, Filter, Database, Share2, Link, Trash2, Edit3, Save, X } from "lucide-react"; // Added Database icon and others
+import { Network, Filter, Database, Share2 } from "lucide-react";
+import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
@@ -24,7 +25,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function UnifiedGraphEditorPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGraph, setSelectedGraph] = useState(null);
   const [currentGraph, setCurrentGraph] = useState(null);
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -176,14 +177,6 @@ export default function UnifiedGraphEditorPage() {
     },
     onSuccess: () => invalidateGraphs(),
   });
-
-  const filteredGraphs = useMemo(() => {
-    if (!searchQuery) return allGraphs;
-    return allGraphs.filter(g =>
-      g.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (g.description && g.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [allGraphs, searchQuery]);
 
   const openGraph = (graph) => {
     if (graph.entity_type === 'StructureDefinition') {
@@ -607,24 +600,9 @@ export default function UnifiedGraphEditorPage() {
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Network className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">图编辑器</span>
-        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredGraphs.length} 个</span>
+        <span className="text-xs text-gray-500 hidden sm:inline">共 {allGraphs.length} 个</span>
         <div className="flex-1" />
-        <div className="relative hidden md:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-[#e5e5e5]"
-          />
-        </div>
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-black text-xs">
-              <Plus className="w-3 h-3 md:mr-1" />
-              <span className="hidden md:inline">新建图</span>
-            </Button>
-          </DialogTrigger>
           <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
             <DialogHeader><DialogTitle className="text-[#e5e5e5]">新建图</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
@@ -686,49 +664,54 @@ export default function UnifiedGraphEditorPage() {
         </Dialog>
       </div>
 
-      {/* 移动端搜索 */}
-      <div className="md:hidden px-2 py-2 bg-[#15171C] border-b border-[#2A2E37]">
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 pl-7 w-full bg-[#0D0F14] border-[#2A2E37] text-sm text-[#e5e5e5]"
-          />
-        </div>
-      </div>
+      <div className="flex-1 flex overflow-hidden">
+        <AssetBrowserPanel
+          entityName="Graph"
+          records={allGraphs}
+          toItem={(g) => ({
+            id: g.id,
+            name: g.name,
+            subtitle: `${graphTypeLabel(g)}${g.entity_type === 'DataGraph' ? ` · ${g.return_type || 'number'}` : ''}`,
+          })}
+          selectedId={selectedGraph?.id}
+          onSelect={setSelectedGraph}
+          onCreate={() => setIsCreating(true)}
+          onDelete={(g) => {
+            if (window.confirm(`确定删除「${g.name}」吗？`)) {
+              deleteMutation.mutate({ id: g.id, entity_type: g.entity_type });
+              if (selectedGraph?.id === g.id) setSelectedGraph(null);
+            }
+          }}
+        />
 
-      <div className="flex-1 overflow-auto p-2 md:p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-          {filteredGraphs.map((graph) => (
-            <div key={graph.id} className="bg-[#15171C] rounded border border-[#2A2E37] p-4 hover:border-[#D97706] transition-colors group">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {/* Conditional rendering for icons based on graph_type */}
-                    {graph.entity_type === 'DataGraph' ? <Network className="w-4 h-4 text-[#5b9bd5]" /> : 
-                     graph.graph_type === 'query' ? <Filter className="w-4 h-4 text-[#70ad47]" /> : 
-                     graph.graph_type === 'structure' ? <Share2 className="w-4 h-4 text-[#ffc000]" /> :
-                     <Database className="w-4 h-4 text-[#c97fff]" />}
-                    <h3 className="text-[#e5e5e5] font-medium">{graph.name}</h3>
-                  </div>
-                  {graph.description && <p className="text-gray-500 text-xs mt-1">{graph.description}</p>}
-                  <div className="text-[10px] text-gray-600 mt-2">
-                    {graphTypeLabel(graph)}
-                    {graph.entity_type === 'DataGraph' && ` · ${graph.return_type || 'number'}`}
-                  </div>
-                </div>
+        <div className="flex-1 overflow-auto p-6">
+          {selectedGraph ? (
+            <div className="max-w-xl space-y-4">
+              <div className="flex items-center gap-2">
+                {selectedGraph.entity_type === 'DataGraph' ? <Network className="w-5 h-5 text-[#5b9bd5]" /> :
+                 selectedGraph.graph_type === 'query' ? <Filter className="w-5 h-5 text-[#70ad47]" /> :
+                 selectedGraph.graph_type === 'structure' ? <Share2 className="w-5 h-5 text-[#ffc000]" /> :
+                 <Database className="w-5 h-5 text-[#c97fff]" />}
+                <h2 className="text-xl font-bold text-[#E2D8B3]">{selectedGraph.name}</h2>
               </div>
-              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
-                <Network className="w-3 h-3 mr-1" />可视化编辑
+              <div className="text-xs text-gray-500">
+                {graphTypeLabel(selectedGraph)}
+                {selectedGraph.entity_type === 'DataGraph' && ` · 出口 ${selectedGraph.return_type || 'number'}`}
+              </div>
+              {selectedGraph.description && <p className="text-sm text-gray-400">{selectedGraph.description}</p>}
+              <Button onClick={() => openGraph(selectedGraph)} className="h-8 bg-[#D97706] hover:bg-[#B45309] text-black">
+                <Network className="w-3.5 h-3.5 mr-1" />可视化编辑
               </Button>
             </div>
-          ))}
+          ) : (
+            <div className="flex h-full items-center justify-center text-gray-500 text-sm">
+              <div className="text-center">
+                <Network className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                <p>从左侧选择或新建一张图</p>
+              </div>
+            </div>
+          )}
         </div>
-        {filteredGraphs.length === 0 && (
-          <div className="text-center py-12 text-white/40"><Network className="w-12 h-12 mx-auto mb-3 opacity-50" /><p>暂无图</p></div>
-        )}
       </div>
     </div>
   );
