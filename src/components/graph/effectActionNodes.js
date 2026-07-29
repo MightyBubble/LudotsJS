@@ -1,12 +1,7 @@
 import { Activity, Crosshair, HeartPulse, MapPin, PackagePlus, Radar, RefreshCw, Rocket, Send, Sparkles, Swords, Users, Eye, EyeOff } from 'lucide-react';
 
 const ports = {
-  inputs: [
-    { id: 'exec', label: '执行', type: 'exec' },
-    { id: 'source', label: '源实体', type: 'entity' },
-    { id: 'target', label: '目标实体', type: 'entity' },
-    { id: 'effect', label: 'Effect Config', type: 'any' },
-  ],
+  inputs: [{ id: 'exec', label: '执行', type: 'exec' }],
   outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
 };
 

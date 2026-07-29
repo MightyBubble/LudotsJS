@@ -305,6 +305,11 @@ export default function Node({
       </div>
 
       <div className="p-3 space-y-0">
+        {node.data?.details?.length > 0 && (
+          <div className="mb-2 space-y-0.5 border-b border-[#2A2E37] pb-2">
+            {node.data.details.map(detail => <div key={detail} className="font-mono text-[9px] leading-4 text-gray-400">{detail}</div>)}
+          </div>
+        )}
         <div className="nodrag">{renderInlineInputs()}</div>
 
         {node.outputs && node.outputs.length > 0 && (

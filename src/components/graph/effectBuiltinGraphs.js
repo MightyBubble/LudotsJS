@@ -1,3 +1,5 @@
+import { EFFECT_BUILTIN_CONTRACTS } from './effectBuiltinContracts';
+
 const ENTRY_OUTPUTS = [{ id: 'exec', label: '执行', type: 'exec' }];
 
 export const EFFECT_BUILTIN_OPERATIONS = [
@@ -31,7 +33,15 @@ export function buildEffectBuiltinGraph(actionId, name, operationType) {
     const connections = chain.slice(0, -1).map((node, index) => ({ id: `${actionId}-${index}`, fromNode: node.id, fromPort: index === 0 ? 'exec' : 'exec_out', toNode: chain[index + 1].id, toPort: 'exec' }));
     return { action_id: actionId, name, description: 'C# GraphConfig 的只读运行图', parameters: [], graph_definition: JSON.stringify({ nodes: chain, connections, blackboard: {}, readOnly: true }) };
   }
-  const operation = { id: 'effect-operation', type: operationType, position: { x: 440, y: 180 }, data: { label: `InvokeBuiltin · ${name}`, runtimeContext: 'EffectContext + merged EffectConfigParams' }, inputs: EXEC_INPUT, outputs: [], locked: true };
-  const connections = [{ id: `${actionId}-exec`, fromNode: entry.id, fromPort: 'exec', toNode: operation.id, toPort: 'exec' }];
-  return { action_id: actionId, name, description: 'C# Builtin Handler 的只读 Graph 视图；Context 与 Config 为隐式运行时上下文', parameters: [], graph_definition: JSON.stringify({ nodes: [entry, operation], connections, blackboard: {}, readOnly: true }) };
+  const contract = EFFECT_BUILTIN_CONTRACTS[actionId] || {};
+  const contextOutputs = (contract.context || []).map(field => ({ id: `context-${field}`, label: field, type: 'entity' }));
+  entry.outputs = [...ENTRY_OUTPUTS, ...contextOutputs];
+  entry.data.details = ['EffectContext'];
+  const sources = (contract.configs || []).map((item, index) => ({ id: `config-${item.id}`, type: 'runtime_param_source', position: { x: 80, y: 360 + index * 170 }, data: { label: item.label, details: item.fields }, inputs: [], outputs: [{ id: item.id, label: item.id, type: 'any' }], locked: true }));
+  if (contract.params?.length) sources.push({ id: 'merged-params', type: 'runtime_param_source', position: { x: 340, y: 360 }, data: { label: 'EffectConfigParams · merged', details: contract.params }, inputs: [], outputs: [{ id: 'mergedParams', label: 'mergedParams', type: 'any' }], locked: true });
+  if (contract.runtime?.length) sources.push({ id: 'runtime-scope', type: 'runtime_param_source', position: { x: 600, y: 360 }, data: { label: 'BuiltinHandlerRuntimeScope', details: contract.runtime }, inputs: [], outputs: [{ id: 'runtimeScope', label: 'runtimeScope', type: 'any' }], locked: true });
+  const dataInputs = [...contextOutputs.map(port => ({ ...port })), ...(contract.configs || []).map(item => ({ id: item.id, label: item.id, type: 'any' })), ...(contract.params?.length ? [{ id: 'mergedParams', label: 'mergedParams', type: 'any' }] : []), ...(contract.runtime?.length ? [{ id: 'runtimeScope', label: 'runtimeScope', type: 'any' }] : [])];
+  const operation = { id: 'effect-operation', type: operationType, position: { x: 900, y: 180 }, data: { label: `InvokeBuiltin · ${name}`, details: ['World', 'effectEntity', 'ref EffectContext', 'in EffectConfigParams', 'in EffectTemplateData'] }, inputs: [...EXEC_INPUT, ...dataInputs], outputs: (contract.results || []).map((result, index) => ({ id: `result-${index}`, label: result, type: 'any' })), locked: true };
+  const connections = [{ id: `${actionId}-exec`, fromNode: entry.id, fromPort: 'exec', toNode: operation.id, toPort: 'exec' }, ...contextOutputs.map(port => ({ id: `${actionId}-${port.id}`, fromNode: entry.id, fromPort: port.id, toNode: operation.id, toPort: port.id })), ...(contract.configs || []).map(item => ({ id: `${actionId}-${item.id}`, fromNode: `config-${item.id}`, fromPort: item.id, toNode: operation.id, toPort: item.id })), ...(contract.params?.length ? [{ id: `${actionId}-params`, fromNode: 'merged-params', fromPort: 'mergedParams', toNode: operation.id, toPort: 'mergedParams' }] : []), ...(contract.runtime?.length ? [{ id: `${actionId}-runtime`, fromNode: 'runtime-scope', fromPort: 'runtimeScope', toNode: operation.id, toPort: 'runtimeScope' }] : [])];
+  return { action_id: actionId, name, description: 'C# Builtin Handler 的只读参数与数据依赖视图', parameters: [], graph_definition: JSON.stringify({ nodes: [entry, ...sources, operation], connections, blackboard: {}, readOnly: true }) };
 }
