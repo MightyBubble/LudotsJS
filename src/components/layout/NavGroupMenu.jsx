@@ -22,8 +22,8 @@ export default function NavGroupMenu({ group, currentPageName }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="bg-[#15171C] border-[#2A2E37] text-gray-300 min-w-44">
         {group.items.map(item => (
-          <DropdownMenuItem key={item.page} asChild className="focus:bg-[#2A2E37] focus:text-white cursor-pointer">
-            <Link to={`/${item.page}`} className="flex items-center gap-2 text-xs">
+          <DropdownMenuItem key={item.page + (item.search || '')} asChild className="focus:bg-[#2A2E37] focus:text-white cursor-pointer">
+            <Link to={`/${item.page}${item.search || ''}`} className="flex items-center gap-2 text-xs">
               <item.icon className={`w-3.5 h-3.5 ${item.page === currentPageName ? 'text-[#D97706]' : ''}`} />
               <span className={item.page === currentPageName ? 'text-[#D97706]' : ''}>{item.label}</span>
             </Link>

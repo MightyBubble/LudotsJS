@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Image as ImageIcon } from 'lucide-react';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
@@ -8,11 +9,15 @@ import { Section, TextField, SelectField, ListField, NumberField, BoolField } fr
 const ASSET_TYPES = ['image', 'audio', 'model', 'animation', 'material', 'particle', 'prefab', 'data', 'script', 'other'];
 const SOURCE_TYPES = ['uploaded', 'url', 'builtin', 'generated'];
 
+const TYPE_LABELS = { model: '模型', animation: '动画', audio: '音效', image: '图像' };
+
 export default function AssetLibraryPage() {
+  const filterType = new URLSearchParams(useLocation().search).get('type') || '';
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Asset', 'assets',
-    () => ({ asset_id: `asset_${Date.now()}`, name: '新资源', asset_type: 'image', source_type: 'url', version: 1, is_active: true, tags: [] })
+    () => ({ asset_id: `asset_${Date.now()}`, name: `新${TYPE_LABELS[filterType] || '资源'}`, asset_type: filterType || 'image', source_type: 'url', version: 1, is_active: true, tags: [] })
   );
+  const visibleRecords = filterType ? records.filter(r => r.asset_type === filterType) : records;
   const { abilities } = useCoreRefs();
 
   const usedBy = draft ? abilities.filter(a => a.icon_asset_id === draft.asset_id) : [];
@@ -28,8 +33,9 @@ export default function AssetLibraryPage() {
 
   return (
     <RecordWorkspace
-      title="资源库" icon={ImageIcon} entityName="Asset"
-      records={records}
+      title={filterType ? `资源库 · ${TYPE_LABELS[filterType] || filterType}` : '资源库'}
+      icon={ImageIcon} entityName="Asset"
+      records={visibleRecords}
       toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.asset_type} · ${r.source_type}${r.is_active === false ? ' · 停用' : ''}` })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create} onDelete={handleDelete} onSave={save} dirty={dirty}

@@ -1,6 +1,7 @@
 import {
   Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
+  Image as ImageIcon, Music, Film,
 } from 'lucide-react';
 
 /** 顶栏分组导航：每组一个下拉，避免顶栏横向滚动 */
@@ -25,22 +26,36 @@ export const NAV_GROUPS = [
       { page: 'EffectLibrary', label: 'Effect 效果', icon: Sparkles },
       { page: 'AbilityLibrary', label: 'Ability 能力', icon: Wand2 },
       { page: 'TriggerLibrary', label: 'Trigger 触发器', icon: KeyRound },
+      { page: 'ModifierDefinitionEditor', label: '修饰器', icon: GitBranch },
       { page: 'ValidatorEditor', label: '验证器', icon: Shield },
       { page: 'RequirementEditor', label: '需求', icon: CheckSquare },
       { page: 'GameEventEditor', label: '事件', icon: Zap },
     ],
   },
   {
-    label: '数据',
+    label: '数据原型',
     items: [
       { page: 'AttributeEditor', label: '属性', icon: Layers },
-      { page: 'ModifierDefinitionEditor', label: '修饰器', icon: GitBranch },
       { page: 'EntityPrototypeEditor', label: '实体原型', icon: Box },
       { page: 'EntityRelationEditor', label: '实体关系', icon: LinkIcon },
-      { page: 'DataTableEditor', label: '数据表', icon: Table },
-      { page: 'GlobalConstantEditor', label: '常量表', icon: Settings },
+    ],
+  },
+  {
+    label: '静态数据',
+    items: [
       { page: 'StructureEditor', label: '结构关系图', icon: Network },
-      { page: 'AssetLibrary', label: 'Asset 资源', icon: Box },
+      { page: 'GlobalConstantEditor', label: '常量表', icon: Settings },
+      { page: 'DataTableEditor', label: '数据表', icon: Table },
+    ],
+  },
+  {
+    label: '资源',
+    items: [
+      { page: 'AssetLibrary', label: '全部资源', icon: Box },
+      { page: 'AssetLibrary', search: '?type=model', label: '模型', icon: Box },
+      { page: 'AssetLibrary', search: '?type=animation', label: '动画', icon: Film },
+      { page: 'AssetLibrary', search: '?type=audio', label: '音效', icon: Music },
+      { page: 'AssetLibrary', search: '?type=image', label: '图像', icon: ImageIcon },
     ],
   },
   {

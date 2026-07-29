@@ -49,8 +49,8 @@ export default function Layout({ children, currentPageName }) {
               </div>
               {group.items.map(item => (
                 <Link
-                  key={item.page}
-                  to={`/${item.page}`}
+                  key={item.page + (item.search || '')}
+                  to={`/${item.page}${item.search || ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 border-b border-[#2A2E37] text-sm ${
                     item.page === currentPageName ? "bg-[#D97706] text-black" : "text-gray-300"
