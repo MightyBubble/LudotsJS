@@ -5,7 +5,6 @@ const TABS = [
   { key: 'data', label: '数据图' },
   { key: 'query', label: '查询图' },
   { key: 'function', label: '函数图' },
-  { key: 'structure', label: '结构图' },
 ];
 
 export default function GraphTypeTabs({ value, onChange, counts = {} }) {

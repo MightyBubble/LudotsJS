@@ -8,7 +8,6 @@ import GraphCanvas from '../components/graph/GraphCanvas';
 import NodeSearchMenu from '../components/graph/NodeSearchMenu';
 import FloatingPanel from '../components/graph/FloatingPanel';
 import GraphMetaPanel from '../components/graph/GraphMetaPanel';
-import StructurePropsPanel from '../components/graph/StructurePropsPanel';
 import GraphTypeTabs from '../components/graph/GraphTypeTabs';
 import Toolbar from '../components/graph/Toolbar';
 import UnifiedNode from '../components/graph/UnifiedNode';
@@ -17,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
 import { graphTypeLabel, returnTypeOptions, USAGE_LABELS, DATA_RETURN_TYPES, FUNCTION_RETURN_TYPES } from '../components/graph/graphLabels';
 import { evaluateGraph } from '@/lib/graphRuntime';
-import { structureToGraph, graphToStructure } from '@/lib/structureAdapter';
 import QuerySimulationPanel from '../components/queryGraph/QuerySimulationPanel';
 import {
   Dialog,
@@ -51,12 +49,6 @@ export default function UnifiedGraphEditorPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: relations = [] } = useQuery({
-    queryKey: ['entityRelations'],
-    queryFn: () => base44.entities.EntityRelation.list(),
-    initialData: [],
-  });
-
   const { data: dataGraphs = [] } = useQuery({
     queryKey: ['dataGraphs'],
     queryFn: () => base44.entities.DataGraph.list(),
@@ -75,13 +67,6 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
-  // 结构图的唯一真源是 StructureDefinition
-  const { data: structureDefs = [] } = useQuery({
-    queryKey: ['structureDefinitions'],
-    queryFn: () => base44.entities.StructureDefinition.list(),
-    initialData: [],
-  });
-
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
       ...g,
@@ -90,31 +75,21 @@ export default function UnifiedGraphEditorPage() {
     }));
 
     return [
-      ...structureDefs.map(s => ({ ...s, graph_type: 'structure', entity_type: 'StructureDefinition' })),
       ...dataGraphEntities,
       ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
       ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' }))
     ];
-  }, [structureDefs, dataGraphs, queryGraphs, functionGraphs]);
+  }, [dataGraphs, queryGraphs, functionGraphs]);
 
   const invalidateGraphs = useCallback(() => {
-    ['dataGraphs', 'entityQueries', 'functionGraphs', 'structureDefinitions'].forEach(key =>
+    ['dataGraphs', 'entityQueries', 'functionGraphs'].forEach(key =>
       queryClient.invalidateQueries({ queryKey: [key] })
     );
   }, [queryClient]);
 
   const createMutation = useMutation({
     mutationFn: (data) => {
-      if (data.graph_type === 'structure') {
-        return base44.entities.StructureDefinition.create({
-          structure_id: data.name.toLowerCase().replace(/\s+/g, '_'),
-          name: data.name,
-          description: data.description,
-          structure_type: 'graph',
-          nodes: [],
-          edges: []
-        });
-      } else if (data.graph_type === 'data') {
+      if (data.graph_type === 'data') {
         return base44.entities.DataGraph.create({
           graph_id: data.name.toLowerCase().replace(/\s+/g, '_'),
           name: data.name,
@@ -145,8 +120,7 @@ export default function UnifiedGraphEditorPage() {
       invalidateGraphs();
       setIsCreating(false);
       setNewGraph({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
-      const entityType = variables.graph_type === 'structure' ? 'StructureDefinition'
-        : variables.graph_type === 'data' ? 'DataGraph'
+      const entityType = variables.graph_type === 'data' ? 'DataGraph'
         : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
       openGraph({ ...graph, graph_type: variables.graph_type, entity_type: entityType });
     },
@@ -154,9 +128,7 @@ export default function UnifiedGraphEditorPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data, entity_type }) => {
-      if (entity_type === 'StructureDefinition') {
-        return base44.entities.StructureDefinition.update(id, data);
-      } else if (entity_type === 'DataGraph') {
+      if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.update(id, data);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.update(id, data);
@@ -169,9 +141,7 @@ export default function UnifiedGraphEditorPage() {
 
   const deleteMutation = useMutation({
     mutationFn: ({ id, entity_type }) => {
-      if (entity_type === 'StructureDefinition') {
-        return base44.entities.StructureDefinition.delete(id);
-      } else if (entity_type === 'DataGraph') {
+      if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.delete(id);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.delete(id);
@@ -183,15 +153,6 @@ export default function UnifiedGraphEditorPage() {
   });
 
   const openGraph = (graph) => {
-    if (graph.entity_type === 'StructureDefinition') {
-      const { nodes: structNodes, connections: structConns } = structureToGraph(graph);
-      setCurrentGraph(graph);
-      setNodes(structNodes);
-      setConnections(structConns);
-      setBlackboard({});
-      return;
-    }
-
     let graphDef;
     try {
       graphDef = typeof graph.graph_definition === 'string'
@@ -209,15 +170,6 @@ export default function UnifiedGraphEditorPage() {
 
   const saveGraph = useCallback(() => {
     if (!currentGraph) return;
-
-    if (currentGraph.entity_type === 'StructureDefinition') {
-      updateMutation.mutate({
-        id: currentGraph.id,
-        entity_type: 'StructureDefinition',
-        data: graphToStructure(nodes, connections)
-      });
-      return;
-    }
 
     updateMutation.mutate({
       id: currentGraph.id,
@@ -428,24 +380,12 @@ export default function UnifiedGraphEditorPage() {
 
         {showBlackboard && (
           <FloatingPanel
-            title={currentGraph.graph_type === 'structure' ? '结构属性' : currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
+            title={currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
             icon={Database}
             onClose={() => setShowBlackboard(false)}
             className="right-4 top-4"
           >
-            {currentGraph.graph_type === 'structure' ? (
-              <StructurePropsPanel
-                nodes={nodes}
-                connections={connections}
-                relations={relations}
-                editingNodeId={editingNodeId}
-                onUpdateNodeData={updateNodeData}
-                onDeleteNode={deleteNode}
-                onDeleteConnection={deleteConnection}
-                onUpdateConnections={setConnections}
-                onClearEditing={() => setEditingNodeId(null)}
-              />
-            ) : currentGraph.graph_type === 'query' ? (
+            {currentGraph.graph_type === 'query' ? (
               <QuerySimulationPanel nodes={nodes} connections={connections} />
             ) : (
               <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
@@ -509,7 +449,6 @@ export default function UnifiedGraphEditorPage() {
                     <SelectItem value="data" className="text-[#e5e5e5] hover:bg-[#262626]">Data Graph (数据图)</SelectItem>
                     <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#262626]">Entity Query (实体查询)</SelectItem>
                     <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#262626]">Function Graph (函数图)</SelectItem>
-                    <SelectItem value="structure" className="text-[#e5e5e5] hover:bg-[#262626]">Structure Graph (结构图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -565,7 +504,6 @@ export default function UnifiedGraphEditorPage() {
           data: allGraphs.filter(g => g.graph_type === 'data').length,
           query: allGraphs.filter(g => g.graph_type === 'query').length,
           function: allGraphs.filter(g => g.graph_type === 'function').length,
-          structure: allGraphs.filter(g => g.graph_type === 'structure').length,
         }}
       />
 
