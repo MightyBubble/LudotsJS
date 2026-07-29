@@ -4,62 +4,67 @@
   "properties": {
     "effect_id": {
       "type": "string",
-      "description": "\u6548\u679c\u552f\u4e00ID"
-    },
-    "name": {
-      "type": "string",
-      "description": "\u663e\u793a\u540d\u79f0"
-    },
-    "description": {
-      "type": "string",
-      "description": "\u63cf\u8ff0"
+      "description": "\u5bf9\u5e94 C# EffectTemplateConfig.id\uff1b\u56e0\u5e73\u53f0\u5185\u7f6e id \u5b57\u6bb5\u5360\u7528\u800c\u4f7f\u7528\u6b64\u5b58\u50a8\u540d"
     },
     "tags": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "\u6548\u679c\u81ea\u8eab\u6807\u7b7e"
+      }
     },
-    "is_active": {
-      "type": "boolean",
-      "default": true,
-      "description": "\u662f\u5426\u542f\u7528"
+    "presetType": {
+      "type": "string"
     },
     "lifetime": {
+      "type": "string",
+      "enum": [
+        "Instant",
+        "After",
+        "Infinite"
+      ],
+      "default": "Instant"
+    },
+    "participatesInResponse": {
+      "type": "boolean"
+    },
+    "expireCondition": {
       "type": "object",
-      "description": "\u751f\u547d\u5468\u671f\uff08EffectLifetimeKind\uff1ainstant / after / infinite\uff09",
       "properties": {
         "kind": {
           "type": "string",
           "enum": [
-            "instant",
-            "after",
-            "infinite"
-          ],
-          "default": "instant",
-          "description": "instant \u77ac\u65f6\uff1bafter \u5b9a\u65f6\uff08Durable\uff0c\u9700 duration\uff09\uff1binfinite \u65e0\u9650\uff08Durable\uff09"
+            "TagPresent",
+            "TagAbsent"
+          ]
         },
-        "duration": {
-          "type": "object",
-          "description": "ValueSource\uff0c\u4ec5 after \u4f7f\u7528"
+        "tag": {
+          "type": "string"
         },
-        "period": {
-          "type": "object",
-          "description": "ValueSource\uff0cafter / infinite \u53ef\u7528"
+        "sense": {
+          "type": "string",
+          "enum": [
+            "Raw",
+            "Effective"
+          ]
+        }
+      }
+    },
+    "duration": {
+      "type": "object",
+      "properties": {
+        "durationTicks": {
+          "type": "integer"
         },
-        "expiration_requirements": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "\u6761\u4ef6/Tag \u9a71\u52a8\u7684\u79fb\u9664\u5224\u5b9a\uff08\u4e0e LifetimeKind \u6b63\u4ea4\uff09"
+        "periodTicks": {
+          "type": "integer"
+        },
+        "clockId": {
+          "type": "string"
         }
       }
     },
     "application": {
       "type": "object",
-      "description": "\u5e94\u7528\u4e0e\u53e0\u52a0",
       "properties": {
         "stacking": {
           "type": "string",
@@ -111,20 +116,16 @@
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "\u5f15\u7528\u7684 Requirement ID \u5217\u8868"
+      }
     },
     "target": {
-      "type": "object",
-      "description": "TargetResolver"
+      "type": "object"
     },
     "blackboard": {
-      "type": "object",
-      "description": "\u9ed1\u677f\u53d8\u91cf\u5b9a\u4e49"
+      "type": "object"
     },
     "phases": {
       "type": "array",
-      "description": "Phase Bindings\uff0c\u56fa\u5b9a\u987a\u5e8f on_propose \u2192 on_calculate \u2192 on_resolve \u2192 on_hit \u2192 on_apply \u2192 on_period \u2192 on_expire \u2192 on_remove",
       "items": {
         "type": "object",
         "properties": {
@@ -149,12 +150,10 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Pre \u9636\u6bb5\u5f15\u7528\u7684 ActionGraph.action_id"
+            }
           },
           "main": {
             "type": "object",
-            "description": "Main Operation",
             "properties": {
               "mode": {
                 "type": "string",
@@ -166,8 +165,7 @@
                 "default": "none"
               },
               "builtin": {
-                "type": "object",
-                "description": "\u5185\u7f6e\u64cd\u4f5c\u53c2\u6570"
+                "type": "object"
               },
               "action_graph_id": {
                 "type": "string"
@@ -181,12 +179,10 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Post \u9636\u6bb5\u5f15\u7528\u7684 ActionGraph.action_id"
+            }
           },
           "listeners": {
             "type": "array",
-            "description": "Phase Listeners\uff1aPre/Main/Post \u5b8c\u6210\u540e\u5206\u53d1\uff0c\u4ec5\u5141\u8bb8\u5165\u961f Request",
             "items": {
               "type": "object",
               "properties": {
@@ -267,7 +263,6 @@
     },
     "response_chain": {
       "type": "object",
-      "description": "OnPropose \u4e0e OnCalculate \u4e4b\u95f4\u7684\u54cd\u5e94\u7a97\u53e3\uff08\u4e0d\u662f phase\uff09",
       "properties": {
         "enabled": {
           "type": "boolean",
@@ -359,6 +354,7 @@
   },
   "required": [
     "effect_id",
-    "name"
+    "lifetime",
+    "participatesInResponse"
   ]
 }

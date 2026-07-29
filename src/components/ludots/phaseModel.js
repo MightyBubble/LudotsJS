@@ -34,12 +34,12 @@ export const PHASE_META = {
 export const INSTANT_FORBIDDEN_PHASES = ['on_period', 'on_expire'];
 
 export const LIFETIME_KINDS = [
-  { value: 'instant', label: 'instant · 瞬时（Apply 后同帧销毁）' },
-  { value: 'after', label: 'after · 定时（Durable，需 duration）' },
-  { value: 'infinite', label: 'infinite · 无限（Durable）' },
+  { value: 'Instant', label: 'Instant · 瞬时（Apply 后同帧销毁）' },
+  { value: 'After', label: 'After · 定时（Durable，需 durationTicks）' },
+  { value: 'Infinite', label: 'Infinite · 无限（Durable）' },
 ];
 
-export const isDurableKind = (kind) => kind === 'after' || kind === 'infinite';
+export const isDurableKind = (kind) => kind === 'After' || kind === 'Infinite';
 
 export const MAIN_MODES = [
   { value: 'none', label: 'none · 无主操作' },

@@ -10,7 +10,7 @@ import { PHASE_IDS, INSTANT_FORBIDDEN_PHASES, isDurableKind, normalizePhases, cr
  */
 export default function PhasePipelineEditor({ effect, onChangePhases, onChangeResponseChain, refs }) {
   const phases = normalizePhases(effect.phases);
-  const durable = isDurableKind(effect.lifetime?.kind);
+  const durable = isDurableKind(effect.lifetime);
 
   const updatePhase = (phaseId, next) => onChangePhases(phases.map(p => p.phase_id === phaseId ? next : p));
 
@@ -18,7 +18,7 @@ export default function PhasePipelineEditor({ effect, onChangePhases, onChangeRe
     <div className="space-y-1.5">
       <div className="text-[10px] text-gray-500 leading-relaxed">
         固定阶段顺序不可改动。自然到期：OnExpire → OnRemove；取消 / 强制移除：跳过 OnExpire、仍执行 OnRemove；
-        Instant 在 OnApply 完成后同帧销毁，after / infinite 创建持久实例。
+        Instant 在 OnApply 完成后同帧销毁，After / Infinite 创建持久实例。
       </div>
       {PHASE_IDS.map((id, idx) => {
         const phase = phases[idx];
@@ -30,7 +30,7 @@ export default function PhasePipelineEditor({ effect, onChangePhases, onChangeRe
               onChange={(next) => updatePhase(id, next)}
               refs={refs}
               forbidden={forbidden}
-              forbiddenReason="instant 效果没有周期与到期阶段；改为 after / infinite 后可用。"
+              forbiddenReason="Instant 效果没有周期与到期阶段；改为 After / Infinite 后可用。"
             />
             {id === 'on_propose' && (
               <>

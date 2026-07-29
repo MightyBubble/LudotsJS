@@ -22,8 +22,7 @@ const PATHS = [
 export default function TransactionTimeline({ effect }) {
   const [path, setPath] = useState('natural_expire');
   const [ran, setRan] = useState(false);
-  const lifetime = effect?.lifetime || {};
-  const durable = isDurableKind(lifetime.kind);
+  const durable = isDurableKind(effect?.lifetime);
 
   const events = useMemo(() => {
     if (!effect) return [];

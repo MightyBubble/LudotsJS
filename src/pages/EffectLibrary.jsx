@@ -4,7 +4,6 @@ import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section, TextField, SelectField, ListField, NumberField, BoolField } from '@/components/ludots/ui';
-import ValueSourceEditor from '@/components/ludots/ValueSourceEditor';
 import TargetResolverEditor from '@/components/ludots/TargetResolverEditor';
 import RefListSelector from '@/components/ludots/RefListSelector';
 import PhasePipelineEditor from '@/components/ludots/PhasePipelineEditor';
@@ -20,8 +19,8 @@ export default function EffectLibraryPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Effect', 'effects',
     () => ({
-      effect_id: `effect_${Date.now()}`, name: '新效果', is_active: true, tags: [],
-      lifetime: { kind: 'instant', expiration_requirements: [] },
+      effect_id: `effect_${Date.now()}`, tags: [], presetType: '',
+      lifetime: 'Instant', participatesInResponse: false,
       application: { stacking: 'none', overflow: 'reject', duration_refresh: 'never', period_reset: 'never' },
       target: { kind: 'self' }, requirements: [],
       phases: createDefaultPhases(), response_chain: createDefaultResponseChain(),
@@ -29,12 +28,14 @@ export default function EffectLibraryPage() {
     })
   );
   const refs = useCoreRefs();
-  const lifetime = draft?.lifetime || {};
+  const duration = draft?.duration || {};
+  const expireCondition = draft?.expireCondition;
   const application = draft?.application || {};
-  const durable = isDurableKind(lifetime.kind);
+  const durable = isDurableKind(draft?.lifetime);
   const issues = draft ? validateEffect(draft, refs) : [];
 
-  const setLifetime = (p) => patch({ lifetime: { ...lifetime, ...p } });
+  const setDuration = (p) => patch({ duration: { ...duration, ...p } });
+  const setExpireCondition = (p) => patch({ expireCondition: { ...expireCondition, ...p } });
   const setApplication = (p) => patch({ application: { ...application, ...p } });
 
   return (
@@ -42,15 +43,14 @@ export default function EffectLibraryPage() {
       entityName="Effect"
       records={records}
       columns={[
-        { key: 'effect_id', label: '效果ID', width: 200, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.effect_id}</span> },
-        { key: 'name', label: '名称', width: 160 },
-        { key: 'lifetime', label: '生命周期', width: 110, render: (r) => r.lifetime?.kind || 'instant' },
-        { key: 'stacking', label: '叠加', width: 140, render: (r) => r.application?.stacking || 'none' },
-        { key: 'tags', label: '标签', render: (r) => (r.tags || []).join(', ') || '-' },
+        { key: 'effect_id', label: 'id', width: 220, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.effect_id}</span> },
+        { key: 'presetType', label: 'presetType', width: 160 },
+        { key: 'lifetime', label: 'lifetime', width: 110 },
+        { key: 'participatesInResponse', label: '响应链', width: 80, render: (r) => (r.participatesInResponse ? '是' : '否') },
+        { key: 'tags', label: 'tags', render: (r) => (r.tags || []).join(', ') || '-' },
         { key: 'phases', label: '启用阶段', width: 90, render: (r) => (r.phases || []).filter(p => p.enabled).length },
-        { key: 'is_active', label: '启用', width: 70, render: (r) => (r.is_active !== false ? '是' : '否') },
       ]}
-      toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.lifetime?.kind || 'instant'} · ${(r.phases || []).filter(p => p.enabled).length} phases` })}
+      toItem={(r) => ({ id: r.id, name: r.effect_id, subtitle: `${r.lifetime || 'Instant'} · ${(r.phases || []).filter(p => p.enabled).length} phases` })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create}
       onDelete={(r) => window.confirm(`确定删除「${r.name}」吗？`) && remove(r.id)}
@@ -58,38 +58,33 @@ export default function EffectLibraryPage() {
     >
       {draft && (
         <div className="max-w-3xl">
-          <Section title="基础 Basic">
-            <TextField label="效果 ID (effect_id)" value={draft.effect_id} onChange={(v) => patch({ effect_id: v })} />
-            <TextField label="名称" value={draft.name} onChange={(v) => patch({ name: v })} />
-            <TextField label="描述" value={draft.description} onChange={(v) => patch({ description: v })} />
-            <ListField label="效果标签" value={draft.tags} onChange={(v) => patch({ tags: v })} />
-            <BoolField label="启用" value={draft.is_active !== false} onChange={(v) => patch({ is_active: v })} />
+          <Section title="基础 Basic · EffectTemplateConfig">
+            <TextField label="id" value={draft.effect_id} onChange={(v) => patch({ effect_id: v })} hint="C# JSON 的 id；平台内置 id 已占用，因此数据库中存为 effect_id" />
+            <ListField label="tags" value={draft.tags} onChange={(v) => patch({ tags: v })} />
+            <TextField label="presetType" value={draft.presetType} onChange={(v) => patch({ presetType: v })} />
+            <BoolField label="participatesInResponse" value={draft.participatesInResponse === true} onChange={(v) => patch({ participatesInResponse: v })} />
           </Section>
 
-          <Section title="生命周期 Lifetime（EffectLifetimeKind）">
-            <SelectField
-              label="kind"
-              value={lifetime.kind || 'instant'}
-              options={LIFETIME_KINDS}
-              onChange={(v) => setLifetime({ kind: v })}
-              hint="after 与 infinite 都是 Durable Effect；条件/Tag 驱动移除与 kind 正交"
-            />
-            {lifetime.kind === 'after' && (
-              <ValueSourceEditor label="持续时间 duration" value={lifetime.duration || {}} onChange={(v) => setLifetime({ duration: v })} attributes={refs.attributes} constants={refs.constants} dataGraphs={refs.dataGraphs} />
+          <Section title="生命周期 Lifetime · EffectTemplateConfig">
+            <SelectField label="lifetime" value={draft.lifetime || 'Instant'} options={LIFETIME_KINDS} onChange={(v) => patch({ lifetime: v })} />
+            {draft.lifetime === 'After' && (
+              <NumberField label="duration.durationTicks" value={duration.durationTicks} onChange={(v) => setDuration({ durationTicks: v })} />
             )}
             {durable && (
-              <ValueSourceEditor label="周期 period（可选）" value={lifetime.period || {}} onChange={(v) => setLifetime({ period: v })} attributes={refs.attributes} constants={refs.constants} dataGraphs={refs.dataGraphs} />
+              <>
+                <NumberField label="duration.periodTicks" value={duration.periodTicks} onChange={(v) => setDuration({ periodTicks: v })} />
+                <TextField label="duration.clockId" value={duration.clockId} onChange={(v) => setDuration({ clockId: v })} />
+              </>
             )}
-            <RefListSelector
-              label="到期需求 expirationRequirements"
-              value={lifetime.expiration_requirements || []}
-              options={refs.requirements.map(r => ({ value: r.requirement_id, label: r.name }))}
-              onChange={(v) => setLifetime({ expiration_requirements: v })}
-            />
-            <p className="text-[10px] text-gray-600">
-              条件/Tag 驱动的移除通过 expirationRequirements 或 Trigger 发起 remove 请求，不作为 lifetime kind。
-              {!durable && ' instant 不允许 period 与到期/周期阶段。'}
-            </p>
+            <BoolField label="配置 expireCondition" value={Boolean(expireCondition)} onChange={(v) => patch({ expireCondition: v ? { kind: 'TagPresent', tag: '', sense: 'Raw' } : null })} />
+            {expireCondition && (
+              <>
+                <SelectField label="expireCondition.kind" value={expireCondition.kind} options={OPT(['TagPresent', 'TagAbsent'])} onChange={(v) => setExpireCondition({ kind: v })} />
+                <TextField label="expireCondition.tag" value={expireCondition.tag} onChange={(v) => setExpireCondition({ tag: v })} />
+                <SelectField label="expireCondition.sense" value={expireCondition.sense} options={OPT(['Raw', 'Effective'])} onChange={(v) => setExpireCondition({ sense: v })} />
+              </>
+            )}
+            <p className="text-[10px] text-gray-600">字段名、枚举值与 C# effects.json 保持一致；到期条件与 lifetime 正交。</p>
           </Section>
 
           <Section title="应用与叠加 Application / Stacking">

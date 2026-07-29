@@ -16,19 +16,17 @@ export function validateEffect(effect, refs = {}) {
   const attrIds = new Set(attributes.map(a => a.attribute_id));
   const dataGraphIds = new Set(dataGraphs.map(g => g.graph_id));
 
-  const lifetime = effect.lifetime || {};
-  const kind = lifetime.kind || 'instant';
+  const kind = effect.lifetime || 'Instant';
+  const duration = effect.duration || {};
   const durable = isDurableKind(kind);
 
-  if (!effect.effect_id) out.push(issue('error', 'effect_id', '缺少 effect_id', '填写唯一 ID'));
-  if (kind === 'after' && !lifetime.duration) out.push(issue('error', 'lifetime.duration', 'after 必须配置 duration', '设置 duration 的 ValueSource'));
-  if (!durable && lifetime.period) out.push(issue('error', 'lifetime.period', 'instant 不允许 period', '删除 period 或改为 after / infinite'));
-  if (kind === 'infinite' && lifetime.duration) out.push(issue('warning', 'lifetime.duration', 'infinite 的 duration 会被忽略', '移除 duration'));
-  if ((lifetime.expiration_requirements || []).some(id => !reqIds.has(id))) {
-    out.push(issue('error', 'lifetime.expiration_requirements', '存在无效的 Requirement 引用', '重新选择需求'));
-  }
-  if (!durable && (lifetime.expiration_requirements || []).length > 0) {
-    out.push(issue('warning', 'lifetime.expiration_requirements', 'instant 不会经历到期判定', '改为 after / infinite'));
+  if (!effect.effect_id) out.push(issue('error', 'effect_id', '缺少 C# id', '填写唯一 ID'));
+  if (effect.participatesInResponse === undefined) out.push(issue('error', 'participatesInResponse', '必须明确是否参与 ResponseChain', '设置 true 或 false'));
+  if (kind === 'After' && (!Number.isInteger(duration.durationTicks) || duration.durationTicks < 1)) out.push(issue('error', 'duration.durationTicks', 'After 必须配置正整数 durationTicks', '填写 tick 数'));
+  if (!durable && duration.periodTicks !== undefined) out.push(issue('error', 'duration.periodTicks', 'Instant 不允许 periodTicks', '删除 periodTicks 或改为 After / Infinite'));
+  if (kind === 'Infinite' && duration.durationTicks !== undefined) out.push(issue('warning', 'duration.durationTicks', 'Infinite 的 durationTicks 会被忽略', '移除 durationTicks'));
+  if (effect.expireCondition && (!effect.expireCondition.kind || !effect.expireCondition.tag || !effect.expireCondition.sense)) {
+    out.push(issue('error', 'expireCondition', 'ExpireCondition 的 kind、tag、sense 必须完整', '补全 C# ExpireConditionConfig'));
   }
 
   const phases = normalizePhases(effect.phases);
