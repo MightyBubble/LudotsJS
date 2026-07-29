@@ -41,7 +41,7 @@ export default function Layout({ children, currentPageName }) {
       />
 
       {/* 移动端导航 */}
-      <div className="h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between gap-2">
+      <div className="order-first h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between gap-2">
         <ProjectSwitcher />
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -49,7 +49,7 @@ export default function Layout({ children, currentPageName }) {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#15171C] border-b border-[#2A2E37] overflow-y-auto max-h-[60vh]">
+        <div className="order-first md:hidden bg-[#15171C] border-b border-[#2A2E37] overflow-y-auto max-h-[60vh]">
           {groups.map(group => (
             <div key={group.key}>
               <div className="px-4 py-1.5 text-[10px] text-gray-500 uppercase tracking-wider bg-[#0D0F14] border-b border-[#2A2E37]">
