@@ -748,6 +748,24 @@ export const NODE_TYPES = {
     outputs: [{ id: 'result', label: '结果', type: 'boolean' }]
   },
   
+  // 纯函数图入口/返回
+  function_entry: {
+    label: '函数入口',
+    icon: Network,
+    category: '函数-流程',
+    graphTypes: ['function'],
+    inputs: [],
+    outputs: []
+  },
+  function_return: {
+    label: '返回',
+    icon: Network,
+    category: '函数-流程',
+    graphTypes: ['function'],
+    inputs: [{ id: 'value', label: '返回值', type: 'any' }],
+    outputs: []
+  },
+
   // 结构图专用节点
   structure_node: {
     label: '结构节点',

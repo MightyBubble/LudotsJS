@@ -26,6 +26,30 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// 纯函数图默认节点：入口 + 返回
+function buildFunctionDefaultNodes(returnType) {
+  return [
+    {
+      id: 'function-entry',
+      type: 'function_entry',
+      position: { x: 120, y: 180 },
+      data: {},
+      inputs: [],
+      outputs: [],
+      locked: true
+    },
+    {
+      id: 'function-return',
+      type: 'function_return',
+      position: { x: 560, y: 180 },
+      data: {},
+      inputs: [{ id: 'value', label: '返回值', type: returnType === 'void' ? 'any' : returnType }],
+      outputs: [],
+      locked: true
+    }
+  ];
+}
+
 export default function UnifiedGraphEditorPage() {
   const [selectedGraph, setSelectedGraph] = useState(null);
   const [currentGraph, setCurrentGraph] = useState(null);
@@ -137,7 +161,11 @@ export default function UnifiedGraphEditorPage() {
           description: data.description,
           return_type: data.return_type || 'void',
           parameters: [], // Default empty parameters for now
-          graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
+          graph_definition: JSON.stringify({
+            nodes: buildFunctionDefaultNodes(data.return_type || 'void'),
+            connections: [],
+            blackboard: {}
+          })
         });
       }
     },
@@ -193,8 +221,14 @@ export default function UnifiedGraphEditorPage() {
       graphDef = {};
     }
 
+    let loadedNodes = graphDef.nodes || [];
+    // 纯函数图必须存在入口与返回节点
+    if (graph.graph_type === 'function' && !loadedNodes.some(n => n.type === 'function_entry')) {
+      loadedNodes = [...buildFunctionDefaultNodes(graph.return_type || 'void'), ...loadedNodes];
+    }
+
     setCurrentGraph(graph);
-    setNodes(graphDef.nodes || []);
+    setNodes(loadedNodes);
     setConnections(graphDef.connections || []);
     setBlackboard(graphDef.blackboard || {});
   };
