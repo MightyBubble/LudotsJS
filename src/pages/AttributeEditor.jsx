@@ -38,10 +38,9 @@ export default function AttributeEditorPage() {
   });
 
   const attributeCalcGraphs = useMemo(() => {
-    // 属性计算图：新建的 data 图（用途标记为 attribute_calculation/general）与遗留的 attribute_calculation 类型都可选
+    // 属性计算：用途为 attribute_calculation/general 且出口为数值的图
     return dataGraphs.filter(g =>
-      g.graph_type === 'attribute_calculation' ||
-      (g.graph_type === 'data' && (!g.usage || g.usage === 'general' || g.usage === 'attribute_calculation'))
+      (g.usage === 'attribute_calculation' || g.usage === 'general') && g.return_type === 'number'
     );
   }, [dataGraphs]);
 

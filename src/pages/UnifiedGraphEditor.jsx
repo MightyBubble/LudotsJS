@@ -10,6 +10,7 @@ import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
+import { graphTypeLabel, returnTypeOptions, USAGE_LABELS, DATA_RETURN_TYPES, FUNCTION_RETURN_TYPES } from '../components/graph/graphLabels';
 import { evaluateGraph } from '@/lib/graphRuntime';
 import { structureToGraph, graphToStructure } from '@/lib/structureAdapter';
 import QuerySimulationPanel from '../components/queryGraph/QuerySimulationPanel';
@@ -33,7 +34,7 @@ export default function UnifiedGraphEditorPage() {
   const [showLibrary, setShowLibrary] = useState(true);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Added return_type
+  const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
   const [connectionValues, setConnectionValues] = useState({});
   const [isEditingType, setIsEditingType] = useState(false);
   const [showLibraryMobile, setShowLibraryMobile] = useState(false);
@@ -79,7 +80,7 @@ export default function UnifiedGraphEditorPage() {
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
       ...g,
-      graph_type: g.graph_type || 'data', // Default to data if not set
+      graph_type: 'data', // DataGraph 恒为 data；用途由 usage 标记，出口由 return_type 标记
       entity_type: 'DataGraph',
     }));
 
@@ -113,7 +114,8 @@ export default function UnifiedGraphEditorPage() {
           graph_id: data.name.toLowerCase().replace(/\s+/g, '_'),
           name: data.name,
           description: data.description,
-          graph_type: data.graph_type,
+          usage: data.usage || 'general',
+          return_type: data.return_type || 'number',
           graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
         });
       } else if (data.graph_type === 'query') { // Added else if for query type
@@ -137,7 +139,7 @@ export default function UnifiedGraphEditorPage() {
       // Invalidate the correct query key based on graph_type
       invalidateGraphs();
       setIsCreating(false);
-      setNewGraph({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Reset newGraph state, including return_type
+      setNewGraph({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
       const entityType = variables.graph_type === 'structure' ? 'StructureDefinition'
         : variables.graph_type === 'data' ? 'DataGraph'
         : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
@@ -238,7 +240,7 @@ export default function UnifiedGraphEditorPage() {
   }, [currentGraph]);
 
   const updateReturnType = useCallback((newReturnType) => {
-    if (!currentGraph || currentGraph.graph_type !== 'function') return;
+    if (!currentGraph || (currentGraph.entity_type !== 'FunctionGraph' && currentGraph.entity_type !== 'DataGraph')) return;
 
     updateMutation.mutate({
       id: currentGraph.id,
@@ -454,9 +456,9 @@ export default function UnifiedGraphEditorPage() {
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1 pointer-events-none">
               <div className="flex items-center gap-2">
-                <span>类型: {currentGraph.entity_type === 'DataGraph' ? (currentGraph.graph_type === 'curve' ? 'Data (曲线)' : currentGraph.graph_type === 'attribute_calculation' ? 'Data (属性计算)' : 'Data') : currentGraph.graph_type === 'query' ? 'Query' : currentGraph.graph_type === 'structure' ? 'Structure' : 'Function'}</span>
+                <span>类型: {graphTypeLabel(currentGraph)}</span>
               </div>
-              {currentGraph.graph_type === 'function' && (
+              {returnTypeOptions(currentGraph).length > 0 && (
                 <div className="flex items-center gap-2">
                   <span>返回:</span>
                   <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
@@ -468,19 +470,14 @@ export default function UnifiedGraphEditorPage() {
                     <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
                       <DialogHeader><DialogTitle className="text-[#e5e5e5]">修改返回类型</DialogTitle></DialogHeader>
                       <div className="space-y-4 py-4">
-                        <Select value={currentGraph.return_type || 'void'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
+                        <Select value={currentGraph.return_type || 'number'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
                           <SelectTrigger className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                            <SelectItem value="void" className="text-[#e5e5e5]">void (无返回)</SelectItem>
-                            <SelectItem value="number" className="text-[#e5e5e5]">number (数值)</SelectItem>
-                            <SelectItem value="boolean" className="text-[#e5e5e5]">boolean (布尔)</SelectItem>
-                            <SelectItem value="string" className="text-[#e5e5e5]">string (字符串)</SelectItem>
-                            <SelectItem value="array" className="text-[#e5e5e5]">array (数组)</SelectItem>
-                            <SelectItem value="object" className="text-[#e5e5e5]">object (对象)</SelectItem>
-                            <SelectItem value="entity" className="text-[#e5e5e5]">entity (实体)</SelectItem>
-                            <SelectItem value="entities" className="text-[#e5e5e5]">entities (实体集)</SelectItem>
+                            {returnTypeOptions(currentGraph).map(t => (
+                              <SelectItem key={t} value={t} className="text-[#e5e5e5]">{t}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -653,22 +650,32 @@ export default function UnifiedGraphEditorPage() {
                 <label className="text-sm text-gray-400 mb-1.5 block">描述</label>
                 <Input value={newGraph.description} onChange={(e) => setNewGraph({ ...newGraph, description: e.target.value })} className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]" />
               </div>
-              {newGraph.graph_type === 'function' && ( // Conditionally render return type select for function graphs
+              {newGraph.graph_type === 'data' && (
                 <div>
-                  <label className="text-sm text-gray-400 mb-1.5 block">返回类型</label>
+                  <label className="text-sm text-gray-400 mb-1.5 block">用途</label>
+                  <Select value={newGraph.usage} onValueChange={(v) => setNewGraph({ ...newGraph, usage: v, return_type: v === 'validation' ? 'boolean' : 'number' })}>
+                    <SelectTrigger className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#15171C] border-[#2A2E37]">
+                      {Object.entries(USAGE_LABELS).map(([k, label]) => (
+                        <SelectItem key={k} value={k} className="text-[#e5e5e5] hover:bg-[#262626]">{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {(newGraph.graph_type === 'data' || newGraph.graph_type === 'function') && (
+                <div>
+                  <label className="text-sm text-gray-400 mb-1.5 block">{newGraph.graph_type === 'data' ? '出口类型' : '返回类型'}</label>
                   <Select value={newGraph.return_type} onValueChange={(v) => setNewGraph({ ...newGraph, return_type: v })}>
                     <SelectTrigger className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                      <SelectItem value="void" className="text-[#e5e5e5] hover:bg-[#262626]">void (无返回)</SelectItem>
-                      <SelectItem value="number" className="text-[#e5e5e5] hover:bg-[#262626]">number (数值)</SelectItem>
-                      <SelectItem value="boolean" className="text-[#e5e5e5] hover:bg-[#262626]">boolean (布尔)</SelectItem>
-                      <SelectItem value="string" className="text-[#e5e5e5] hover:bg-[#262626]">string (字符串)</SelectItem>
-                      <SelectItem value="array" className="text-[#e5e5e5] hover:bg-[#262626]">array (数组)</SelectItem>
-                      <SelectItem value="object" className="text-[#e5e5e5] hover:bg-[#262626]">object (对象)</SelectItem>
-                      <SelectItem value="entity" className="text-[#e5e5e5] hover:bg-[#262626]">entity (实体)</SelectItem>
-                      <SelectItem value="entities" className="text-[#e5e5e5] hover:bg-[#262626]">entities (实体集)</SelectItem>
+                      {(newGraph.graph_type === 'data' ? DATA_RETURN_TYPES : FUNCTION_RETURN_TYPES).map(t => (
+                        <SelectItem key={t} value={t} className="text-[#e5e5e5] hover:bg-[#262626]">{t}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -708,14 +715,8 @@ export default function UnifiedGraphEditorPage() {
                   </div>
                   {graph.description && <p className="text-gray-500 text-xs mt-1">{graph.description}</p>}
                   <div className="text-[10px] text-gray-600 mt-2">
-                    {/* Conditional rendering for graph type display */}
-                    {graph.entity_type === 'DataGraph'
-                      ? (graph.graph_type === 'curve' ? 'Data Graph (曲线)'
-                        : graph.graph_type === 'attribute_calculation' ? 'Data Graph (属性计算)'
-                        : 'Data Graph')
-                      : graph.graph_type === 'query' ? 'Entity Query'
-                      : graph.graph_type === 'structure' ? 'Structure Definition'
-                      : `Function Graph (${graph.return_type || 'void'})`}
+                    {graphTypeLabel(graph)}
+                    {graph.entity_type === 'DataGraph' && ` · ${graph.return_type || 'number'}`}
                   </div>
                 </div>
               </div>

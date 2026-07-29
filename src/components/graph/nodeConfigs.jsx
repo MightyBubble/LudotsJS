@@ -755,21 +755,10 @@ export const NODE_TYPES = {
   }
 };
 
-// curve / attribute_calculation 是 data 图的用途子集，共用同一套节点
-const GRAPH_TYPE_ALIASES = {
-  curve: 'data',
-  attribute_calculation: 'data'
-};
-
-export function normalizeGraphType(graphType) {
-  return GRAPH_TYPE_ALIASES[graphType] || graphType;
-}
-
-// 根据graphType获取可用节点
+// 根据graphType获取可用节点（graphType 只有 data / query / function / structure）
 export function getAvailableNodes(graphType) {
-  const type = normalizeGraphType(graphType);
   return Object.entries(NODE_TYPES)
-    .filter(([_, config]) => config.graphTypes.includes(type))
+    .filter(([_, config]) => config.graphTypes.includes(graphType))
     .map(([type, config]) => ({ type, ...config }));
 }
 
