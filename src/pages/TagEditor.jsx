@@ -168,7 +168,6 @@ function ConditionalRuleSection({ type, icon, title, description, color, config,
 
 export default function TagEditor() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [newTagPath, setNewTagPath] = useState("");
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [selectedTag, setSelectedTag] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
@@ -384,7 +383,8 @@ export default function TagEditor() {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === 'n') {
         e.preventDefault();
-        document.querySelector('input[placeholder*="输入标签路径"]')?.focus();
+        const path = window.prompt('输入标签路径');
+        if (path) createTagsFromPath(path);
       }
 
       if (e.key === 'F2' && selectedTag) {
@@ -445,7 +445,6 @@ export default function TagEditor() {
       }
     }
 
-    setNewTagPath("");
     parts.forEach((_, i) => {
       const path = parts.slice(0, i + 1).join('.');
       setExpandedNodes(prev => new Set([...prev, path]));
@@ -944,6 +943,16 @@ export default function TagEditor() {
           </>
         )}
 
+        <ToolButton
+          icon={Plus}
+          tone="primary"
+          onClick={() => {
+            const path = window.prompt('输入标签路径');
+            if (path) createTagsFromPath(path);
+          }}
+        >
+          新建
+        </ToolButton>
         <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索标签..." />
       </PageActions>
 
@@ -953,30 +962,6 @@ export default function TagEditor() {
           <>
             {/* 左侧树形视图 */}
             <div className="w-full md:w-96 bg-[#15171C] border-b md:border-r md:border-b-0 border-[#2A2E37] flex flex-col max-h-[40vh] md:max-h-none">
-              <div className="p-2 md:p-3 border-b border-[#2A2E37]">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="输入标签路径"
-                    value={newTagPath}
-                    onChange={(e) => setNewTagPath(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') createTagsFromPath(newTagPath);
-                    }}
-                    className="flex-1 h-8 bg-[#0D0F14] border-[#2A2E37] text-sm text-[#e5e5e5]"
-                  />
-                  <Button
-                    size="sm"
-                    onClick={() => createTagsFromPath(newTagPath)}
-                    className="h-8 bg-[#D97706] hover:bg-[#B45309] text-black"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />创建
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1 hidden md:block">
-                  拖拽标签调整层级，拖到下方空白区域移至根级
-                </p>
-              </div>
-
               <div
                 className="flex-1 overflow-auto relative"
                 onDragOver={handleRootDragOver}
