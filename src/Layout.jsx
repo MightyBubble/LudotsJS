@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { NAV_GROUPS, ALL_NAV_ITEMS } from "@/components/layout/navConfig";
+import { getVisibleNavGroups, ALL_NAV_ITEMS } from "@/components/layout/navConfig";
 import NavGroupMenu from "@/components/layout/NavGroupMenu";
+import ProjectSwitcher from "@/components/layout/ProjectSwitcher";
+import useProjectScope from "@/lib/projectScope";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const currentLabel = ALL_NAV_ITEMS.find(i => i.page === currentPageName)?.label || "Ludots";
+  const { project } = useProjectScope();
+  const groups = getVisibleNavGroups(project);
+  const currentLabel = ALL_NAV_ITEMS.find(i => i.page === currentPageName)?.label || "LudotsJS";
 
   return (
     <div className="h-screen bg-[#0D0F14] flex flex-col">
@@ -22,19 +26,21 @@ export default function Layout({ children, currentPageName }) {
         ::-webkit-scrollbar-thumb:hover { background: #444; }
       `}</style>
 
-      {/* 桌面端：分组下拉导航，顶栏不再横向滚动 */}
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] hidden md:flex items-center px-4 gap-1 overflow-hidden">
-        <span className="text-xs font-semibold text-[#E2D8B3] mr-2 whitespace-nowrap">Ludots</span>
-        {NAV_GROUPS.map(group => (
-          <NavGroupMenu key={group.label} group={group} currentPageName={currentPageName} />
+      {/* 桌面端：品牌区 + 项目切换器 + 分组下拉导航 */}
+      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] hidden md:flex items-center px-3 gap-1.5 overflow-hidden">
+        <span className="text-xs font-semibold text-[#E2D8B3] whitespace-nowrap">LudotsJS</span>
+        <ProjectSwitcher />
+        <div className="w-px h-5 bg-[#2A2E37] mx-1" />
+        {groups.map(group => (
+          <NavGroupMenu key={group.key} group={group} currentPageName={currentPageName} />
         ))}
         <div className="flex-1" />
-        <span className="text-[11px] text-gray-500 truncate max-w-[220px]">{currentLabel}</span>
+        <span className="text-[11px] text-gray-500 truncate max-w-[160px]">{currentLabel}</span>
       </div>
 
       {/* 移动端导航 */}
-      <div className="h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between">
-        <span className="text-sm font-semibold text-[#e5e5e5]">{currentLabel}</span>
+      <div className="h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between gap-2">
+        <ProjectSwitcher />
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -42,8 +48,8 @@ export default function Layout({ children, currentPageName }) {
 
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#15171C] border-b border-[#2A2E37] overflow-y-auto max-h-[60vh]">
-          {NAV_GROUPS.map(group => (
-            <div key={group.label}>
+          {groups.map(group => (
+            <div key={group.key}>
               <div className="px-4 py-1.5 text-[10px] text-gray-500 uppercase tracking-wider bg-[#0D0F14] border-b border-[#2A2E37]">
                 {group.label}
               </div>

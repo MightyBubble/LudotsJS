@@ -1,55 +1,88 @@
 import {
-  Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box,
+  Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Gamepad2,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
-  Image as ImageIcon, Music, Film,
+  Image as ImageIcon, Music, Film, FolderKanban, Users, Activity, Search, ListTree,
 } from 'lucide-react';
 
-/** 顶栏分组导航：每组一个下拉，避免顶栏横向滚动 */
+/**
+ * 顶层模块（Tab）→ 分组条目。
+ * key 与 Project.enabled_modules / navigation_profile.tab_order 对应。
+ */
 export const NAV_GROUPS = [
   {
-    label: '标签',
+    key: 'project',
+    label: '项目',
     items: [
-      { page: 'TagEditor', label: '标签编辑', icon: Edit3 },
-      { page: 'TagSimulator', label: '标签模拟器', icon: Zap },
+      { page: 'ProjectOverview', label: '项目概览', icon: FolderKanban },
+      { page: 'ProjectOverview', search: '?panel=validation', label: '校验摘要', icon: CheckSquare },
+      { page: 'ProjectOverview', search: '?panel=settings', label: '项目设置', icon: Settings },
     ],
   },
   {
-    label: '规则',
+    key: 'core_data',
+    label: '核心数据',
     items: [
-      { page: 'UnlockableCommands', label: '可解锁指令', icon: KeyRound },
-      { page: 'InteractionEffects', label: '交互效果规则', icon: Sparkles },
+      { page: 'TagEditor', label: 'Gameplay Tags', icon: Edit3 },
+      { page: 'Templates', label: 'Tag Templates', icon: ListTree },
+      { page: 'AttributeEditor', label: 'Attributes', icon: Layers },
+      { page: 'GlobalConstantEditor', label: 'Global Constants', icon: Settings },
+      { page: 'DataTableEditor', label: 'Data Tables', icon: Table },
+      { page: 'StructureEditor', label: 'Structure Definitions', icon: Network },
     ],
   },
   {
-    label: '玩法',
+    key: 'world',
+    label: '世界模型',
     items: [
-      { page: 'EffectLibrary', label: 'Effect 效果', icon: Sparkles },
-      { page: 'AbilityLibrary', label: 'Ability 能力', icon: Wand2 },
-      { page: 'TriggerLibrary', label: 'Trigger 触发器', icon: KeyRound },
-      { page: 'ModifierDefinitionEditor', label: '修饰器', icon: GitBranch },
-      { page: 'ValidatorEditor', label: '验证器', icon: Shield },
-      { page: 'RequirementEditor', label: '需求', icon: CheckSquare },
-      { page: 'GameEventEditor', label: '事件', icon: Zap },
+      { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
+      { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
+      { page: 'EntityQueryEditor', label: 'Entity Queries', icon: Search },
+      { page: 'TagSimulator', label: 'Simulated Entities', icon: Users },
     ],
   },
   {
-    label: '数据原型',
+    key: 'gameplay',
+    label: 'Gameplay',
     items: [
-      { page: 'AttributeEditor', label: '属性', icon: Layers },
-      { page: 'EntityPrototypeEditor', label: '实体原型', icon: Box },
-      { page: 'EntityRelationEditor', label: '实体关系', icon: LinkIcon },
+      { page: 'AbilityLibrary', label: 'Abilities', icon: Wand2 },
+      { page: 'EffectLibrary', label: 'Effects', icon: Sparkles },
+      { page: 'ModifierDefinitionEditor', label: 'Modifier Definitions', icon: GitBranch },
+      { page: 'AttributeModifiers', label: 'Attribute Modifiers', icon: GitBranch },
     ],
   },
   {
-    label: '静态数据',
+    key: 'logic',
+    label: '逻辑',
     items: [
-      { page: 'StructureEditor', label: '结构关系图', icon: Network },
-      { page: 'GlobalConstantEditor', label: '常量表', icon: Settings },
-      { page: 'DataTableEditor', label: '数据表', icon: Table },
+      { page: 'UnifiedGraphEditor', search: '?type=action', label: 'ActionGraph', icon: Globe },
+      { page: 'UnifiedGraphEditor', search: '?type=data', label: 'DataGraph', icon: Globe },
+      { page: 'UnifiedGraphEditor', search: '?type=function', label: 'FunctionGraph', icon: Globe },
+      { page: 'ConditionEditor', label: 'Conditions', icon: CheckSquare },
+      { page: 'ValidatorEditor', label: 'Validators', icon: Shield },
     ],
   },
   {
-    label: '资源',
+    key: 'input',
+    label: '输入与订单',
+    items: [{ page: 'InputSystem', label: '输入与订单（规划中）', icon: Gamepad2 }],
+  },
+  {
+    key: 'events',
+    label: '事件',
+    items: [
+      { page: 'GameEventEditor', label: 'Game Events', icon: Zap },
+      { page: 'InteractionEffects', label: 'Interaction Effects', icon: Sparkles },
+      { page: 'UnlockableCommands', label: 'Unlockable Commands', icon: KeyRound },
+    ],
+  },
+  {
+    key: 'progression',
+    label: '成长',
+    items: [{ page: 'RequirementEditor', label: 'Requirements', icon: CheckSquare }],
+  },
+  {
+    key: 'presentation',
+    label: '表现',
     items: [
       { page: 'AssetLibrary', label: '全部资源', icon: Box },
       { page: 'AssetLibrary', search: '?type=model', label: '模型', icon: Box },
@@ -59,16 +92,30 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    label: '图与模拟',
+    key: 'simulation',
+    label: '模拟与诊断',
     items: [
-      { page: 'UnifiedGraphEditor', label: '图编辑器', icon: Globe },
       { page: 'NewAttributeSimulator', label: '属性计算器', icon: Calculator },
+      { page: 'TagSimulator', label: '标签模拟器', icon: Zap },
+      { page: 'History', label: 'Tag History', icon: Activity },
+      { page: 'DesignDoc', label: '设计文档', icon: BookOpen },
     ],
   },
-  {
-    label: '文档',
-    items: [{ page: 'DesignDoc', label: '设计文档', icon: BookOpen }],
-  },
 ];
+
+export const ALL_MODULE_KEYS = NAV_GROUPS.map(g => g.key);
+
+/** 按项目的 enabled_modules / navigation_profile 过滤与排序顶层模块 */
+export function getVisibleNavGroups(project) {
+  const enabled = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
+  const order = project?.navigation_profile?.tab_order?.length
+    ? project.navigation_profile.tab_order
+    : enabled;
+  const labels = project?.navigation_profile?.tab_labels || {};
+  return order
+    .map(key => NAV_GROUPS.find(g => g.key === key))
+    .filter(g => g && enabled.includes(g.key))
+    .map(g => ({ ...g, label: labels[g.key] || g.label }));
+}
 
 export const ALL_NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);

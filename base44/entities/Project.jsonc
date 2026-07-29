@@ -1,0 +1,58 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "\u9879\u76ee\u552f\u4e00ID"
+    },
+    "workspace_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u5de5\u4f5c\u533a workspace_id"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u9879\u76ee\u540d\u79f0"
+    },
+    "slug": {
+      "type": "string",
+      "description": "\u77ed\u6807\u8bc6"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u63cf\u8ff0"
+    },
+    "game_type": {
+      "type": "string",
+      "description": "\u6e38\u620f\u7c7b\u578b\uff08arpg / rts / tcg \u7b49\uff09"
+    },
+    "template_key": {
+      "type": "string",
+      "description": "\u521b\u5efa\u65f6\u4f7f\u7528\u7684\u6a21\u677f\u952e"
+    },
+    "enabled_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u542f\u7528\u7684\u9876\u5c42\u6a21\u5757 key\uff1aproject / core_data / world / gameplay / logic / input / events / progression / presentation / simulation"
+    },
+    "navigation_profile": {
+      "type": "object",
+      "description": "\u5bfc\u822a\u914d\u7f6e\uff1a{ tab_order: string[], tab_labels: { [moduleKey]: string } }"
+    },
+    "settings": {
+      "type": "object",
+      "description": "\u9879\u76ee\u7ea7\u8bbe\u7f6e"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "project_id",
+    "workspace_id",
+    "name"
+  ]
+}

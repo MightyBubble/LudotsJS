@@ -1,0 +1,39 @@
+{
+  "name": "ProjectFolder",
+  "type": "object",
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "\u6587\u4ef6\u5939\u552f\u4e00ID"
+    },
+    "workspace_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u5de5\u4f5c\u533a"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u9879\u76ee\uff08workspace \u5171\u4eab\u76ee\u5f55\u65f6\u4e3a\u7a7a\uff09"
+    },
+    "parent_folder_id": {
+      "type": "string",
+      "description": "\u7236\u76ee\u5f55 folder_id\uff0c\u6839\u76ee\u5f55\u4e3a\u7a7a"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u76ee\u5f55\u540d"
+    },
+    "module_key": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u6a21\u5757 key\uff08core_data / world / gameplay ...\uff09"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "folder_id",
+    "workspace_id",
+    "name"
+  ]
+}

@@ -12,7 +12,9 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AssetLibrary from './pages/AssetLibrary';
 import EffectLibrary from './pages/EffectLibrary';
 import AbilityLibrary from './pages/AbilityLibrary';
-import TriggerLibrary from './pages/TriggerLibrary';
+import ProjectOverview from './pages/ProjectOverview';
+import InputSystem from './pages/InputSystem';
+import { ProjectScopeProvider } from '@/lib/projectScope';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -67,7 +69,8 @@ const AuthenticatedApp = () => {
       <Route path="/AssetLibrary" element={<LayoutWrapper currentPageName="AssetLibrary"><AssetLibrary /></LayoutWrapper>} />
       <Route path="/EffectLibrary" element={<LayoutWrapper currentPageName="EffectLibrary"><EffectLibrary /></LayoutWrapper>} />
       <Route path="/AbilityLibrary" element={<LayoutWrapper currentPageName="AbilityLibrary"><AbilityLibrary /></LayoutWrapper>} />
-      <Route path="/TriggerLibrary" element={<LayoutWrapper currentPageName="TriggerLibrary"><TriggerLibrary /></LayoutWrapper>} />
+      <Route path="/ProjectOverview" element={<LayoutWrapper currentPageName="ProjectOverview"><ProjectOverview /></LayoutWrapper>} />
+      <Route path="/InputSystem" element={<LayoutWrapper currentPageName="InputSystem"><InputSystem /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -79,10 +82,12 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
+        <ProjectScopeProvider>
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+        </ProjectScopeProvider>
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
