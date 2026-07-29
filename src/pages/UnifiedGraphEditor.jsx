@@ -9,6 +9,7 @@ import NodeSearchMenu from '../components/graph/NodeSearchMenu';
 import FloatingPanel from '../components/graph/FloatingPanel';
 import GraphMetaPanel from '../components/graph/GraphMetaPanel';
 import StructurePropsPanel from '../components/graph/StructurePropsPanel';
+import GraphTypeTabs from '../components/graph/GraphTypeTabs';
 import Toolbar from '../components/graph/Toolbar';
 import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
@@ -36,6 +37,7 @@ export default function UnifiedGraphEditorPage() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [showInfo, setShowInfo] = useState(false);
+  const [typeFilter, setTypeFilter] = useState('all');
   const [nodeMenu, setNodeMenu] = useState(null);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -555,10 +557,23 @@ export default function UnifiedGraphEditorPage() {
         </Dialog>
       </div>
 
+      <GraphTypeTabs
+        value={typeFilter}
+        onChange={setTypeFilter}
+        counts={{
+          all: allGraphs.length,
+          data: allGraphs.filter(g => g.graph_type === 'data').length,
+          query: allGraphs.filter(g => g.graph_type === 'query').length,
+          function: allGraphs.filter(g => g.graph_type === 'function').length,
+          structure: allGraphs.filter(g => g.graph_type === 'structure').length,
+        }}
+      />
+
       <div className="flex-1 flex overflow-hidden">
         <AssetBrowserPanel
+          key={typeFilter}
           entityName="Graph"
-          records={allGraphs}
+          records={typeFilter === 'all' ? allGraphs : allGraphs.filter(g => g.graph_type === typeFilter)}
           toItem={(g) => ({
             id: g.id,
             name: g.name,
