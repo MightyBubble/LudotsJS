@@ -2,39 +2,54 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { getTypeColor, getTypeShape } from './nodeConfigs';
 
-export default function NodePort({ nodeId, port, type }) {
+/**
+ * 虚幻蓝图风格引脚：
+ * - 未连接为空心，已连接为实心
+ * - 圆形=单值，方形=数组/集合，菱形=结构体，三角=执行流
+ */
+export default function NodePort({ nodeId, port, type, connected, hideLabel = false }) {
   const isInput = type === 'input';
   const portColor = getTypeColor(port.type);
   const portShape = getTypeShape(port.type);
+  const isFilled = connected === undefined ? false : !!connected;
+  const isExec = portShape === 'triangle';
 
   const renderPortShape = () => {
-    const size = 12;
-    const commonProps = {
-      style: {
-        fill: portColor,
-        stroke: '#1a1a1a',
-        strokeWidth: 2,
-        pointerEvents: 'none'
-      }
+    const s = 13;
+    const c = s / 2;
+    const props = {
+      fill: isFilled || isExec ? portColor : 'transparent',
+      stroke: portColor,
+      strokeWidth: 1.8,
+      strokeLinejoin: 'round',
+      style: { pointerEvents: 'none' }
     };
 
     switch (portShape) {
-      case 'circle':
-        return <circle cx={size / 2} cy={size / 2} r={size / 2 - 1} {...commonProps} />;
       case 'square':
-        return <rect x={1} y={1} width={size - 2} height={size - 2} {...commonProps} />;
+        return (
+          <g>
+            <rect x={1.5} y={1.5} width={s - 3} height={s - 3} rx={1.5} {...props} />
+            {!isFilled && <rect x={c - 1.25} y={c - 1.25} width={2.5} height={2.5} fill={portColor} />}
+          </g>
+        );
       case 'diamond':
-        return <polygon points={`${size / 2},1 ${size - 1},${size / 2} ${size / 2},${size - 1} 1,${size / 2}`} {...commonProps} />;
+        return <polygon points={`${c},1.2 ${s - 1.2},${c} ${c},${s - 1.2} 1.2,${c}`} {...props} />;
       case 'triangle':
-        return <polygon points={`${size / 2},1 ${size - 1},${size - 1} 1,${size - 1}`} {...commonProps} />;
+        return <polygon points={`2,1.5 ${s - 1.5},${c} 2,${s - 1.5}`} {...props} />;
       default:
-        return <circle cx={size / 2} cy={size / 2} r={size / 2 - 1} {...commonProps} />;
+        return (
+          <g>
+            <circle cx={c} cy={c} r={c - 1.6} {...props} />
+            {isFilled && <circle cx={c} cy={c} r={c - 4} fill="#0D0F14" opacity={0.35} />}
+          </g>
+        );
     }
   };
 
   return (
     <div
-      className={`flex items-center text-xs text-white/80 relative ${isInput ? 'flex-row' : 'flex-row-reverse text-right'}`}
+      className={`group flex items-center text-[11px] relative ${isInput ? 'flex-row' : 'flex-row-reverse text-right'}`}
       style={{
         position: 'relative',
         paddingLeft: isInput ? '0' : '8px',
@@ -52,32 +67,40 @@ export default function NodePort({ nodeId, port, type }) {
         style={{
           position: 'absolute',
           top: '50%',
-          left: isInput ? '-6px' : 'auto',
-          right: isInput ? 'auto' : '-6px',
+          left: isInput ? '-7px' : 'auto',
+          right: isInput ? 'auto' : '-7px',
           transform: 'translateY(-50%)',
-          width: 12,
-          height: 12,
-          minWidth: 12,
-          minHeight: 12,
+          width: 14,
+          height: 14,
+          minWidth: 14,
+          minHeight: 14,
           background: 'transparent',
           border: 'none',
           borderRadius: 0,
-          zIndex: 20
+          zIndex: 20,
+          cursor: 'crosshair'
         }}
       >
-        <svg width="12" height="12" style={{ overflow: 'visible', display: 'block', pointerEvents: 'none' }}>
+        <svg
+          width="13"
+          height="13"
+          className="transition-transform duration-100 group-hover:scale-125"
+          style={{ overflow: 'visible', display: 'block', pointerEvents: 'none', filter: `drop-shadow(0 0 2px ${portColor}55)` }}
+        >
           {renderPortShape()}
         </svg>
       </Handle>
-      <span
-        className="font-medium leading-none"
-        style={{
-          marginLeft: isInput ? '10px' : '0',
-          marginRight: isInput ? '0' : '10px'
-        }}
-      >
-        {port.label}
-      </span>
+      {!hideLabel && (
+        <span
+          className="font-medium leading-none tracking-wide text-white/70"
+          style={{
+            marginLeft: isInput ? '11px' : '0',
+            marginRight: isInput ? '0' : '11px'
+          }}
+        >
+          {port.label}
+        </span>
+      )}
     </div>
   );
 }

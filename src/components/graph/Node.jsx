@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import NodePort from './NodePort';
+import BlackboardVarNode from './BlackboardVarNode';
 import { Input } from '@/components/ui/input';
 
 const nodeAccentColors = {
@@ -116,8 +117,7 @@ export default function Node({
           nodeId={node.id}
           port={inputPort}
           type="input"
-          onStartConnection={onStartConnection}
-          onEndConnection={onEndConnection}
+          connected={isConnected}
         />
         <Input
           type="number"
@@ -149,8 +149,7 @@ export default function Node({
               nodeId={node.id}
               port={input}
               type="input"
-              onStartConnection={onStartConnection}
-              onEndConnection={onEndConnection}
+              connected={isPortConnected(input.id)}
             />
           ))}
         </div>
@@ -236,38 +235,6 @@ export default function Node({
       );
     }
 
-    if (node.type === 'blackboard_get') {
-      return (
-        <div className="text-white/90 text-sm font-mono px-2 py-1.5 bg-[#0e639c]/10 rounded border border-[#0e639c]/30">
-          {node.data.key || '未设置'}
-        </div>
-      );
-    }
-
-    if (node.type === 'blackboard_set') {
-      return (
-        <div className="space-y-2">
-          <div className="text-white/90 text-sm font-mono px-2 py-1.5 bg-[#16825d]/10 rounded border border-[#16825d]/30">
-            {node.data.key || '未设置'}
-          </div>
-          {node.inputs && node.inputs.length > 0 && (
-            <div className="space-y-1.5">
-              {node.inputs.map(input => (
-                <NodePort
-                  key={input.id}
-                  nodeId={node.id}
-                  port={input}
-                  type="input"
-                  onStartConnection={onStartConnection}
-                  onEndConnection={onEndConnection}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
     if (node.inputs && node.inputs.length > 0) {
       return (
         <div className="space-y-1.5">
@@ -277,8 +244,7 @@ export default function Node({
               nodeId={node.id}
               port={input}
               type="input"
-              onStartConnection={onStartConnection}
-              onEndConnection={onEndConnection}
+              connected={isPortConnected(input.id)}
             />
           ))}
         </div>
@@ -287,6 +253,17 @@ export default function Node({
 
     return null;
   };
+
+  if (node.type === 'blackboard_get' || node.type === 'blackboard_set') {
+    return (
+      <BlackboardVarNode
+        node={node}
+        selected={selected}
+        connectedInputPorts={connectedInputPorts}
+        onDelete={onDelete}
+      />
+    );
+  }
 
   return (
     <div
@@ -335,8 +312,6 @@ export default function Node({
                 nodeId={node.id}
                 port={output}
                 type="output"
-                onStartConnection={onStartConnection}
-                onEndConnection={onEndConnection}
               />
             ))}
           </div>
