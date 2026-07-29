@@ -68,7 +68,6 @@ import StructureEditor from './pages/StructureEditor';
 import TagEditor from './pages/TagEditor';
 import TagSimulator from './pages/TagSimulator';
 import TagVisualization from './pages/TagVisualization';
-import Templates from './pages/Templates';
 import UnifiedGraphEditor from './pages/UnifiedGraphEditor';
 import UnlockableCommands from './pages/UnlockableCommands';
 import ValidatorEditor from './pages/ValidatorEditor';
@@ -99,7 +98,6 @@ export const PAGES = {
     "TagEditor": TagEditor,
     "TagSimulator": TagSimulator,
     "TagVisualization": TagVisualization,
-    "Templates": Templates,
     "UnifiedGraphEditor": UnifiedGraphEditor,
     "UnlockableCommands": UnlockableCommands,
     "ValidatorEditor": ValidatorEditor,
