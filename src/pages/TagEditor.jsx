@@ -484,14 +484,12 @@ export default function TagEditor() {
       tagMap[tag.full_path] = { ...tag, children: [] };
     });
 
-    localTags.forEach(tag => {
+    Object.values(tagMap).forEach(tag => {
       if (!tag.parent_path || tag.parent_path === "") {
-        tree.push(tagMap[tag.full_path]);
+        tree.push(tag);
       } else {
         const parent = tagMap[tag.parent_path];
-        if (parent) {
-          parent.children.push(tagMap[tag.full_path]);
-        }
+        if (parent) parent.children.push(tag);
       }
     });
 

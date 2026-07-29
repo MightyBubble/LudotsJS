@@ -15,6 +15,7 @@ import AbilityLibrary from './pages/AbilityLibrary';
 import ProjectOverview from './pages/ProjectOverview';
 import InputSystem from './pages/InputSystem';
 import { ProjectScopeProvider } from '@/lib/projectScope';
+import I18nProvider from '@/i18n/I18nProvider';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
 function App() {
 
   return (
+    <I18nProvider>
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <ProjectScopeProvider>
@@ -92,6 +94,7 @@ function App() {
         <VisualEditAgent />
       </QueryClientProvider>
     </AuthProvider>
+    </I18nProvider>
   )
 }
 

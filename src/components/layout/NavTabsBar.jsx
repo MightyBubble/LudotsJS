@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { usePageActionsSlot } from "@/components/shell/PageActions";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const itemPath = (item) => `/${item.page}${item.search || ""}`;
 
@@ -10,6 +11,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
   const currentGroup = groups.find(g => g.items.some(i => i.page === currentPageName));
   const [activeKey, setActiveKey] = useState(currentGroup?.key || groups[0]?.key);
   const setSlot = usePageActionsSlot();
+  const { t } = useI18n();
   const lastVisited = useRef({});
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
-            {g.label}
+            {g.isCustomLabel ? g.label : t(`nav.${g.key}`, g.label)}
           </button>
         ))}
       </div>
@@ -71,7 +73,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
               }`}
             >
               <item.icon className="w-3.5 h-3.5" />
-              {item.label}
+              {t(`page.${item.page}${item.search || ''}`, item.label)}
             </Link>
           );
         })}

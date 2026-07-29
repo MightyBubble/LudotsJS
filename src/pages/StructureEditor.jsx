@@ -4,13 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, LayoutGrid } from "lucide-react";
+import { Plus, X, LayoutGrid, ArrowLeft, ZoomOut, ZoomIn, Maximize2, Save } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import PageActions from '@/components/shell/PageActions';
 import { SearchBox, ToolButton } from '@/components/shell/ui';
 import GraphCanvas from '@/components/graph/GraphCanvas';
-import Toolbar from '@/components/graph/Toolbar';
 import StructureNode from '@/components/graph/StructureNode';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function StructureEditorPage() {
   const [selectedStructure, setSelectedStructure] = useState(null);
@@ -26,6 +26,7 @@ export default function StructureEditorPage() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
 
   const queryClient = useQueryClient();
+  const { t } = useI18n();
 
   const { data: structures = [] } = useQuery({
     queryKey: ['structureDefinitions'],
@@ -176,19 +177,19 @@ export default function StructureEditorPage() {
   return (
     <div className="h-full flex flex-col bg-[#0D0F14] text-white">
       <PageActions>
-        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索结构..." />
-        <ToolButton icon={Plus} tone="primary" onClick={() => setIsCreating(true)}>新建</ToolButton>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder={t('structure.search')} />
+        <ToolButton icon={Plus} tone="primary" onClick={() => setIsCreating(true)}>{t('common.new')}</ToolButton>
+        {selectedStructure && (
+          <>
+            <ToolButton icon={ArrowLeft} onClick={() => setSelectedStructure(null)} title={t('structure.back')} />
+            <ToolButton icon={ZoomOut} onClick={() => setZoom(z => Math.max(z - 0.1, 0.5))} title={t('structure.zoomOut')} />
+            <span className="min-w-10 text-center text-[10px] text-muted-foreground">{(zoom * 100).toFixed(0)}%</span>
+            <ToolButton icon={ZoomIn} onClick={() => setZoom(z => Math.min(z + 0.1, 2))} title={t('structure.zoomIn')} />
+            <ToolButton icon={Maximize2} onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} title={t('structure.resetView')} />
+            <ToolButton icon={Save} onClick={handleSave}>{t('common.save')}</ToolButton>
+          </>
+        )}
       </PageActions>
-      <Toolbar
-        onSave={handleSave}
-        onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
-        onZoomOut={() => setZoom(z => Math.max(z - 0.1, 0.5))}
-        onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-        onToggleLibrary={() => setShowLibrary(!showLibrary)}
-        onBack={() => setSelectedStructure(null)}
-        projectName={selectedStructure?.name || "结构编辑器"}
-        zoom={zoom}
-      />
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Structure List */}

@@ -112,7 +112,7 @@ export function getVisibleNavGroups(project) {
   return order
     .map(key => NAV_GROUPS.find(g => g.key === key))
     .filter(g => g && enabled.includes(g.key))
-    .map(g => ({ ...g, label: labels[g.key] || g.label }));
+    .map(g => ({ ...g, label: labels[g.key] || g.label, isCustomLabel: Boolean(labels[g.key]) }));
 }
 
 export const ALL_NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);

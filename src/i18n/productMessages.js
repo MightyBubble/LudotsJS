@@ -1,0 +1,52 @@
+export const PRODUCT_LOCALES = ['zh-CN', 'en-US'];
+
+export const productMessages = {
+  'zh-CN': {
+    'locale.label': '界面语言', 'locale.zh': '中文', 'locale.en': 'English',
+    'common.new': '新建', 'common.search': '搜索', 'common.save': '保存',
+    'common.cancel': '取消', 'common.create': '创建', 'common.delete': '删除',
+    'structure.search': '搜索结构...', 'structure.back': '关闭结构',
+    'structure.zoomOut': '缩小', 'structure.zoomIn': '放大', 'structure.resetView': '重置视图',
+    'project.none': '未选择项目', 'project.workspace': '工作区', 'project.project': '项目',
+    'project.empty': '此工作区暂无项目',
+    'nav.project': '项目', 'nav.world': '世界模型', 'nav.core_data': '数据', 'nav.gameplay': '玩法',
+    'nav.logic': '逻辑图', 'nav.input': '输入与订单', 'nav.events': '规则', 'nav.progression': '成长',
+    'nav.presentation': '表现', 'nav.simulation': '模拟与诊断',
+    'page.ProjectOverview': '项目概览', 'page.ProjectOverview?panel=validation': '校验摘要', 'page.ProjectOverview?panel=settings': '项目设置',
+    'page.TagEditor': '玩法标签', 'page.AttributeEditor': '属性', 'page.EntityPrototypeEditor': '实体原型',
+    'page.EntityRelationEditor': '实体关系', 'page.EntityRelationEditor?view=static': '静态关系',
+    'page.GlobalConstantEditor': '全局常量', 'page.DataTableEditor': '数据表', 'page.StructureEditor': '结构定义',
+    'page.AbilityLibrary': '能力', 'page.EffectLibrary': '效果', 'page.ModifierDefinitionEditor': '修饰器定义', 'page.ValidatorEditor': '验证器',
+    'page.UnifiedGraphEditor?type=action': '动作图', 'page.UnifiedGraphEditor?type=data': '数据图',
+    'page.UnifiedGraphEditor?type=function': '函数图', 'page.UnifiedGraphEditor?type=query': '实体查询图',
+    'page.InputSystem': '输入与订单（规划中）', 'page.GameEventEditor': '游戏事件',
+    'page.InteractionEffects': '交互效果', 'page.UnlockableCommands': '可解锁命令', 'page.RequirementEditor': '需求',
+    'page.AssetLibrary': '全部资源', 'page.AssetLibrary?type=model': '模型', 'page.AssetLibrary?type=animation': '动画',
+    'page.AssetLibrary?type=audio': '音效', 'page.AssetLibrary?type=image': '图像',
+    'page.NewAttributeSimulator': '属性计算器', 'page.TagSimulator': '标签模拟器', 'page.History': '标签历史', 'page.DesignDoc': '设计文档'
+  },
+  'en-US': {
+    'locale.label': 'Interface language', 'locale.zh': '中文', 'locale.en': 'English',
+    'common.new': 'New', 'common.search': 'Search', 'common.save': 'Save',
+    'common.cancel': 'Cancel', 'common.create': 'Create', 'common.delete': 'Delete',
+    'structure.search': 'Search structures...', 'structure.back': 'Close structure',
+    'structure.zoomOut': 'Zoom out', 'structure.zoomIn': 'Zoom in', 'structure.resetView': 'Reset view',
+    'project.none': 'No project selected', 'project.workspace': 'Workspace', 'project.project': 'Project',
+    'project.empty': 'No projects in this workspace',
+    'nav.project': 'Project', 'nav.world': 'World Model', 'nav.core_data': 'Data', 'nav.gameplay': 'Gameplay',
+    'nav.logic': 'Logic Graphs', 'nav.input': 'Input & Orders', 'nav.events': 'Rules', 'nav.progression': 'Progression',
+    'nav.presentation': 'Presentation', 'nav.simulation': 'Simulation & Diagnostics',
+    'page.ProjectOverview': 'Project Overview', 'page.ProjectOverview?panel=validation': 'Validation Summary', 'page.ProjectOverview?panel=settings': 'Project Settings',
+    'page.TagEditor': 'Gameplay Tags', 'page.AttributeEditor': 'Attributes', 'page.EntityPrototypeEditor': 'Entity Prototypes',
+    'page.EntityRelationEditor': 'Entity Relations', 'page.EntityRelationEditor?view=static': 'Static Relations',
+    'page.GlobalConstantEditor': 'Global Constants', 'page.DataTableEditor': 'Data Tables', 'page.StructureEditor': 'Structure Definitions',
+    'page.AbilityLibrary': 'Abilities', 'page.EffectLibrary': 'Effects', 'page.ModifierDefinitionEditor': 'Modifier Definitions', 'page.ValidatorEditor': 'Validators',
+    'page.UnifiedGraphEditor?type=action': 'Action Graph', 'page.UnifiedGraphEditor?type=data': 'Data Graph',
+    'page.UnifiedGraphEditor?type=function': 'Function Graph', 'page.UnifiedGraphEditor?type=query': 'Entity Query Graph',
+    'page.InputSystem': 'Input & Orders (Planned)', 'page.GameEventEditor': 'Game Events',
+    'page.InteractionEffects': 'Interaction Effects', 'page.UnlockableCommands': 'Unlockable Commands', 'page.RequirementEditor': 'Requirements',
+    'page.AssetLibrary': 'All Assets', 'page.AssetLibrary?type=model': 'Models', 'page.AssetLibrary?type=animation': 'Animations',
+    'page.AssetLibrary?type=audio': 'Audio', 'page.AssetLibrary?type=image': 'Images',
+    'page.NewAttributeSimulator': 'Attribute Calculator', 'page.TagSimulator': 'Tag Simulator', 'page.History': 'Tag History', 'page.DesignDoc': 'Design Docs'
+  }
+};

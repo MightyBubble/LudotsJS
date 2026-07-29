@@ -6,16 +6,19 @@ import NavTabsBar from "@/components/layout/NavTabsBar";
 import { PageActionsProvider } from "@/components/shell/PageActions";
 import ProjectSwitcher from "@/components/layout/ProjectSwitcher";
 import useProjectScope from "@/lib/projectScope";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { project } = useProjectScope();
+  const { t } = useI18n();
   const groups = getVisibleNavGroups(project);
   const currentLabel = ALL_NAV_ITEMS.find(i => i.page === currentPageName)?.label || "LudotsJS";
 
   return (
     <PageActionsProvider>
-    <div className="h-screen bg-[#0D0F14] flex flex-col">
+    <div className="silver-editor dark h-screen bg-background flex flex-col">
       <style>{`
         body {
           background: #0D0F14;
@@ -36,6 +39,7 @@ export default function Layout({ children, currentPageName }) {
           <>
             <span className="text-xs font-semibold text-[#E2D8B3] whitespace-nowrap">LudotsJS</span>
             <ProjectSwitcher />
+            <LocaleSwitcher />
           </>
         }
       />
@@ -43,6 +47,7 @@ export default function Layout({ children, currentPageName }) {
       {/* 移动端导航 */}
       <div className="order-first h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between gap-2">
         <ProjectSwitcher />
+        <LocaleSwitcher />
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white p-2">
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -64,7 +69,7 @@ export default function Layout({ children, currentPageName }) {
                     item.page === currentPageName ? "bg-[#D97706] text-black" : "text-gray-300"
                   }`}
                 >
-                  <item.icon className="w-4 h-4" />{item.label}
+                  <item.icon className="w-4 h-4" />{t(`page.${item.page}${item.search || ''}`, item.label)}
                 </Link>
               ))}
             </div>
