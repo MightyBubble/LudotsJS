@@ -26,16 +26,17 @@ export default function Layout({ children, currentPageName }) {
         ::-webkit-scrollbar-thumb:hover { background: #444; }
       `}</style>
 
-      {/* 桌面端：品牌区 + 项目切换器 */}
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] hidden md:flex items-center px-3 gap-1.5 overflow-hidden">
-        <span className="text-xs font-semibold text-[#E2D8B3] whitespace-nowrap">LudotsJS</span>
-        <ProjectSwitcher />
-        <div className="flex-1" />
-        <span className="text-[11px] text-gray-500 truncate max-w-[160px]">{currentLabel}</span>
-      </div>
-
-      {/* 桌面端：两行 Tab 导航 */}
-      <NavTabsBar groups={groups} currentPageName={currentPageName} />
+      {/* 桌面端：工作区 + 模块 Tab 同一行，第二行为条目 Tab */}
+      <NavTabsBar
+        groups={groups}
+        currentPageName={currentPageName}
+        leading={
+          <>
+            <span className="text-xs font-semibold text-[#E2D8B3] whitespace-nowrap">LudotsJS</span>
+            <ProjectSwitcher />
+          </>
+        }
+      />
 
       {/* 移动端导航 */}
       <div className="h-14 bg-[#15171C] border-b border-[#2A2E37] md:hidden flex items-center px-4 justify-between gap-2">

@@ -26,7 +26,6 @@ export const NAV_GROUPS = [
       { page: 'AttributeEditor', label: 'Attributes', icon: Layers },
       { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
       { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
-      { page: 'EntityQueryEditor', label: 'Entity Graph', icon: Network },
     ],
   },
   {

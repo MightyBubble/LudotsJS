@@ -8,7 +8,6 @@ import GraphCanvas from '../components/graph/GraphCanvas';
 import NodeSearchMenu from '../components/graph/NodeSearchMenu';
 import FloatingPanel from '../components/graph/FloatingPanel';
 import GraphMetaPanel from '../components/graph/GraphMetaPanel';
-import GraphTypeTabs from '../components/graph/GraphTypeTabs';
 import Toolbar from '../components/graph/Toolbar';
 import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
@@ -25,6 +24,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLocation } from 'react-router-dom';
 
 // 纯函数图默认节点：入口 + 返回
 function buildFunctionDefaultNodes(returnType) {
@@ -59,7 +59,8 @@ export default function UnifiedGraphEditorPage() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [showInfo, setShowInfo] = useState(false);
-  const [typeFilter, setTypeFilter] = useState('all');
+  const location = useLocation();
+  const typeFilter = new URLSearchParams(location.search).get('type') || 'all';
   const [nodeMenu, setNodeMenu] = useState(null);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -244,14 +245,6 @@ export default function UnifiedGraphEditorPage() {
       }
     });
   }, [currentGraph, nodes, connections, blackboard, updateMutation]);
-
-  const updateGraphType = useCallback((newType) => {
-    if (!currentGraph) return;
-
-    // 转换图类型需要删除旧图并创建新图
-    alert('图类型转换功能开发中...');
-    setIsEditingType(false);
-  }, [currentGraph]);
 
   const updateReturnType = useCallback((newReturnType) => {
     if (!currentGraph || (currentGraph.entity_type !== 'FunctionGraph' && currentGraph.entity_type !== 'DataGraph')) return;
@@ -595,18 +588,6 @@ export default function UnifiedGraphEditorPage() {
         </Dialog>
       </div>
 
-      <GraphTypeTabs
-        value={typeFilter}
-        onChange={setTypeFilter}
-        counts={{
-          all: allGraphs.length,
-          data: allGraphs.filter(g => g.graph_type === 'data').length,
-          query: allGraphs.filter(g => g.graph_type === 'query').length,
-          function: allGraphs.filter(g => g.graph_type === 'function').length,
-          action: allGraphs.filter(g => g.graph_type === 'action').length,
-        }}
-      />
-
       <div className="flex-1 flex overflow-hidden">
         <AssetBrowserPanel
           key={typeFilter}
@@ -619,7 +600,10 @@ export default function UnifiedGraphEditorPage() {
           })}
           selectedId={selectedGraph?.id}
           onSelect={(g) => { setSelectedGraph(g); openGraph(g); }}
-          onCreate={() => setIsCreating(true)}
+          onCreate={() => {
+            if (typeFilter !== 'all') setNewGraph(prev => ({ ...prev, graph_type: typeFilter }));
+            setIsCreating(true);
+          }}
           onDelete={(g) => {
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
               deleteMutation.mutate({ id: g.id, entity_type: g.entity_type });
