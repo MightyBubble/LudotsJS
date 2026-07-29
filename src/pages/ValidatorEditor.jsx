@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Edit3, Trash2, X, Save, Shield } from "lucide-react";
-import PageActions from "@/components/shell/PageActions";
-import { SearchBox, ToolButton } from "@/components/shell/ui";
+import RecordWorkspace from "@/components/ludots/RecordWorkspace";
+import { Section } from "@/components/ludots/ui";
 
 export default function ValidatorEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,10 +67,11 @@ export default function ValidatorEditorPage() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Validator.create(data),
-    onSuccess: () => {
+    onSuccess: (record) => {
       queryClient.invalidateQueries({ queryKey: ['validators'] });
       setCreatingNew(false);
-      setEditData(null);
+      setEditingId(record.id);
+      setEditData(record);
     },
   });
 
@@ -99,11 +100,10 @@ export default function ValidatorEditorPage() {
   }, [validators, searchQuery]);
 
   const handleCreate = () => {
-    setCreatingNew(true);
-    setEditingId(null);
-    setEditData({
-      validator_id: "",
-      name: "",
+    const stamp = Date.now();
+    createMutation.mutate({
+      validator_id: `validator_${stamp}`,
+      name: "新验证器",
       description: "",
       validator_type: "entity_check",
       entity_check_config: { source_entity: "source", check_type: "has_tag", tag_path: "" },
@@ -881,69 +881,50 @@ export default function ValidatorEditorPage() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
-      <PageActions>
-        <SearchBox value={searchQuery} onChange={setSearchQuery} />
-        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
-      </PageActions>
+    <RecordWorkspace
+      entityName="Validator"
+      records={validators}
+      toItem={(validator) => ({
+        id: validator.id,
+        name: validator.name,
+        subtitle: `${validator.validator_id} · ${getTypeName(validator.validator_type)}`,
+      })}
+      columns={[
+        { key: 'validator_id', label: '验证器 ID', width: 220, render: (validator) => <span className="font-mono text-[#E2D8B3]">{validator.validator_id}</span> },
+        { key: 'name', label: '名称', width: 180 },
+        { key: 'validator_type', label: '类型', width: 130, render: (validator) => getTypeName(validator.validator_type) },
+        { key: 'config', label: '配置', render: renderConfigCell },
+        { key: 'negate', label: '取反', width: 70, render: (validator) => validator.negate ? '是' : '否' },
+        { key: 'failure_result', label: '失败结果', width: 100 },
+      ]}
+      selectedId={editingId}
+      onSelect={handleEdit}
+      onCreate={handleCreate}
+      onDelete={(validator) => handleDelete(validator.id)}
+      onSave={handleSave}
+      dirty={Boolean(editData)}
+    >
+      {editData && (
+        <div className="max-w-3xl space-y-3">
+          <Section title="基础信息">
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs text-gray-400 mb-1">验证器 ID</label><Input value={editData.validator_id || ''} onChange={(e) => setEditData({ ...editData, validator_id: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+              <div><label className="block text-xs text-gray-400 mb-1">名称</label><Input value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+            </div>
+            <div><label className="block text-xs text-gray-400 mb-1">描述</label><Input value={editData.description || ''} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs text-gray-400 mb-1">类型</label><Select value={editData.validator_type || 'entity_check'} onValueChange={handleTypeChange}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]"><SelectItem value="entity_check">实体检查</SelectItem><SelectItem value="entity_compare">实体比较</SelectItem><SelectItem value="combine">组合</SelectItem><SelectItem value="data_graph">验证图</SelectItem></SelectContent></Select></div>
+              <div><label className="block text-xs text-gray-400 mb-1">失败结果</label><Select value={editData.failure_result || 'false'} onValueChange={(value) => setEditData({ ...editData, failure_result: value })}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]"><SelectItem value="false">false</SelectItem><SelectItem value="unknown">unknown</SelectItem></SelectContent></Select></div>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" checked={Boolean(editData.negate)} onChange={(e) => setEditData({ ...editData, negate: e.target.checked })} />取反结果</label>
+          </Section>
 
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
-            <tr>
-              <th className="text-left p-2 font-semibold text-gray-300 w-48">验证器ID</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-32">名称</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-24">类型</th>
-              <th className="text-left p-2 font-semibold text-gray-300">配置</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-16">取反</th>
-              <th className="text-left p-2 font-semibold text-gray-300 w-20">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {creatingNew && editData && renderEditRow(editData)}
-            
-            {filteredValidators.map((validator) => {
-              const isEditing = editingId === validator.id;
-              
-              if (isEditing && editData) {
-                return <React.Fragment key={validator.id}>{renderEditRow(editData)}</React.Fragment>;
-              }
-              
-              return (
-                <tr key={validator.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
-                  <td className="p-2 text-gray-300 font-mono">{validator.validator_id}</td>
-                  <td className="p-2 text-gray-300">{validator.name}</td>
-                  <td className="p-2 text-gray-300">{getTypeName(validator.validator_type)}</td>
-                  <td className="p-2">{renderConfigCell(validator)}</td>
-                  <td className="p-2">
-                    {validator.negate ? <span className="text-gray-300">✓</span> : <span className="text-gray-600">-</span>}
-                  </td>
-                  <td className="p-2">
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={() => handleEdit(validator)} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#2A2E37]">
-                        <Edit3 className="w-3 h-3" />
-                      </Button>
-                      <Button size="sm" onClick={() => handleDelete(validator.id)} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#7f1d1d]">
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <datalist id="tags-list">
-          {tags.map(t => <option key={t.id} value={t.full_path} />)}
-        </datalist>
-        
-        {filteredValidators.length === 0 && !creatingNew && (
-          <div className="text-center py-12 text-gray-500">
-            <div className="text-sm">暂无验证器</div>
-          </div>
-        )}
-      </div>
-    </div>
+          <Section title={`${getTypeName(editData.validator_type)}配置`}>
+            {renderConfigEditor(editData)}
+          </Section>
+          <datalist id="tags-list">{tags.map((tag) => <option key={tag.id} value={tag.full_path} />)}</datalist>
+        </div>
+      )}
+    </RecordWorkspace>
   );
 }

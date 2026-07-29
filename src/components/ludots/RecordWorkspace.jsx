@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import AssetBrowserPanel from '@/components/assetBrowser/AssetBrowserPanel';
 import PageActions from '@/components/shell/PageActions';
 import RecordTable from '@/components/ludots/RecordTable';
-import { ToolButton, S } from '@/components/shell/ui';
+import { SearchBox, ToolButton, S } from '@/components/shell/ui';
 import { Save, ListTree, Table2, Plus } from 'lucide-react';
 
 /**
@@ -28,12 +28,22 @@ export default function RecordWorkspace({
 }) {
   const storageKey = `ludots.view.${entityName}`;
   const [view, setView] = useState(() => localStorage.getItem(storageKey) || 'tree');
+  const [searchQuery, setSearchQuery] = useState('');
   const changeView = (v) => { setView(v); localStorage.setItem(storageKey, v); };
   const hasTable = Array.isArray(columns) && columns.length > 0;
+  const visibleRecords = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return records;
+    return records.filter((record) => {
+      const item = toItem(record);
+      return `${item.name || ''} ${item.subtitle || ''}`.toLowerCase().includes(q);
+    });
+  }, [records, searchQuery, toItem]);
 
   return (
     <div className={S.page}>
       <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} />
         {headerRight}
         {hasTable && (
           <div className="flex items-center gap-1">
@@ -50,7 +60,7 @@ export default function RecordWorkspace({
       {view === 'table' && hasTable ? (
         <div className="flex-1 overflow-hidden">
           <RecordTable
-            records={records}
+            records={visibleRecords}
             columns={columns}
             selectedId={selectedId}
             onSelect={(r) => { onSelect?.(r); changeView('tree'); }}
@@ -61,8 +71,9 @@ export default function RecordWorkspace({
         <div className="flex-1 flex overflow-hidden">
           <AssetBrowserPanel
             entityName={entityName}
-            records={records}
+            records={visibleRecords}
             toItem={toItem}
+            hideSearch
             selectedId={selectedId}
             onSelect={onSelect}
             onCreate={onCreate}

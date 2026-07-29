@@ -10,7 +10,7 @@ import useEditorMeta from "./useEditorMeta";
  * records: 业务记录数组；toItem(record) → { id, name, subtitle }
  */
 export default function AssetBrowserPanel({
-  entityName, records, toItem, selectedId, onSelect, onOpen, onCreate, onDelete, children,
+  entityName, records, toItem, selectedId, onSelect, onOpen, onCreate, onDelete, children, hideSearch = false,
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const { metaByRecord, getCategory, setCategory, toggleFavorite } = useEditorMeta(entityName);
@@ -33,15 +33,17 @@ export default function AssetBrowserPanel({
   return (
     <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] flex flex-col flex-shrink-0">
       <div className="p-2 border-b border-[#2A2E37] flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
+        {!hideSearch && (
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+            <Input
+              placeholder="搜索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-7 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
+            />
+          </div>
+        )}
         {onCreate && (
           <Button size="sm" onClick={onCreate} className="h-7 px-2 bg-[#D97706] hover:bg-[#B45309] text-white">
             <Plus className="w-3.5 h-3.5" />
