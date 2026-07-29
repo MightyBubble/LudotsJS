@@ -1,6 +1,7 @@
 import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat, Table } from 'lucide-react';
 
 import { ACTION_NODE_TYPES } from './actionNodes';
+import { PURE_NODE_TYPES } from './pureNodes';
 
 // 类型颜色映射
 export const TYPE_COLORS = {
@@ -776,6 +777,7 @@ export const NODE_TYPES = {
     outputs: [{ id: 'out', label: '出', type: 'relation' }]
   },
 
+  ...PURE_NODE_TYPES,
   ...ACTION_NODE_TYPES
 };
 

@@ -1,0 +1,84 @@
+{
+  "name": "Asset",
+  "type": "object",
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "\u8d44\u6e90\u8bed\u4e49\u552f\u4e00ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u63cf\u8ff0"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "audio",
+        "model",
+        "animation",
+        "material",
+        "particle",
+        "prefab",
+        "data",
+        "script",
+        "other"
+      ],
+      "default": "image",
+      "description": "\u8d44\u6e90\u7c7b\u578b"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "uploaded",
+        "url",
+        "builtin",
+        "generated"
+      ],
+      "default": "url",
+      "description": "\u6765\u6e90\u7c7b\u578b"
+    },
+    "uri": {
+      "type": "string",
+      "description": "\u8d44\u6e90\u5730\u5740"
+    },
+    "preview_uri": {
+      "type": "string",
+      "description": "\u9884\u89c8\u56fe\u5730\u5740"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6807\u7b7e"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "\u6269\u5c55\u5143\u6570\u636e"
+    },
+    "import_settings": {
+      "type": "object",
+      "description": "\u5bfc\u5165\u8bbe\u7f6e"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "\u7248\u672c\u53f7"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u662f\u5426\u542f\u7528"
+    }
+  },
+  "required": [
+    "asset_id",
+    "name",
+    "asset_type"
+  ]
+}

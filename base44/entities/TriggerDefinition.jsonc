@@ -1,0 +1,77 @@
+{
+  "name": "TriggerDefinition",
+  "type": "object",
+  "properties": {
+    "trigger_id": {
+      "type": "string",
+      "description": "\u89e6\u53d1\u5668\u552f\u4e00ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u63cf\u8ff0"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "event",
+        "tag_count",
+        "attribute_threshold",
+        "interval"
+      ],
+      "default": "event",
+      "description": "\u89e6\u53d1\u7c7b\u578b"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "\u8ba2\u9605\u7684 GameEvent ID\uff08event \u7c7b\u578b\uff09"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "source",
+        "target",
+        "global"
+      ],
+      "default": "owner"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u547d\u4e2d\u524d\u7f6e\u9700\u6c42\uff08Requirement ID\uff09"
+    },
+    "config": {
+      "type": "object",
+      "description": "\u5404\u7c7b\u578b\u4e13\u5c5e\u914d\u7f6e"
+    },
+    "cooldown": {
+      "type": "number",
+      "default": 0,
+      "description": "\u8282\u6d41\u95f4\u9694\uff08\u79d2\uff09"
+    },
+    "max_activations": {
+      "type": "number",
+      "description": "\u6700\u5927\u547d\u4e2d\u6b21\u6570"
+    },
+    "once_per_event": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u540c\u4e00\u4e8b\u4ef6\u4ec5\u547d\u4e2d\u4e00\u6b21"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "trigger_id",
+    "name",
+    "trigger_type"
+  ]
+}

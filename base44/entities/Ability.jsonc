@@ -1,0 +1,96 @@
+{
+  "name": "Ability",
+  "type": "object",
+  "properties": {
+    "ability_id": {
+      "type": "string",
+      "description": "\u80fd\u529b\u552f\u4e00ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u63cf\u8ff0"
+    },
+    "icon_asset_id": {
+      "type": "string",
+      "description": "\u56fe\u6807\u8d44\u6e90ID\uff08\u5f15\u7528 Asset\uff09"
+    },
+    "ability_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u80fd\u529b\u6807\u7b7e"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "activation_mode": {
+      "type": "string",
+      "enum": [
+        "active",
+        "passive",
+        "event_driven"
+      ],
+      "default": "active"
+    },
+    "input_binding": {
+      "type": "object",
+      "description": "\u8f93\u5165\u7ed1\u5b9a"
+    },
+    "activation_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6fc0\u6d3b\u9700\u6c42\uff08Requirement ID\uff09"
+    },
+    "target": {
+      "type": "object",
+      "description": "TargetResolver"
+    },
+    "blackboard": {
+      "type": "object",
+      "description": "\u9ed1\u677f\u53d8\u91cf\u5b9a\u4e49"
+    },
+    "cost_effect_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cooldown_effect_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "activation_effect_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cancellation_effect_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hooks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Ability Hooks"
+    }
+  },
+  "required": [
+    "ability_id",
+    "name"
+  ]
+}
