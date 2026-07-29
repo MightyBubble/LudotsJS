@@ -7,7 +7,7 @@ export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0D0F14] flex flex-col">
+    <div className="h-screen bg-[#0D0F14] flex flex-col">
       <style>{`
         body {
           background: #0D0F14;
@@ -161,7 +161,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
-      <div className="flex-1 overflow-hidden">{children}</div>
+      <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
     </div>
   );
 }
