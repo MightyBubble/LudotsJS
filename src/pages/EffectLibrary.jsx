@@ -28,7 +28,7 @@ export default function EffectLibraryPage() {
       toItem={(r) => ({ id: r.id, name: r.effect_id, subtitle: `${r.lifetime || 'Instant'} · ${r.presetType || 'None'}` })}
       selectedId={editor.selectedId} onSelect={(r) => editor.setSelectedId(r.id)} onCreate={editor.create}
       onDelete={(r) => window.confirm(`确定删除「${r.effect_id}」吗？`) && editor.remove(r.id)}
-      onSave={editor.save} dirty={editor.dirty}
+      onSave={editor.save} dirty={editor.dirty} hideBrowserOnMobile
     >
       {editor.draft && <EffectDetailsEditor draft={editor.draft} patch={editor.patch} refs={refs} issues={issues} />}
     </RecordWorkspace>

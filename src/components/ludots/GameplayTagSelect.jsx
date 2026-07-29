@@ -4,7 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const NONE = '__none__';
 
 export default function GameplayTagSelect({ label, value, tags = [], onChange }) {
-  const options = [...tags].sort((a, b) => a.full_path.localeCompare(b.full_path));
+  const options = [...new Map(tags.map(tag => [tag.full_path, tag])).values()]
+    .sort((a, b) => a.full_path.localeCompare(b.full_path));
 
   return (
     <div>

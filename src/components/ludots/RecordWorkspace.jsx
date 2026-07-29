@@ -24,6 +24,7 @@ export default function RecordWorkspace({
   dirty,
   headerRight,
   children,
+  hideBrowserOnMobile = false,
   emptyHint = '从左侧选择或新建一条记录',
 }) {
   const storageKey = `ludots.view.${entityName}`;
@@ -73,15 +74,17 @@ export default function RecordWorkspace({
         </div>
       ) : (
         <div className="flex-1 flex overflow-hidden">
-          <AssetBrowserPanel
-            entityName={entityName}
-            records={visibleRecords}
-            toItem={toItem}
-            hideSearch
-            selectedId={selectedId}
-            onSelect={onSelect}
-            onDelete={onDelete}
-          />
+          <div className={hideBrowserOnMobile && selectedId ? 'hidden md:contents' : 'contents'}>
+            <AssetBrowserPanel
+              entityName={entityName}
+              records={visibleRecords}
+              toItem={toItem}
+              hideSearch
+              selectedId={selectedId}
+              onSelect={onSelect}
+              onDelete={onDelete}
+            />
+          </div>
           <div className="flex-1 overflow-y-auto p-4 min-w-0">
             {children || <div className={S.empty}>{emptyHint}</div>}
           </div>
