@@ -7,7 +7,6 @@ import { Section, TextField, SelectField, ListField, NumberField, BoolField } fr
 import ValueSourceEditor from '@/components/ludots/ValueSourceEditor';
 import TargetResolverEditor from '@/components/ludots/TargetResolverEditor';
 import RefListSelector from '@/components/ludots/RefListSelector';
-import OperationsEditor from '@/components/ludots/OperationsEditor';
 import PhasePipelineEditor from '@/components/ludots/PhasePipelineEditor';
 import TransactionTimeline from '@/components/ludots/TransactionTimeline';
 import { validateEffect } from '@/components/ludots/validation';
@@ -143,13 +142,6 @@ export default function EffectLibraryPage() {
                 </p>
               ))}
           </Section>
-
-          {(draft.operations || []).length > 0 && (
-            <Section title="[旧版兼容] 平铺 Operations">
-              <p className="text-[10px] text-yellow-500">该字段仅为兼容旧记录保留，新配置请使用上方 Phase 流程。</p>
-              <OperationsEditor operations={draft.operations || []} onChange={(v) => patch({ operations: v })} refs={refs} />
-            </Section>
-          )}
         </div>
       )}
     </RecordWorkspace>

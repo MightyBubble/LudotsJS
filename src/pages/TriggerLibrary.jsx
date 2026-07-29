@@ -22,7 +22,7 @@ export default function TriggerLibraryPage() {
   // 反向引用：哪些 Effect / Ability 的 Hook 使用了该 Trigger
   const usedBy = draft ? [
     ...refs.effects.filter(e => (e.phases || []).some(p => (p.listeners || []).some(l => l.trigger_id === draft.trigger_id))).map(e => `效果：${e.name}`),
-    ...refs.abilities.filter(a => (a.hooks || []).some(h => h.trigger_id === draft.trigger_id)).map(a => `能力：${a.name}`),
+    ...refs.abilities.filter(a => (a.listeners || []).some(l => l.trigger_id === draft.trigger_id)).map(a => `能力：${a.name}`),
   ] : [];
 
   return (

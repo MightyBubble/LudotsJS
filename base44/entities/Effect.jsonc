@@ -28,7 +28,7 @@
     },
     "lifetime": {
       "type": "object",
-      "description": "\u751f\u547d\u5468\u671f\uff08\u5bf9\u9f50 EffectLifetimeKind\uff1ainstant / after / infinite\uff09",
+      "description": "\u751f\u547d\u5468\u671f\uff08EffectLifetimeKind\uff1ainstant / after / infinite\uff09",
       "properties": {
         "kind": {
           "type": "string",
@@ -53,7 +53,7 @@
           "items": {
             "type": "string"
           },
-          "description": "\u6761\u4ef6/Tag \u9a71\u52a8\u7684\u79fb\u9664\u5224\u5b9a\uff08\u4e0e LifetimeKind \u6b63\u4ea4\uff0c\u7531 Requirement \u6216 Trigger \u53d1\u8d77 remove\uff09"
+          "description": "\u6761\u4ef6/Tag \u9a71\u52a8\u7684\u79fb\u9664\u5224\u5b9a\uff08\u4e0e LifetimeKind \u6b63\u4ea4\uff09"
         }
       }
     },
@@ -124,7 +124,7 @@
     },
     "phases": {
       "type": "array",
-      "description": "\u6b63\u5f0f\u7ed3\u6784\uff1aPhase Bindings\uff0c\u56fa\u5b9a\u987a\u5e8f on_propose \u2192 on_calculate \u2192 on_resolve \u2192 on_hit \u2192 on_apply \u2192 on_period \u2192 on_expire \u2192 on_remove",
+      "description": "Phase Bindings\uff0c\u56fa\u5b9a\u987a\u5e8f on_propose \u2192 on_calculate \u2192 on_resolve \u2192 on_hit \u2192 on_apply \u2192 on_period \u2192 on_expire \u2192 on_remove",
       "items": {
         "type": "object",
         "properties": {
@@ -186,7 +186,7 @@
           },
           "listeners": {
             "type": "array",
-            "description": "Phase Listeners\uff08\u539f Hook\uff09\uff1aPre/Main/Post \u5b8c\u6210\u540e\u5206\u53d1\uff0c\u4ec5\u5141\u8bb8\u5165\u961f Request",
+            "description": "Phase Listeners\uff1aPre/Main/Post \u5b8c\u6210\u540e\u5206\u53d1\uff0c\u4ec5\u5141\u8bb8\u5165\u961f Request",
             "items": {
               "type": "object",
               "properties": {
@@ -337,20 +337,6 @@
           }
         }
       }
-    },
-    "operations": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      },
-      "description": "[\u65e7\u7248\u517c\u5bb9] \u5e73\u94fa Operations\uff0c\u65b0\u8bb0\u5f55\u8bf7\u4f7f\u7528 phases"
-    },
-    "hooks": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      },
-      "description": "[\u65e7\u7248\u517c\u5bb9] \u65e7 Hook \u5217\u8868\uff0c\u65b0\u8bb0\u5f55\u8bf7\u4f7f\u7528 phases[].listeners"
     },
     "granted_tags": {
       "type": "array",

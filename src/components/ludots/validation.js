@@ -130,13 +130,6 @@ export function validateEffect(effect, refs = {}) {
     });
   }
 
-  if ((effect.operations || []).length > 0) {
-    out.push(issue('warning', 'operations', '存在旧版平铺 Operations 数据（已保留兼容）', '迁移到 Phase Bindings 后清空 operations'));
-  }
-  if ((effect.hooks || []).length > 0) {
-    out.push(issue('warning', 'hooks', '存在旧版 hooks 数据（已保留兼容）', '迁移为对应 Phase 的 Listeners'));
-  }
-
   return out;
 }
 
@@ -164,10 +157,10 @@ export function validateAbility(ability, refs = {}) {
   if (ability.activation_mode === 'event_driven' && !triggers.some(t => (t.requests || []).some(r => r.ability_id === ability.ability_id))) {
     out.push(issue('warning', 'activation_mode', '事件驱动能力应由 Trigger 发起 Ability Request', '在触发器中配置 activate_ability 请求'));
   }
-  (ability.hooks || []).forEach((l, i) => {
+  (ability.listeners || []).forEach((l, i) => {
     (l.responses || []).forEach((r, ri) => {
       if (r.response_type === 'activate_ability' && r.ability_id === ability.ability_id) {
-        out.push(issue('error', `hooks[${i}].responses[${ri}]`, 'Listener 重新激活自身，存在递归风险', '改为其它能力或设置 max_executions'));
+        out.push(issue('error', `listeners[${i}].responses[${ri}]`, 'Listener 重新激活自身，存在递归风险', '改为其它能力或设置 max_executions'));
       }
     });
   });

@@ -19,7 +19,7 @@ export default function AbilityLibraryPage() {
       ability_id: `ability_${Date.now()}`, name: '新能力', is_active: true, activation_mode: 'active',
       ability_tags: [], activation_requirements: [], target: { kind: 'explicit_target' },
       cost_effect_ids: [], cooldown_effect_ids: [], activation_effect_ids: [], cancellation_effect_ids: [],
-      hooks: [], blackboard: {}, input_binding: {},
+      listeners: [], blackboard: {}, input_binding: {},
     })
   );
   const refs = useCoreRefs();
@@ -67,7 +67,7 @@ export default function AbilityLibraryPage() {
           </Section>
 
           <Section title="Phase Listeners（能力激活管线）">
-            <PhaseListenersEditor listeners={draft.hooks || []} onChange={(v) => patch({ hooks: v })} phaseOptions={ABILITY_LISTENER_PHASES} refs={refs} />
+            <PhaseListenersEditor listeners={draft.listeners || []} onChange={(v) => patch({ listeners: v })} phaseOptions={ABILITY_LISTENER_PHASES} refs={refs} />
           </Section>
 
           <Section title="黑板 Blackboard">
