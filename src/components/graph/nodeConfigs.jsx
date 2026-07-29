@@ -1,7 +1,10 @@
 import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat, Table } from 'lucide-react';
 
+import { ACTION_NODE_TYPES } from './actionNodes';
+
 // 类型颜色映射
 export const TYPE_COLORS = {
+  exec: '#e5e5e5',
   number: '#5b9bd5',
   boolean: '#d9534f',
   string: '#e91e63',
@@ -24,6 +27,7 @@ export const TYPE_COLORS = {
 
 // 类型形状映射
 export const TYPE_SHAPES = {
+  exec: 'triangle',
   number: 'circle',
   boolean: 'circle',
   string: 'circle',
@@ -752,13 +756,19 @@ export const NODE_TYPES = {
     graphTypes: ['structure'],
     inputs: [{ id: 'in', label: '入', type: 'relation' }],
     outputs: [{ id: 'out', label: '出', type: 'relation' }]
-  }
+  },
+
+  ...ACTION_NODE_TYPES
 };
 
-// 根据graphType获取可用节点（graphType 只有 data / query / function / structure）
+// 根据graphType获取可用节点（graphType: data / query / function / action）
+// 动作图额外可用所有纯函数图节点（纯求值，无副作用）
 export function getAvailableNodes(graphType) {
   return Object.entries(NODE_TYPES)
-    .filter(([_, config]) => config.graphTypes.includes(graphType))
+    .filter(([_, config]) =>
+      config.graphTypes.includes(graphType) ||
+      (graphType === 'action' && config.graphTypes.includes('function'))
+    )
     .map(([type, config]) => ({ type, ...config }));
 }
 

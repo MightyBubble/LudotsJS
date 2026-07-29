@@ -18,10 +18,10 @@ export function graphTypeLabel(graph) {
       return `Data (${USAGE_LABELS[graph.usage] || USAGE_LABELS.general})`;
     case 'EntityQuery':
       return 'Entity Query';
-    case 'StructureDefinition':
-      return 'Structure Definition';
+    case 'ActionGraph':
+      return '动作图';
     default:
-      return `Function Graph (${graph.return_type || 'void'})`;
+      return `纯函数图 (${graph.return_type || 'void'})`;
   }
 }
 

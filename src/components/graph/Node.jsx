@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import NodePort from './NodePort';
 import BlackboardVarNode from './BlackboardVarNode';
 import { Input } from '@/components/ui/input';
+import { getNodeLabel } from './nodeConfigs';
 
 const nodeAccentColors = {
   number: '#5b9bd5',
@@ -286,7 +287,7 @@ export default function Node({
         }}
       >
         <span className="font-medium text-xs text-[#E2D8B3]">
-          {node.data?.label || nodeLabels[node.type] || node.type}
+          {node.data?.label || nodeLabels[node.type] || getNodeLabel(node.type)}
         </span>
         {!isLocked && (
           <button

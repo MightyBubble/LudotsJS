@@ -1,0 +1,45 @@
+{
+  "name": "ActionGraph",
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string",
+      "description": "\u52a8\u4f5c\u56fe\u552f\u4e00\u6807\u8bc6\u7b26\uff08\u4f8b\u5982\uff1aapply_burn, cast_fireball\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u52a8\u4f5c\u56fe\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u52a8\u4f5c\u56fe\u63cf\u8ff0"
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "\u52a8\u4f5c\u5165\u53e3\u53c2\u6570\u5b9a\u4e49\uff08\u65bd\u6cd5\u8005\u3001\u76ee\u6807\u7b49\uff09"
+    },
+    "graph_definition": {
+      "type": "string",
+      "description": "\u52a8\u4f5c\u56fe\u5b8c\u6574\u5b9a\u4e49\uff08JSON\u5b57\u7b26\u4e32\uff0c\u5305\u542bnodes, connections, blackboard\uff09"
+    }
+  },
+  "required": [
+    "action_id",
+    "name",
+    "graph_definition"
+  ]
+}

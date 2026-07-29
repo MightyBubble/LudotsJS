@@ -67,6 +67,12 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
+  const { data: actionGraphs = [] } = useQuery({
+    queryKey: ['actionGraphs'],
+    queryFn: () => base44.entities.ActionGraph.list(),
+    initialData: [],
+  });
+
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
       ...g,
@@ -77,12 +83,13 @@ export default function UnifiedGraphEditorPage() {
     return [
       ...dataGraphEntities,
       ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
-      ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' }))
+      ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' })),
+      ...actionGraphs.map(g => ({ ...g, graph_type: 'action', entity_type: 'ActionGraph' }))
     ];
-  }, [dataGraphs, queryGraphs, functionGraphs]);
+  }, [dataGraphs, queryGraphs, functionGraphs, actionGraphs]);
 
   const invalidateGraphs = useCallback(() => {
-    ['dataGraphs', 'entityQueries', 'functionGraphs'].forEach(key =>
+    ['dataGraphs', 'entityQueries', 'functionGraphs', 'actionGraphs'].forEach(key =>
       queryClient.invalidateQueries({ queryKey: [key] })
     );
   }, [queryClient]);
@@ -97,6 +104,25 @@ export default function UnifiedGraphEditorPage() {
           usage: data.usage || 'general',
           return_type: data.return_type || 'number',
           graph_definition: JSON.stringify({ nodes: [], connections: [], blackboard: {} })
+        });
+      } else if (data.graph_type === 'action') {
+        return base44.entities.ActionGraph.create({
+          action_id: data.name.toLowerCase().replace(/\s+/g, '_'),
+          name: data.name,
+          description: data.description,
+          parameters: [],
+          graph_definition: JSON.stringify({
+            nodes: [{
+              id: `node-${Date.now()}`,
+              type: 'action_entry',
+              position: { x: 120, y: 160 },
+              data: {},
+              inputs: [],
+              outputs: getNodeConfig('action_entry').outputs
+            }],
+            connections: [],
+            blackboard: {}
+          })
         });
       } else if (data.graph_type === 'query') { // Added else if for query type
         return base44.entities.EntityQuery.create({
@@ -121,7 +147,8 @@ export default function UnifiedGraphEditorPage() {
       setIsCreating(false);
       setNewGraph({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
       const entityType = variables.graph_type === 'data' ? 'DataGraph'
-        : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
+        : variables.graph_type === 'query' ? 'EntityQuery'
+        : variables.graph_type === 'action' ? 'ActionGraph' : 'FunctionGraph';
       openGraph({ ...graph, graph_type: variables.graph_type, entity_type: entityType });
     },
   });
@@ -132,6 +159,8 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.DataGraph.update(id, data);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.update(id, data);
+      } else if (entity_type === 'ActionGraph') {
+        return base44.entities.ActionGraph.update(id, data);
       } else { // Handle FunctionGraph update
         return base44.entities.FunctionGraph.update(id, data);
       }
@@ -145,6 +174,8 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.DataGraph.delete(id);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.delete(id);
+      } else if (entity_type === 'ActionGraph') {
+        return base44.entities.ActionGraph.delete(id);
       } else { // Handle FunctionGraph delete
         return base44.entities.FunctionGraph.delete(id);
       }
@@ -238,6 +269,15 @@ export default function UnifiedGraphEditorPage() {
       limit_bottom: { count: 10 },
       limit_percent_top: { percent: 10 },
       limit_percent_bottom: { percent: 10 },
+      modify_attribute: { attributeId: '', key: '', operation: 'add' },
+      add_tag: { tagPath: '' },
+      remove_tag: { tagPath: '' },
+      create_relation: { relationId: '' },
+      remove_relation: { relationId: '' },
+      fire_event: { eventId: '' },
+      call_pure_function: { functionId: '' },
+      run_entity_query: { queryId: '' },
+      call_action_graph: { actionId: '' },
       blackboard_get: { key: blackboardKey || '' },
       blackboard_set: { key: blackboardKey || '' }
     };
@@ -448,7 +488,8 @@ export default function UnifiedGraphEditorPage() {
                   <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                     <SelectItem value="data" className="text-[#e5e5e5] hover:bg-[#262626]">Data Graph (数据图)</SelectItem>
                     <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#262626]">Entity Query (实体查询)</SelectItem>
-                    <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#262626]">Function Graph (函数图)</SelectItem>
+                    <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#262626]">Pure Function Graph (纯函数图)</SelectItem>
+                    <SelectItem value="action" className="text-[#e5e5e5] hover:bg-[#262626]">Action Graph (动作图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -504,6 +545,7 @@ export default function UnifiedGraphEditorPage() {
           data: allGraphs.filter(g => g.graph_type === 'data').length,
           query: allGraphs.filter(g => g.graph_type === 'query').length,
           function: allGraphs.filter(g => g.graph_type === 'function').length,
+          action: allGraphs.filter(g => g.graph_type === 'action').length,
         }}
       />
 
