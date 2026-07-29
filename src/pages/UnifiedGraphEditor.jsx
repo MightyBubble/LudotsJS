@@ -454,7 +454,7 @@ export default function UnifiedGraphEditorPage() {
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1 pointer-events-none">
               <div className="flex items-center gap-2">
-                <span>类型: {currentGraph.graph_type === 'data' ? 'Data' : currentGraph.graph_type === 'query' ? 'Query' : currentGraph.graph_type === 'structure' ? 'Structure' : 'Function'}</span>
+                <span>类型: {currentGraph.entity_type === 'DataGraph' ? (currentGraph.graph_type === 'curve' ? 'Data (曲线)' : currentGraph.graph_type === 'attribute_calculation' ? 'Data (属性计算)' : 'Data') : currentGraph.graph_type === 'query' ? 'Query' : currentGraph.graph_type === 'structure' ? 'Structure' : 'Function'}</span>
               </div>
               {currentGraph.graph_type === 'function' && (
                 <div className="flex items-center gap-2">
