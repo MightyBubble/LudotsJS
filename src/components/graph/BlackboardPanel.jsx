@@ -137,7 +137,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
   };
 
   return (
-    <div className="w-64 bg-[#15171C] border-l border-[#2A2E37] flex flex-col">
+    <div className="w-full flex flex-col bg-transparent">
       <style>{`
         .blackboard-scroll::-webkit-scrollbar { width: 8px; }
         .blackboard-scroll::-webkit-scrollbar-track { background: #2d2d2d; }
@@ -145,11 +145,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         .blackboard-scroll::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
       `}</style>
 
-      <div className="flex items-center justify-between p-3 border-b border-[#2A2E37]">
-        <div className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-white/70" />
-          <span className="text-sm font-semibold text-white/90">黑板变量</span>
-        </div>
+      <div className="flex items-center justify-end px-2 pt-2">
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
             <Button size="sm" className="h-6 px-2 bg-[#D97706] hover:bg-[#1177bb] text-white">
@@ -464,7 +460,7 @@ export default function BlackboardPanel({ blackboard, onChange }) {
         ))}
       </div>
 
-      <div className="p-3 border-t border-[#2A2E37] text-[10px] text-white/40">
+      <div className="px-3 py-2 border-t border-[#2A2E37] text-[10px] text-white/40">
         拖拽公开变量到画布创建Get/Set节点
       </div>
     </div>

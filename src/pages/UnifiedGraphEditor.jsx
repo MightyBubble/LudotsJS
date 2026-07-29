@@ -2,11 +2,13 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Network, Filter, Database, Share2 } from "lucide-react";
+import { Network, Database, Info } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import GraphCanvas from '../components/graph/GraphCanvas';
-import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
 import NodeSearchMenu from '../components/graph/NodeSearchMenu';
+import FloatingPanel from '../components/graph/FloatingPanel';
+import GraphMetaPanel from '../components/graph/GraphMetaPanel';
+import StructurePropsPanel from '../components/graph/StructurePropsPanel';
 import Toolbar from '../components/graph/Toolbar';
 import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
@@ -33,15 +35,13 @@ export default function UnifiedGraphEditorPage() {
   const [blackboard, setBlackboard] = useState({});
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [showLibrary, setShowLibrary] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [nodeMenu, setNodeMenu] = useState(null);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
   const [connectionValues, setConnectionValues] = useState({});
   const [isEditingType, setIsEditingType] = useState(false);
-  const [showLibraryMobile, setShowLibraryMobile] = useState(false);
-  const [showBlackboardMobile, setShowBlackboardMobile] = useState(false);
   
   // Structure Editor State
   const [editingNodeId, setEditingNodeId] = useState(null);
@@ -248,7 +248,7 @@ export default function UnifiedGraphEditorPage() {
     setCurrentGraph(prev => ({ ...prev, return_type: newReturnType }));
   }, [currentGraph, updateMutation]);
 
-  const addNode = useCallback((type) => {
+  const addNodeAtPosition = useCallback((type, position, blackboardKey = null) => {
     const config = getNodeConfig(type);
     if (!config) return;
 
@@ -265,10 +265,7 @@ export default function UnifiedGraphEditorPage() {
       vector4: { x: 0, y: 0, z: 0, w: 0 },
       quaternion: { x: 0, y: 0, z: 0, w: 1 },
       color: { r: 1, g: 1, b: 1 },
-      blackboard_get: { key: '' },
-      blackboard_set: { key: '' },
       structure_node: { label: '新节点', nodeId: `node_${Date.now()}`, description: '' },
-      // Query node defaults
       entity_source: {},
       filter_prototype: { prototypeId: '' },
       filter_attribute: { attributeId: '', key: '', operator: 'gt', threshold: 0 },
@@ -287,26 +284,6 @@ export default function UnifiedGraphEditorPage() {
       limit_bottom: { count: 10 },
       limit_percent_top: { percent: 10 },
       limit_percent_bottom: { percent: 10 },
-    };
-
-    const newNode = {
-      id: `node-${Date.now()}`,
-      type,
-      // Center the node in the current view
-      position: { x: (-pan.x + 300) / zoom, y: (-pan.y + 200) / zoom },
-      data: defaultData[type] || {},
-      inputs: config.inputs || [],
-      outputs: config.outputs || []
-    };
-    setNodes(prev => [...prev, newNode]);
-  }, [nodes.length, pan, zoom]);
-
-  const addNodeAtPosition = useCallback((type, position, blackboardKey = null) => {
-    const config = getNodeConfig(type);
-    if (!config) return;
-
-    const defaultData = {
-      number: { value: 0 },
       blackboard_get: { key: blackboardKey || '' },
       blackboard_set: { key: blackboardKey || '' }
     };
@@ -395,219 +372,122 @@ export default function UnifiedGraphEditorPage() {
   };
 
   const editorPane = currentGraph ? (
-      <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden min-w-0">
-        <Toolbar
-          onSave={saveGraph}
-          onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
-          onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
-          onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-          onToggleLibrary={() => {
-            setShowLibrary(prev => !prev);
-            setShowLibraryMobile(prev => !prev);
-          }}
-          onToggleBlackboard={() => {
-            setShowBlackboard(prev => !prev);
-            setShowBlackboardMobile(prev => !prev);
-          }}
-          onBack={() => setCurrentGraph(null)}
-          projectName={currentGraph.name}
+    <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden min-w-0">
+      <Toolbar
+        onSave={saveGraph}
+        onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
+        onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+        onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+        onToggleBlackboard={() => setShowBlackboard(prev => !prev)}
+        onToggleInfo={() => setShowInfo(prev => !prev)}
+        onBack={() => { setCurrentGraph(null); setSelectedGraph(null); }}
+        projectName={currentGraph.name}
+        zoom={zoom}
+        showBlackboard={showBlackboard}
+        showInfo={showInfo}
+      />
+
+      <div className="flex-1 relative overflow-hidden overscroll-contain">
+        <GraphCanvas
+          nodes={nodes}
+          connections={connections}
           zoom={zoom}
-          showBlackboard={showBlackboard}
+          pan={pan}
+          onPanChange={setPan}
+          onZoomChange={setZoom}
+          onUpdateNodePosition={updateNodePosition}
+          onUpdateNodeData={updateNodeData}
+          onDeleteNode={deleteNode}
+          onAddConnection={addConnection}
+          onDeleteConnection={deleteConnection}
+          onAddNodeAtPosition={addNodeAtPosition}
+          NodeComponent={UnifiedNode}
+          connectionValues={connectionValues}
+          onSelectNode={(id) => setEditingNodeId(id)}
+          onSelectConnection={(id) => setSelectedConnectionId(id)}
+          onPaneContextMenu={setNodeMenu}
         />
 
-        <div className="flex-1 flex overflow-hidden relative">
-          {/* 桌面端显示 */}
-          {showLibrary && <div className="hidden md:block"><UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={addNode} onClose={() => setShowLibrary(false)} /></div>}
+        {nodeMenu && (
+          <NodeSearchMenu
+            x={nodeMenu.x}
+            y={nodeMenu.y}
+            graphType={currentGraph.graph_type}
+            onAdd={(type) => addNodeAtPosition(type, nodeMenu.position)}
+            onClose={() => setNodeMenu(null)}
+          />
+        )}
 
-          {/* 移动端节点库弹窗 */}
-          {showLibraryMobile && (
-            <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowLibraryMobile(false)}>
-              <div className="absolute bottom-0 left-0 right-0 bg-[#15171C] max-h-[60vh] overflow-hidden rounded-t-xl" onClick={(e) => e.stopPropagation()}>
-                <UnifiedNodeLibrary graphType={currentGraph.graph_type} onAddNode={(type) => { addNode(type); setShowLibraryMobile(false); }} onClose={() => setShowLibraryMobile(false)} />
-              </div>
-            </div>
-          )}
+        {showInfo && (
+          <FloatingPanel title="资产信息" icon={Info} onClose={() => setShowInfo(false)} className="left-4 top-4">
+            <GraphMetaPanel graph={currentGraph} />
+          </FloatingPanel>
+        )}
 
-          <div className="flex-1 relative">
-            <GraphCanvas
-              nodes={nodes}
-              connections={connections}
-              zoom={zoom}
-              pan={pan}
-              onPanChange={setPan}
-              onZoomChange={setZoom}
-              onUpdateNodePosition={updateNodePosition}
-              onUpdateNodeData={updateNodeData}
-              onDeleteNode={deleteNode}
-              onAddConnection={addConnection}
-              onDeleteConnection={deleteConnection}
-              onAddNodeAtPosition={addNodeAtPosition}
-              NodeComponent={UnifiedNode}
-              connectionValues={connectionValues}
-              onSelectNode={(id) => setEditingNodeId(id)}
-              onSelectConnection={(id) => setSelectedConnectionId(id)}
-              onPaneContextMenu={setNodeMenu}
-            />
-
-            {nodeMenu && (
-              <NodeSearchMenu
-                x={nodeMenu.x}
-                y={nodeMenu.y}
-                graphType={currentGraph.graph_type}
-                onAdd={(type) => addNodeAtPosition(type, nodeMenu.position)}
-                onClose={() => setNodeMenu(null)}
+        {showBlackboard && (
+          <FloatingPanel
+            title={currentGraph.graph_type === 'structure' ? '结构属性' : currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
+            icon={Database}
+            onClose={() => setShowBlackboard(false)}
+            className="right-4 top-4"
+          >
+            {currentGraph.graph_type === 'structure' ? (
+              <StructurePropsPanel
+                nodes={nodes}
+                connections={connections}
+                relations={relations}
+                editingNodeId={editingNodeId}
+                onUpdateNodeData={updateNodeData}
+                onDeleteNode={deleteNode}
+                onDeleteConnection={deleteConnection}
+                onUpdateConnections={setConnections}
+                onClearEditing={() => setEditingNodeId(null)}
               />
+            ) : currentGraph.graph_type === 'query' ? (
+              <QuerySimulationPanel nodes={nodes} connections={connections} />
+            ) : (
+              <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
             )}
+          </FloatingPanel>
+        )}
 
-            <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1 pointer-events-none">
-              <div className="flex items-center gap-2">
-                <span>类型: {graphTypeLabel(currentGraph)}</span>
-              </div>
-              {returnTypeOptions(currentGraph).length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span>返回:</span>
-                  <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
-                    <DialogTrigger asChild>
-                      <button className="text-[#D97706] hover:text-[#B45309] underline">
-                        {currentGraph.return_type || 'void'}
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
-                      <DialogHeader><DialogTitle className="text-[#e5e5e5]">修改返回类型</DialogTitle></DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <Select value={currentGraph.return_type || 'number'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
-                          <SelectTrigger className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                            {returnTypeOptions(currentGraph).map(t => (
-                              <SelectItem key={t} value={t} className="text-[#e5e5e5]">{t}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              )}
-              <div>节点: {nodes.length}</div>
-              <div>连接: {connections.length}</div>
-              <div>缩放: {(zoom * 100).toFixed(0)}%</div>
-            </div>
-          </div>
-
-          {/* 桌面端显示 - 普通黑板 或 结构图属性面板 */}
-          {showBlackboard && (
-            <div className="hidden md:block h-full">
-              {currentGraph.graph_type === 'structure' ? (
-                <div className="w-64 bg-[#15171C] border-l border-[#2A2E37] p-4 h-full overflow-y-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-bold text-[#e5e5e5]">结构属性</h3>
+        <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1">
+          <div>类型: {graphTypeLabel(currentGraph)}</div>
+          {returnTypeOptions(currentGraph).length > 0 && (
+            <div className="flex items-center gap-2">
+              <span>返回:</span>
+              <Dialog open={isEditingType} onOpenChange={setIsEditingType}>
+                <DialogTrigger asChild>
+                  <button className="text-[#D97706] hover:text-[#B45309] underline">
+                    {currentGraph.return_type || 'void'}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
+                  <DialogHeader><DialogTitle className="text-[#e5e5e5]">修改返回类型</DialogTitle></DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <Select value={currentGraph.return_type || 'number'} onValueChange={(v) => { updateReturnType(v); setIsEditingType(false); }}>
+                      <SelectTrigger className="bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#15171C] border-[#2A2E37]">
+                        {returnTypeOptions(currentGraph).map(t => (
+                          <SelectItem key={t} value={t} className="text-[#e5e5e5]">{t}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  
-                  {editingNodeId ? (
-                    (() => {
-                      const node = nodes.find(n => n.id === editingNodeId);
-                      if (!node) return null;
-                      return (
-                        <div className="space-y-4">
-                          <div className="text-xs text-gray-500 mb-2">编辑节点</div>
-                          <div>
-                            <label className="text-xs text-gray-500 block mb-1">节点ID</label>
-                            <Input 
-                              value={node.data.nodeId || ''} 
-                              onChange={e => updateNodeData(node.id, { nodeId: e.target.value })}
-                              className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-[#e5e5e5]"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-gray-500 block mb-1">显示名称</label>
-                            <Input 
-                              value={node.data.label || ''} 
-                              onChange={e => updateNodeData(node.id, { label: e.target.value })}
-                              className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-[#e5e5e5]"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-gray-500 block mb-1">描述</label>
-                            <Input 
-                              value={node.data.description || ''} 
-                              onChange={e => updateNodeData(node.id, { description: e.target.value })}
-                              className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-[#e5e5e5]"
-                            />
-                          </div>
-                          <Button 
-                            className="w-full bg-red-900/20 hover:bg-red-900/40 text-xs h-7 mt-4 text-red-400"
-                            onClick={() => {
-                              deleteNode(node.id);
-                              setEditingNodeId(null);
-                            }}
-                          >
-                            删除节点
-                          </Button>
-                        </div>
-                      );
-                    })()
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="text-xs text-gray-500 mb-2">连接列表 ({connections.length})</div>
-                      {connections.length === 0 && <div className="text-xs text-gray-600">暂无连接</div>}
-                      {connections.map(conn => {
-                        const fromNode = nodes.find(n => n.id === conn.fromNode);
-                        const toNode = nodes.find(n => n.id === conn.toNode);
-                        const label = fromNode?.data?.label || 'Unknown';
-                        const toLabel = toNode?.data?.label || 'Unknown';
-                        
-                        return (
-                          <div key={conn.id} className="bg-[#0D0F14] p-2 rounded border border-[#2A2E37] text-xs">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-gray-400">{label} → {toLabel}</span>
-                              <button onClick={() => deleteConnection(conn.id)} className="text-red-400 hover:text-white">×</button>
-                            </div>
-                            <Select 
-                              value={conn.data?.relation_definition_id || ""}
-                              onValueChange={v => {
-                                const newConns = connections.map(c => c.id === conn.id ? { ...c, data: { ...c.data, relation_definition_id: v } } : c);
-                                setConnections(newConns);
-                              }}
-                            >
-                              <SelectTrigger className="h-6 bg-[#15171C] border-[#2A2E37] text-xs w-full text-[#e5e5e5]">
-                                <SelectValue placeholder="选择关系" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                                {relations.map(r => (
-                                  <SelectItem key={r.id} value={r.relation_id} className="text-xs text-[#e5e5e5] hover:bg-[#262626]">{r.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              ) : currentGraph.graph_type === 'query' ? (
-                <QuerySimulationPanel nodes={nodes} connections={connections} />
-              ) : (
-                <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
-              )}
+                </DialogContent>
+              </Dialog>
             </div>
           )}
-
-          {/* 移动端黑板弹窗 */}
-          {showBlackboardMobile && (
-            <div className="md:hidden absolute inset-0 z-50 bg-black/50" onClick={() => setShowBlackboardMobile(false)}>
-              <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-[#15171C]" onClick={(e) => e.stopPropagation()}>
-                <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
-              </div>
-            </div>
-          )}
+          <div>节点: {nodes.length} · 连接: {connections.length}</div>
         </div>
       </div>
+    </div>
   ) : null;
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-[#e5e5e5]">
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
         <Network className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">图编辑器</span>
