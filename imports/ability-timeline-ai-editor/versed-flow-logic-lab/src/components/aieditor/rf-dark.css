@@ -1,0 +1,59 @@
+/* React Flow 官方暗色主题覆盖（苹果系深色：半透明白边 × Apple 系统蓝 accent） */
+
+/* 缩放控件：浮层最亮一档 + 浮层阴影 */
+.react-flow__controls {
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.30);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.react-flow__controls button {
+  background: #1C1E22;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: rgba(235,235,245,0.75);
+}
+.react-flow__controls button:hover { background: #26282D; }
+.react-flow__controls button svg { fill: rgba(235,235,245,0.75); }
+.react-flow__controls button.react-flow__controls-interactive { cursor: pointer; }
+
+/* 小地图 */
+.react-flow__minimap {
+  background: #131417;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+}
+.react-flow__minimap-mask { fill: rgba(12, 13, 16, 0.72); }
+.react-flow__minimap-node { fill: rgba(255,255,255,0.14); }
+
+/* 连线：悬停/选中高亮（亮银） */
+.react-flow__edge:hover .react-flow__edge-path { stroke: #F5F5F7; }
+.react-flow__edge.selected .react-flow__edge-path { stroke: #E8E8ED !important; }
+.react-flow__edge.selectable:hover .react-flow__edge-textbg { fill: #26282D; }
+
+/* 连线过程预览（白 = exec 语义） */
+.react-flow__connection-path { stroke: #EBEBF0; stroke-width: 2; }
+
+/* 可连接手柄的磁吸反馈 */
+.react-flow__handle.connectingto { background: #E8E8ED; }
+.react-flow__handle.valid { background: #30D158; }
+
+/* 框选矩形（银 10% 铺底 + 银虚线） */
+.react-flow__selection {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px dashed rgba(255, 255, 255, 0.55);
+}
+
+/* 多选时的节点组选框 */
+.react-flow__nodesselection-rect {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* 节点选中态交给自定义节点渲染（selected prop），这里关掉默认蓝框 */
+.react-flow__node:focus { outline: none; }
+.react-flow__node-default:focus,
+.react-flow__node-input:focus,
+.react-flow__node-output:focus { outline: none; }
+
+/* 背景容器 */
+.react-flow { background: #0C0D10; }
+.react-flow__attribution { display: none; }

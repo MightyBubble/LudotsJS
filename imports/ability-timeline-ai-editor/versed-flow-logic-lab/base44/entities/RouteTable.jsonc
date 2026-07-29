@@ -1,0 +1,85 @@
+{
+  "name": "RouteTable",
+  "type": "object",
+  "title": "\u4e0a\u4e0b\u6587\u8def\u7531\u8868",
+  "properties": {
+    "input_tag": {
+      "type": "string",
+      "title": "\u8f93\u5165\u6807\u7b7e",
+      "description": "\u8be5\u8def\u7531\u8868\u6302\u5728\u54ea\u4e2a InputTag \u4e0a\uff08\u5982 Input.Smart\uff09"
+    },
+    "rules": {
+      "type": "array",
+      "title": "\u89c4\u5219\u5217\u8868",
+      "description": "\u81ea\u4e0a\u800c\u4e0b\u9996\u6761\u547d\u4e2d\u751f\u6548",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "type": "object",
+            "title": "\u6761\u4ef6",
+            "properties": {
+              "target": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "title": "\u76ee\u6807\u5173\u7cfb",
+                "enum": [
+                  "enemy",
+                  "ally",
+                  "ground",
+                  null
+                ]
+              },
+              "selfTags": {
+                "type": "array",
+                "title": "\u81ea\u8eab\u6807\u7b7e",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "targetTags": {
+                "type": "array",
+                "title": "\u76ee\u6807\u6807\u7b7e",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "targetHpBelow": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "title": "\u76ee\u6807\u8840\u91cf\u6bd4\u4f4e\u4e8e"
+              }
+            }
+          },
+          "do": {
+            "type": "object",
+            "title": "\u6307\u4ee4",
+            "properties": {
+              "type": {
+                "type": "string",
+                "title": "\u52a8\u4f5c",
+                "enum": [
+                  "attack",
+                  "move",
+                  "follow",
+                  "ability"
+                ]
+              },
+              "ability": {
+                "type": "string",
+                "title": "\u6280\u80fd"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "input_tag"
+  ]
+}

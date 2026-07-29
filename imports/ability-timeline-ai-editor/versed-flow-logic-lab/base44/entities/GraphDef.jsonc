@@ -1,0 +1,25 @@
+{
+  "name": "GraphDef",
+  "type": "object",
+  "title": "\u56fe\u5b9a\u4e49\uff08GraphVM\uff1a\u6a21\u677f/\u51fd\u6570/\u5b8f/\u81ea\u7531\u56fe\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u56fe\u6807\u8bc6",
+      "description": "\u5982 cmd.besiege / cond.under_attack / fn.double"
+    },
+    "kind": {
+      "type": "string",
+      "title": "\u7c7b\u522b",
+      "description": "action | condition | function | macro | script"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u56fe\u6570\u636e",
+      "description": "{ name, kind, command?, inputs[], outputs[], nodes[], links[] }"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 苹果系深色主题：明度分层 × 半透明白边 × Apple 系统强调色 */
+@layer base {
+  :root {
+    --background: 230 12% 5%;
+    --foreground: 240 8% 92%;
+    --card: 230 10% 8%;
+    --card-foreground: 240 8% 92%;
+    --popover: 230 8% 11%;
+    --popover-foreground: 240 8% 92%;
+    --primary: 240 5% 88%;
+    --primary-foreground: 240 10% 10%;
+    --secondary: 240 7% 12%;
+    --secondary-foreground: 240 8% 92%;
+    --muted: 240 7% 12%;
+    --muted-foreground: 240 6% 62%;
+    --accent: 240 6% 10%;
+    --accent-foreground: 240 8% 92%;
+    --destructive: 3 100% 61%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 7% 17%;
+    --input: 240 7% 17%;
+    --ring: 240 5% 75%;
+    --chart-1: 240 5% 78%;
+    --chart-2: 240 4% 62%;
+    --chart-3: 240 4% 70%;
+    --chart-4: 240 6% 85%;
+    --chart-5: 3 100% 66%;
+    --radius: 0rem;
+    --font-heading: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "JetBrains Mono", Consolas, monospace;
+    --sidebar-background: 230 12% 5%;
+    --sidebar-foreground: 240 8% 92%;
+    --sidebar-primary: 240 5% 88%;
+    --sidebar-primary-foreground: 240 10% 10%;
+    --sidebar-accent: 240 7% 12%;
+    --sidebar-accent-foreground: 240 8% 92%;
+    --sidebar-border: 240 7% 17%;
+    --sidebar-ring: 240 5% 75%;
+  }
+
+  .dark {
+    --background: 230 12% 5%;
+    --foreground: 240 8% 92%;
+    --card: 230 10% 8%;
+    --card-foreground: 240 8% 92%;
+    --popover: 230 8% 11%;
+    --popover-foreground: 240 8% 92%;
+    --primary: 240 5% 88%;
+    --primary-foreground: 240 10% 10%;
+    --secondary: 240 7% 12%;
+    --secondary-foreground: 240 8% 92%;
+    --muted: 240 7% 12%;
+    --muted-foreground: 240 6% 62%;
+    --accent: 240 6% 10%;
+    --accent-foreground: 240 8% 92%;
+    --destructive: 3 100% 61%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 7% 17%;
+    --input: 240 7% 17%;
+    --ring: 240 5% 75%;
+    --chart-1: 240 5% 78%;
+    --chart-2: 240 4% 62%;
+    --chart-3: 240 4% 70%;
+    --chart-4: 240 6% 85%;
+    --chart-5: 3 100% 66%;
+    --sidebar-background: 230 12% 5%;
+    --sidebar-foreground: 240 8% 92%;
+    --sidebar-primary: 240 5% 88%;
+    --sidebar-primary-foreground: 240 10% 10%;
+    --sidebar-accent: 240 7% 12%;
+    --sidebar-accent-foreground: 240 8% 92%;
+    --sidebar-border: 240 7% 17%;
+    --sidebar-ring: 240 5% 75%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+    font-size: 13px;
+  }
+
+  ::selection {
+    background: rgba(255, 255, 255, 0.24);
+  }
+
+  :focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid #e8e8ed;
+    outline-offset: 2px;
+    border-radius: 0;
+  }
+}
+
+/* Studio 直角规范：全产品消灭圆角（仅保留 React Flow 引脚圆形） */
+* {
+  border-radius: 0 !important;
+}
+.react-flow__handle {
+  border-radius: 50% !important;
+}
+
+/* 统一滚动条（10px · 半透明白 thumb · 轨道透明） */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 0;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.26);
+  background-clip: content-box;
+}

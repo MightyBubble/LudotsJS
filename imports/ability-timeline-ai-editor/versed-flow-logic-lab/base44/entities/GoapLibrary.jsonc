@@ -1,0 +1,19 @@
+{
+  "name": "GoapLibrary",
+  "type": "object",
+  "title": "GOAP \u52a8\u4f5c\u5e93\uff08\u89c4\u5212\u4e0e\u5b9e\u73b0\u5206\u79bb\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u5e93\u6807\u8bc6"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u52a8\u4f5c\u6570\u7ec4",
+      "description": "[{ name, impl, pre[], eff[], cost, params? }]"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

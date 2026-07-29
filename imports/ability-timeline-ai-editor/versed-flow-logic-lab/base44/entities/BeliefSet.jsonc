@@ -1,0 +1,19 @@
+{
+  "name": "BeliefSet",
+  "type": "object",
+  "title": "\u4e3b\u89c2\u8ba4\u8bc6\u96c6\uff08BB\u2192Belief \u6620\u5c04\u66f2\u7ebf\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u96c6\u6807\u8bc6"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u5b9a\u4e49\u6570\u7ec4",
+      "description": "[{ key, source, norm{}, curve{}, smoothing? }]"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

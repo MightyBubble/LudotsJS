@@ -1,0 +1,19 @@
+{
+  "name": "HtnDomain",
+  "type": "object",
+  "title": "HTN \u57df\uff08\u4efb\u52a1\u5206\u89e3\u7f51\u7edc\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u57df\u6807\u8bc6"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u57df\u6570\u636e",
+      "description": "{ root, tasks{} }"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

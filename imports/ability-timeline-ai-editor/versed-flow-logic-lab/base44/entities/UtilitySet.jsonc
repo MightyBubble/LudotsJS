@@ -1,0 +1,19 @@
+{
+  "name": "UtilitySet",
+  "type": "object",
+  "title": "Utility \u51b3\u7b56\u96c6\uff08DecisionMaker\u2192Decision\u2192Consideration\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u96c6\u6807\u8bc6"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u96c6\u6570\u636e",
+      "description": "{ name, compensation, momentum, makers[] }"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

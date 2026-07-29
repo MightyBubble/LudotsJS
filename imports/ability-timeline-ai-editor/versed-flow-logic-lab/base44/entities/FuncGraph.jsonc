@@ -1,0 +1,20 @@
+{
+  "name": "FuncGraph",
+  "type": "object",
+  "title": "\u51fd\u6570\u56fe\uff08\u8282\u70b9/\u8fb9\u7684\u5185\u90e8\u6d41\u7a0b\u8986\u76d6\uff09",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u56fe\u6807\u8bc6",
+      "description": "\u5982 stance:node:Idle / patrol:edge:Move->Engage"
+    },
+    "data": {
+      "type": "object",
+      "title": "\u56fe\u6570\u636e",
+      "description": "{ timing, desc, params[], steps[], returns[] }"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

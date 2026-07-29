@@ -1,0 +1,51 @@
+{
+  "name": "TaskNode",
+  "type": "object",
+  "title": "\u670d\u52a1\u8282\u70b9",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "title": "\u63cf\u8ff0"
+    },
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "action",
+        "condition"
+      ],
+      "title": "\u8282\u70b9\u7c7b\u578b"
+    },
+    "category": {
+      "type": "string",
+      "title": "\u5206\u7c7b"
+    },
+    "behavior_key": {
+      "type": "string",
+      "title": "\u884c\u4e3a\u6807\u8bc6",
+      "description": "Action \u8282\u70b9\u4e13\u7528\uff1a\u6620\u5c04\u5230\u884c\u4e3a\u5b9e\u73b0\u51fd\u6570"
+    },
+    "config": {
+      "type": "object",
+      "title": "\u6761\u4ef6\u914d\u7f6e",
+      "description": "Condition \u8282\u70b9\u4e13\u7528\uff1a\u6570\u636e\u9a71\u52a8\u7684\u8bc4\u4f30\u5668\u914d\u7f6e { evaluator, params }",
+      "properties": {
+        "evaluator": {
+          "type": "string",
+          "title": "\u8bc4\u4f30\u5668\u540d\u79f0"
+        },
+        "params": {
+          "type": "object",
+          "title": "\u8bc4\u4f30\u53c2\u6570"
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "node_type"
+  ]
+}
