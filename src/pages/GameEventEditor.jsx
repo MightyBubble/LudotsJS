@@ -126,9 +126,6 @@ export default function GameEventEditor() {
   return (
     <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
-        <Zap className="w-4 h-4 text-yellow-400" />
-        <span className="text-sm font-semibold text-gray-300">事件编辑器</span>
-        <span className="text-xs text-gray-500 hidden sm:inline">共 {filteredEvents.length} 个</span>
         <div className="flex-1" />
         <div className="relative hidden md:block">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />

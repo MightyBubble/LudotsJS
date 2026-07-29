@@ -336,10 +336,6 @@ export default function AttributeModifiersPage() {
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
-        <TrendingUp className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">属性修饰器编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredModifiers.length} 个</span>
-        
         <div className="flex-1" />
 
         <div className="relative">

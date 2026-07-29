@@ -141,10 +141,6 @@ export default function EntityPrototypeEditorPage() {
   return (
     <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <Box className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">实体原型编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredPrototypes.length} 个</span>
-        
         <div className="flex-1" />
 
         <div className="relative">

@@ -521,12 +521,7 @@ export default function UnifiedGraphEditorPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
-        <Network className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">图编辑器</span>
-        <span className="text-xs text-gray-500 hidden sm:inline">共 {allGraphs.length} 个</span>
-        <div className="flex-1" />
-        <Dialog open={isCreating} onOpenChange={setIsCreating}>
+      <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
             <DialogHeader><DialogTitle className="text-[#e5e5e5]">新建图</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
@@ -585,8 +580,7 @@ export default function UnifiedGraphEditorPage() {
               <Button onClick={handleCreate} className="w-full bg-[#D97706] hover:bg-[#B45309] text-black">创建</Button>
             </div>
           </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
 
       <div className="flex-1 flex overflow-hidden">
         <AssetBrowserPanel

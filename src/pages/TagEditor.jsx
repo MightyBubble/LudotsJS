@@ -897,8 +897,6 @@ export default function TagEditor() {
     <div className="h-screen flex flex-col bg-[#0a0a0a] text-[#e5e5e5]">
       {/* 顶部工具栏 - 移动端适配 */}
       <div className="h-12 bg-[#141414] border-b border-[#262626] flex items-center px-2 md:px-4 gap-1 md:gap-3 overflow-x-auto">
-        <span className="text-sm font-semibold text-gray-300 whitespace-nowrap">Tag编辑器</span>
-
         {/* 视图切换 */}
         <div className="flex gap-1 bg-[#0a0a0a] rounded p-1 border border-[#262626]">
           <Button

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -523,9 +522,6 @@ export default function EntityQueryEditorPage() {
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] text-white">
       <div className="h-10 bg-[#2d2d2d] border-b border-[#3d3d3d] flex items-center px-4 gap-3">
-        <Filter className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">实体查询编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredQueries.length} 个</span>
         <div className="flex-1" />
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
