@@ -57,7 +57,6 @@ export const NAV_GROUPS = [
       { page: 'UnifiedGraphEditor', search: '?type=action', label: 'ActionGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=data', label: 'DataGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=function', label: 'FunctionGraph', icon: Globe },
-      { page: 'ConditionEditor', label: 'Conditions', icon: CheckSquare },
       { page: 'ValidatorEditor', label: 'Validators', icon: Shield },
     ],
   },
