@@ -20,9 +20,9 @@
         "entity_check",
         "entity_compare",
         "combine",
-        "function_graph"
+        "data_graph"
       ],
-      "description": "\u9a8c\u8bc1\u5668\u7c7b\u578b"
+      "description": "\u9a8c\u8bc1\u5668\u7c7b\u578b\u3002data_graph \u8868\u793a\u5f15\u7528\u4e00\u5f20 usage=validation \u4e14 return_type=boolean \u7684 DataGraph"
     },
     "entity_check_config": {
       "type": "object",
@@ -46,7 +46,7 @@
             "is_prototype",
             "has_attribute",
             "has_relation",
-            "function_graph"
+            "data_graph"
           ],
           "description": "\u68c0\u67e5\u7c7b\u578b"
         },
@@ -68,12 +68,13 @@
         "relation_id": {
           "type": "string"
         },
-        "function_graph_id": {
-          "type": "string"
+        "data_graph_id": {
+          "type": "string",
+          "description": "\u5f15\u7528\u7684\u9a8c\u8bc1\u56feID\uff08DataGraph.graph_id\uff09"
         },
         "parameter_bindings": {
           "type": "object",
-          "description": "\u51fd\u6570\u56fe\u53c2\u6570\u7ed1\u5b9a"
+          "description": "\u9a8c\u8bc1\u56fe\u9ed1\u677f\u53c2\u6570\u7ed1\u5b9a"
         }
       }
     },
@@ -96,7 +97,7 @@
             "attribute_value",
             "tag_count",
             "relation_count",
-            "function_graph"
+            "data_graph"
           ],
           "description": "\u6bd4\u8f83\u7c7b\u578b"
         },
@@ -158,12 +159,13 @@
           "type": "string",
           "description": "\u76ee\u6807\u5c5e\u6027\u952e\uff08attribute_key\u6a21\u5f0f\uff09"
         },
-        "function_graph_id": {
-          "type": "string"
+        "data_graph_id": {
+          "type": "string",
+          "description": "\u5f15\u7528\u7684\u9a8c\u8bc1\u56feID\uff08DataGraph.graph_id\uff09"
         },
         "parameter_bindings": {
           "type": "object",
-          "description": "\u51fd\u6570\u56fe\u53c2\u6570\u7ed1\u5b9a"
+          "description": "\u9a8c\u8bc1\u56fe\u9ed1\u677f\u53c2\u6570\u7ed1\u5b9a"
         }
       }
     },
@@ -190,16 +192,17 @@
         }
       }
     },
-    "function_graph_config": {
+    "data_graph_config": {
       "type": "object",
-      "description": "\u51fd\u6570\u56fe\u914d\u7f6e",
+      "description": "\u9a8c\u8bc1\u56fe\u914d\u7f6e\uff08usage=validation, return_type=boolean \u7684 DataGraph\uff09",
       "properties": {
-        "function_graph_id": {
-          "type": "string"
+        "data_graph_id": {
+          "type": "string",
+          "description": "\u5f15\u7528\u7684\u9a8c\u8bc1\u56feID\uff08DataGraph.graph_id\uff09"
         },
         "parameter_bindings": {
           "type": "object",
-          "description": "\u53c2\u6570\u7ed1\u5b9a\u6620\u5c04"
+          "description": "\u9ed1\u677f\u53c2\u6570\u7ed1\u5b9a\u6620\u5c04"
         }
       }
     },

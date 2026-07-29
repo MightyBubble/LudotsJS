@@ -228,26 +228,35 @@ export default function NewAttributeSimulatorPage() {
     return result;
   }, [filteredAttributes, modifierOutputs]);
 
+  // 属性最终值：执行 final_calculation_data_graph_id 指向的属性计算图；
+  // 图不存在/为空时退化为所有键求和
   const finalValues = useMemo(() => {
     const result = {};
-    
+    const flatten = (val) => Array.isArray(val) ? val.reduce((s, v) => s + (Number(v) || 0), 0) : (Number(val) || 0);
+
     filteredAttributes.forEach(attr => {
       const keys = attributeKeys[attr.attribute_id] || {};
-      
-      let total = 0;
-      Object.values(keys).forEach(val => {
-        if (Array.isArray(val)) {
-          total += val.reduce((sum, v) => sum + v, 0);
-        } else {
-          total += val;
-        }
+
+      const overrides = {};
+      Object.entries(attr.input_mappings || {}).forEach(([blackboardKey, attrKey]) => {
+        overrides[blackboardKey] = flatten(keys[attrKey]);
       });
-      
-      result[attr.attribute_id] = total;
+
+      const graph = dataGraphs.find(g => g.graph_id === attr.final_calculation_data_graph_id);
+      const graphResult = evaluateGraphValue(graph, overrides);
+
+      result[attr.attribute_id] = {
+        value: graphResult !== null
+          ? graphResult
+          : Object.values(keys).reduce((sum, v) => sum + flatten(v), 0),
+        usedGraph: graphResult !== null,
+        graphId: attr.final_calculation_data_graph_id,
+        inputs: overrides,
+      };
     });
-    
+
     return result;
-  }, [filteredAttributes, attributeKeys]);
+  }, [filteredAttributes, attributeKeys, dataGraphs]);
 
   const updateTagCount = (tag, delta) => {
     setTagCounts(prev => {
@@ -576,13 +585,27 @@ export default function NewAttributeSimulatorPage() {
           <div className="flex-1 p-3 space-y-3">
             {filteredAttributes.map(attr => {
               const keys = attributeKeys[attr.attribute_id] || {};
-              const final = finalValues[attr.attribute_id] || 0;
+              const final = finalValues[attr.attribute_id] || { value: 0, usedGraph: false };
               return (
                 <div key={attr.id} className="bg-gradient-to-br from-[#0a0a0a] to-[#252526] border-2 border-green-600/30 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-semibold text-white">{attr.name}</div>
-                    <div className="text-3xl font-bold text-green-400">{final.toFixed(0)}</div>
+                    <div className="text-3xl font-bold text-green-400">{final.value.toFixed(0)}</div>
                   </div>
+                  <div className="flex items-center gap-1 mb-2 text-[10px] text-gray-500">
+                    <span>计算图: {final.graphId || '未设置'}</span>
+                    {!final.usedGraph && (
+                      <span className="bg-orange-900/40 text-orange-300 px-1 rounded" title="未找到可执行的属性计算图，已退化为各键求和">无图</span>
+                    )}
+                  </div>
+                  {final.usedGraph && Object.keys(final.inputs).length > 0 && (
+                    <div className="flex items-center gap-1 flex-wrap mb-2 text-[10px] text-gray-500">
+                      <span>图输入:</span>
+                      {Object.entries(final.inputs).map(([k, v]) => (
+                        <span key={k} className="bg-[#262626] px-1 rounded text-gray-300">{k}={v}</span>
+                      ))}
+                    </div>
+                  )}
                   <div className="space-y-1 pt-2 border-t border-[#2A2E37]/50">
                     {Object.entries(keys).map(([keyName, keyValue]) => (
                       <div key={keyName} className="flex items-center justify-between text-[10px]">

@@ -44,9 +44,9 @@ export default function ValidatorEditorPage() {
     initialData: [],
   });
 
-  const { data: functionGraphs = [] } = useQuery({
-    queryKey: ['functionGraphs'],
-    queryFn: () => base44.entities.FunctionGraph.list(),
+  const { data: dataGraphs = [] } = useQuery({
+    queryKey: ['dataGraphs'],
+    queryFn: () => base44.entities.DataGraph.list(),
     initialData: [],
   });
 
@@ -56,9 +56,10 @@ export default function ValidatorEditorPage() {
     initialData: [],
   });
 
-  const booleanFunctionGraphs = useMemo(() => {
-    return functionGraphs.filter(g => g.return_type === 'boolean');
-  }, [functionGraphs]);
+  // 验证图：用途为 validation 且出口为 boolean 的 DataGraph
+  const validationGraphs = useMemo(() => {
+    return dataGraphs.filter(g => g.usage === 'validation' && g.return_type === 'boolean');
+  }, [dataGraphs]);
 
   const getAttributeKeys = (attributeId) => {
     const attr = attributes.find(a => a.attribute_id === attributeId);
@@ -147,7 +148,7 @@ export default function ValidatorEditorPage() {
       entity_check: { entity_check_config: { source_entity: "source", check_type: "has_tag", tag_path: "" } },
       entity_compare: { entity_compare_config: { source_entity: "source", compare_type: "attribute_value", operator: "gt", value_source: "literal", compare_value: 0 } },
       combine: { combine_config: { logic_operator: "AND", sub_validator_ids: [] } },
-      function_graph: { function_graph_config: { function_graph_id: "", parameter_bindings: {} } }
+      data_graph: { data_graph_config: { data_graph_id: "", parameter_bindings: {} } }
     };
     
     setEditData({
@@ -162,7 +163,7 @@ export default function ValidatorEditorPage() {
       entity_check: '实体检查',
       entity_compare: '实体比较',
       combine: '组合',
-      function_graph: '函数图'
+      data_graph: '验证图'
     };
     return map[type] || type;
   };
@@ -198,11 +199,11 @@ export default function ValidatorEditorPage() {
         </div>
       );
     }
-    if (validator.validator_type === 'function_graph') {
-      const cfg = validator.function_graph_config || {};
+    if (validator.validator_type === 'data_graph') {
+      const cfg = validator.data_graph_config || {};
       return (
         <div className="text-xs text-gray-300">
-          {cfg.function_graph_id && <div>图: {cfg.function_graph_id}</div>}
+          {cfg.data_graph_id && <div>图: {cfg.data_graph_id}</div>}
           {cfg.parameter_bindings && <div>参数: {Object.keys(cfg.parameter_bindings).length}个</div>}
         </div>
       );
@@ -244,7 +245,7 @@ export default function ValidatorEditorPage() {
               <SelectItem value="is_prototype" className="text-white text-xs">是原型</SelectItem>
               <SelectItem value="has_attribute" className="text-white text-xs">有属性</SelectItem>
               <SelectItem value="has_relation" className="text-white text-xs">有关系</SelectItem>
-              <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+              <SelectItem value="data_graph" className="text-white text-xs">验证图</SelectItem>
             </SelectContent>
           </Select>
           {cfg.check_type === 'has_tag' && (
@@ -329,17 +330,17 @@ export default function ValidatorEditorPage() {
               </SelectContent>
             </Select>
           )}
-          {cfg.check_type === 'function_graph' && (
+          {cfg.check_type === 'data_graph' && (
             <Select
-              value={cfg.function_graph_id || ""}
-              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, function_graph_id: v } })}
+              value={cfg.data_graph_id || ""}
+              onValueChange={(v) => setEditData({ ...data, entity_check_config: { ...cfg, data_graph_id: v } })}
             >
               <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
-                <SelectValue placeholder="选择函数图" />
+                <SelectValue placeholder="选择验证图" />
               </SelectTrigger>
               <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                {booleanFunctionGraphs.map(g => (
-                  <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+                {validationGraphs.map(g => (
+                  <SelectItem key={g.id} value={g.graph_id} className="text-white text-xs">{g.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -372,7 +373,7 @@ export default function ValidatorEditorPage() {
                 <SelectItem value="tag_count" className="text-white text-xs">标签计数</SelectItem>
                 <SelectItem value="relation_attribute" className="text-white text-xs">关系属性值</SelectItem>
                 <SelectItem value="relation_count" className="text-white text-xs">关系计数</SelectItem>
-                <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+                <SelectItem value="data_graph" className="text-white text-xs">验证图</SelectItem>
               </SelectContent>
             </Select>
             {['attribute_value', 'tag_count'].includes(cfg.compare_type) && (
@@ -515,17 +516,17 @@ export default function ValidatorEditorPage() {
                 </Select>
               </div>
             )}
-            {cfg.compare_type === 'function_graph' && (
+            {cfg.compare_type === 'data_graph' && (
               <Select
-                value={cfg.function_graph_id || ""}
-                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, function_graph_id: v } })}
+                value={cfg.data_graph_id || ""}
+                onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, data_graph_id: v } })}
               >
                 <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
-                  <SelectValue placeholder="选择函数图" />
+                  <SelectValue placeholder="选择验证图" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                  {booleanFunctionGraphs.map(g => (
-                    <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+                  {validationGraphs.map(g => (
+                    <SelectItem key={g.id} value={g.graph_id} className="text-white text-xs">{g.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -533,7 +534,7 @@ export default function ValidatorEditorPage() {
           </div>
           
           {/* 操作符 */}
-          {cfg.compare_type !== 'function_graph' && (
+          {cfg.compare_type !== 'data_graph' && (
             <Select
               value={cfg.operator || "gt"}
               onValueChange={(v) => setEditData({ ...data, entity_compare_config: { ...cfg, operator: v } })}
@@ -553,7 +554,7 @@ export default function ValidatorEditorPage() {
           )}
 
           {/* 比较值B */}
-          {cfg.compare_type !== 'function_graph' && (
+          {cfg.compare_type !== 'data_graph' && (
             <div className="bg-[#15171C] p-1.5 rounded">
               <div className="text-xs text-gray-400 mb-1">比较值B:</div>
               <Select
@@ -792,23 +793,26 @@ export default function ValidatorEditorPage() {
       );
     }
 
-    if (data.validator_type === 'function_graph') {
-      const cfg = data.function_graph_config || {};
+    if (data.validator_type === 'data_graph') {
+      const cfg = data.data_graph_config || {};
       return (
         <div className="space-y-1">
           <Select
-            value={cfg.function_graph_id || ""}
-            onValueChange={(v) => setEditData({ ...data, function_graph_config: { ...cfg, function_graph_id: v } })}
+            value={cfg.data_graph_id || ""}
+            onValueChange={(v) => setEditData({ ...data, data_graph_config: { ...cfg, data_graph_id: v } })}
           >
             <SelectTrigger className="h-6 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
-              <SelectValue placeholder="选择函数图" />
+              <SelectValue placeholder="选择验证图" />
             </SelectTrigger>
             <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-              {booleanFunctionGraphs.map(g => (
-                <SelectItem key={g.id} value={g.function_id} className="text-white text-xs">{g.name}</SelectItem>
+              {validationGraphs.map(g => (
+                <SelectItem key={g.id} value={g.graph_id} className="text-white text-xs">{g.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {validationGraphs.length === 0 && (
+            <div className="text-[10px] text-orange-300">暂无验证图（需在图编辑器新建用途=验证、出口=boolean 的图）</div>
+          )}
           <div className="text-xs text-gray-500">参数绑定: {Object.keys(cfg.parameter_bindings || {}).length}个</div>
         </div>
       );
@@ -848,7 +852,7 @@ export default function ValidatorEditorPage() {
               <SelectItem value="entity_check" className="text-white text-xs">实体检查</SelectItem>
               <SelectItem value="entity_compare" className="text-white text-xs">实体比较</SelectItem>
               <SelectItem value="combine" className="text-white text-xs">组合</SelectItem>
-              <SelectItem value="function_graph" className="text-white text-xs">函数图</SelectItem>
+              <SelectItem value="data_graph" className="text-white text-xs">验证图</SelectItem>
             </SelectContent>
           </Select>
         </td>
