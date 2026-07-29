@@ -1,10 +1,11 @@
 {
   "name": "Effect",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "effect_id": {
       "type": "string",
-      "description": "\u5bf9\u5e94 C# EffectTemplateConfig.id\uff1b\u56e0\u5e73\u53f0\u5185\u7f6e id \u5b57\u6bb5\u5360\u7528\u800c\u4f7f\u7528\u6b64\u5b58\u50a8\u540d"
+      "description": "C# EffectTemplateConfig.id\uff1b\u5e73\u53f0\u5185\u7f6e id \u5360\u7528\uff0c\u6545\u5b58\u4e3a effect_id"
     },
     "tags": {
       "type": "array",
@@ -42,14 +43,17 @@
         "Instant",
         "After",
         "Infinite"
-      ],
-      "default": "Instant"
+      ]
     },
     "participatesInResponse": {
       "type": "boolean"
     },
     "expireCondition": {
-      "type": "object",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
       "properties": {
         "kind": {
           "type": "string",
@@ -71,7 +75,11 @@
       }
     },
     "duration": {
-      "type": "object",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
       "properties": {
         "durationTicks": {
           "type": "integer"
@@ -84,292 +92,490 @@
         }
       }
     },
-    "application": {
-      "type": "object",
-      "properties": {
-        "stacking": {
-          "type": "string",
-          "enum": [
-            "none",
-            "aggregate_by_source",
-            "aggregate_by_target",
-            "independent"
-          ],
-          "default": "none"
-        },
-        "max_stacks": {
-          "type": "number"
-        },
-        "overflow": {
-          "type": "string",
-          "enum": [
-            "reject",
-            "refresh_duration",
-            "replace_oldest",
-            "execute_overflow_effect"
-          ],
-          "default": "reject"
-        },
-        "overflow_effect_id": {
-          "type": "string"
-        },
-        "duration_refresh": {
-          "type": "string",
-          "enum": [
-            "never",
-            "on_reapply",
-            "on_stack_added"
-          ],
-          "default": "never"
-        },
-        "period_reset": {
-          "type": "string",
-          "enum": [
-            "never",
-            "on_reapply",
-            "on_stack_added"
-          ],
-          "default": "never"
-        }
-      }
-    },
-    "requirements": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "target": {
-      "type": "object"
-    },
-    "blackboard": {
-      "type": "object"
-    },
-    "phases": {
+    "modifiers": {
       "type": "array",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
-          "phase_id": {
+          "attribute": {
+            "type": "string"
+          },
+          "op": {
             "type": "string",
             "enum": [
-              "on_propose",
-              "on_calculate",
-              "on_resolve",
-              "on_hit",
-              "on_apply",
-              "on_period",
-              "on_expire",
-              "on_remove"
+              "Add",
+              "Multiply",
+              "Override"
             ]
           },
-          "enabled": {
-            "type": "boolean",
-            "default": false
-          },
-          "pre_action_graph_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "main": {
-            "type": "object",
-            "properties": {
-              "mode": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "builtin",
-                  "action_graph"
-                ],
-                "default": "none"
-              },
-              "builtin": {
-                "type": "object"
-              },
-              "action_graph_id": {
-                "type": "string"
-              },
-              "parameter_mappings_text": {
-                "type": "string"
-              }
-            }
-          },
-          "post_action_graph_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "listeners": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "listener_id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "scope": {
-                  "type": "string",
-                  "enum": [
-                    "target",
-                    "source",
-                    "global"
-                  ],
-                  "default": "target"
-                },
-                "requirements": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "priority": {
-                  "type": "number",
-                  "default": 0
-                },
-                "max_executions": {
-                  "type": "number"
-                },
-                "enabled": {
-                  "type": "boolean",
-                  "default": true
-                },
-                "responses": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "response_type": {
-                        "type": "string",
-                        "enum": [
-                          "apply_effect",
-                          "remove_effect",
-                          "emit_event",
-                          "activate_ability",
-                          "entity_lifecycle_request"
-                        ]
-                      },
-                      "effect_id": {
-                        "type": "string"
-                      },
-                      "event_id": {
-                        "type": "string"
-                      },
-                      "ability_id": {
-                        "type": "string"
-                      },
-                      "lifecycle_request": {
-                        "type": "string",
-                        "enum": [
-                          "create",
-                          "destroy"
-                        ]
-                      },
-                      "prototype_id": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
+          "value": {
+            "type": "number"
           }
         }
       }
     },
-    "response_chain": {
-      "type": "object",
+    "targetQuery": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
       "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
+        "kind": {
+          "type": "string"
         },
-        "max_depth": {
-          "type": "number",
-          "default": 3
+        "shape": {
+          "type": "string"
         },
-        "max_responses": {
-          "type": "number",
-          "default": 8
+        "radius": {
+          "type": "integer"
         },
-        "root_budget": {
-          "type": "number",
-          "default": 16
+        "innerRadius": {
+          "type": "integer"
         },
-        "dedupe_by_correlation": {
-          "type": "boolean",
-          "default": true
+        "halfAngle": {
+          "type": "integer"
         },
-        "entries": {
+        "halfWidth": {
+          "type": "integer"
+        },
+        "halfHeight": {
+          "type": "integer"
+        },
+        "rotation": {
+          "type": "integer"
+        },
+        "length": {
+          "type": "integer"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "graphProgramId": {
+          "type": "integer"
+        }
+      }
+    },
+    "targetFilter": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "relationFilter": {
+          "type": "string"
+        },
+        "excludeSource": {
+          "type": "boolean"
+        },
+        "maxTargets": {
+          "type": "integer"
+        },
+        "layerMask": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "entry_id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "action": {
-                "type": "string",
-                "enum": [
-                  "reject",
-                  "cancel",
-                  "modify",
-                  "redirect",
-                  "replace",
-                  "append"
-                ]
-              },
-              "requirements": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "priority": {
-                "type": "number",
-                "default": 0
-              },
-              "modify_mapping_text": {
-                "type": "string"
-              },
-              "redirect_query_id": {
-                "type": "string"
-              },
-              "replacement_effect_id": {
-                "type": "string"
-              },
-              "appended_effect_id": {
-                "type": "string"
-              }
+            "type": "string"
+          }
+        }
+      }
+    },
+    "targetDispatch": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "type": "string"
+        },
+        "payloadEffect": {
+          "type": "string"
+        },
+        "contextMapping": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "payloadSource": {
+              "type": "string"
+            },
+            "payloadTarget": {
+              "type": "string"
+            },
+            "payloadTargetContext": {
+              "type": "string"
             }
           }
         }
       }
     },
-    "granted_tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "projectile": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "speed": {
+          "type": "integer"
+        },
+        "range": {
+          "type": "integer"
+        },
+        "arcHeight": {
+          "type": "integer"
+        },
+        "impactEffect": {
+          "type": "string"
+        },
+        "hitEffect": {
+          "type": "string"
+        },
+        "presentationEffect": {
+          "type": "string"
+        },
+        "travelMode": {
+          "type": "string",
+          "enum": [
+            "Direction",
+            "TrackTarget"
+          ]
+        },
+        "impactPolicy": {
+          "type": "string",
+          "enum": [
+            "DestroyOnFirstHit",
+            "ContinueOnHit"
+          ]
+        },
+        "collisionHalfWidth": {
+          "type": "integer"
+        },
+        "collisionRelationFilter": {
+          "type": "string"
+        },
+        "collisionExcludeSource": {
+          "type": "boolean"
+        },
+        "maxHitCount": {
+          "type": "integer"
+        }
       }
     },
-    "blocked_tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "unitCreation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "placementPattern": {
+          "type": "string"
+        },
+        "facingPattern": {
+          "type": "string"
+        },
+        "unitType": {
+          "type": "string"
+        },
+        "templateId": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "offsetRadius": {
+          "type": "integer"
+        },
+        "placementRadiusCm": {
+          "type": "integer"
+        },
+        "placementStartAngleDeg": {
+          "type": "integer"
+        },
+        "onSpawnEffect": {
+          "type": "string"
+        },
+        "copySourcePlayerOwner": {
+          "type": "boolean"
+        },
+        "linkSourceAsParent": {
+          "type": "boolean"
+        }
       }
     },
-    "removed_tags_on_apply": {
+    "displacement": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "directionMode": {
+          "type": "string"
+        },
+        "fixedDirectionDeg": {
+          "type": "integer"
+        },
+        "totalDistanceCm": {
+          "type": "integer"
+        },
+        "totalDurationTicks": {
+          "type": "integer"
+        },
+        "overrideNavigation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "relation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "snapSubjectToParentPosition": {
+          "type": "boolean"
+        },
+        "relationshipType": {
+          "type": "string"
+        }
+      }
+    },
+    "revealArea": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "radius": {
+          "type": "integer"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "memoryTtlTicks": {
+          "type": "integer"
+        },
+        "detectionStrength": {
+          "type": "integer"
+        }
+      }
+    },
+    "submitOrderFromBlackboard": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "storedTarget": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "targetKindKey": {
+              "type": "string"
+            },
+            "targetPositionKey": {
+              "type": "string"
+            },
+            "targetEntityKey": {
+              "type": "string"
+            },
+            "hexQKey": {
+              "type": "string"
+            },
+            "hexRKey": {
+              "type": "string"
+            }
+          }
+        },
+        "pointMoveOrderTypeKey": {
+          "type": "string"
+        },
+        "entityOrderTypeKey": {
+          "type": "string"
+        },
+        "entityOrderIntArg0": {
+          "type": "integer"
+        },
+        "submitMode": {
+          "type": "string",
+          "enum": [
+            "Immediate",
+            "Queued"
+          ]
+        }
+      }
+    },
+    "progression": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "delta": {
+          "type": "integer"
+        }
+      }
+    },
+    "phaseGraphs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pre": {
+            "type": "string"
+          },
+          "post": {
+            "type": "string"
+          },
+          "skipMain": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "phaseListeners": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "listenTag": {
+            "type": "string"
+          },
+          "listenEffectId": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "graphProgram": {
+            "type": "string"
+          },
+          "eventTag": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "configParams": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "object",
+              "array",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "grantedTags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "base": {
+            "type": "integer"
+          },
+          "graphProgram": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "stack": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "policy": {
+          "type": "string",
+          "enum": [
+            "KeepDuration",
+            "RefreshDuration",
+            "AddDuration"
+          ]
+        },
+        "overflowPolicy": {
+          "type": "string",
+          "enum": [
+            "RejectNew",
+            "RemoveOldest"
+          ]
+        }
       }
     }
   },
