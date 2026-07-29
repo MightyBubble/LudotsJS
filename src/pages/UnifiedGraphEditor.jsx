@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Network, Database, Info } from "lucide-react";
+import { Network, Database, Info, Plus, Save } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import NodeSearchMenu from '../components/graph/NodeSearchMenu';
@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation } from 'react-router-dom';
+import PageActions from '@/components/shell/PageActions';
+import { SearchBox, ToolButton } from '@/components/shell/ui';
 
 // 纯函数图默认节点：入口 + 返回
 function buildFunctionDefaultNodes(returnType) {
@@ -67,6 +69,7 @@ export default function UnifiedGraphEditorPage() {
   const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
   const [connectionValues, setConnectionValues] = useState({});
   const [isEditingType, setIsEditingType] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Structure Editor State
   const [editingNodeId, setEditingNodeId] = useState(null);
@@ -418,21 +421,17 @@ export default function UnifiedGraphEditorPage() {
 
   const editorPane = currentGraph ? (
     <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden min-w-0">
-      <Toolbar
-        onSave={saveGraph}
-        onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
-        onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
-        onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-        onToggleBlackboard={() => setShowBlackboard(prev => !prev)}
-        onToggleInfo={() => setShowInfo(prev => !prev)}
-        onBack={() => { setCurrentGraph(null); setSelectedGraph(null); }}
-        projectName={currentGraph.name}
-        zoom={zoom}
-        showBlackboard={showBlackboard}
-        showInfo={showInfo}
-      />
-
       <div className="flex-1 relative overflow-hidden overscroll-contain">
+        <Toolbar
+          onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
+          onZoomOut={() => setZoom(prev => Math.max(prev - 0.1, 0.5))}
+          onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+          onToggleBlackboard={() => setShowBlackboard(prev => !prev)}
+          onToggleInfo={() => setShowInfo(prev => !prev)}
+          zoom={zoom}
+          showBlackboard={showBlackboard}
+          showInfo={showInfo}
+        />
         <GraphCanvas
           nodes={nodes}
           connections={connections}
@@ -521,6 +520,14 @@ export default function UnifiedGraphEditorPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索图..." />
+        <ToolButton icon={Plus} tone="primary" onClick={() => {
+          if (typeFilter !== 'all') setNewGraph(prev => ({ ...prev, graph_type: typeFilter }));
+          setIsCreating(true);
+        }}>新建</ToolButton>
+        <ToolButton icon={Save} onClick={saveGraph} disabled={!currentGraph}>保存</ToolButton>
+      </PageActions>
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
             <DialogHeader><DialogTitle className="text-[#e5e5e5]">新建图</DialogTitle></DialogHeader>
@@ -586,7 +593,7 @@ export default function UnifiedGraphEditorPage() {
         <AssetBrowserPanel
           key={typeFilter}
           entityName="Graph"
-          records={typeFilter === 'all' ? allGraphs : allGraphs.filter(g => g.graph_type === typeFilter)}
+          records={(typeFilter === 'all' ? allGraphs : allGraphs.filter(g => g.graph_type === typeFilter)).filter(g => !searchQuery || `${g.name} ${g.description || ''}`.toLowerCase().includes(searchQuery.toLowerCase()))}
           toItem={(g) => ({
             id: g.id,
             name: g.name,
@@ -594,10 +601,7 @@ export default function UnifiedGraphEditorPage() {
           })}
           selectedId={selectedGraph?.id}
           onSelect={(g) => { setSelectedGraph(g); openGraph(g); }}
-          onCreate={() => {
-            if (typeFilter !== 'all') setNewGraph(prev => ({ ...prev, graph_type: typeFilter }));
-            setIsCreating(true);
-          }}
+          hideSearch
           onDelete={(g) => {
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
               deleteMutation.mutate({ id: g.id, entity_type: g.entity_type });

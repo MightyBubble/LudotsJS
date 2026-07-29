@@ -3,7 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, X, AlertCircle, Check, Ban, Zap, Trash2, Power, Eraser, Info, ArrowRight, Shield, Layers } from "lucide-react";
+import { Plus, X, AlertCircle, Check, Ban, Zap, Trash2, Power, Eraser, Info, ArrowRight } from "lucide-react";
+import PageActions from '@/components/shell/PageActions';
+import { SearchBox } from '@/components/shell/ui';
 
 export default function TagSimulator() {
   const [entityName, setEntityName] = useState("Test Entity");
@@ -137,6 +139,7 @@ export default function TagSimulator() {
 
   return (
     <div className="h-full flex bg-[#0D0F14] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
+      <PageActions><SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索标签..." /></PageActions>
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #15171C; }
@@ -232,29 +235,6 @@ export default function TagSimulator() {
 
       {/* Main Content: Library */}
       <div className="flex-1 flex flex-col bg-[#0D0F14] min-w-0">
-        {/* Search Header */}
-        <div className="h-14 border-b border-[#2A2E37] flex items-center px-4 gap-4 bg-[#0D0F14]">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <Input
-              placeholder="Search tags..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 bg-[#15171C] border-[#2A2E37] text-sm text-[#e5e5e5] focus:border-[#D97706] rounded-md"
-            />
-          </div>
-          <div className="flex gap-4 text-xs text-gray-500">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-green-500/20 border border-green-500/50" />
-              <span>Available ({addableTags.length})</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500/20 border border-red-500/50" />
-              <span>Blocked ({blockedTags.length})</span>
-            </div>
-          </div>
-        </div>
-
         {/* Library Grid */}
         <div className="flex-1 overflow-hidden flex">
           {/* Available Tags Column */}

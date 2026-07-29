@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import AssetBrowserPanel from '@/components/assetBrowser/AssetBrowserPanel';
 import PageActions from '@/components/shell/PageActions';
 import RecordTable from '@/components/ludots/RecordTable';
-import { SearchBox, ToolButton, S } from '@/components/shell/ui';
+import { SearchBox, ToolButton, ViewSwitch, S } from '@/components/shell/ui';
 import { Save, ListTree, Table2, Plus } from 'lucide-react';
 
 /**
@@ -44,16 +44,20 @@ export default function RecordWorkspace({
     <div className={S.page}>
       <PageActions>
         <SearchBox value={searchQuery} onChange={setSearchQuery} />
-        {headerRight}
         {hasTable && (
-          <div className="flex items-center gap-1">
-            <ToolButton icon={ListTree} tone={view === 'tree' ? 'primary' : 'default'} title="文件树 + 详情" onClick={() => changeView('tree')}>详情</ToolButton>
-            <ToolButton icon={Table2} tone={view === 'table' ? 'primary' : 'default'} title="二维表" onClick={() => changeView('table')}>表格</ToolButton>
-          </div>
+          <ViewSwitch
+            value={view}
+            onChange={changeView}
+            options={[
+              { value: 'tree', label: '详情', icon: ListTree, title: '文件树 + 详情' },
+              { value: 'table', label: '表格', icon: Table2, title: '二维表' },
+            ]}
+          />
         )}
+        {headerRight}
         {onCreate && <ToolButton icon={Plus} tone="primary" onClick={onCreate}>新建</ToolButton>}
-        {view === 'tree' && selectedId && onSave && (
-          <ToolButton icon={Save} tone="primary" onClick={onSave}>保存{dirty ? ' *' : ''}</ToolButton>
+        {onSave && (
+          <ToolButton icon={Save} onClick={onSave} disabled={!selectedId || view !== 'tree'}>保存{dirty ? ' *' : ''}</ToolButton>
         )}
       </PageActions>
 

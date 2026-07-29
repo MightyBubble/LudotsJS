@@ -4,11 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X, LayoutGrid, ArrowLeft, ZoomOut, ZoomIn, Maximize2, Save } from "lucide-react";
+import { Plus, X, LayoutGrid, Save } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import PageActions from '@/components/shell/PageActions';
 import { SearchBox, ToolButton } from '@/components/shell/ui';
 import GraphCanvas from '@/components/graph/GraphCanvas';
+import Toolbar from '@/components/graph/Toolbar';
 import StructureNode from '@/components/graph/StructureNode';
 import { useI18n } from '@/i18n/I18nProvider';
 
@@ -179,16 +180,7 @@ export default function StructureEditorPage() {
       <PageActions>
         <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder={t('structure.search')} />
         <ToolButton icon={Plus} tone="primary" onClick={() => setIsCreating(true)}>{t('common.new')}</ToolButton>
-        {selectedStructure && (
-          <>
-            <ToolButton icon={ArrowLeft} onClick={() => setSelectedStructure(null)} title={t('structure.back')} />
-            <ToolButton icon={ZoomOut} onClick={() => setZoom(z => Math.max(z - 0.1, 0.5))} title={t('structure.zoomOut')} />
-            <span className="min-w-10 text-center text-[10px] text-muted-foreground">{(zoom * 100).toFixed(0)}%</span>
-            <ToolButton icon={ZoomIn} onClick={() => setZoom(z => Math.min(z + 0.1, 2))} title={t('structure.zoomIn')} />
-            <ToolButton icon={Maximize2} onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} title={t('structure.resetView')} />
-            <ToolButton icon={Save} onClick={handleSave}>{t('common.save')}</ToolButton>
-          </>
-        )}
+        <ToolButton icon={Save} onClick={handleSave} disabled={!selectedStructure}>{t('common.save')}</ToolButton>
       </PageActions>
 
       <div className="flex-1 flex overflow-hidden">
@@ -224,6 +216,12 @@ export default function StructureEditorPage() {
         <div className="flex-1 bg-[#1a1a1a] relative">
           {selectedStructure ? (
             <>
+              <Toolbar
+                onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
+                onZoomOut={() => setZoom(z => Math.max(z - 0.1, 0.5))}
+                onResetView={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+                zoom={zoom}
+              />
               <GraphCanvas
                 nodes={nodes}
                 connections={connections}
@@ -242,7 +240,7 @@ export default function StructureEditorPage() {
               
               <div className="absolute top-4 left-4 bg-[#15171C]/90 p-2 rounded border border-[#2A2E37] flex gap-2">
                 <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37] text-xs text-white">
-                  <Plus className="w-3 h-3 mr-1" /> 添加节点
+                  <Plus className="w-3 h-3 mr-1" /> 新建节点
                 </Button>
               </div>
             </>

@@ -33,7 +33,6 @@ export default function EffectLibraryPage() {
   const application = draft?.application || {};
   const durable = isDurableKind(lifetime.kind);
   const issues = draft ? validateEffect(draft, refs) : [];
-  const errorCount = issues.filter(i => i.severity === 'error').length;
 
   const setLifetime = (p) => patch({ lifetime: { ...lifetime, ...p } });
   const setApplication = (p) => patch({ application: { ...application, ...p } });
@@ -56,11 +55,6 @@ export default function EffectLibraryPage() {
       onCreate={create}
       onDelete={(r) => window.confirm(`确定删除「${r.name}」吗？`) && remove(r.id)}
       onSave={save} dirty={dirty}
-      headerRight={draft && (
-        <span className={`text-[11px] mr-2 ${errorCount ? 'text-red-400' : 'text-green-500'}`}>
-          {errorCount ? `${errorCount} 个错误` : '校验通过'}
-        </span>
-      )}
     >
       {draft && (
         <div className="max-w-3xl">

@@ -11,7 +11,7 @@ import {
   Shield, Ban, Link, Trash, Power, Eraser, Zap
 } from "lucide-react";
 import PageActions from "@/components/shell/PageActions";
-import { SearchBox, ToolButton } from "@/components/shell/ui";
+import { SearchBox, ToolButton, ViewSwitch } from "@/components/shell/ui";
 import GraphView from "../components/tagEditor/GraphView";
 import CategoryManager from "../components/tagEditor/CategoryManager";
 import TagCountEventPanel from "../components/tag/TagCountEventPanel";
@@ -896,10 +896,15 @@ export default function TagEditor() {
     <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
       {/* 顶部工具栏 - 移动端适配 */}
       <PageActions>
-        <div className="flex gap-1 bg-[#15171C] rounded p-0.5 border border-[#2A2E37]">
-          <ToolButton icon={List} tone={viewMode === 'tree' ? 'primary' : 'default'} onClick={() => setViewMode('tree')}>树形</ToolButton>
-          <ToolButton icon={Network} tone={viewMode === 'graph' ? 'primary' : 'default'} onClick={() => setViewMode('graph')}>图形</ToolButton>
-        </div>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索标签..." />
+        <ViewSwitch
+          value={viewMode}
+          onChange={setViewMode}
+          options={[
+            { value: 'tree', label: '树形', icon: List },
+            { value: 'graph', label: '图形', icon: Network },
+          ]}
+        />
 
         <ToolButton icon={Palette} onClick={() => setShowCategoryManager(true)}>分类</ToolButton>
         <ToolButton icon={Download} onClick={exportToJSON} title="导出" />
@@ -934,13 +939,6 @@ export default function TagEditor() {
           </>
         )}
 
-        {hasUnsavedChanges && (
-          <>
-            <ToolButton icon={Save} tone="primary" onClick={handleSaveChanges}>保存 *</ToolButton>
-            <ToolButton icon={X} onClick={handleDiscardChanges}>撤销</ToolButton>
-          </>
-        )}
-
         <ToolButton
           icon={Plus}
           tone="primary"
@@ -951,7 +949,8 @@ export default function TagEditor() {
         >
           新建
         </ToolButton>
-        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索标签..." />
+        <ToolButton icon={Save} onClick={handleSaveChanges} disabled={!hasUnsavedChanges}>保存{hasUnsavedChanges ? ' *' : ''}</ToolButton>
+        {hasUnsavedChanges && <ToolButton icon={X} onClick={handleDiscardChanges}>撤销</ToolButton>}
       </PageActions>
 
       {/* 主要内容区 */}

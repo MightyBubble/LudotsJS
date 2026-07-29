@@ -57,7 +57,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
       </div>
 
       {/* 二级：当前模块的条目（即页面标题） + 右侧当前页操作区 */}
-      <div className="h-9 bg-[#0D0F14] border-b border-[#2A2E37] flex items-center gap-1 px-2 overflow-x-auto">
+      <div className="min-h-9 h-auto md:h-9 bg-[#0D0F14] border-b border-[#2A2E37] flex flex-wrap md:flex-nowrap items-center gap-1 px-2 py-1 md:py-0 overflow-x-hidden md:overflow-x-auto">
         {active?.items.map(item => {
           const isActive =
             item.page === currentPageName &&
@@ -77,7 +77,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
             </Link>
           );
         })}
-        <div ref={setSlot} className="ml-auto flex items-center gap-2 pl-3 shrink-0" />
+        <div ref={setSlot} className="order-last md:order-none w-full md:w-auto ml-0 md:ml-auto flex items-center gap-2 pt-1 md:pt-0 md:pl-3 shrink-0 overflow-x-auto" />
       </div>
     </>
   );

@@ -70,8 +70,28 @@ export function SearchBox({ value, onChange, placeholder = '搜索...' }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-7 pl-7 pr-2 w-40 lg:w-56 rounded bg-[#0D0F14] border border-[#2A2E37] text-xs text-[#e5e5e5] placeholder:text-gray-600 focus:outline-none focus:border-[#D97706]"
+        className="h-7 pl-7 pr-2 w-24 sm:w-40 lg:w-56 rounded bg-[#0D0F14] border border-[#2A2E37] text-xs text-[#e5e5e5] placeholder:text-gray-600 focus:outline-none focus:border-[#D97706]"
       />
+    </div>
+  );
+}
+
+/** 二级栏唯一的分段视图切换样式 */
+export function ViewSwitch({ value, options, onChange }) {
+  return (
+    <div className="h-7 inline-flex items-center rounded border border-[#2A2E37] bg-[#15171C] p-0.5">
+      {options.map(({ value: optionValue, label, icon: Icon, title }) => (
+        <button
+          key={optionValue}
+          type="button"
+          title={title || label}
+          onClick={() => onChange(optionValue)}
+          className={`h-6 w-7 sm:w-auto px-0 sm:px-2 rounded-sm text-xs inline-flex items-center justify-center gap-1 whitespace-nowrap transition-colors ${value === optionValue ? 'bg-[#D97706] text-black' : 'text-gray-400 hover:bg-[#2A2E37] hover:text-gray-100'}`}
+        >
+          {Icon && <Icon className="w-3 h-3" />}
+          <span className="hidden sm:inline">{label}</span>
+        </button>
+      ))}
     </div>
   );
 }

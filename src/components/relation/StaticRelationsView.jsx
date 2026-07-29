@@ -39,7 +39,7 @@ export default function StaticRelationsView() {
       ]}
       selectedId={selectedId}
       onSelect={(item) => setSelectedId(item.id)}
-      headerRight={proto && <ToolButton icon={Plus} onClick={() => setRelations([...list, { relation_definition_id: relations[0]?.relation_id || '', target_prototype_id: '', attribute_values: {} }])}>添加关系</ToolButton>}
+      headerRight={<ToolButton icon={Plus} disabled={!proto} onClick={() => setRelations([...list, { relation_definition_id: relations[0]?.relation_id || '', target_prototype_id: '', attribute_values: {} }])}>新建</ToolButton>}
       emptyHint="选择一个原型以配置静态关系"
     >
       {proto && (
