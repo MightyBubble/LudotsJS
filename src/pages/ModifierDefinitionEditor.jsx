@@ -44,7 +44,11 @@ export default function ModifierDefinitionEditorPage() {
   });
 
   const curveGraphs = useMemo(() => {
-    return dataGraphs.filter(g => g.graph_type === 'curve');
+    // 曲线图：新建的 data 图（用途标记为 curve/general）与遗留的 curve 类型都可选
+    return dataGraphs.filter(g =>
+      g.graph_type === 'curve' ||
+      (g.graph_type === 'data' && (!g.usage || g.usage === 'general' || g.usage === 'curve'))
+    );
   }, [dataGraphs]);
 
   const createMutation = useMutation({

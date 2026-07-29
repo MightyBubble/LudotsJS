@@ -17,10 +17,22 @@
     "graph_type": {
       "type": "string",
       "enum": [
+        "data",
+        "structure",
         "curve",
         "attribute_calculation"
       ],
-      "description": "\u56fe\u7684\u7c7b\u578b\uff1acurve(\u66f2\u7ebf\u56fe) \u6216 attribute_calculation(\u5c5e\u6027\u8ba1\u7b97\u56fe)"
+      "description": "\u56fe\u7684\u7c7b\u578b\uff1adata(\u901a\u7528\u6570\u636e\u56fe) / structure(\u7ed3\u6784\u56fe) / curve(\u66f2\u7ebf\u56fe\uff0cdata\u7684\u7528\u9014\u5b50\u96c6) / attribute_calculation(\u5c5e\u6027\u8ba1\u7b97\u56fe\uff0cdata\u7684\u7528\u9014\u5b50\u96c6)"
+    },
+    "usage": {
+      "type": "string",
+      "enum": [
+        "general",
+        "curve",
+        "attribute_calculation"
+      ],
+      "default": "general",
+      "description": "data \u56fe\u7684\u7528\u9014\u6807\u8bb0\uff0c\u51b3\u5b9a\u53ef\u88ab\u54ea\u4e9b\u6a21\u5757\u5f15\u7528\uff08\u66f2\u7ebf / \u5c5e\u6027\u8ba1\u7b97 / \u901a\u7528\uff09"
     },
     "input_parameters": {
       "type": "array",

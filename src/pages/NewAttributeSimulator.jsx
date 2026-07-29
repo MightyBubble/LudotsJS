@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calculator, Plus, Minus, ArrowRight, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { evaluateGraphValue } from "@/lib/graphRuntime";
 
 export default function NewAttributeSimulatorPage() {
   const [tagCounts, setTagCounts] = useState({});
@@ -34,6 +35,12 @@ export default function NewAttributeSimulatorPage() {
   const { data: prototypes = [] } = useQuery({
     queryKey: ['entityPrototypes'],
     queryFn: () => base44.entities.EntityPrototype.list(),
+    initialData: [],
+  });
+
+  const { data: dataGraphs = [] } = useQuery({
+    queryKey: ['dataGraphs'],
+    queryFn: () => base44.entities.DataGraph.list(),
     initialData: [],
   });
 
@@ -109,8 +116,13 @@ export default function NewAttributeSimulatorPage() {
         }
       });
 
-      const inputValues = Object.values(inputs);
-      const magnitude = inputValues.reduce((a, b) => a * 10 + b * 5, 0);
+      // 真实执行曲线图；图不存在或为空时退化为输入求和
+      const curveGraph = dataGraphs.find(g => g.graph_id === mod.curve_data_graph_id);
+      const graphResult = evaluateGraphValue(curveGraph, inputs);
+      const usedGraph = graphResult !== null;
+      const magnitude = usedGraph
+        ? graphResult
+        : Object.values(inputs).reduce((sum, v) => sum + (Number(v) || 0), 0);
       
       const isManuallyActive = modifierActiveStates[mod.id] !== undefined ? modifierActiveStates[mod.id] : mod.is_active;
       const isManuallyDisabled = modifierActiveStates[mod.id] === false;
@@ -119,6 +131,7 @@ export default function NewAttributeSimulatorPage() {
         modifier: mod,
         inputs,
         magnitude,
+        usedGraph,
         isActive: isManuallyActive && magnitude > 0,
         isManuallyDisabled,
         targetAttribute: mod.target_attribute_id,
@@ -126,7 +139,7 @@ export default function NewAttributeSimulatorPage() {
         warnings: modifierWarnings[mod.id] || []
       };
     });
-  }, [modifiers, tagCounts, attributeKeyValues, constantValues, modifierActiveStates, modifierWarnings]);
+  }, [modifiers, tagCounts, attributeKeyValues, constantValues, modifierActiveStates, modifierWarnings, dataGraphs]);
 
   const sortedModifierOutputs = useMemo(() => {
     return [...modifierOutputs].sort((a, b) => {
@@ -525,7 +538,14 @@ export default function NewAttributeSimulatorPage() {
                     )}
                     
                     <div className="space-y-1 text-[10px] text-gray-400">
-                      <div>曲线: {output.modifier.curve_data_graph_id}</div>
+                      <div className="flex items-center gap-1">
+                        <span>曲线: {output.modifier.curve_data_graph_id || '未设置'}</span>
+                        {!output.usedGraph && (
+                          <span className="text-[9px] bg-orange-900/40 text-orange-300 px-1 rounded" title="未找到可执行的曲线图，已退化为输入求和">
+                            无图
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1 flex-wrap">
                         <span>输入:</span>
                         {Object.entries(output.inputs).map(([key, val]) => (

@@ -38,7 +38,11 @@ export default function AttributeEditorPage() {
   });
 
   const attributeCalcGraphs = useMemo(() => {
-    return dataGraphs.filter(g => g.graph_type === 'attribute_calculation');
+    // 属性计算图：新建的 data 图（用途标记为 attribute_calculation/general）与遗留的 attribute_calculation 类型都可选
+    return dataGraphs.filter(g =>
+      g.graph_type === 'attribute_calculation' ||
+      (g.graph_type === 'data' && (!g.usage || g.usage === 'general' || g.usage === 'attribute_calculation'))
+    );
   }, [dataGraphs]);
 
   const createMutation = useMutation({

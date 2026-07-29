@@ -24,6 +24,26 @@ GlobalConstant / DataTable → 全局可引用`,
     questions: []
   },
   {
+    id: "architecture-decisions",
+    title: "架构统一决策 (Roadmap)",
+    overview: "对文档中全部疑问的根因分析与统一方案。",
+    definition: "文档里的 10 个疑问可归为四个根因：①图系统实体分裂 ②缺少统一的图执行引擎 ③布尔判断体系三层重叠（Validator / ConditionDefinition / Requirement）④副作用没有统一表达方式。",
+    intent: "避免每个模块各自发明一小块 DSL。统一图存储、统一执行、统一条件、统一副作用，让新增玩法只需组合已有构件。",
+    architecture: `已完成：
+• 修复 graph_type 枚举矛盾：DataGraph 的枚举补齐为 data / structure / curve / attribute_calculation，并新增 usage 字段（general / curve / attribute_calculation）作为「用途标记」。属性编辑器与修饰器编辑器现在能同时选到新建的 data 图和遗留类型的图。
+• 抽出统一图执行引擎 src/lib/graphRuntime.js：拓扑求值 + 环检测，实现数值、向量、黑板、比较、逻辑、集合、条件、标签判断节点。图编辑器的实时连线值与属性模拟器的曲线计算已共用它，删除了模拟器里 magnitude = a*10+b*5 的硬编码。
+
+待办（按优先级）：
+1. Structure 统一：以 StructureDefinition 为唯一真源（EntityPrototype.structure_bindings 引用的是它），让统一编辑器的 structure 类型直接读写该实体，迁移后废弃 DataGraph 中的 structure 记录。
+2. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
+3. Action Graph（第 5 种图，副作用图）：引入 exec 执行引脚、事件入口节点、动作节点（加/移标签、改属性键、施加修饰器、发射事件、增删关系）与真正的顺序 / 分支 / 遍历。之后各处硬编码副作用字段渐进式改为引用 action graph。
+4. Query / Function 节点的执行语义接入引擎（目前非纯数值节点为端口透传）。
+5. 零散项：TagHistory 接入写入、TagCountEvent 面板补 GameEvent 下拉、ConditionEditor 配色统一（若并入 Validator 则直接下线）。`,
+    questions: [
+      "Action Graph 的事件入口应该复用 GameEvent 实体，还是单独定义一套图触发器？"
+    ]
+  },
+  {
     id: "tag-editor",
     title: "标签编辑器 (TagEditor)",
     overview: "GameplayTag 的可视化树形编辑器，是整个系统的基础模块。",
@@ -150,7 +170,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 • 实时计算：每当节点/连接变化时自动执行拓扑排序 + 前向传播计算`,
     questions: [
       "DataGraph 同时存储 data 和 structure 两种图类型，通过 graph_type 字段区分。但 structure 图有自己的专用编辑器（StructureEditor），是否存在数据竞争风险？",
-      "图计算目前是前端模拟执行，仅支持基础数学运算。Query/Function 节点的计算逻辑尚未实现，仅做了端口传递。"
+      "[部分完成] 计算已抽到统一引擎 graphRuntime，覆盖数值/向量/黑板/比较/逻辑/集合/条件/标签节点；Query 与 Structure 节点仍为端口透传，待接入执行语义。"
     ]
   },
   {
@@ -170,7 +190,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 • recovery_config：自动回复行为（目标键、回复速率、延迟）
 • 阈值事件：通过 ThresholdEventPanel 配置，当属性键达到阈值时触发 GameEvent`,
     questions: [
-      "attributeCalcGraphs 过滤 graph_type === 'attribute_calculation'，但 DataGraph 的 graph_type 枚举中没有这个值（只有 data/structure）。这意味着当前无法选择计算图？"
+      "[已修复] graph_type 枚举已补齐并新增 usage 用途标记，计算图下拉现在同时包含 data 图与遗留 attribute_calculation 图。"
     ]
   },
   {
@@ -196,7 +216,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 
 曲线图对应 DataGraph 的 curve 类型子集。`,
     questions: [
-      "curveGraphs 过滤 graph_type === 'curve'，但 DataGraph 的 graph_type 枚举中同样没有 curve 值。与 Attribute 面临相同的问题。"
+      "[已修复] 曲线图下拉现在同时包含 data 图（用途 general/curve）与遗留 curve 图。"
     ]
   },
   {
@@ -250,7 +270,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 
 与 UnifiedGraphEditor 中 structure 图类型存在功能重叠。`,
     questions: [
-      "StructureEditor 和 UnifiedGraphEditor(structure) 编辑的是不同实体（StructureDefinition vs DataGraph），但概念上做的是同一件事。是否考虑统一？"
+      "[已决策，待实施] 以 StructureDefinition 为唯一真源，统一编辑器的 structure 类型改为读写该实体，迁移后废弃 DataGraph 中的 structure 记录。详见「架构统一决策」模块。"
     ]
   },
   {
@@ -272,7 +292,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 
 缺陷预警系统：当修饰器引用了原型未包含的属性时，显示「输入预警」或「目标预警」。`,
     questions: [
-      "magnitude 的计算公式 (a * 10 + b * 5) 是硬编码的简化模拟，与实际 Data Graph 曲线计算无关。是否计划接入真实的图执行引擎？"
+      "[已修复] 已接入统一图执行引擎，按修饰器的 curve_data_graph_id 真实执行曲线图；找不到可执行图时退化为输入求和并在卡片上标注「无图」。"
     ]
   },
   {
