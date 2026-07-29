@@ -13,6 +13,7 @@ import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
+import { compileRuntimeGraph } from '@/lib/runtime/runtimeGraphCompiler';
 import { graphTypeLabel, returnTypeOptions, USAGE_LABELS, DATA_RETURN_TYPES, FUNCTION_RETURN_TYPES } from '../components/graph/graphLabels';
 import { evaluateGraph } from '@/lib/graphRuntime';
 import QuerySimulationPanel from '../components/queryGraph/QuerySimulationPanel';
@@ -254,11 +255,14 @@ export default function UnifiedGraphEditorPage() {
       return;
     }
 
+    const runtimeGraph = currentGraph.entity_type === 'ActionGraph'
+      ? compileRuntimeGraph(currentGraph.action_id, nodes, connections)
+      : null;
     updateMutation.mutate({
       id: currentGraph.id,
       entity_type: currentGraph.entity_type,
       data: {
-        graph_definition: JSON.stringify({ nodes, connections, blackboard })
+        graph_definition: JSON.stringify({ nodes, connections, blackboard, ...(runtimeGraph ? { runtimeGraph } : {}) })
       }
     });
   }, [currentGraph, nodes, connections, blackboard, updateMutation]);
@@ -358,7 +362,7 @@ export default function UnifiedGraphEditorPage() {
       id: `node-${Date.now()}`,
       type,
       position,
-      data: defaultData[type] || {},
+      data: { ...(config.defaultData || {}), ...(defaultData[type] || {}) },
       inputs: config.inputs || [],
       outputs: config.outputs || []
     };

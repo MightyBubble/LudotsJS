@@ -3,7 +3,8 @@ import { X } from 'lucide-react';
 import NodePort from './NodePort';
 import BlackboardVarNode from './BlackboardVarNode';
 import { Input } from '@/components/ui/input';
-import { getNodeLabel } from './nodeConfigs';
+import { getNodeConfig, getNodeLabel } from './nodeConfigs';
+import RuntimeNodeFields from './RuntimeNodeFields';
 
 const nodeAccentColors = {
   number: '#5b9bd5',
@@ -87,6 +88,7 @@ export default function Node({
 }) {
   const accentColor = nodeAccentColors[node?.type] || nodeAccentColors.number;
   const isLocked = node?.locked || (node?.id && node.id.startsWith('output-'));
+  const nodeConfig = getNodeConfig(node?.type);
 
   if (!node) {
     return null;
@@ -310,7 +312,10 @@ export default function Node({
             {node.data.details.map(detail => <div key={detail} className="font-mono text-[9px] leading-4 text-gray-400">{detail}</div>)}
           </div>
         )}
-        <div className="nodrag">{renderInlineInputs()}</div>
+        <div className="nodrag">
+          <RuntimeNodeFields fields={nodeConfig?.configFields} data={node.data || {}} onChange={data => onUpdateData(node.id, data)} />
+          {renderInlineInputs()}
+        </div>
 
         {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5 mt-2">
