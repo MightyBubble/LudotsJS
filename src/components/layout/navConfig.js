@@ -10,26 +10,24 @@ export const NAV_GROUPS = [
     items: [
       { page: 'TagEditor', label: '标签编辑', icon: Edit3 },
       { page: 'TagSimulator', label: '标签模拟器', icon: Zap },
-      { page: 'UnlockableCommands', label: '可解锁指令', icon: KeyRound },
-      { page: 'InteractionEffects', label: '交互效果规则', icon: Sparkles },
     ],
   },
   {
     label: '规则',
     items: [
-      { page: 'ValidatorEditor', label: '验证器', icon: Shield },
-      { page: 'RequirementEditor', label: '需求', icon: CheckSquare },
-      { page: 'GameEventEditor', label: '事件', icon: Zap },
-      { page: 'GlobalConstantEditor', label: '全局常量', icon: Settings },
+      { page: 'UnlockableCommands', label: '可解锁指令', icon: KeyRound },
+      { page: 'InteractionEffects', label: '交互效果规则', icon: Sparkles },
     ],
   },
   {
-    label: 'Ludots',
+    label: '玩法',
     items: [
       { page: 'EffectLibrary', label: 'Effect 效果', icon: Sparkles },
       { page: 'AbilityLibrary', label: 'Ability 能力', icon: Wand2 },
       { page: 'TriggerLibrary', label: 'Trigger 触发器', icon: KeyRound },
-      { page: 'AssetLibrary', label: 'Asset 资源', icon: Box },
+      { page: 'ValidatorEditor', label: '验证器', icon: Shield },
+      { page: 'RequirementEditor', label: '需求', icon: CheckSquare },
+      { page: 'GameEventEditor', label: '事件', icon: Zap },
     ],
   },
   {
@@ -40,7 +38,9 @@ export const NAV_GROUPS = [
       { page: 'EntityPrototypeEditor', label: '实体原型', icon: Box },
       { page: 'EntityRelationEditor', label: '实体关系', icon: LinkIcon },
       { page: 'DataTableEditor', label: '数据表', icon: Table },
+      { page: 'GlobalConstantEditor', label: '全局常量', icon: Settings },
       { page: 'StructureEditor', label: '结构关系图', icon: Network },
+      { page: 'AssetLibrary', label: 'Asset 资源', icon: Box },
     ],
   },
   {
