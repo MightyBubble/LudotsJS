@@ -1,0 +1,22 @@
+{
+  "name": "EntityQuery",
+  "type": "object",
+  "properties": {
+    "query_name": {
+      "type": "string",
+      "description": "\u67e5\u8be2\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u67e5\u8be2\u63cf\u8ff0"
+    },
+    "graph_definition": {
+      "type": "string",
+      "description": "\u67e5\u8be2\u56fe\u7684\u5b8c\u6574\u5b9a\u4e49\uff08JSON\u5b57\u7b26\u4e32\u683c\u5f0f\uff0c\u5305\u542bnodes, connections, outputs\uff09"
+    }
+  },
+  "required": [
+    "query_name",
+    "graph_definition"
+  ]
+}

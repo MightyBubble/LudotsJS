@@ -1,0 +1,51 @@
+{
+  "name": "DataTable",
+  "type": "object",
+  "properties": {
+    "table_id": {
+      "type": "string",
+      "description": "\u6570\u636e\u8868\u552f\u4e00\u6807\u8bc6\u7b26"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u6570\u636e\u8868\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u6570\u636e\u8868\u63cf\u8ff0"
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "description": "\u5217\u5b9a\u4e49"
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "\u884c\u6570\u636e"
+    }
+  },
+  "required": [
+    "table_id",
+    "name",
+    "columns",
+    "rows"
+  ]
+}

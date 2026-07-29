@@ -1,0 +1,93 @@
+{
+  "name": "InteractionEffect",
+  "type": "object",
+  "properties": {
+    "effect_name": {
+      "type": "string",
+      "description": "\u6548\u679c\u89c4\u5219\u540d\u79f0\uff0c\u4f8b\u5982\uff1a\u71c3\u70e7\u6728\u5934"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u6548\u679c\u89c4\u5219\u63cf\u8ff0"
+    },
+    "triggering_effect_tag_path": {
+      "type": "string",
+      "description": "\u89e6\u53d1\u6b64\u6548\u679c\u7684\u6807\u7b7e\u8def\u5f84\uff0c\u4f8b\u5982\uff1aEffect.Fire.Burn"
+    },
+    "interactor_conditions": {
+      "type": "object",
+      "description": "\u53d1\u8d77\u8005\uff08\u4f8b\u5982\uff1a\u73a9\u5bb6\uff0c\u6280\u80fd\uff09\u5fc5\u987b\u6ee1\u8db3\u7684\u6807\u7b7e\u6761\u4ef6",
+      "properties": {
+        "has_any_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u53d1\u8d77\u8005\u5fc5\u987b\u62e5\u6709\u5176\u4e2d\u4efb\u610f\u4e00\u4e2a\u6807\u7b7e"
+        },
+        "has_all_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u53d1\u8d77\u8005\u5fc5\u987b\u62e5\u6709\u6240\u6709\u8fd9\u4e9b\u6807\u7b7e"
+        },
+        "not_has_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u53d1\u8d77\u8005\u4e0d\u80fd\u62e5\u6709\u8fd9\u4e9b\u6807\u7b7e"
+        }
+      }
+    },
+    "target_object_conditions": {
+      "type": "object",
+      "description": "\u76ee\u6807\u5bf9\u8c61\u5fc5\u987b\u6ee1\u8db3\u7684\u6807\u7b7e\u6761\u4ef6",
+      "properties": {
+        "has_any_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u76ee\u6807\u5fc5\u987b\u62e5\u6709\u5176\u4e2d\u4efb\u610f\u4e00\u4e2a\u6807\u7b7e"
+        },
+        "has_all_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u76ee\u6807\u5fc5\u987b\u62e5\u6709\u6240\u6709\u8fd9\u4e9b\u6807\u7b7e"
+        },
+        "not_has_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u76ee\u6807\u4e0d\u80fd\u62e5\u6709\u8fd9\u4e9b\u6807\u7b7e"
+        }
+      }
+    },
+    "resulting_effect_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6ee1\u8db3\u6761\u4ef6\u540e\uff0c\u4ea7\u751f\u7684\u540e\u7eed\u6548\u679cID\u5217\u8868\uff08\u6548\u679c\u6807\u7b7e\u8def\u5f84\uff09\uff0c\u8fd9\u4e9b\u6548\u679c\u4f1a\u518d\u6b21\u8fdb\u5165\u6548\u679c\u7cfb\u7edf\u5904\u7406"
+    },
+    "priority": {
+      "type": "number",
+      "default": 0,
+      "description": "\u6548\u679c\u4f18\u5148\u7ea7\uff0c\u6570\u503c\u8d8a\u5927\u4f18\u5148\u7ea7\u8d8a\u9ad8"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u89c4\u5219\u662f\u5426\u6fc0\u6d3b"
+    }
+  },
+  "required": [
+    "effect_name",
+    "triggering_effect_tag_path"
+  ]
+}

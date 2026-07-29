@@ -1,0 +1,156 @@
+{
+  "name": "Requirement",
+  "type": "object",
+  "properties": {
+    "requirement_id": {
+      "type": "string",
+      "description": "\u9700\u6c42\u552f\u4e00\u6807\u8bc6\u7b26\uff08\u4f8b\u5982\uff1acan_build_barracks, unlock_fireball\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u9700\u6c42\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u9700\u6c42\u63cf\u8ff0"
+    },
+    "requirement_type": {
+      "type": "string",
+      "enum": [
+        "node",
+        "count"
+      ],
+      "default": "node",
+      "description": "\u9700\u6c42\u7c7b\u578b\uff1a\u8282\u70b9\uff08\u903b\u8f91\u7ec4\u5408\uff09\u6216\u8ba1\u6570"
+    },
+    "node_config": {
+      "type": "object",
+      "description": "\u8282\u70b9\u914d\u7f6e\uff08\u903b\u8f91\u7ec4\u5408\uff09",
+      "properties": {
+        "logic_operator": {
+          "type": "string",
+          "enum": [
+            "AND",
+            "OR",
+            "XOR"
+          ],
+          "description": "\u903b\u8f91\u64cd\u4f5c\u7b26"
+        },
+        "sub_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "validator",
+                  "requirement"
+                ],
+                "description": "\u5b50\u9879\u7c7b\u578b"
+              },
+              "validator_id": {
+                "type": "string"
+              },
+              "requirement_id": {
+                "type": "string"
+              },
+              "negate": {
+                "type": "boolean",
+                "default": false,
+                "description": "\u662f\u5426\u53d6\u53cd"
+              },
+              "context_binding": {
+                "type": "object",
+                "description": "\u4e0a\u4e0b\u6587\u7ed1\u5b9a\uff08\u4e3avalidator\u63d0\u4f9b\u5b9e\u4f53\u7b49\u53c2\u6570\uff09",
+                "properties": {
+                  "source_entity": {
+                    "type": "string",
+                    "enum": [
+                      "caster",
+                      "target",
+                      "player",
+                      "global"
+                    ],
+                    "description": "\u6e90\u5b9e\u4f53\u6765\u6e90"
+                  },
+                  "target_entity": {
+                    "type": "string",
+                    "enum": [
+                      "caster",
+                      "target",
+                      "player",
+                      "global"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "\u5b50\u9700\u6c42\u5217\u8868"
+        }
+      }
+    },
+    "count_config": {
+      "type": "object",
+      "description": "\u8ba1\u6570\u914d\u7f6e",
+      "properties": {
+        "count_type": {
+          "type": "string",
+          "enum": [
+            "validator_true_count",
+            "entity_count"
+          ],
+          "description": "\u8ba1\u6570\u7c7b\u578b"
+        },
+        "validator_id": {
+          "type": "string",
+          "description": "\u8981\u8ba1\u6570\u7684\u9a8c\u8bc1\u5668ID"
+        },
+        "entity_query_id": {
+          "type": "string",
+          "description": "\u5b9e\u4f53\u67e5\u8be2ID\uff08\u7528\u4e8e\u5b9e\u4f53\u8ba1\u6570\uff09"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "eq",
+            "neq",
+            "gt",
+            "lt",
+            "gte",
+            "lte"
+          ],
+          "description": "\u6bd4\u8f83\u64cd\u4f5c\u7b26"
+        },
+        "count_value": {
+          "type": "number",
+          "description": "\u76ee\u6807\u8ba1\u6570\u503c"
+        }
+      }
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "active",
+        "disabled",
+        "hidden"
+      ],
+      "default": "active",
+      "description": "\u9700\u6c42\u72b6\u6001"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "\u4e0d\u6ee1\u8db3\u9700\u6c42\u65f6\u663e\u793a\u7684\u9519\u8bef\u6d88\u606f"
+    },
+    "tooltip": {
+      "type": "string",
+      "description": "\u9700\u6c42\u7684\u63d0\u793a\u6587\u672c"
+    }
+  },
+  "required": [
+    "requirement_id",
+    "name",
+    "requirement_type"
+  ]
+}

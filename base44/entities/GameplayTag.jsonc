@@ -1,0 +1,154 @@
+{
+  "name": "GameplayTag",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u6807\u7b7e\u540d\u79f0\uff08\u4e0d\u5305\u542b\u8def\u5f84\uff09"
+    },
+    "full_path": {
+      "type": "string",
+      "description": "\u5b8c\u6574\u8def\u5f84\uff08\u4f8b\u5982\uff1aAbility.Combat.Skill.Fireball\uff09"
+    },
+    "parent_path": {
+      "type": "string",
+      "description": "\u7236\u7ea7\u6807\u7b7e\u8def\u5f84\uff0c\u6839\u6807\u7b7e\u4e3a\u7a7a"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u6807\u7b7e\u63cf\u8ff0\u8bf4\u660e"
+    },
+    "category_key": {
+      "type": "string",
+      "description": "\u5206\u7c7b\u952e\u540d\uff08\u5f15\u7528TagCategory\u7684key\uff09"
+    },
+    "depth": {
+      "type": "number",
+      "description": "\u5c42\u7ea7\u6df1\u5ea6\uff080\u4e3a\u6839\u7ea7\uff09"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u4f7f\u7528\u6b21\u6570\u7edf\u8ba1"
+    },
+    "is_locked": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u662f\u5426\u9501\u5b9a\uff08\u9632\u6b62\u8bef\u64cd\u4f5c\uff09"
+    },
+    "required_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u9644\u52a0\u524d\u5fc5\u987b\u5b58\u5728\u7684\u6807\u7b7e\u5217\u8868\uff08\u9a8c\u8bc1\uff09"
+    },
+    "blocked_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u9644\u52a0\u524d\u4e0d\u80fd\u5b58\u5728\u7684\u6807\u7b7e\u5217\u8868\uff08\u9a8c\u8bc1\uff09"
+    },
+    "attached_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u9644\u52a0\u6b64\u6807\u7b7e\u540e\u540c\u6b65\u6dfb\u52a0\u7684\u6807\u7b7e\u5217\u8868"
+    },
+    "removed_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u9644\u52a0\u540e\u8981\u79fb\u9664\u7684\u76ee\u6807\u6807\u7b7e\u5217\u8868"
+    },
+    "disabled_if_tags": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "match_mode": {
+          "type": "string",
+          "enum": [
+            "any",
+            "all"
+          ],
+          "default": "any",
+          "description": "any: \u6ee1\u8db3\u4efb\u4e00\u6761\u4ef6\u5373\u89e6\u53d1, all: \u9700\u6ee1\u8db3\u6240\u6709\u6761\u4ef6"
+        }
+      },
+      "description": "\u9644\u52a0\u540e\u5982\u679c\u76ee\u6807\u6709\u8fd9\u4e9b\u6807\u7b7e\uff0c\u6b64\u6807\u7b7e\u81ea\u52a8\u7981\u7528"
+    },
+    "remove_if_tags": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "match_mode": {
+          "type": "string",
+          "enum": [
+            "any",
+            "all"
+          ],
+          "default": "any",
+          "description": "any: \u6ee1\u8db3\u4efb\u4e00\u6761\u4ef6\u5373\u89e6\u53d1, all: \u9700\u6ee1\u8db3\u6240\u6709\u6761\u4ef6"
+        }
+      },
+      "description": "\u9644\u52a0\u540e\u5982\u679c\u76ee\u6807\u6709\u8fd9\u4e9b\u6807\u7b7e\uff0c\u6b64\u6807\u7b7e\u81ea\u52a8\u79fb\u9664"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6807\u7b7e\u522b\u540d\u5217\u8868"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "number"
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "replacement_tag": {
+          "type": "string"
+        }
+      },
+      "description": "\u6269\u5c55\u5143\u6570\u636e"
+    },
+    "validation_rules": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "min_length": {
+          "type": "number"
+        },
+        "max_length": {
+          "type": "number"
+        }
+      },
+      "description": "\u9a8c\u8bc1\u89c4\u5219"
+    }
+  },
+  "required": [
+    "name",
+    "full_path"
+  ]
+}

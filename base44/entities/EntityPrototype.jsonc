@@ -1,0 +1,65 @@
+{
+  "name": "EntityPrototype",
+  "type": "object",
+  "properties": {
+    "prototype_id": {
+      "type": "string",
+      "description": "\u539f\u578b\u552f\u4e00\u6807\u8bc6\u7b26"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u539f\u578b\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u539f\u578b\u63cf\u8ff0"
+    },
+    "referenced_attributes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u5f15\u7528\u7684\u5c5e\u6027ID\u5217\u8868"
+    },
+    "static_relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relation_definition_id": {
+            "type": "string"
+          },
+          "target_prototype_id": {
+            "type": "string"
+          },
+          "attribute_values": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "\u76f4\u63a5\u5b9a\u4e49\u7684\u9759\u6001\u5173\u7cfb\uff08\u9057\u7559/\u7b80\u5355\u6a21\u5f0f\uff09"
+    },
+    "structure_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "structure_id": {
+            "type": "string",
+            "description": "\u7ed1\u5b9a\u7684\u7ed3\u6784\u56feID"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "\u5728\u8be5\u7ed3\u6784\u4e2d\u5bf9\u5e94\u7684\u8282\u70b9ID"
+          }
+        }
+      },
+      "description": "\u7ed1\u5b9a\u7684\u62bd\u8c61\u7ed3\u6784\u8282\u70b9"
+    }
+  },
+  "required": [
+    "prototype_id",
+    "name",
+    "referenced_attributes"
+  ]
+}

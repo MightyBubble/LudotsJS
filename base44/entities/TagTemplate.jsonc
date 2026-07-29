@@ -1,0 +1,39 @@
+{
+  "name": "TagTemplate",
+  "type": "object",
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "\u6a21\u677f\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u6a21\u677f\u8bf4\u660e"
+    },
+    "category": {
+      "type": "string",
+      "description": "\u6a21\u677f\u5206\u7c7b"
+    },
+    "tags_structure": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "\u6807\u7b7e\u7ed3\u6784\u6570\u636e\uff08JSON\u683c\u5f0f\uff09"
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u662f\u5426\u6536\u85cf"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u4f7f\u7528\u6b21\u6570"
+    }
+  },
+  "required": [
+    "template_name",
+    "tags_structure"
+  ]
+}

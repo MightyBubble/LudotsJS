@@ -1,0 +1,32 @@
+{
+  "name": "TagCategory",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "\u5206\u7c7b\u552f\u4e00\u6807\u8bc6\u7b26\uff08\u5982\uff1aability, state, effect\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u5206\u7c7b\u663e\u793a\u540d\u79f0\uff08\u5982\uff1a\u80fd\u529b\u3001\u72b6\u6001\u3001\u6548\u679c\uff09"
+    },
+    "color": {
+      "type": "string",
+      "description": "\u5206\u7c7b\u989c\u8272\uff08\u5341\u516d\u8fdb\u5236\uff0c\u5982\uff1a#60a5fa\uff09"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u5206\u7c7b\u8bf4\u660e"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "\u6392\u5e8f\u987a\u5e8f"
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "color"
+  ]
+}

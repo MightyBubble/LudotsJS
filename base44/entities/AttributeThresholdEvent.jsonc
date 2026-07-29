@@ -1,0 +1,93 @@
+{
+  "name": "AttributeThresholdEvent",
+  "type": "object",
+  "properties": {
+    "rule_name": {
+      "type": "string",
+      "description": "\u89c4\u5219\u540d\u79f0"
+    },
+    "attribute_id": {
+      "type": "string",
+      "description": "\u76d1\u542c\u7684\u5c5e\u6027ID"
+    },
+    "attribute_key": {
+      "type": "string",
+      "description": "\u76d1\u542c\u7684\u5c5e\u6027\u952e"
+    },
+    "comparison_mode": {
+      "type": "string",
+      "enum": [
+        "absolute",
+        "ratio",
+        "compare_key"
+      ],
+      "default": "absolute",
+      "description": "\u6bd4\u8f83\u6a21\u5f0f\uff1aabsolute(\u7edd\u5bf9\u503c), ratio(\u6bd4\u4f8b\uff0c\u4e0e\u6700\u5927\u503c\u6bd4), compare_key(\u6bd4\u8f83\u4e24\u4e2a\u952e)"
+    },
+    "compare_target_key": {
+      "type": "string",
+      "description": "\u6bd4\u8f83\u76ee\u6807\u952e\uff08\u5f53comparison_mode\u4e3acompare_key\u65f6\u4f7f\u7528\uff09"
+    },
+    "operator": {
+      "type": "string",
+      "enum": [
+        "gt",
+        "lt",
+        "gte",
+        "lte",
+        "eq",
+        "neq"
+      ],
+      "default": "gte",
+      "description": "\u6bd4\u8f83\u64cd\u4f5c\u7b26\uff08\u5927\u4e8e\u3001\u5c0f\u4e8e\u3001\u5927\u4e8e\u7b49\u4e8e\u3001\u5c0f\u4e8e\u7b49\u4e8e\u3001\u7b49\u4e8e\u3001\u4e0d\u7b49\u4e8e\uff09"
+    },
+    "threshold_value": {
+      "type": "number",
+      "description": "\u9608\u503c/\u7cfb\u6570\u3002absolute\u6a21\u5f0f\u4e3a\u5177\u4f53\u6570\u503c\uff0cratio\u6a21\u5f0f\u4e3a0-1\u6bd4\u4f8b\uff0ccompare_key\u6a21\u5f0f\u4e3a\u7cfb\u6570\uff08attribute_key op compare_target_key * threshold_value\uff09"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "\u89e6\u53d1\u7684\u4e8b\u4ef6ID"
+    },
+    "parameter_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event_param_name": {
+            "type": "string",
+            "description": "\u4e8b\u4ef6\u53c2\u6570\u540d"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": [
+              "attribute_value",
+              "threshold_value",
+              "entity",
+              "constant"
+            ],
+            "description": "\u7ed1\u5b9a\u6e90\u7c7b\u578b"
+          },
+          "constant_value": {
+            "type": "string",
+            "description": "\u5e38\u91cf\u503c\uff08JSON\u5b57\u7b26\u4e32\u683c\u5f0f\uff09"
+          }
+        }
+      },
+      "description": "\u4e8b\u4ef6\u53c2\u6570\u7ed1\u5b9a\u914d\u7f6e"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u662f\u5426\u6fc0\u6d3b"
+    }
+  },
+  "required": [
+    "rule_name",
+    "attribute_id",
+    "attribute_key",
+    "operator",
+    "threshold_value",
+    "event_id"
+  ]
+}

@@ -1,5 +1,4 @@
-
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import NodePort from '../graph/NodePort';
 import { Input } from '@/components/ui/input';
@@ -68,9 +67,6 @@ export default function QueryNode({
   onStartConnection,
   onEndConnection 
 }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const nodeRef = useRef(null);
-  const dragStartRef = useRef({ x: 0, y: 0, nodeX: 0, nodeY: 0 });
   const accentColor = nodeAccentColors[node?.type] || '#6c757d';
 
   const { data: attributes = [] } = useQuery({
@@ -97,63 +93,9 @@ export default function QueryNode({
     initialData: [],
   });
 
-  if (!node || !node.position) {
+  if (!node) {
     return null;
   }
-
-  const handleMouseDown = (e) => {
-    if (e.button !== 0) return;
-    
-    if (e.target.closest('.node-port') || e.target.closest('.delete-button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('[role="combobox"]')) {
-      return;
-    }
-    
-    const multiSelect = e.ctrlKey || e.metaKey;
-    onSelect?.(node.id, multiSelect);
-    
-    setIsDragging(true);
-    dragStartRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      nodeX: node.position.x || 0,
-      nodeY: node.position.y || 0
-    };
-    e.stopPropagation();
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-
-    const parent = nodeRef.current?.parentElement?.parentElement;
-    if (!parent) return;
-
-    const transform = parent.style.transform;
-    const scaleMatch = transform.match(/scale\(([\d.]+)\)/);
-    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-
-    const dx = (e.clientX - dragStartRef.current.x) / scale;
-    const dy = (e.clientY - dragStartRef.current.y) / scale;
-
-    onUpdatePosition(node.id, {
-      x: dragStartRef.current.nodeX + dx,
-      y: dragStartRef.current.nodeY + dy
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  React.useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging]);
 
   const getAttributeKeys = (attributeId) => {
     const attr = attributes.find(a => a.attribute_id === attributeId);
@@ -203,7 +145,7 @@ export default function QueryNode({
           value={displayValue}
           onChange={(e) => onUpdateData(node.id, { [portId]: inputType === 'number' ? (parseFloat(e.target.value) || 0) : e.target.value })}
           disabled={isConnected}
-          className={`h-6 text-xs border-[#434343] flex-1 px-2 ${
+          className={`nodrag h-6 text-xs border-[#434343] flex-1 px-2 ${
             isConnected 
               ? 'bg-[#2d2d30]/50 text-white/60 cursor-not-allowed' 
               : 'bg-[#2d2d30] text-white/90'
@@ -755,11 +697,8 @@ export default function QueryNode({
 
   return (
     <div
-      ref={nodeRef}
-      className="absolute rounded shadow-2xl select-none cursor-move"
+      className="rounded shadow-2xl select-none cursor-move"
       style={{
-        left: node.position.x ?? 0,
-        top: node.position.y ?? 0,
         width: '220px',
         backgroundColor: '#3c3c3c',
         borderLeft: `3px solid ${accentColor}`,
@@ -767,7 +706,6 @@ export default function QueryNode({
         boxShadow: selected ? `0 0 0 2px ${accentColor}40, 0 4px 12px rgba(0,0,0,0.5)` : '0 4px 12px rgba(0,0,0,0.5)',
         transition: 'border 0.2s, box-shadow 0.2s'
       }}
-      onMouseDown={handleMouseDown}
     >
       <div 
         className="flex items-center justify-between px-3 py-2 border-b"
@@ -806,7 +744,7 @@ export default function QueryNode({
           </div>
         )}
 
-        {renderNodeContent()}
+        <div className="nodrag">{renderNodeContent()}</div>
 
         {node.outputs && node.outputs.length > 0 && (
           <div className="space-y-1.5">

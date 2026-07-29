@@ -1,0 +1,92 @@
+{
+  "name": "StructureDefinition",
+  "type": "object",
+  "properties": {
+    "structure_id": {
+      "type": "string",
+      "description": "\u7ed3\u6784\u56fe\u552f\u4e00\u6807\u8bc6\u7b26\uff08\u5982\uff1athree_kingdoms_relations, tech_tree_basic\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u7ed3\u6784\u56fe\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u63cf\u8ff0"
+    },
+    "structure_type": {
+      "type": "string",
+      "enum": [
+        "graph",
+        "tree",
+        "network",
+        "hierarchy"
+      ],
+      "default": "graph",
+      "description": "\u7ed3\u6784\u7c7b\u578b\uff08\u4ec5\u7528\u4e8e\u6807\u8bb0\uff0c\u4e0d\u5f3a\u5236\u903b\u8f91\uff09"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          },
+          "metadata": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "\u62bd\u8c61\u8282\u70b9\u5217\u8868"
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_node_id": {
+            "type": "string"
+          },
+          "target_node_id": {
+            "type": "string"
+          },
+          "relation_definition_id": {
+            "type": "string",
+            "description": "\u5f15\u7528\u7684\u5173\u7cfb\u5b9a\u4e49ID\uff08EntityRelation\uff09"
+          },
+          "attribute_values": {
+            "type": "object",
+            "description": "\u8be5\u5173\u7cfb\u7684\u5177\u4f53\u5c5e\u6027\u503c"
+          }
+        }
+      },
+      "description": "\u8282\u70b9\u4e4b\u95f4\u7684\u8fde\u63a5\u5173\u7cfb"
+    }
+  },
+  "required": [
+    "structure_id",
+    "name",
+    "nodes"
+  ]
+}

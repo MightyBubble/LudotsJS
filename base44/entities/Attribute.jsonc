@@ -1,0 +1,116 @@
+{
+  "name": "Attribute",
+  "type": "object",
+  "properties": {
+    "attribute_id": {
+      "type": "string",
+      "description": "\u5c5e\u6027\u7684\u552f\u4e00\u6807\u8bc6\u7b26\uff08\u4f8b\u5982\uff1aattack_power, defense\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u5c5e\u6027\u7684\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u5c5e\u6027\u63cf\u8ff0"
+    },
+    "default_base_value": {
+      "type": "number",
+      "default": 100,
+      "description": "\u5c5e\u6027\u7684\u9ed8\u8ba4\u57fa\u7840\u503c"
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "\u952e\u540d\uff08\u4f8b\u5982\uff1abase_value, add_zone\uff09"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "value",
+              "array"
+            ],
+            "default": "value",
+            "description": "\u952e\u7c7b\u578b\uff1avalue\uff08\u5355\u503c\uff09\u6216 array\uff08\u6570\u7ec4\uff09"
+          }
+        }
+      },
+      "description": "\u5c5e\u6027\u7684\u952e\u5b9a\u4e49\u5217\u8868"
+    },
+    "input_mappings": {
+      "type": "object",
+      "description": "\u8f93\u5165\u6620\u5c04\uff0c\u5c06Data Graph\u7684\u9ed1\u677f\u53c2\u6570\u540d\u6620\u5c04\u5230\u5c5e\u6027\u7684\u952e\uff08\u4f8b\u5982\uff1a{'graph_base': 'base_value', 'graph_add': 'add_zone'}\uff09"
+    },
+    "final_calculation_data_graph_id": {
+      "type": "string",
+      "description": "\u7528\u4e8e\u8ba1\u7b97\u5c5e\u6027\u6700\u7ec8\u503c\u7684Data Graph ID"
+    },
+    "clamp_config": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "min_key": {
+          "type": "string",
+          "description": "\u6700\u5c0f\u503c\u952e\u540d"
+        },
+        "max_key": {
+          "type": "string",
+          "description": "\u6700\u5927\u503c\u952e\u540d"
+        },
+        "min_value": {
+          "type": "number",
+          "description": "\u56fa\u5b9a\u6700\u5c0f\u503c"
+        },
+        "max_value": {
+          "type": "number",
+          "description": "\u56fa\u5b9a\u6700\u5927\u503c"
+        }
+      },
+      "description": "\u94b3\u5236\u7ea6\u675f\u914d\u7f6e"
+    },
+    "recovery_config": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "target_key": {
+          "type": "string",
+          "description": "\u56de\u590d\u76ee\u6807\u952e"
+        },
+        "recovery_rate_key": {
+          "type": "string",
+          "description": "\u56de\u590d\u901f\u7387\u952e"
+        },
+        "recovery_rate_value": {
+          "type": "number",
+          "description": "\u56fa\u5b9a\u56de\u590d\u901f\u7387/\u79d2"
+        },
+        "recovery_delay_key": {
+          "type": "string",
+          "description": "\u56de\u590d\u5ef6\u8fdf\u952e"
+        },
+        "recovery_delay_value": {
+          "type": "number",
+          "description": "\u56fa\u5b9a\u56de\u590d\u5ef6\u8fdf\uff08\u79d2\uff09"
+        }
+      },
+      "description": "\u56de\u590d\u884c\u4e3a\u914d\u7f6e"
+    }
+  },
+  "required": [
+    "attribute_id",
+    "name",
+    "keys",
+    "input_mappings",
+    "final_calculation_data_graph_id"
+  ]
+}

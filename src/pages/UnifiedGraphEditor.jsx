@@ -517,6 +517,7 @@ export default function UnifiedGraphEditorPage() {
               zoom={zoom}
               pan={pan}
               onPanChange={setPan}
+              onZoomChange={setZoom}
               onUpdateNodePosition={updateNodePosition}
               onUpdateNodeData={updateNodeData}
               onDeleteNode={deleteNode}

@@ -1,0 +1,37 @@
+{
+  "name": "TagHistory",
+  "type": "object",
+  "properties": {
+    "tag_path": {
+      "type": "string",
+      "description": "\u64cd\u4f5c\u7684\u6807\u7b7e\u8def\u5f84"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "move",
+        "rename"
+      ],
+      "description": "\u64cd\u4f5c\u7c7b\u578b"
+    },
+    "old_value": {
+      "type": "object",
+      "description": "\u64cd\u4f5c\u524d\u7684\u503c"
+    },
+    "new_value": {
+      "type": "object",
+      "description": "\u64cd\u4f5c\u540e\u7684\u503c"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u64cd\u4f5c\u63cf\u8ff0"
+    }
+  },
+  "required": [
+    "tag_path",
+    "action_type"
+  ]
+}

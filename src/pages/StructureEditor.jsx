@@ -7,78 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Save, Trash2, Search, X, LayoutGrid, Network } from "lucide-react";
 import GraphCanvas from '@/components/graph/GraphCanvas';
 import Toolbar from '@/components/graph/Toolbar';
-
-// Custom Node Component for Structure Editor
-const StructureNode = ({ node, selected, onSelect, onStartConnection, onEndConnection, onUpdatePosition }) => {
-  const handleMouseDown = (e) => {
-    if (e.button === 0) {
-      e.stopPropagation();
-      onSelect(node.id, e.shiftKey);
-    }
-  };
-
-  return (
-    <div
-      onMouseDown={handleMouseDown}
-      style={{
-        position: 'absolute',
-        left: node.position.x,
-        top: node.position.y,
-        cursor: 'move',
-      }}
-      className={`px-3 py-2 rounded-md shadow-lg border transition-all min-w-[140px] ${selected ? 'border-[#D97706] bg-[#2d2d2d]' : 'border-[#2A2E37] bg-[#0D0F14]'}`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-1 pb-1 border-b border-[#2A2E37]">
-        <span className="text-xs font-bold text-white truncate max-w-[100px]">{node.data.label}</span>
-        <div className="w-2 h-2 rounded-full bg-[#D97706]" />
-      </div>
-
-      <div className="text-[10px] text-gray-400 font-mono mb-2">{node.data.nodeId}</div>
-
-      {/* Ports */}
-      <div className="flex justify-between items-center mt-1">
-        {/* Input Port */}
-        <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#D97706] border border-[#666] cursor-crosshair flex items-center justify-center"
-          title="Incoming Relations"
-          data-node-id={node.id}
-          data-port-id="in"
-          data-port-type="input"
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            onStartConnection(node.id, 'in', 'input', e.currentTarget);
-          }}
-          onMouseUp={(e) => {
-            e.stopPropagation();
-            onEndConnection(node.id, 'in', 'input');
-          }}
-        >
-           <div className="w-1 h-1 bg-white/50 rounded-full" />
-        </div>
-
-        {/* Output Port */}
-        <div 
-          className="w-3 h-3 rounded-full bg-[#4a4a4a] hover:bg-[#D97706] border border-[#666] cursor-crosshair flex items-center justify-center"
-          title="Outgoing Relations"
-          data-node-id={node.id}
-          data-port-id="out"
-          data-port-type="output"
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            onStartConnection(node.id, 'out', 'output', e.currentTarget);
-          }}
-          onMouseUp={(e) => {
-            e.stopPropagation();
-            onEndConnection(node.id, 'out', 'output');
-          }}
-        >
-           <div className="w-1 h-1 bg-white/50 rounded-full" />
-        </div>
-      </div>
-    </div>
-  );
-};
+import StructureNode from '@/components/graph/StructureNode';
 
 export default function StructureEditorPage() {
   const [selectedStructure, setSelectedStructure] = useState(null);
@@ -326,20 +255,14 @@ export default function StructureEditorPage() {
                 zoom={zoom}
                 pan={pan}
                 onPanChange={setPan}
+                onZoomChange={setZoom}
                 onUpdateNodePosition={onUpdateNodePosition}
                 onUpdateNodeData={onUpdateNodeData}
                 onDeleteNode={onDeleteNode}
                 onAddConnection={onAddConnection}
                 onDeleteConnection={onDeleteConnection}
-                NodeComponent={(props) => (
-                  <StructureNode 
-                    {...props} 
-                    onSelect={(id, multiSelect) => {
-                      props.onSelect(id, multiSelect);
-                      handleSelectNode(id);
-                    }}
-                  />
-                )}
+                onSelectNode={handleSelectNode}
+                NodeComponent={StructureNode}
               />
               
               <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#2A2E37] flex gap-2">
