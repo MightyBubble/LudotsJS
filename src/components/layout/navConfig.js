@@ -19,25 +19,24 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    key: 'core_data',
-    label: '核心数据',
-    items: [
-      { page: 'TagEditor', label: 'Gameplay Tags', icon: Edit3 },
-      { page: 'Templates', label: 'Tag Templates', icon: ListTree },
-      { page: 'AttributeEditor', label: 'Attributes', icon: Layers },
-      { page: 'GlobalConstantEditor', label: 'Global Constants', icon: Settings },
-      { page: 'DataTableEditor', label: 'Data Tables', icon: Table },
-      { page: 'StructureEditor', label: 'Structure Definitions', icon: Network },
-    ],
-  },
-  {
     key: 'world',
     label: '世界模型',
     items: [
+      { page: 'TagEditor', label: 'Gameplay Tags', icon: Edit3 },
+      { page: 'AttributeEditor', label: 'Attributes', icon: Layers },
       { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
       { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
-      { page: 'EntityQueryEditor', label: 'Entity Queries', icon: Search },
-      { page: 'TagSimulator', label: 'Simulated Entities', icon: Users },
+      { page: 'EntityQueryEditor', label: 'Entity Graph', icon: Network },
+    ],
+  },
+  {
+    key: 'core_data',
+    label: '核心数据',
+    items: [
+      { page: 'Templates', label: 'Tag Templates', icon: ListTree },
+      { page: 'GlobalConstantEditor', label: 'Global Constants', icon: Settings },
+      { page: 'DataTableEditor', label: 'Data Tables', icon: Table },
+      { page: 'StructureEditor', label: 'Structure Definitions', icon: Network },
     ],
   },
   {
