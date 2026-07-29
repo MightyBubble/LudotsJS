@@ -292,9 +292,11 @@ export default function Node({
         {!isLocked && (
           <button
             className="delete-button text-white/30 hover:text-white/80 transition-colors"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(node.id);
+              e.currentTarget.blur();
+              requestAnimationFrame(() => onDelete(node.id));
             }}
           >
             <X className="w-3.5 h-3.5" />

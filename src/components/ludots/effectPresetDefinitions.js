@@ -1,6 +1,6 @@
 export const EFFECT_PHASES = ['OnPropose', 'OnCalculate', 'OnResolve', 'OnHit', 'OnApply', 'OnPeriod', 'OnExpire', 'OnRemove'];
 
-const builtin = (id) => ({ type: 'builtin', id });
+const builtin = (id) => ({ type: 'graph', id: `Builtin.${id}`, builtin: true });
 const graph = (id) => ({ type: 'graph', id });
 
 export const EFFECT_PRESETS = {

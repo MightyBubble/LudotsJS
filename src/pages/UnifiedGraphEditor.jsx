@@ -63,6 +63,7 @@ export default function UnifiedGraphEditorPage() {
   const [showInfo, setShowInfo] = useState(false);
   const location = useLocation();
   const typeFilter = new URLSearchParams(location.search).get('type') || 'all';
+  const requestedGraphId = new URLSearchParams(location.search).get('graph');
   const [nodeMenu, setNodeMenu] = useState(null);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -237,6 +238,12 @@ export default function UnifiedGraphEditorPage() {
     setBlackboard(graphDef.blackboard || {});
   };
 
+  useEffect(() => {
+    if (!requestedGraphId || selectedGraph?.action_id === requestedGraphId) return;
+    const graph = allGraphs.find(item => item.entity_type === 'ActionGraph' && item.action_id === requestedGraphId);
+    if (graph) { setSelectedGraph(graph); openGraph(graph); }
+  }, [requestedGraphId, allGraphs, selectedGraph?.action_id]);
+
   const saveGraph = useCallback(() => {
     if (!currentGraph) return;
 
@@ -332,6 +339,10 @@ export default function UnifiedGraphEditorPage() {
       call_pure_function: { functionId: '' },
       run_entity_query: { queryId: '' },
       call_action_graph: { actionId: '' },
+      effect_apply_force: {}, effect_apply_modifiers: {}, effect_spatial_query: {}, effect_dispatch_payload: {},
+      effect_reresolve_dispatch: {}, effect_create_projectile: {}, effect_create_unit: {}, effect_apply_displacement: {},
+      effect_apply_relation: {}, effect_execute_exchange: {}, effect_complete_progression: {}, effect_submit_order: {},
+      effect_deploy_consume_source: {}, effect_reveal_area: {}, effect_decay_reveal_area: {},
       blackboard_get: { key: blackboardKey || '' },
       blackboard_set: { key: blackboardKey || '' }
     };
@@ -603,6 +614,7 @@ export default function UnifiedGraphEditorPage() {
           onSelect={(g) => { setSelectedGraph(g); openGraph(g); }}
           hideSearch
           onDelete={(g) => {
+            if (g.action_id?.startsWith('Builtin.') || g.action_id === 'Graph.Lifecycle.DeployConsumeSource') { alert('Preset Main ActionGraph 不可删除，但可直接编辑节点'); return; }
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
               deleteMutation.mutate({ id: g.id, entity_type: g.entity_type });
               if (selectedGraph?.id === g.id) setSelectedGraph(null);

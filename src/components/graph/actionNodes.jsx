@@ -11,7 +11,8 @@ export const ACTION_NODE_TYPES = {
     outputs: [
       { id: 'exec', label: '执行', type: 'exec' },
       { id: 'source', label: '施法者', type: 'entity' },
-      { id: 'target', label: '目标', type: 'entity' }
+      { id: 'target', label: '目标', type: 'entity' },
+      { id: 'effect', label: 'Effect Config', type: 'any' }
     ]
   },
   action_branch: {
