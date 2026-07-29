@@ -31,7 +31,7 @@ export const NAV_GROUPS = [
   },
   {
     key: 'core_data',
-    label: '核心数据',
+    label: '数据',
     items: [
       { page: 'GlobalConstantEditor', label: 'Global Constants', icon: Settings },
       { page: 'DataTableEditor', label: 'Data Tables', icon: Table },
