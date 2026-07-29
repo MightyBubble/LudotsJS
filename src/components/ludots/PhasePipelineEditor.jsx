@@ -24,7 +24,7 @@ export default function PhasePipelineEditor({ effect, onChangePhases, onChangeRe
         const phase = phases[idx];
         const forbidden = !durable && INSTANT_FORBIDDEN_PHASES.includes(id);
         return (
-          <React.Fragment key={id}>
+          <div key={id} className="contents">
             <PhaseEditor
               phase={phase}
               onChange={(next) => updatePhase(id, next)}
@@ -46,7 +46,7 @@ export default function PhasePipelineEditor({ effect, onChangePhases, onChangeRe
             {idx < PHASE_IDS.length - 1 && (
               <div className="flex justify-center"><ArrowDown className="w-3 h-3 text-gray-600" /></div>
             )}
-          </React.Fragment>
+          </div>
         );
       })}
     </div>
