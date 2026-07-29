@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network, BookOpen, Database } from "lucide-react";
-import NavGroup from "@/components/layout/NavGroup";
+import { Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Link as LinkIcon, Globe, Menu, X, Settings, Shield, CheckSquare, Table, Network, BookOpen } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -67,14 +66,12 @@ export default function Layout({ children, currentPageName }) {
         <Link to={createPageUrl("GlobalConstantEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "GlobalConstantEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
           <Settings className="w-3.5 h-3.5" />常量
         </Link>
-        <NavGroup icon={Database} label="数据" active={currentPageName === "DataTableEditor" || currentPageName === "StructureEditor"}>
-            <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-2 px-3 py-1.5 text-xs ${currentPageName === "DataTableEditor" ? "text-[#D97706]" : "text-gray-300 hover:bg-[#2A2E37] hover:text-white"}`}>
-              <Table className="w-3.5 h-3.5" />数据表
-            </Link>
-            <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-2 px-3 py-1.5 text-xs ${currentPageName === "StructureEditor" ? "text-[#D97706]" : "text-gray-300 hover:bg-[#2A2E37] hover:text-white"}`}>
-              <Network className="w-3.5 h-3.5" />关系图
-            </Link>
-          </NavGroup>
+        <Link to={createPageUrl("DataTableEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DataTableEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+            <Table className="w-3.5 h-3.5" />数据表
+          </Link>
+          <Link to={createPageUrl("StructureEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "StructureEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+            <Network className="w-3.5 h-3.5" />关系图
+          </Link>
           <div className="h-5 w-px bg-[#2A2E37]" />
           <Link to={createPageUrl("DesignDoc")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "DesignDoc" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
             <BookOpen className="w-3.5 h-3.5" />文档

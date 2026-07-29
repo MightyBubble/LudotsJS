@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Edit3, Trash2, Table, X, Save } from "lucide-react";
+import { Plus, Edit3, Trash2, Table, X, Save } from "lucide-react";
+import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 
 export default function DataTableEditorPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTable, setSelectedTable] = useState(null);
   const [editingTable, setEditingTable] = useState(null);
 
@@ -44,14 +44,6 @@ export default function DataTableEditorPage() {
       setSelectedTable(null);
     },
   });
-
-  const filteredTables = useMemo(() => {
-    if (!searchQuery) return tables;
-    return tables.filter(t =>
-      t.table_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [tables, searchQuery]);
 
   const handleCreate = () => {
     const newTable = {
@@ -169,46 +161,21 @@ export default function DataTableEditorPage() {
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
         <Table className="w-4 h-4 text-gray-400" />
         <span className="text-sm font-semibold text-gray-300">数据表编辑器</span>
-        <span className="text-xs text-gray-500">共 {filteredTables.length} 个</span>
+        <span className="text-xs text-gray-500">共 {tables.length} 个</span>
         
         <div className="flex-1" />
-
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
-
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
-          <Plus className="w-3 h-3 mr-1" />
-          新建
-        </Button>
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] overflow-auto">
-          <div className="p-2 space-y-1">
-            {filteredTables.map((table) => (
-              <div
-                key={table.id}
-                onClick={() => { setSelectedTable(table); setEditingTable(null); }}
-                className={`p-2 rounded cursor-pointer hover:bg-[#15171C] ${
-                  selectedTable?.id === table.id ? 'bg-[#094771]' : ''
-                }`}
-              >
-                <div className="text-sm text-white font-medium">{table.name}</div>
-                <div className="text-xs text-gray-400">{table.table_id}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {table.columns.length} 列 × {table.rows.length} 行
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <AssetBrowserPanel
+          entityName="DataTable"
+          records={tables}
+          toItem={(t) => ({ id: t.id, name: t.name, subtitle: `${t.table_id} · ${t.columns.length}列×${t.rows.length}行` })}
+          selectedId={selectedTable?.id}
+          onSelect={(t) => { setSelectedTable(t); setEditingTable(null); }}
+          onCreate={handleCreate}
+          onDelete={(t) => { if (window.confirm('确定删除此数据表吗？')) deleteMutation.mutate(t.id); }}
+        />
 
         <div className="flex-1 overflow-auto p-4">
           {editingTable ? (

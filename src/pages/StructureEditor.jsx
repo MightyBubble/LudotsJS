@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Save, Trash2, Search, X, LayoutGrid, Network } from "lucide-react";
+import { Plus, X, LayoutGrid } from "lucide-react";
+import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
 import GraphCanvas from '@/components/graph/GraphCanvas';
 import Toolbar from '@/components/graph/Toolbar';
 import StructureNode from '@/components/graph/StructureNode';
@@ -12,7 +13,6 @@ import StructureNode from '@/components/graph/StructureNode';
 export default function StructureEditorPage() {
   const [selectedStructure, setSelectedStructure] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [editingNode, setEditingNode] = useState(null);
   const [editingEdge, setEditingEdge] = useState(null);
   const [showLibrary, setShowLibrary] = useState(true); // Used for left sidebar visibility
@@ -186,63 +186,30 @@ export default function StructureEditorPage() {
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Structure List */}
         {(!selectedStructure || showLibrary) && (
-          <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] flex flex-col">
-            <div className="p-3 border-b border-[#2A2E37] flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-                <Input 
-                  placeholder="搜索结构..." 
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="h-8 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs" 
-                />
+          <AssetBrowserPanel
+            entityName="StructureDefinition"
+            records={structures}
+            toItem={(s) => ({ id: s.id, name: s.name, subtitle: s.structure_id })}
+            selectedId={selectedStructure?.id}
+            onSelect={loadGraph}
+            onCreate={() => setIsCreating(true)}
+            onDelete={(s) => { if (window.confirm('确定删除此结构吗？')) deleteMutation.mutate(s.id); }}
+          >
+            {isCreating && (
+              <div className="p-2 border-b border-[#2A2E37] space-y-2">
+                <Input id="new-id" placeholder="ID (e.g. tech_tree)" className="h-7 text-xs bg-[#0D0F14] border-[#2A2E37] text-white" />
+                <Input id="new-name" placeholder="名称" className="h-7 text-xs bg-[#0D0F14] border-[#2A2E37] text-white" />
+                <div className="flex gap-1 justify-end">
+                  <Button size="sm" className="h-6 text-xs bg-[#262626]" onClick={() => setIsCreating(false)}>取消</Button>
+                  <Button size="sm" className="h-6 text-xs bg-[#D97706] hover:bg-[#B45309] text-white" onClick={() => {
+                    const id = document.getElementById('new-id').value;
+                    const name = document.getElementById('new-name').value;
+                    if (id && name) createMutation.mutate({ structure_id: id, name, nodes: [], edges: [] });
+                  }}>创建</Button>
+                </div>
               </div>
-              <Button size="sm" onClick={() => setIsCreating(true)} className="h-8 px-2 bg-[#262626]">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
-              {isCreating && (
-                <div className="p-2 bg-[#262626] rounded space-y-2 mb-2">
-                  <Input id="new-id" placeholder="ID (e.g. tech_tree)" className="h-7 text-xs" />
-                  <Input id="new-name" placeholder="名称" className="h-7 text-xs" />
-                  <div className="flex gap-1 justify-end">
-                    <Button size="sm" className="h-6 text-xs" onClick={() => setIsCreating(false)}>取消</Button>
-                    <Button size="sm" className="h-6 text-xs bg-[#D97706] hover:bg-[#B45309] text-white" onClick={() => {
-                      const id = document.getElementById('new-id').value;
-                      const name = document.getElementById('new-name').value;
-                      if(id && name) createMutation.mutate({ structure_id: id, name, nodes: [], edges: [] });
-                    }}>创建</Button>
-                  </div>
-                </div>
-              )}
-              {structures
-                .filter(s => s.name.includes(searchQuery) || s.structure_id.includes(searchQuery))
-                .map(s => (
-                <div 
-                  key={s.id}
-                  onClick={() => loadGraph(s)}
-                  className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center group ${selectedStructure?.id === s.id ? 'bg-[#D97706] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
-                >
-                  <div>
-                    <div className="font-medium">{s.name}</div>
-                    <div className="text-[10px] opacity-60">{s.structure_id}</div>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-900/50 hover:text-red-200"
-                    onClick={(e) => { e.stopPropagation(); if(confirm('删除?')) deleteMutation.mutate(s.id); }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              ))}
-              {structures.length === 0 && !isCreating && (
-                <div className="text-center py-8 text-gray-500 text-xs">暂无结构</div>
-              )}
-            </div>
-          </div>
+            )}
+          </AssetBrowserPanel>
         )}
 
         {/* Center: Graph Canvas */}
