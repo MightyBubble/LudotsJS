@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
 import { evaluateGraph } from '@/lib/graphRuntime';
 import { structureToGraph, graphToStructure } from '@/lib/structureAdapter';
+import QuerySimulationPanel from '../components/queryGraph/QuerySimulationPanel';
 import {
   Dialog,
   DialogContent,
@@ -583,6 +584,8 @@ export default function UnifiedGraphEditorPage() {
                     </div>
                   )}
                 </div>
+              ) : currentGraph.graph_type === 'query' ? (
+                <QuerySimulationPanel nodes={nodes} connections={connections} />
               ) : (
                 <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
               )}

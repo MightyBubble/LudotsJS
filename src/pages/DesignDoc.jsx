@@ -38,7 +38,7 @@ GlobalConstant / DataTable → 全局可引用`,
 待办（按优先级）：
 1. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
 2. Action Graph（第 5 种图，副作用图）：引入 exec 执行引脚、事件入口节点、动作节点（加/移标签、改属性键、施加修饰器、发射事件、增删关系）与真正的顺序 / 分支 / 遍历。之后各处硬编码副作用字段渐进式改为引用 action graph。
-3. Query / Function 节点的执行语义接入引擎（目前非纯数值节点为端口透传）。
+3. Function 节点的执行语义接入引擎（目前为端口透传）。Query 已接入：src/lib/queryRuntime.js 实现实体源/原型·属性·标签·关系·关联实体过滤、空间距离与区域、交并差、按属性·关系·标签排序、TopN/BottomN/百分比限制，查询图编辑器右侧「查询模拟」面板可用模拟实体集实时查看各节点结果与最终输出。
 4. 零散项：TagHistory 接入写入、TagCountEvent 面板补 GameEvent 下拉、ConditionEditor 配色统一（若并入 Validator 则直接下线）。`,
     questions: [
       "Action Graph 的事件入口应该复用 GameEvent 实体，还是单独定义一套图触发器？"
