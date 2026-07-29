@@ -267,7 +267,7 @@ export default function Node({
 
   return (
     <div
-      className={`rounded shadow-2xl select-none ${isLocked ? 'cursor-default' : 'cursor-move'}`}
+      className="rounded shadow-2xl select-none cursor-move"
       style={{
         width: '220px',
         backgroundColor: '#15171C',

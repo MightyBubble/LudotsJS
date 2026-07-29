@@ -113,7 +113,7 @@ function GraphCanvasInner({
           id: node.id,
           type: 'unified',
           position: node.position || old?.position || { x: 0, y: 0 },
-          draggable: !isLocked,
+          draggable: true,
           deletable: !isLocked,
           data: {
             node,
