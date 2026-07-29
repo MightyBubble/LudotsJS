@@ -51,7 +51,7 @@ export default function RecordWorkspace({
             <ToolButton icon={Table2} tone={view === 'table' ? 'primary' : 'default'} title="二维表" onClick={() => changeView('table')}>表格</ToolButton>
           </div>
         )}
-        {view === 'table' && onCreate && <ToolButton icon={Plus} onClick={onCreate}>新建</ToolButton>}
+        {onCreate && <ToolButton icon={Plus} tone="primary" onClick={onCreate}>新建</ToolButton>}
         {view === 'tree' && selectedId && onSave && (
           <ToolButton icon={Save} tone="primary" onClick={onSave}>保存{dirty ? ' *' : ''}</ToolButton>
         )}
@@ -76,7 +76,6 @@ export default function RecordWorkspace({
             hideSearch
             selectedId={selectedId}
             onSelect={onSelect}
-            onCreate={onCreate}
             onDelete={onDelete}
           />
           <div className="flex-1 overflow-y-auto p-4 min-w-0">

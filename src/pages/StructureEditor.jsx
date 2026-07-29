@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X, LayoutGrid } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
+import PageActions from '@/components/shell/PageActions';
+import { SearchBox, ToolButton } from '@/components/shell/ui';
 import GraphCanvas from '@/components/graph/GraphCanvas';
 import Toolbar from '@/components/graph/Toolbar';
 import StructureNode from '@/components/graph/StructureNode';
@@ -16,6 +18,7 @@ export default function StructureEditorPage() {
   const [editingNode, setEditingNode] = useState(null);
   const [editingEdge, setEditingEdge] = useState(null);
   const [showLibrary, setShowLibrary] = useState(true); // Used for left sidebar visibility
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [nodes, setNodes] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -172,6 +175,10 @@ export default function StructureEditorPage() {
 
   return (
     <div className="h-full flex flex-col bg-[#0D0F14] text-white">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="搜索结构..." />
+        <ToolButton icon={Plus} tone="primary" onClick={() => setIsCreating(true)}>新建</ToolButton>
+      </PageActions>
       <Toolbar
         onSave={handleSave}
         onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
@@ -188,11 +195,11 @@ export default function StructureEditorPage() {
         {(!selectedStructure || showLibrary) && (
           <AssetBrowserPanel
             entityName="StructureDefinition"
-            records={structures}
+            records={structures.filter((item) => !searchQuery || `${item.name} ${item.structure_id}`.toLowerCase().includes(searchQuery.toLowerCase()))}
             toItem={(s) => ({ id: s.id, name: s.name, subtitle: s.structure_id })}
+            hideSearch
             selectedId={selectedStructure?.id}
             onSelect={loadGraph}
-            onCreate={() => setIsCreating(true)}
             onDelete={(s) => { if (window.confirm('确定删除此结构吗？')) deleteMutation.mutate(s.id); }}
           >
             {isCreating && (

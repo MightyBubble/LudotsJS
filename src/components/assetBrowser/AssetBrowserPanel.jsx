@@ -32,24 +32,27 @@ export default function AssetBrowserPanel({
 
   return (
     <div className="w-64 bg-[#15171C] border-r border-[#2A2E37] flex flex-col flex-shrink-0">
-      <div className="p-2 border-b border-[#2A2E37] flex gap-2">
-        {!hideSearch && (
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-            <Input
-              placeholder="搜索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-7 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-            />
-          </div>
-        )}
-        {onCreate && (
-          <Button size="sm" onClick={onCreate} className="h-7 px-2 bg-[#D97706] hover:bg-[#B45309] text-white">
-            <Plus className="w-3.5 h-3.5" />
-          </Button>
-        )}
-      </div>
+      {(!hideSearch || onCreate) && (
+        <div className="p-2 border-b border-[#2A2E37] flex gap-2">
+          {!hideSearch && (
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+              <Input
+                placeholder="搜索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-7 pl-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
+              />
+            </div>
+          )}
+          {onCreate && (
+            <Button size="sm" onClick={onCreate} className="h-7 px-2.5 gap-1.5 bg-[#D97706] hover:bg-[#B45309] text-black text-xs">
+              <Plus className="w-3 h-3" />
+              新建
+            </Button>
+          )}
+        </div>
+      )}
 
       {children}
 

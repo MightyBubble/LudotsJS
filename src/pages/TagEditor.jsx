@@ -969,7 +969,7 @@ export default function TagEditor() {
                     onClick={() => createTagsFromPath(newTagPath)}
                     className="h-8 bg-[#D97706] hover:bg-[#B45309] text-black"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3 h-3 mr-1" />创建
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500 mt-1 hidden md:block">

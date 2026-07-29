@@ -6,7 +6,7 @@ import { S, IconButton } from '@/components/shell/ui';
 export default function RecordTable({ records = [], columns = [], selectedId, onSelect, onDelete }) {
   return (
     <div className="h-full overflow-auto">
-      <table className="w-full">
+      <table className="w-full min-w-[760px]">
         <thead className="sticky top-0 bg-[#15171C] border-b border-[#2A2E37]">
           <tr>
             {columns.map(c => (

@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Trash2, Box, Edit3, Save, X } from "lucide-react";
-import PageActions from "@/components/shell/PageActions";
-import { SearchBox, ToolButton } from "@/components/shell/ui";
+import RecordWorkspace from '@/components/ludots/RecordWorkspace';
+import { Section } from '@/components/ludots/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function EntityPrototypeEditorPage() {
@@ -35,10 +35,9 @@ export default function EntityPrototypeEditorPage() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.EntityPrototype.create(data),
-    onSuccess: () => {
+    onSuccess: (record) => {
       queryClient.invalidateQueries({ queryKey: ['entityPrototypes'] });
-      setEditingRow(null);
-      setEditData(null);
+      handleEdit(record);
     },
   });
 
@@ -141,253 +140,43 @@ export default function EntityPrototypeEditorPage() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
-      <PageActions>
-        <SearchBox value={searchQuery} onChange={setSearchQuery} />
-        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
-      </PageActions>
-
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-xs text-white">
-          <thead className="bg-[#15171C] border-b border-[#2A2E37] sticky top-0 z-10">
-            <tr>
-              <th className="text-left p-2 font-medium text-white/70 w-40">原型ID</th>
-              <th className="text-left p-2 font-medium text-white/70 w-40">名称</th>
-              <th className="text-left p-2 font-medium text-white/70">描述</th>
-              <th className="text-left p-2 font-medium text-white/70">引用的属性</th>
-              <th className="text-left p-2 font-medium text-white/70">结构绑定</th>
-              <th className="text-right p-2 font-medium text-white/70 w-24"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPrototypes.map((proto) => {
-              const isEditing = editingRow === proto.id;
-              const currentData = isEditing ? editData : proto;
-              
-              return (
-                <tr key={proto.id} className="border-b border-[#2A2E37] hover:bg-[#15171C]">
-                  <td className="p-2">
-                    {isEditing ? (
-                      <Input
-                        value={editData.prototype_id}
-                        onChange={(e) => setEditData({ ...editData, prototype_id: e.target.value })}
-                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-                      />
-                    ) : (
-                      <span className="text-white/90 font-mono">{proto.prototype_id}</span>
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {isEditing ? (
-                      <Input
-                        value={editData.name}
-                        onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-                      />
-                    ) : (
-                      <span className="text-white/90">{proto.name}</span>
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {isEditing ? (
-                      <Input
-                        value={editData.description || ""}
-                        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                        className="h-6 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-                      />
-                    ) : (
-                      <span className="text-white/70">{proto.description || "-"}</span>
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {isEditing ? (
-                      <div className="space-y-1">
-                        {(editData.referenced_attributes || []).map((attrId, idx) => {
-                          const attr = attributes.find(a => a.attribute_id === attrId);
-                          return (
-                            <div key={idx} className="flex gap-1 items-center">
-                              <Select
-                                value={attrId}
-                                onValueChange={(val) => handleUpdateAttribute(idx, val)}
-                              >
-                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs flex-1">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                                  {attributes.map(a => (
-                                    <SelectItem key={a.id} value={a.attribute_id} className="text-white text-xs">
-                                      {a.name} ({a.attribute_id})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <button
-                                onClick={() => handleRemoveAttribute(idx)}
-                                className="text-white/30 hover:text-red-400"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                        <Button
-                          size="sm"
-                          onClick={handleAddAttribute}
-                          className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-1">
-                        {(proto.referenced_attributes || []).map(attrId => {
-                          const attr = attributes.find(a => a.attribute_id === attrId);
-                          return (
-                            <span key={attrId} className={`text-[10px] px-2 py-0.5 rounded ${attr ? 'bg-blue-900/50 text-blue-300' : 'bg-red-900/50 text-red-300'}`}>
-                              {attr ? attr.name : `❌ ${attrId}`}
-                            </span>
-                          );
-                        })}
-                        {(proto.referenced_attributes || []).length === 0 && (
-                          <span className="text-gray-600 text-xs">无引用</span>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-2">
-                    {isEditing ? (
-                      <div className="space-y-1 min-w-[200px]">
-                        {(editData.structure_bindings || []).map((binding, idx) => {
-                          const structure = structures.find(s => s.structure_id === binding.structure_id);
-                          const nodes = structure?.nodes || [];
-                          return (
-                            <div key={idx} className="flex gap-1 items-center bg-[#1E2128]/30 p-1 rounded">
-                              <Select
-                                value={binding.structure_id}
-                                onValueChange={(v) => {
-                                  const newBindings = [...editData.structure_bindings];
-                                  newBindings[idx] = { ...binding, structure_id: v, node_id: "" };
-                                  setEditData({ ...editData, structure_bindings: newBindings });
-                                }}
-                              >
-                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-24">
-                                  <SelectValue placeholder="结构" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                                  {structures.map(s => (
-                                    <SelectItem key={s.id} value={s.structure_id} className="text-white text-xs">{s.name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                value={binding.node_id}
-                                onValueChange={(v) => {
-                                  const newBindings = [...editData.structure_bindings];
-                                  newBindings[idx] = { ...binding, node_id: v };
-                                  setEditData({ ...editData, structure_bindings: newBindings });
-                                }}
-                                disabled={!binding.structure_id}
-                              >
-                                <SelectTrigger className="h-5 bg-[#0D0F14] border-[#2A2E37] text-white text-xs w-24">
-                                  <SelectValue placeholder="节点" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                                  {nodes.map(n => (
-                                    <SelectItem key={n.node_id} value={n.node_id} className="text-white text-xs">{n.name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <button
-                                onClick={() => {
-                                  const newBindings = [...editData.structure_bindings];
-                                  newBindings.splice(idx, 1);
-                                  setEditData({ ...editData, structure_bindings: newBindings });
-                                }}
-                                className="text-white/30 hover:text-red-400"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                        <Button
-                          size="sm"
-                          onClick={() => setEditData({
-                            ...editData,
-                            structure_bindings: [...(editData.structure_bindings || []), { structure_id: "", node_id: "" }]
-                          })}
-                          className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs w-full"
-                        >
-                          <Plus className="w-3 h-3 mr-1" /> 绑定结构
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        {(proto.structure_bindings || []).map((b, i) => {
-                          const structName = structures.find(s => s.structure_id === b.structure_id)?.name || b.structure_id;
-                          return (
-                            <div key={i} className="text-[10px] bg-[#1E2128] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
-                              <span className="text-blue-300">{structName}</span>
-                              <span className="text-gray-500">→</span>
-                              <span>{b.node_id}</span>
-                            </div>
-                          );
-                        })}
-                        {(proto.structure_bindings || []).length === 0 && (
-                          <span className="text-gray-600 text-xs">无绑定</span>
-                        )}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-2 text-right">
-                    {isEditing ? (
-                      <div className="flex gap-1 justify-end">
-                        <Button
-                          size="sm"
-                          onClick={handleSave}
-                          disabled={updateMutation.isPending}
-                          className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309]"
-                        >
-                          <Save className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={handleCancel}
-                          className="h-6 px-2 bg-[#1E2128] hover:bg-[#2A2E37]"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-1 justify-end">
-                        <button
-                          onClick={() => handleEdit(proto)}
-                          className="text-white/30 hover:text-blue-400"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(proto.id)}
-                          className="text-white/30 hover:text-red-400"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        
-        {filteredPrototypes.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            <Box className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>暂无实体原型</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <RecordWorkspace
+      entityName="EntityPrototype"
+      records={prototypes}
+      toItem={(item) => ({ id: item.id, name: item.name, subtitle: `${item.prototype_id} · ${(item.referenced_attributes || []).length} 个属性` })}
+      columns={[
+        { key: 'prototype_id', label: '原型 ID', width: 220, render: (item) => <span className="font-mono text-[#E2D8B3]">{item.prototype_id}</span> },
+        { key: 'name', label: '名称', width: 180 },
+        { key: 'description', label: '描述' },
+        { key: 'referenced_attributes', label: '引用属性', render: (item) => `${(item.referenced_attributes || []).length} 项` },
+        { key: 'structure_bindings', label: '结构绑定', render: (item) => `${(item.structure_bindings || []).length} 项` },
+      ]}
+      selectedId={editingRow}
+      onSelect={handleEdit}
+      onCreate={handleCreate}
+      onDelete={(item) => handleDelete(item.id)}
+      onSave={handleSave}
+      dirty={Boolean(editData)}
+    >
+      {editData && (
+        <div className="max-w-3xl">
+          <Section title="基础信息">
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="block text-xs text-gray-400 mb-1">原型 ID</label><Input value={editData.prototype_id || ''} onChange={(e) => setEditData({ ...editData, prototype_id: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+              <div><label className="block text-xs text-gray-400 mb-1">名称</label><Input value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+            </div>
+            <div><label className="block text-xs text-gray-400 mb-1">描述</label><Input value={editData.description || ''} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
+          </Section>
+          <Section title="引用属性">
+            <div className="space-y-2">{(editData.referenced_attributes || []).map((attributeId, index) => <div key={`${attributeId}-${index}`} className="flex gap-2"><Select value={attributeId} onValueChange={(value) => handleUpdateAttribute(index, value)}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{attributes.map((attribute) => <SelectItem key={attribute.id} value={attribute.attribute_id}>{attribute.name}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="ghost" onClick={() => handleRemoveAttribute(index)} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button></div>)}</div>
+            <Button size="sm" onClick={handleAddAttribute} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加属性</Button>
+          </Section>
+          <Section title="结构绑定">
+            <div className="space-y-2">{(editData.structure_bindings || []).map((binding, index) => { const structure = structures.find(item => item.structure_id === binding.structure_id); return <div key={index} className="grid grid-cols-[1fr_1fr_32px] gap-2"><Select value={binding.structure_id || ''} onValueChange={(value) => { const list = [...editData.structure_bindings]; list[index] = { structure_id: value, node_id: '' }; setEditData({ ...editData, structure_bindings: list }); }}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue placeholder="结构" /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{structures.map((item) => <SelectItem key={item.id} value={item.structure_id}>{item.name}</SelectItem>)}</SelectContent></Select><Select value={binding.node_id || ''} onValueChange={(value) => { const list = [...editData.structure_bindings]; list[index] = { ...binding, node_id: value }; setEditData({ ...editData, structure_bindings: list }); }}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue placeholder="节点" /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{(structure?.nodes || []).map((node) => <SelectItem key={node.node_id} value={node.node_id}>{node.name}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="ghost" onClick={() => setEditData({ ...editData, structure_bindings: editData.structure_bindings.filter((_, itemIndex) => itemIndex !== index) })} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button></div>; })}</div>
+            <Button size="sm" onClick={() => setEditData({ ...editData, structure_bindings: [...(editData.structure_bindings || []), { structure_id: '', node_id: '' }] })} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加绑定</Button>
+          </Section>
+        </div>
+      )}
+    </RecordWorkspace>
   );
 }
