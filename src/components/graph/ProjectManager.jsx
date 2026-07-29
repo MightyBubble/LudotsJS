@@ -26,7 +26,7 @@ export default function ProjectManager({ projects, onOpen, onCreate, onDelete, o
     });
     
     setNewProject({ name: '', description: '', graph_type: 'curve' });
-    setIsAdding(false);
+    setIsCreating(false);
   };
 
   return (

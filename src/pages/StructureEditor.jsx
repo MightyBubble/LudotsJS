@@ -54,7 +54,7 @@ export default function StructureEditorPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.StructureDefinition.delete(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['structureDefinitions'] });
       if (selectedStructure && selectedStructure.id === id) {
         setSelectedStructure(null);

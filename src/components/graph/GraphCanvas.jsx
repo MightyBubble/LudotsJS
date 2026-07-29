@@ -4,7 +4,9 @@ import {
   ReactFlowProvider,
   Background,
   BackgroundVariant,
-  useReactFlow
+  useReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import Node from './Node';
@@ -86,8 +88,8 @@ function GraphCanvasInner({
   NodeComponent
 }) {
   const { screenToFlowPosition } = useReactFlow();
-  const [selectedNodeIds, setSelectedNodeIds] = useState(new Set());
-  const [selectedEdgeIds, setSelectedEdgeIds] = useState(new Set());
+  const [rfNodes, setRfNodes] = useState([]);
+  const [rfEdges, setRfEdges] = useState([]);
   const [contextMenu, setContextMenu] = useState(null);
   const [pendingDrop, setPendingDrop] = useState(null);
 
@@ -99,72 +101,71 @@ function GraphCanvasInner({
     return set;
   }, [connections]);
 
-  const rfNodes = useMemo(() => {
-    return (nodes || []).map(node => {
-      const isLocked = node.locked || (node.id && node.id.startsWith('output-'));
-      return {
-        id: node.id,
-        type: 'unified',
-        position: node.position || { x: 0, y: 0 },
-        selected: selectedNodeIds.has(node.id),
-        draggable: !isLocked,
-        deletable: !isLocked,
-        data: {
-          node,
-          NodeComponent,
-          connectedInputPorts,
-          onUpdateData: onUpdateNodeData,
-          onUpdateNode,
-          onDelete: onDeleteNode
-        }
-      };
+  // Sync incoming props into React Flow's own node state, preserving measurements
+  useEffect(() => {
+    setRfNodes(prev => {
+      const prevMap = new Map(prev.map(n => [n.id, n]));
+      return (nodes || []).map(node => {
+        const old = prevMap.get(node.id);
+        const isLocked = node.locked || (node.id && node.id.startsWith('output-'));
+        return {
+          ...(old || {}),
+          id: node.id,
+          type: 'unified',
+          position: node.position || old?.position || { x: 0, y: 0 },
+          draggable: !isLocked,
+          deletable: !isLocked,
+          data: {
+            node,
+            NodeComponent,
+            connectedInputPorts,
+            onUpdateData: onUpdateNodeData,
+            onUpdateNode,
+            onDelete: onDeleteNode
+          }
+        };
+      });
     });
-  }, [nodes, selectedNodeIds, NodeComponent, connectedInputPorts, onUpdateNodeData, onUpdateNode, onDeleteNode]);
+  }, [nodes, NodeComponent, connectedInputPorts, onUpdateNodeData, onUpdateNode, onDeleteNode]);
 
-  const rfEdges = useMemo(() => {
-    return (connections || []).map(conn => ({
-      id: conn.id,
-      source: conn.fromNode,
-      sourceHandle: conn.fromPort,
-      target: conn.toNode,
-      targetHandle: conn.toPort,
-      type: 'unified',
-      selected: selectedEdgeIds.has(conn.id),
-      data: {
-        value: connectionValues?.[conn.id],
-        label: conn.data?.label
-      }
-    }));
-  }, [connections, connectionValues, selectedEdgeIds]);
+  useEffect(() => {
+    setRfEdges(prev => {
+      const prevMap = new Map(prev.map(e => [e.id, e]));
+      return (connections || []).map(conn => {
+        const old = prevMap.get(conn.id);
+        return {
+          ...(old || {}),
+          id: conn.id,
+          source: conn.fromNode,
+          sourceHandle: conn.fromPort,
+          target: conn.toNode,
+          targetHandle: conn.toPort,
+          type: 'unified',
+          data: {
+            value: connectionValues?.[conn.id],
+            label: conn.data?.label
+          }
+        };
+      });
+    });
+  }, [connections, connectionValues]);
 
   const handleNodesChange = useCallback((changes) => {
+    setRfNodes(prev => applyNodeChanges(changes, prev));
     changes.forEach(change => {
       if (change.type === 'position' && change.position) {
         onUpdateNodePosition?.(change.id, change.position);
       } else if (change.type === 'remove') {
         onDeleteNode?.(change.id);
-      } else if (change.type === 'select') {
-        setSelectedNodeIds(prev => {
-          const next = new Set(prev);
-          if (change.selected) next.add(change.id);
-          else next.delete(change.id);
-          return next;
-        });
       }
     });
   }, [onUpdateNodePosition, onDeleteNode]);
 
   const handleEdgesChange = useCallback((changes) => {
+    setRfEdges(prev => applyEdgeChanges(changes, prev));
     changes.forEach(change => {
       if (change.type === 'remove') {
         onDeleteConnection?.(change.id);
-      } else if (change.type === 'select') {
-        setSelectedEdgeIds(prev => {
-          const next = new Set(prev);
-          if (change.selected) next.add(change.id);
-          else next.delete(change.id);
-          return next;
-        });
       }
     });
   }, [onDeleteConnection]);
