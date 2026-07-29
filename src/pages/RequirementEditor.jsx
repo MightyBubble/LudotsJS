@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Edit3, Trash2, X, Save, CheckSquare } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
+import { SearchBox, ToolButton } from "@/components/shell/ui";
 
 export default function RequirementEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -181,7 +183,7 @@ export default function RequirementEditorPage() {
             <Button size="sm" onClick={handleSave} className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
               <Save className="w-3 h-3" />
             </Button>
-            <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">
+            <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs">
               <X className="w-3 h-3" />
             </Button>
           </div>
@@ -191,25 +193,11 @@ export default function RequirementEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <div className="flex-1" />
-
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
-
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#262626] hover:bg-[#4d4d4d] text-white text-xs">
-          <Plus className="w-3 h-3 mr-1" />
-          新建
-        </Button>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} />
+        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
+      </PageActions>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs">
@@ -242,10 +230,10 @@ export default function RequirementEditorPage() {
                   <td className="p-2 text-gray-300">{requirement.state}</td>
                   <td className="p-2">
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => handleEdit(requirement)} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#4d4d4d]">
+                      <Button size="sm" onClick={() => handleEdit(requirement)} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#2A2E37]">
                         <Edit3 className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" onClick={() => handleDelete(requirement.id)} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#5a1e1e]">
+                      <Button size="sm" onClick={() => handleDelete(requirement.id)} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#7f1d1d]">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>

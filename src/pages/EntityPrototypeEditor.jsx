@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Trash2, Box, Edit3, Save, X } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
+import { SearchBox, ToolButton } from "@/components/shell/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function EntityPrototypeEditorPage() {
@@ -139,25 +141,11 @@ export default function EntityPrototypeEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <div className="flex-1" />
-
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
-
-        <Button size="sm" onClick={handleCreate} className="h-7 px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
-          <Plus className="w-3 h-3 mr-1" />
-          新建
-        </Button>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} />
+        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
+      </PageActions>
 
       <div className="flex-1 overflow-auto">
         <table className="w-full text-xs text-white">
@@ -245,7 +233,7 @@ export default function EntityPrototypeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleAddAttribute}
-                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
+                          className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs"
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -273,7 +261,7 @@ export default function EntityPrototypeEditorPage() {
                           const structure = structures.find(s => s.structure_id === binding.structure_id);
                           const nodes = structure?.nodes || [];
                           return (
-                            <div key={idx} className="flex gap-1 items-center bg-[#262626]/30 p-1 rounded">
+                            <div key={idx} className="flex gap-1 items-center bg-[#1E2128]/30 p-1 rounded">
                               <Select
                                 value={binding.structure_id}
                                 onValueChange={(v) => {
@@ -328,7 +316,7 @@ export default function EntityPrototypeEditorPage() {
                             ...editData,
                             structure_bindings: [...(editData.structure_bindings || []), { structure_id: "", node_id: "" }]
                           })}
-                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs w-full"
+                          className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs w-full"
                         >
                           <Plus className="w-3 h-3 mr-1" /> 绑定结构
                         </Button>
@@ -338,7 +326,7 @@ export default function EntityPrototypeEditorPage() {
                         {(proto.structure_bindings || []).map((b, i) => {
                           const structName = structures.find(s => s.structure_id === b.structure_id)?.name || b.structure_id;
                           return (
-                            <div key={i} className="text-[10px] bg-[#262626] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
+                            <div key={i} className="text-[10px] bg-[#1E2128] px-2 py-0.5 rounded text-gray-300 flex items-center gap-1">
                               <span className="text-blue-300">{structName}</span>
                               <span className="text-gray-500">→</span>
                               <span>{b.node_id}</span>
@@ -365,7 +353,7 @@ export default function EntityPrototypeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleCancel}
-                          className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]"
+                          className="h-6 px-2 bg-[#1E2128] hover:bg-[#2A2E37]"
                         >
                           <X className="w-3 h-3" />
                         </Button>

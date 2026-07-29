@@ -136,7 +136,7 @@ export default function TagSimulator() {
   const simulation = selectedTag ? simulateAddTag(selectedTag) : null;
 
   return (
-    <div className="h-screen flex bg-[#0D0F14] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
+    <div className="h-full flex bg-[#0D0F14] text-[#e5e5e5] font-sans overflow-hidden selection:bg-[#D97706] selection:text-white">
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #15171C; }
@@ -222,7 +222,7 @@ export default function TagSimulator() {
             variant="ghost" 
             size="sm" 
             onClick={() => setActiveTags(new Set())}
-            className="w-full h-8 text-xs text-gray-500 hover:text-red-400 hover:bg-[#262626]"
+            className="w-full h-8 text-xs text-gray-500 hover:text-red-400 hover:bg-[#1E2128]"
             disabled={activeTags.size === 0}
           >
             <Trash2 className="w-3.5 h-3.5 mr-2" /> Clear All Tags
@@ -363,7 +363,7 @@ export default function TagSimulator() {
               {/* Simulation Results */}
               {simulation && (
                 <div className="space-y-4">
-                  <div className="h-px bg-[#262626]" />
+                  <div className="h-px bg-[#1E2128]" />
                   <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Add Effects</h4>
 
                   {/* Will Attach */}
@@ -450,7 +450,7 @@ export default function TagSimulator() {
               <Button 
                 onClick={() => handleRemoveTag(selectedTag.full_path)}
                 variant="destructive"
-                className="w-full bg-[#262626] hover:bg-red-900/50 text-red-400 border border-red-900/30 h-9 text-xs"
+                className="w-full bg-[#1E2128] hover:bg-red-900/50 text-red-400 border border-red-900/30 h-9 text-xs"
               >
                 Remove from Entity
               </Button>

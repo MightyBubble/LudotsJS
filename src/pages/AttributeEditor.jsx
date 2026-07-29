@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Trash2, Layers, Edit3, Save, X, Zap, MinusSquare, Activity } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
+import { SearchBox, ToolButton } from "@/components/shell/ui";
 import ThresholdEventPanel from "../components/attribute/ThresholdEventPanel";
 import ClampConfigPanel from "../components/attribute/ClampConfigPanel";
 import RecoveryConfigPanel from "../components/attribute/RecoveryConfigPanel";
@@ -238,25 +240,11 @@ export default function AttributeEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
-        <div className="flex-1" />
-
-        <div className="relative hidden md:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
-
-        <Button size="sm" onClick={handleCreate} className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-white text-xs">
-          <Plus className="w-3 h-3 md:mr-1" />
-          <span className="hidden md:inline">新建</span>
-        </Button>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} />
+        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
+      </PageActions>
 
       {/* 移动端搜索 */}
       <div className="md:hidden px-2 py-2 bg-[#15171C] border-b border-[#2A2E37]">
@@ -362,7 +350,7 @@ export default function AttributeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleAddKey}
-                          className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
+                          className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs"
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -431,7 +419,7 @@ export default function AttributeEditorPage() {
                           <Button
                             size="sm"
                             onClick={handleAddMapping}
-                            className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs"
+                            className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs"
                           >
                             <Plus className="w-3 h-3" />
                           </Button>
@@ -461,7 +449,7 @@ export default function AttributeEditorPage() {
                         <Button
                           size="sm"
                           onClick={handleCancel}
-                          className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]"
+                          className="h-6 px-2 bg-[#1E2128] hover:bg-[#2A2E37]"
                         >
                           <X className="w-3 h-3" />
                         </Button>
@@ -529,7 +517,7 @@ export default function AttributeEditorPage() {
                         <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309]">
                           <Save className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#262626] hover:bg-[#4d4d4d]">
+                        <Button size="sm" onClick={handleCancel} className="h-6 px-2 bg-[#1E2128] hover:bg-[#2A2E37]">
                           <X className="w-3 h-3" />
                         </Button>
                       </>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { getVisibleNavGroups, ALL_NAV_ITEMS } from "@/components/layout/navConfig";
 import NavTabsBar from "@/components/layout/NavTabsBar";
+import { PageActionsProvider } from "@/components/shell/PageActions";
 import ProjectSwitcher from "@/components/layout/ProjectSwitcher";
 import useProjectScope from "@/lib/projectScope";
 
@@ -13,6 +14,7 @@ export default function Layout({ children, currentPageName }) {
   const currentLabel = ALL_NAV_ITEMS.find(i => i.page === currentPageName)?.label || "LudotsJS";
 
   return (
+    <PageActionsProvider>
     <div className="h-screen bg-[#0D0F14] flex flex-col">
       <style>{`
         body {
@@ -72,5 +74,6 @@ export default function Layout({ children, currentPageName }) {
 
       <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
     </div>
+    </PageActionsProvider>
   );
 }

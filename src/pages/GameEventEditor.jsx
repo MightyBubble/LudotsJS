@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, Search, Plus, Trash2, Edit2, Save, X } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
+import { SearchBox, ToolButton } from "@/components/shell/ui";
 
 export default function GameEventEditor() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -124,23 +126,11 @@ export default function GameEventEditor() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-2 md:px-4 gap-2 md:gap-3">
-        <div className="flex-1" />
-        <div className="relative hidden md:block">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-          <Input
-            placeholder="搜索..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 pl-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"
-          />
-        </div>
-        <Button onClick={handleCreate} size="sm" className="h-7 px-2 md:px-3 bg-[#D97706] hover:bg-[#B45309] text-xs">
-          <Plus className="w-3 h-3 md:mr-1" />
-          <span className="hidden md:inline">新建事件</span>
-        </Button>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <SearchBox value={searchQuery} onChange={setSearchQuery} />
+        <ToolButton icon={Plus} tone="primary" onClick={handleCreate}>新建</ToolButton>
+      </PageActions>
 
       <div className="md:hidden px-2 py-2 bg-[#15171C] border-b border-[#2A2E37]">
         <div className="relative">

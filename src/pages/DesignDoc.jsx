@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { BookOpen, ChevronDown, ChevronRight, AlertTriangle } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
 
 const modules = [
   {
@@ -453,15 +454,12 @@ export default function DesignDocPage() {
   const totalQuestions = modules.reduce((sum, m) => sum + m.questions.length, 0);
   
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-[#e5e5e5]">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <BookOpen className="w-4 h-4 text-[#D97706]" />
-        <span className="text-sm font-semibold text-gray-300">设计文档</span>
-        <span className="text-xs text-gray-500">{modules.length} 个模块</span>
-        {totalQuestions > 0 && (
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      {totalQuestions > 0 && (
+        <PageActions>
           <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">{totalQuestions} 个疑问</span>
-        )}
-      </div>
+        </PageActions>
+      )}
       
       <div className="flex-1 overflow-auto p-4">
         <div className="max-w-4xl mx-auto space-y-2">

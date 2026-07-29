@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { usePageActionsSlot } from "@/components/shell/PageActions";
 
 export default function NavTabsBar({ groups, currentPageName, leading = null }) {
   const location = useLocation();
   const currentGroup = groups.find(g => g.items.some(i => i.page === currentPageName));
   const [activeKey, setActiveKey] = useState(currentGroup?.key || groups[0]?.key);
+  const setSlot = usePageActionsSlot();
 
   useEffect(() => {
     if (currentGroup) setActiveKey(currentGroup.key);
@@ -14,7 +16,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
 
   return (
     <>
-      {/* 第一行：工作区 + 顶层模块 Tab */}
+      {/* 一级：工作区 + 模块 */}
       <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] hidden md:flex items-stretch px-2 gap-2 overflow-x-auto">
         {leading && <div className="flex items-center gap-2 shrink-0">{leading}</div>}
         <div className="w-px my-2 bg-[#2A2E37] shrink-0" />
@@ -33,8 +35,8 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
         ))}
       </div>
 
-      {/* 第二行：当前模块下的条目 Tab */}
-      <div className="h-8 bg-[#0D0F14] border-b border-[#2A2E37] hidden md:flex items-center gap-1 px-2 overflow-x-auto">
+      {/* 二级：当前模块的条目（即页面标题） + 右侧当前页操作区 */}
+      <div className="h-9 bg-[#0D0F14] border-b border-[#2A2E37] flex items-center gap-1 px-2 overflow-x-auto">
         {active?.items.map(item => {
           const isActive =
             item.page === currentPageName &&
@@ -54,6 +56,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
             </Link>
           );
         })}
+        <div ref={setSlot} className="ml-auto flex items-center gap-2 pl-3 shrink-0" />
       </div>
     </>
   );

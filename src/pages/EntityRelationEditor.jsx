@@ -7,30 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Search, Plus, Edit3, Trash2, X, Save, Link as LinkIcon, Share2, ArrowRight, Settings2 } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
+import { ToolButton } from "@/components/shell/ui";
 
 export default function EntityRelationEditorPage() {
   const [activeTab, setActiveTab] = useState("definitions");
   
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-12 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 justify-between">
-        <div className="flex items-center gap-3">
-          <LinkIcon className="w-5 h-5 text-gray-400" />
-          <span className="text-lg font-semibold text-gray-200">关系编辑器</span>
-        </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-          <TabsList className="bg-[#0D0F14] border border-[#2A2E37] h-8">
-            <TabsTrigger value="definitions" className="text-xs px-3 data-[state=active]:bg-[#D97706] data-[state=active]:text-white">
-              <Settings2 className="w-3 h-3 mr-2" />
-              关系定义 (Definitions)
-            </TabsTrigger>
-            <TabsTrigger value="static" className="text-xs px-3 data-[state=active]:bg-[#D97706] data-[state=active]:text-white">
-              <Share2 className="w-3 h-3 mr-2" />
-              静态关系 (Static Relations)
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
+        <ToolButton icon={Settings2} tone={activeTab === 'definitions' ? 'primary' : 'default'} onClick={() => setActiveTab('definitions')}>关系定义</ToolButton>
+        <ToolButton icon={Share2} tone={activeTab === 'static' ? 'primary' : 'default'} onClick={() => setActiveTab('static')}>静态关系</ToolButton>
+      </PageActions>
 
       <div className="flex-1 overflow-hidden">
         {activeTab === "definitions" ? <RelationDefinitionsView /> : <StaticRelationsView />}
@@ -130,7 +118,7 @@ function RelationDefinitionsView() {
             {relation.attributes.map(attrId => {
               const attr = attributes.find(a => a.attribute_id === attrId);
               return (
-                <span key={attrId} className="bg-[#262626] px-1 rounded text-gray-300">
+                <span key={attrId} className="bg-[#1E2128] px-1 rounded text-gray-300">
                   {attr?.name || attrId}
                 </span>
               );
@@ -188,7 +176,7 @@ function RelationDefinitionsView() {
                 {(data.attributes || []).map((attrId) => {
                    const attr = attributes.find(a => a.attribute_id === attrId);
                    return (
-                    <div key={attrId} className="bg-[#262626] px-2 py-0.5 rounded text-xs flex items-center gap-1 text-gray-200">
+                    <div key={attrId} className="bg-[#1E2128] px-2 py-0.5 rounded text-xs flex items-center gap-1 text-gray-200">
                       <span>{attr?.name || attrId}</span>
                       <button 
                         onClick={() => setEditData({ ...data, attributes: data.attributes.filter(id => id !== attrId) })}
@@ -227,7 +215,7 @@ function RelationDefinitionsView() {
             <Button size="sm" onClick={handleSave} className="h-7 px-2 bg-[#D97706] hover:bg-[#B45309] text-xs">
               <Save className="w-3 h-3" />
             </Button>
-            <Button size="sm" onClick={() => { setCreatingNew(false); setEditingId(null); setEditData(null); }} className="h-7 px-2 bg-[#262626] hover:bg-[#4d4d4d] text-xs">
+            <Button size="sm" onClick={() => { setCreatingNew(false); setEditingId(null); setEditData(null); }} className="h-7 px-2 bg-[#1E2128] hover:bg-[#2A2E37] text-xs">
               <X className="w-3 h-3" />
             </Button>
           </div>
@@ -259,7 +247,7 @@ function RelationDefinitionsView() {
             setEditData({
               relation_id: "", name: "", description: "", is_directional: true, attributes: [], tags: []
             });
-          }} className="h-8 bg-[#262626] hover:bg-[#4d4d4d] text-white text-xs">
+          }} className="h-8 bg-[#1E2128] hover:bg-[#2A2E37] text-white text-xs">
             <Plus className="w-3 h-3 mr-1" /> 新建定义
           </Button>
         </div>
@@ -286,10 +274,10 @@ function RelationDefinitionsView() {
                   <td className="p-2">{renderConfigCell(relation)}</td>
                   <td className="p-2">
                     <div className="flex gap-1">
-                      <Button size="sm" onClick={() => { setEditingId(relation.id); setCreatingNew(false); setEditData({...relation}); }} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#4d4d4d]">
+                      <Button size="sm" onClick={() => { setEditingId(relation.id); setCreatingNew(false); setEditData({...relation}); }} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#2A2E37]">
                         <Edit3 className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" onClick={() => { if(confirm('确认删除?')) deleteMutation.mutate(relation.id); }} className="h-6 w-6 p-0 bg-[#262626] hover:bg-[#5a1e1e]">
+                      <Button size="sm" onClick={() => { if(confirm('确认删除?')) deleteMutation.mutate(relation.id); }} className="h-6 w-6 p-0 bg-[#1E2128] hover:bg-[#7f1d1d]">
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
@@ -391,11 +379,11 @@ function StaticRelationsView() {
             <div 
               key={p.id}
               onClick={() => setSelectedPrototypeId(p.prototype_id)}
-              className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center ${selectedPrototypeId === p.prototype_id ? 'bg-[#D97706] text-white' : 'text-gray-300 hover:bg-[#262626]'}`}
+              className={`p-2 rounded cursor-pointer text-xs flex justify-between items-center ${selectedPrototypeId === p.prototype_id ? 'bg-[#D97706] text-white' : 'text-gray-300 hover:bg-[#1E2128]'}`}
             >
               <span className="truncate">{p.name}</span>
               {p.static_relations?.length > 0 && (
-                <span className="bg-[#262626] px-1.5 rounded-full text-[10px] text-gray-400">{p.static_relations.length}</span>
+                <span className="bg-[#1E2128] px-1.5 rounded-full text-[10px] text-gray-400">{p.static_relations.length}</span>
               )}
             </div>
           ))}
@@ -527,7 +515,7 @@ function StaticRelationsView() {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleRemoveRelation(idx)}
-                            className="text-gray-500 hover:text-red-400 hover:bg-[#262626] h-8 w-8 p-0"
+                            className="text-gray-500 hover:text-red-400 hover:bg-[#1E2128] h-8 w-8 p-0"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

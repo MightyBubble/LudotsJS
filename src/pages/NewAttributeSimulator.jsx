@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calculator, Plus, Minus, ArrowRight, AlertTriangle } from "lucide-react";
+import PageActions from "@/components/shell/PageActions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { evaluateGraphValue } from "@/lib/graphRuntime";
 
@@ -270,28 +271,22 @@ export default function NewAttributeSimulatorPage() {
   }, [tags, referencedInputs.tags]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <Calculator className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">属性模拟器</span>
-        
-        <div className="flex-1" />
-        
-        <span className="text-xs text-gray-500">实体原型:</span>
+    <div className="h-full flex flex-col overflow-hidden bg-[#0D0F14] text-[#e5e5e5]">
+      <PageActions>
         <Select value={selectedPrototypeId || ""} onValueChange={setSelectedPrototypeId}>
-          <SelectTrigger className="h-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-white text-xs">
+          <SelectTrigger className="h-7 w-48 bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5] text-xs">
             <SelectValue placeholder="全部属性" />
           </SelectTrigger>
           <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-            <SelectItem value="all" className="text-white text-xs">全部属性</SelectItem>
+            <SelectItem value="all" className="text-[#e5e5e5] text-xs">全部属性</SelectItem>
             {prototypes.map(p => (
-              <SelectItem key={p.id} value={p.id} className="text-white text-xs">
+              <SelectItem key={p.id} value={p.id} className="text-[#e5e5e5] text-xs">
                 {p.name} ({p.prototype_id})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </PageActions>
 
       {missingAttributes.length > 0 && (
         <div className="bg-red-900/20 border-b border-red-900/50 px-4 py-2 flex items-center gap-2">

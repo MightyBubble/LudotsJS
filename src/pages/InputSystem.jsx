@@ -12,10 +12,7 @@ const PIPELINE = [
 export default function InputSystemPage() {
   return (
     <div className="h-full overflow-auto bg-[#0D0F14] text-white">
-      <div className="h-10 bg-[#15171C] border-b border-[#2A2E37] flex items-center px-4 gap-3">
-        <Gamepad2 className="w-4 h-4 text-gray-400" />
-        <span className="text-sm font-semibold text-gray-300">输入与订单</span>
-      </div>
+
       <div className="p-4 max-w-3xl space-y-3">
         <p className="text-xs text-gray-400">
           此模块的实体（InputAction / InputContext / ControlScheme / InputBufferProfile / InputPattern /

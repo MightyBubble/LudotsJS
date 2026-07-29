@@ -171,7 +171,7 @@ export default function StructureEditorPage() {
   }, [nodes]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+    <div className="h-full flex flex-col bg-[#0D0F14] text-white">
       <Toolbar
         onSave={handleSave}
         onZoomIn={() => setZoom(z => Math.min(z + 0.1, 2))}
@@ -200,7 +200,7 @@ export default function StructureEditorPage() {
                 <Input id="new-id" placeholder="ID (e.g. tech_tree)" className="h-7 text-xs bg-[#0D0F14] border-[#2A2E37] text-white" />
                 <Input id="new-name" placeholder="名称" className="h-7 text-xs bg-[#0D0F14] border-[#2A2E37] text-white" />
                 <div className="flex gap-1 justify-end">
-                  <Button size="sm" className="h-6 text-xs bg-[#262626]" onClick={() => setIsCreating(false)}>取消</Button>
+                  <Button size="sm" className="h-6 text-xs bg-[#1E2128]" onClick={() => setIsCreating(false)}>取消</Button>
                   <Button size="sm" className="h-6 text-xs bg-[#D97706] hover:bg-[#B45309] text-white" onClick={() => {
                     const id = document.getElementById('new-id').value;
                     const name = document.getElementById('new-name').value;
@@ -232,8 +232,8 @@ export default function StructureEditorPage() {
                 NodeComponent={StructureNode}
               />
               
-              <div className="absolute top-4 left-4 bg-[#2d2d2d]/90 p-2 rounded border border-[#2A2E37] flex gap-2">
-                <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#262626] hover:bg-[#4d4d4d] text-xs text-white">
+              <div className="absolute top-4 left-4 bg-[#15171C]/90 p-2 rounded border border-[#2A2E37] flex gap-2">
+                <Button size="sm" onClick={handleAddNode} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37] text-xs text-white">
                   <Plus className="w-3 h-3 mr-1" /> 添加节点
                 </Button>
               </div>
@@ -322,10 +322,10 @@ export default function StructureEditorPage() {
                           setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, data: { ...c.data, relation_definition_id: v, label: relName } } : c));
                         }}
                       >
-                        <SelectTrigger className="h-6 bg-[#2d2d2d] border-[#2A2E37] text-xs w-full text-white">
+                        <SelectTrigger className="h-6 bg-[#15171C] border-[#2A2E37] text-xs w-full text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#2d2d2d] border-[#2A2E37]">
+                        <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                           {relations.map(r => (
                             <SelectItem key={r.id} value={r.relation_id} className="text-xs text-white">{r.name}</SelectItem>
                           ))}

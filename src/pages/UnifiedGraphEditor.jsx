@@ -532,10 +532,10 @@ export default function UnifiedGraphEditorPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#15171C] border-[#2A2E37]">
-                    <SelectItem value="data" className="text-[#e5e5e5] hover:bg-[#262626]">Data Graph (数据图)</SelectItem>
-                    <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#262626]">Entity Query (实体查询)</SelectItem>
-                    <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#262626]">Pure Function Graph (纯函数图)</SelectItem>
-                    <SelectItem value="action" className="text-[#e5e5e5] hover:bg-[#262626]">Action Graph (动作图)</SelectItem>
+                    <SelectItem value="data" className="text-[#e5e5e5] hover:bg-[#1E2128]">Data Graph (数据图)</SelectItem>
+                    <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#1E2128]">Entity Query (实体查询)</SelectItem>
+                    <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#1E2128]">Pure Function Graph (纯函数图)</SelectItem>
+                    <SelectItem value="action" className="text-[#e5e5e5] hover:bg-[#1E2128]">Action Graph (动作图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -556,7 +556,7 @@ export default function UnifiedGraphEditorPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {Object.entries(USAGE_LABELS).map(([k, label]) => (
-                        <SelectItem key={k} value={k} className="text-[#e5e5e5] hover:bg-[#262626]">{label}</SelectItem>
+                        <SelectItem key={k} value={k} className="text-[#e5e5e5] hover:bg-[#1E2128]">{label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -571,7 +571,7 @@ export default function UnifiedGraphEditorPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-[#15171C] border-[#2A2E37]">
                       {(newGraph.graph_type === 'data' ? DATA_RETURN_TYPES : FUNCTION_RETURN_TYPES).map(t => (
-                        <SelectItem key={t} value={t} className="text-[#e5e5e5] hover:bg-[#262626]">{t}</SelectItem>
+                        <SelectItem key={t} value={t} className="text-[#e5e5e5] hover:bg-[#1E2128]">{t}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

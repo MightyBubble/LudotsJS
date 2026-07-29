@@ -161,7 +161,7 @@ export default function DataTableEditorPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0D0F14] text-white">
+    <div className="h-full flex flex-col bg-[#0D0F14] text-white">
       <div className="flex-1 flex overflow-hidden">
         <AssetBrowserPanel
           entityName="DataTable"
@@ -250,7 +250,7 @@ export default function DataTableEditorPage() {
                         </th>
                       ))}
                       <th className="text-left p-2 w-20">
-                        <Button size="sm" onClick={handleAddColumn} className="h-5 px-2 bg-[#262626] hover:bg-[#4d4d4d]">
+                        <Button size="sm" onClick={handleAddColumn} className="h-5 px-2 bg-[#1E2128] hover:bg-[#2A2E37]">
                           <Plus className="w-3 h-3" />
                         </Button>
                       </th>
@@ -299,7 +299,7 @@ export default function DataTableEditorPage() {
                 </table>
               </div>
 
-              <Button onClick={handleAddRow} className="bg-[#262626] hover:bg-[#4d4d4d]">
+              <Button onClick={handleAddRow} className="bg-[#1E2128] hover:bg-[#2A2E37]">
                 <Plus className="w-4 h-4 mr-1" />
                 添加行
               </Button>
@@ -321,7 +321,7 @@ export default function DataTableEditorPage() {
                   </Button>
                   <Button
                     onClick={() => handleAddRowToTable(selectedTable)}
-                    className="bg-[#262626] hover:bg-[#4d4d4d]"
+                    className="bg-[#1E2128] hover:bg-[#2A2E37]"
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     添加行
