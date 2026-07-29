@@ -363,13 +363,12 @@ evaluate_context_parameters：定义评估此条件所需的上下文参数。`,
     id: "action-graph",
     title: "Action Graph（规划中）",
     overview: "可复用的动作例程库，类似虚幻的 Function Library / Macro。",
-    definition: "第五类图。带执行流（exec 引脚）的可复用动作例程：有签名（输入参数、可选返回值）、有内部执行流与副作用节点，可被其他 Action Graph 调用、也可被触发器调用。它本身不包含任何触发条件。",
-    intent: `明确定位：Action Graph ≠ 触发器。两者严格分层：
+    definition: "第五类图。带执行流（exec 引脚）的可复用动作例程：有签名（输入参数、可选返回值）、有内部执行流与副作用节点，可被其他 Action Graph 调用。",
+    intent: `定位为类似虚幻蓝图的 Function Library / Macro：一组无状态、可复用、可组合的动作单元。
 
-• 触发器层（TagCountEvent / AttributeThresholdEvent / InteractionEffect / UnlockableCommand 等）：只负责"什么时候发生"，以及把上下文（source / target / 数值）绑定到被调用例程的参数上。
-• Action Graph 层：只负责"做什么"，是无状态、可复用、可组合的动作单元，像 UE 的蓝图函数库/宏一样被到处调用，不知道自己是被谁触发的。
+Action Graph 只描述"做什么"，不包含任何触发条件，也不关心自己被谁调用。调用方式（谁在什么时机调用它、如何绑定参数）不属于本模块范围，后续单独讨论。
 
-这样同一个动作（例如"施加灼烧并扣血"）可以被标签事件、属性阈值、交互效果共用，不需要在每个触发器实体里重复配置。`,
+与现有四类图的区别：Data / Query / Function / Structure 图都是求值语义（输入 → 值 / 布尔 / 实体集），Action Graph 是执行语义（按 exec 链顺序产生副作用）。求值部分直接复用现有图作为子图。`,
     architecture: `实体：ActionGraph（规划）
 字段：action_id, name, description, parameters[]（名称/类型/默认值）, return_type, is_macro（宏：内联展开，可有多个执行输出；函数：单入单出）, graph_definition（JSON）
 
@@ -380,9 +379,7 @@ evaluate_context_parameters：定义评估此条件所需的上下文参数。`,
 • 取值：复用 Data / Function / Query 图作为纯求值子图；条件判断复用 Validator / Requirement
 
 引脚约定：白色三角 exec 引脚只连 exec，数据引脚沿用现有 TYPE_SHAPES / TYPE_COLORS。
-运行时：新增 actionRuntime.js，按 exec 链顺序执行并产出"副作用日志"（不真的改库），在编辑器右侧面板单步查看。
-
-触发器侧改造（后续）：各触发器实体新增 action_id + parameter_bindings，逐步取代现有各自的固定结果字段。`,
+运行时：新增 actionRuntime.js，按 exec 链顺序执行并产出"副作用日志"（不真的改库），在编辑器右侧面板单步查看。`,
     questions: [
       "宏（is_macro，内联展开、允许多个执行输出引脚）第一版是否需要？还是先只做函数形态（单入单出）。",
       "副作用是否需要事务/回滚语义（一串动作中途失败时前面的是否撤销）。",
