@@ -8,7 +8,7 @@ export default function EffectObjectMapEditor({ title, value = {}, fields, onCha
   const remove = (key) => { const next = { ...value }; delete next[key]; onChange(next); };
   const patch = (key, field, next) => onChange({ ...value, [key]: { ...value[key], [field]: next } });
   return (
-    <Section title={title} action={<button onClick={add} className="flex items-center gap-1 text-xs text-[#E2D8B3]"><Plus className="w-3 h-3" />添加</button>}>
+    <Section title={title} right={<button onClick={add} className="flex items-center gap-1 text-xs text-[#E2D8B3]"><Plus className="w-3 h-3" />添加</button>}>
       {Object.keys(value).length === 0 && <p className="text-[11px] text-gray-600">未配置</p>}
       {Object.entries(value).map(([key, row]) => (
         <div key={key} className="border border-[#2A2E37] rounded p-2 space-y-2">

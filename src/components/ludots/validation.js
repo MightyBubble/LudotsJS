@@ -1,4 +1,5 @@
 import { EFFECT_PRESET_TYPES } from './effectPresetTypes';
+import { EFFECT_PHASES, EFFECT_PRESETS } from './effectPresetDefinitions';
 
 const issue = (severity, field_path, message, fix) => ({ severity, field_path, message, fix });
 
@@ -7,9 +8,12 @@ export function validateEffect(effect, refs = {}) {
   const out = [];
   const attrIds = new Set((refs.attributes || []).map(a => a.attribute_id));
   const effectIds = new Set((refs.effects || []).map(e => e.effect_id));
+  const graphIds = new Set((refs.actionGraphs || []).map(g => g.action_id));
+  const preset = EFFECT_PRESETS[effect.presetType] || EFFECT_PRESETS.None;
   if (!effect.effect_id) out.push(issue('error', 'effect_id', '缺少 C# id', '填写唯一 ID'));
   if (!EFFECT_PRESET_TYPES.includes(effect.presetType)) out.push(issue('error', 'presetType', '不是 C# EffectPresetType', '选择有效枚举'));
-  if (!['Instant', 'After', 'Infinite'].includes(effect.lifetime)) out.push(issue('error', 'lifetime', '不是 C# LifetimeKind', '选择有效枚举'));
+  if (!preset.allowedLifetimes.includes(effect.lifetime)) out.push(issue('error', 'lifetime', '不符合 preset_types.json 的 allowedLifetimes', `选择 ${preset.allowedLifetimes.join(' / ')}`));
+  (preset.fields || []).forEach(field => { if (field === 'modifiers' ? !(effect.modifiers || []).length : effect[field] == null) out.push(issue('error', field, `${effect.presetType} 需要 ${field}`, '配置 Preset 必需字段')); });
   if (effect.participatesInResponse === undefined) out.push(issue('error', 'participatesInResponse', '必须明确是否参与响应', '设置 true 或 false'));
   if ((effect.tags || []).length > 1) out.push(issue('error', 'tags', 'C# Loader 最多允许一个顶层 tag', '只保留一个 tag'));
   if (effect.lifetime === 'After' && (!Number.isInteger(effect.duration?.durationTicks) || effect.duration.durationTicks < 1)) out.push(issue('error', 'duration.durationTicks', 'After 需要正整数 durationTicks', '填写 tick 数'));
@@ -21,7 +25,21 @@ export function validateEffect(effect, refs = {}) {
   });
   ['impactEffect', 'hitEffect', 'presentationEffect'].forEach(key => { const id = effect.projectile?.[key]; if (id && !effectIds.has(id)) out.push(issue('error', `projectile.${key}`, 'Effect 引用无效', '选择现有 Effect')); });
   if (effect.targetDispatch?.payloadEffect && !effectIds.has(effect.targetDispatch.payloadEffect)) out.push(issue('error', 'targetDispatch.payloadEffect', 'Effect 引用无效', '选择现有 Effect'));
+  Object.entries(effect.phaseGraphs || {}).forEach(([phase, config]) => {
+    if (!EFFECT_PHASES.includes(phase)) out.push(issue('error', `phaseGraphs.${phase}`, '不是 C# EffectPhaseId', '使用固定八阶段'));
+    ['pre', 'post'].forEach(slot => { if (config?.[slot] && !graphIds.has(config[slot])) out.push(issue('error', `phaseGraphs.${phase}.${slot}`, 'ActionGraph 引用无效', '选择现有 ActionGraph')); });
+  });
+  if (effect.lifetime === 'Instant' && (effect.phaseListeners || []).length) out.push(issue('error', 'phaseListeners', 'C# Loader 禁止 Instant Effect 持有 Phase Listener', '改为 After / Infinite 或删除监听器'));
+  (effect.phaseListeners || []).forEach((listener, i) => {
+    if (!['Source', 'Target'].includes(listener.scope)) out.push(issue('error', `phaseListeners[${i}].scope`, '监听视角无效', '选择 Source / Target'));
+    if (!['Graph', 'Event', 'Both'].includes(listener.action)) out.push(issue('error', `phaseListeners[${i}].action`, '监听动作无效', '选择 Graph / Event / Both'));
+    if (['Graph', 'Both'].includes(listener.action) && (!listener.graphProgram || !graphIds.has(listener.graphProgram))) out.push(issue('error', `phaseListeners[${i}].graphProgram`, '需要有效 ActionGraph', '选择图程序'));
+  });
   (effect.grantedTags || []).forEach((g, i) => { if (!g.tag || !g.formula) out.push(issue('error', `grantedTags[${i}]`, '授予标签需要 tag 与 formula', '补全字段')); });
+  const cp = effect.configParams || {};
+  if (effect.presetType === 'ApplyForce2D' && (!cp['_ep.forceXTargetAttrId'] || !cp['_ep.forceYTargetAttrId'])) out.push(issue('error', 'configParams', 'ApplyForce2D 缺少两个目标 Attribute 参数', '配置 ForceParams'));
+  if (effect.presetType === 'Exchange' && !cp['_ep.exchangeOperationId']) out.push(issue('error', 'configParams._ep.exchangeOperationId', 'Exchange 缺少 operation', '配置保留参数'));
+  if (effect.presetType === 'DeployConsumeSource' && (!cp['_ep.targetEntityTemplate'] || !cp['_ep.lifecycleAttributeValueSource'] || ![0,1,2,3].some(i => cp[`_ep.lifecycleAttribute${i}`]))) out.push(issue('error', 'configParams', 'DeployConsumeSource 保留参数不完整', '配置模板、值来源和至少一个 Attribute'));
   return out;
 }
 

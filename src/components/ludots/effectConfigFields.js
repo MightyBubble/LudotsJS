@@ -23,7 +23,6 @@ export const EFFECT_OBJECTS = {
 };
 
 export const MODIFIER_FIELDS = [{ key: 'attribute', label: 'attribute', type: 'attribute' }, select('op', 'op', ['Add', 'Multiply', 'Override']), number('value')];
-export const GRANTED_TAG_FIELDS = [tag('tag'), text('formula'), number('amount'), number('base'), text('graphProgram')];
-export const PHASE_LISTENER_FIELDS = [tag('listenTag'), effect('listenEffectId'), select('phase', 'phase', ['OnPropose', 'OnCalculate', 'OnResolve', 'OnHit', 'OnApply', 'OnPeriod', 'OnExpire', 'OnRemove']), text('scope'), text('action'), text('graphProgram'), tag('eventTag'), number('priority')];
-export const PHASE_GRAPH_FIELDS = [text('pre'), text('post'), bool('skipMain')];
+export const GRANTED_TAG_FIELDS = [tag('tag'), text('formula'), number('amount'), number('base'), { key: 'graphProgram', label: 'graphProgram', type: 'graph' }];
+export const PHASE_LISTENER_BASE_FIELDS = [tag('listenTag'), effect('listenEffectId'), select('phase', 'phase', ['OnPropose', 'OnCalculate', 'OnResolve', 'OnHit', 'OnApply', 'OnPeriod', 'OnExpire', 'OnRemove']), select('scope', 'scope', ['Source', 'Target']), select('action', 'action', ['Graph', 'Event', 'Both']), number('priority')];
 export const CONFIG_PARAM_FIELDS = [text('type'), { key: 'value', label: 'value (JSON)', type: 'json' }];
