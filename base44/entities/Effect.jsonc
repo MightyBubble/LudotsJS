@@ -10,10 +10,31 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "maxItems": 1
     },
     "presetType": {
-      "type": "string"
+      "type": "string",
+      "enum": [
+        "None",
+        "ApplyForce2D",
+        "InstantDamage",
+        "DoT",
+        "Heal",
+        "HoT",
+        "Buff",
+        "Search",
+        "PeriodicSearch",
+        "LaunchProjectile",
+        "CreateUnit",
+        "Displacement",
+        "Relation",
+        "Exchange",
+        "CompleteProgression",
+        "SubmitOrderFromBlackboard",
+        "DeployConsumeSource",
+        "RevealArea"
+      ]
     },
     "lifetime": {
       "type": "string",
@@ -354,6 +375,7 @@
   },
   "required": [
     "effect_id",
+    "presetType",
     "lifetime",
     "participatesInResponse"
   ]

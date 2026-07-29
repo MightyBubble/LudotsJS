@@ -4,6 +4,8 @@ import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section, TextField, SelectField, ListField, NumberField, BoolField } from '@/components/ludots/ui';
+import GameplayTagSelect from '@/components/ludots/GameplayTagSelect';
+import { EFFECT_PRESET_OPTIONS } from '@/components/ludots/effectPresetTypes';
 import TargetResolverEditor from '@/components/ludots/TargetResolverEditor';
 import RefListSelector from '@/components/ludots/RefListSelector';
 import PhasePipelineEditor from '@/components/ludots/PhasePipelineEditor';
@@ -19,7 +21,7 @@ export default function EffectLibraryPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Effect', 'effects',
     () => ({
-      effect_id: `effect_${Date.now()}`, tags: [], presetType: '',
+      effect_id: `effect_${Date.now()}`, tags: [], presetType: 'None',
       lifetime: 'Instant', participatesInResponse: false,
       application: { stacking: 'none', overflow: 'reject', duration_refresh: 'never', period_reset: 'never' },
       target: { kind: 'self' }, requirements: [],
@@ -60,8 +62,8 @@ export default function EffectLibraryPage() {
         <div className="max-w-3xl">
           <Section title="基础 Basic · EffectTemplateConfig">
             <TextField label="id" value={draft.effect_id} onChange={(v) => patch({ effect_id: v })} hint="C# JSON 的 id；平台内置 id 已占用，因此数据库中存为 effect_id" />
-            <ListField label="tags" value={draft.tags} onChange={(v) => patch({ tags: v })} />
-            <TextField label="presetType" value={draft.presetType} onChange={(v) => patch({ presetType: v })} />
+            <GameplayTagSelect label="tags[0]" value={draft.tags?.[0]} tags={refs.tags} onChange={(v) => patch({ tags: v ? [v] : [] })} />
+            <SelectField label="presetType" value={draft.presetType || 'None'} options={EFFECT_PRESET_OPTIONS} onChange={(v) => patch({ presetType: v })} />
             <BoolField label="participatesInResponse" value={draft.participatesInResponse === true} onChange={(v) => patch({ participatesInResponse: v })} />
           </Section>
 
@@ -80,7 +82,7 @@ export default function EffectLibraryPage() {
             {expireCondition && (
               <>
                 <SelectField label="expireCondition.kind" value={expireCondition.kind} options={OPT(['TagPresent', 'TagAbsent'])} onChange={(v) => setExpireCondition({ kind: v })} />
-                <TextField label="expireCondition.tag" value={expireCondition.tag} onChange={(v) => setExpireCondition({ tag: v })} />
+                <GameplayTagSelect label="expireCondition.tag" value={expireCondition.tag} tags={refs.tags} onChange={(v) => setExpireCondition({ tag: v })} />
                 <SelectField label="expireCondition.sense" value={expireCondition.sense} options={OPT(['Raw', 'Effective'])} onChange={(v) => setExpireCondition({ sense: v })} />
               </>
             )}
