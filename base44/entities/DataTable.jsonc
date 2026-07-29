@@ -14,6 +14,15 @@
       "type": "string",
       "description": "\u6570\u636e\u8868\u63cf\u8ff0"
     },
+    "table_type": {
+      "type": "string",
+      "enum": [
+        "data",
+        "constant"
+      ],
+      "default": "data",
+      "description": "\u8868\u7c7b\u578b\uff1adata \u666e\u901a\u6570\u636e\u8868\uff1bconstant \u5e38\u91cf\u8868\uff08\u56fa\u5b9a\u5217 key/type/value/description\uff0c\u53ef\u5b58\u5728\u591a\u5f20\uff09"
+    },
     "columns": {
       "type": "array",
       "items": {

@@ -13,11 +13,14 @@ export default function DataTableEditorPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: tables = [] } = useQuery({
+  const { data: allTables = [] } = useQuery({
     queryKey: ['dataTables'],
     queryFn: () => base44.entities.DataTable.list(),
     initialData: [],
   });
+
+  // 常量表在「常量表」页面单独管理
+  const tables = allTables.filter(t => t.table_type !== 'constant');
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.DataTable.create(data),
@@ -50,6 +53,7 @@ export default function DataTableEditorPage() {
       table_id: "new_table",
       name: "新数据表",
       description: "",
+      table_type: "data",
       columns: [{ name: "column1", type: "string" }],
       rows: [{ column1: "" }]
     };

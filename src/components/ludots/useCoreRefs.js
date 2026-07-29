@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import useConstants from '@/lib/useConstants';
 
 const q = (key, fn) => ({ queryKey: [key], queryFn: fn, initialData: [] });
 
@@ -11,7 +12,7 @@ export default function useCoreRefs() {
   const { data: events } = useQuery(q('gameEvents', () => base44.entities.GameEvent.list()));
   const { data: prototypes } = useQuery(q('entityPrototypes', () => base44.entities.EntityPrototype.list()));
   const { data: entityQueries } = useQuery(q('entityQueries', () => base44.entities.EntityQuery.list()));
-  const { data: constants } = useQuery(q('globalConstants', () => base44.entities.GlobalConstant.list()));
+  const constants = useConstants();
   const { data: dataGraphs } = useQuery(q('dataGraphs', () => base44.entities.DataGraph.list()));
   const { data: effects } = useQuery(q('effects', () => base44.entities.Effect.list()));
   const { data: abilities } = useQuery(q('abilities', () => base44.entities.Ability.list()));

@@ -38,7 +38,7 @@ export const NAV_GROUPS = [
       { page: 'EntityPrototypeEditor', label: '实体原型', icon: Box },
       { page: 'EntityRelationEditor', label: '实体关系', icon: LinkIcon },
       { page: 'DataTableEditor', label: '数据表', icon: Table },
-      { page: 'GlobalConstantEditor', label: '全局常量', icon: Settings },
+      { page: 'GlobalConstantEditor', label: '常量表', icon: Settings },
       { page: 'StructureEditor', label: '结构关系图', icon: Network },
       { page: 'AssetLibrary', label: 'Asset 资源', icon: Box },
     ],

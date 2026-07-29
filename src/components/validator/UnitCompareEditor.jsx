@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import useConstants from '@/lib/useConstants';
 
 export default function UnitCompareEditor({ config, onChange }) {
   const compareConfig = config || { compare_type: 'attribute_value', operator: 'gte' };
@@ -25,11 +26,7 @@ export default function UnitCompareEditor({ config, onChange }) {
     initialData: [],
   });
 
-  const { data: constants = [] } = useQuery({
-    queryKey: ['globalConstants'],
-    queryFn: () => base44.entities.GlobalConstant.list(),
-    initialData: [],
-  });
+  const constants = useConstants();
 
   const handleUpdate = (field, value) => {
     onChange({ ...compareConfig, [field]: value });

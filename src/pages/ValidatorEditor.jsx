@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import useConstants from "@/lib/useConstants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -50,11 +51,7 @@ export default function ValidatorEditorPage() {
     initialData: [],
   });
 
-  const { data: constants = [] } = useQuery({
-    queryKey: ['globalConstants'],
-    queryFn: () => base44.entities.GlobalConstant.list(),
-    initialData: [],
-  });
+  const constants = useConstants();
 
   // 验证图：用途为 validation 且出口为 boolean 的 DataGraph
   const validationGraphs = useMemo(() => {

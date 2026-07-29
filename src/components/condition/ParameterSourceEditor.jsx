@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import useConstants from '@/lib/useConstants';
 
 export default function ParameterSourceEditor({ value, onChange, label = "参数", allowEntityTag = true }) {
   const source = value || { source_type: 'literal', literal_value: '' };
@@ -13,11 +14,7 @@ export default function ParameterSourceEditor({ value, onChange, label = "参数
     initialData: [],
   });
 
-  const { data: constants = [] } = useQuery({
-    queryKey: ['globalConstants'],
-    queryFn: () => base44.entities.GlobalConstant.list(),
-    initialData: [],
-  });
+  const constants = useConstants();
 
   const { data: tags = [] } = useQuery({
     queryKey: ['gameplayTags'],
