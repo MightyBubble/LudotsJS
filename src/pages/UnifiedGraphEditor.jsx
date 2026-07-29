@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Network, Filter, Database, Share2 } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
+import useEditorMeta from "@/components/assetBrowser/useEditorMeta";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
 import Toolbar from '../components/graph/Toolbar';
@@ -46,6 +47,7 @@ export default function UnifiedGraphEditorPage() {
   const [selectedConnectionId, setSelectedConnectionId] = useState(null);
 
   const queryClient = useQueryClient();
+  const graphMeta = useEditorMeta('Graph');
 
   const { data: relations = [] } = useQuery({
     queryKey: ['entityRelations'],
@@ -675,6 +677,7 @@ export default function UnifiedGraphEditorPage() {
           })}
           selectedId={selectedGraph?.id}
           onSelect={setSelectedGraph}
+          onOpen={openGraph}
           onCreate={() => setIsCreating(true)}
           onDelete={(g) => {
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
@@ -699,9 +702,19 @@ export default function UnifiedGraphEditorPage() {
                 {selectedGraph.entity_type === 'DataGraph' && ` · 出口 ${selectedGraph.return_type || 'number'}`}
               </div>
               {selectedGraph.description && <p className="text-sm text-gray-400">{selectedGraph.description}</p>}
-              <Button onClick={() => openGraph(selectedGraph)} className="h-8 bg-[#D97706] hover:bg-[#B45309] text-black">
-                <Network className="w-3.5 h-3.5 mr-1" />可视化编辑
-              </Button>
+
+              <div className="pt-2">
+                <label className="text-xs text-gray-500 block mb-1">虚拟目录（用 / 分隔，留空为根目录）</label>
+                <Input
+                  key={selectedGraph.id}
+                  defaultValue={graphMeta.getCategory(selectedGraph.id)}
+                  placeholder="例如 曲线/属性成长"
+                  onBlur={(e) => graphMeta.setCategory(selectedGraph.id, e.target.value.trim())}
+                  className="h-8 max-w-xs bg-[#15171C] border-[#2A2E37] text-xs text-[#e5e5e5]"
+                />
+              </div>
+
+              <p className="text-xs text-gray-600">提示：在左侧树中双击可直接打开图</p>
             </div>
           ) : (
             <div className="flex h-full items-center justify-center text-gray-500 text-sm">

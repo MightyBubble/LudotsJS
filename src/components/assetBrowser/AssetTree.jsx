@@ -15,7 +15,7 @@ function buildTree(items) {
   return root;
 }
 
-function TreeLevel({ node, path, depth, selectedId, onSelect, onSetCategory, onToggleFavorite, onDelete, collapsed, toggleFolder }) {
+function TreeLevel({ node, path, depth, selectedId, onSelect, onOpen, onSetCategory, onToggleFavorite, onDelete, collapsed, toggleFolder }) {
   const folderNames = Object.keys(node.folders).sort();
   return (
     <div>
@@ -36,7 +36,7 @@ function TreeLevel({ node, path, depth, selectedId, onSelect, onSetCategory, onT
             {isOpen && (
               <TreeLevel
                 node={node.folders[name]} path={fullPath} depth={depth + 1}
-                selectedId={selectedId} onSelect={onSelect} onSetCategory={onSetCategory}
+                selectedId={selectedId} onSelect={onSelect} onOpen={onOpen} onSetCategory={onSetCategory}
                 onToggleFavorite={onToggleFavorite} onDelete={onDelete}
                 collapsed={collapsed} toggleFolder={toggleFolder}
               />
@@ -49,6 +49,8 @@ function TreeLevel({ node, path, depth, selectedId, onSelect, onSetCategory, onT
         <div
           key={item.id}
           onClick={() => onSelect(item)}
+          onDoubleClick={() => onOpen && onOpen(item)}
+          title={onOpen ? "双击打开" : undefined}
           className={`group flex items-center gap-1 px-2 py-1 rounded cursor-pointer text-xs ${selectedId === item.id ? "bg-[#D97706] text-black" : "text-gray-300 hover:bg-[#2A2E37]"}`}
           style={{ paddingLeft: 12 + depth * 12 }}
         >
@@ -90,7 +92,7 @@ function TreeLevel({ node, path, depth, selectedId, onSelect, onSetCategory, onT
   );
 }
 
-export default function AssetTree({ items, selectedId, onSelect, onSetCategory, onToggleFavorite, onDelete }) {
+export default function AssetTree({ items, selectedId, onSelect, onOpen, onSetCategory, onToggleFavorite, onDelete }) {
   const [collapsed, setCollapsed] = useState({});
   const tree = useMemo(() => buildTree(items), [items]);
   const toggleFolder = (path) => setCollapsed(prev => ({ ...prev, [path]: !prev[path] }));
@@ -102,7 +104,7 @@ export default function AssetTree({ items, selectedId, onSelect, onSetCategory, 
   return (
     <TreeLevel
       node={tree} path="" depth={0}
-      selectedId={selectedId} onSelect={onSelect} onSetCategory={onSetCategory}
+      selectedId={selectedId} onSelect={onSelect} onOpen={onOpen} onSetCategory={onSetCategory}
       onToggleFavorite={onToggleFavorite} onDelete={onDelete}
       collapsed={collapsed} toggleFolder={toggleFolder}
     />

@@ -10,7 +10,7 @@ import useEditorMeta from "./useEditorMeta";
  * records: 业务记录数组；toItem(record) → { id, name, subtitle }
  */
 export default function AssetBrowserPanel({
-  entityName, records, toItem, selectedId, onSelect, onCreate, onDelete, children,
+  entityName, records, toItem, selectedId, onSelect, onOpen, onCreate, onDelete, children,
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const { metaByRecord, getCategory, setCategory, toggleFavorite } = useEditorMeta(entityName);
@@ -56,6 +56,7 @@ export default function AssetBrowserPanel({
           items={items}
           selectedId={selectedId}
           onSelect={(item) => onSelect(item.record)}
+          onOpen={onOpen ? (item) => onOpen(item.record) : undefined}
           onSetCategory={(item, path) => setCategory(item.record.id, path)}
           onToggleFavorite={(item) => toggleFavorite(item.record.id)}
           onDelete={onDelete ? (item) => onDelete(item.record) : undefined}
