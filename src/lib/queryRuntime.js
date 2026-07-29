@@ -187,26 +187,22 @@ export function executeQueryGraph({ nodes = [], connections = [] }, entities = [
   };
 }
 
-export const SAMPLE_ENTITIES = [
-  {
-    id: 'hero_1', name: '关羽', prototype_id: 'hero',
-    attributes: { attack_power: { base_value: 120 }, health: { base_value: 900 } },
-    tags: { 'Status.Buff.Rage': 2, 'Faction.Shu': 1 },
-    position: { x: 0, y: 0, z: 0 },
-    relations: [{ relation_id: 'hero_equipment', target_id: 'item_1', attributes: { durability: { base_value: 80 } }, tags: {} }],
-  },
-  {
-    id: 'hero_2', name: '张飞', prototype_id: 'hero',
-    attributes: { attack_power: { base_value: 95 }, health: { base_value: 1100 } },
-    tags: { 'Faction.Shu': 1 },
-    position: { x: 50, y: 0, z: 0 },
-    relations: [],
-  },
-  {
-    id: 'item_1', name: '青龙偃月刀', prototype_id: 'weapon',
-    attributes: { attack_power: { base_value: 40 } },
-    tags: { 'Item.Weapon': 1 },
-    position: { x: 5, y: 0, z: 0 },
-    relations: [],
-  },
-];
+// 将 SimulatedEntity 记录转换为运行时实体形状
+export function simulatedEntitiesToRuntime(records = []) {
+  return records
+    .filter(r => r.is_active !== false)
+    .map(r => ({
+      id: r.entity_key,
+      name: r.name,
+      prototype_id: r.prototype_id,
+      attributes: r.attributes || {},
+      tags: r.tags || {},
+      position: r.position || {},
+      relations: (r.relations || []).map(rel => ({
+        relation_id: rel.relation_id,
+        target_id: rel.target_key,
+        attributes: rel.attributes || {},
+        tags: rel.tags || {},
+      })),
+    }));
+}

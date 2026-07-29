@@ -1,0 +1,71 @@
+{
+  "name": "SimulatedEntity",
+  "type": "object",
+  "properties": {
+    "entity_key": {
+      "type": "string",
+      "description": "\u6a21\u62df\u5b9e\u4f53\u552f\u4e00\u952e\uff08\u7528\u4e8e\u5173\u7cfb\u5f15\u7528\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "prototype_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u5b9e\u4f53\u539f\u578bID\uff08\u5f15\u7528 EntityPrototype\uff09"
+    },
+    "attributes": {
+      "type": "object",
+      "description": "\u5c5e\u6027\u503c\uff1a{ [attributeId]: { [key]: number } }"
+    },
+    "tags": {
+      "type": "object",
+      "description": "\u6807\u7b7e\u8ba1\u6570\uff1a{ [tagPath]: count }"
+    },
+    "position": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "description": "\u7a7a\u95f4\u5750\u6807"
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relation_id": {
+            "type": "string"
+          },
+          "target_key": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object"
+          },
+          "tags": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "\u8be5\u5b9e\u4f53\u53d1\u51fa\u7684\u5173\u7cfb\u5b9e\u4f8b"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u662f\u5426\u53c2\u4e0e\u6a21\u62df"
+    }
+  },
+  "required": [
+    "entity_key",
+    "name"
+  ]
+}

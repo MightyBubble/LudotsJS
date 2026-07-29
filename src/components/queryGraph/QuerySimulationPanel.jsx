@@ -1,17 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Play, RotateCcw } from 'lucide-react';
-import { executeQueryGraph, SAMPLE_ENTITIES } from '@/lib/queryRuntime';
+import { base44 } from '@/api/base44Client';
+import { executeQueryGraph, simulatedEntitiesToRuntime } from '@/lib/queryRuntime';
 import { getNodeLabel } from '@/components/graph/nodeConfigs';
 
 export default function QuerySimulationPanel({ nodes, connections }) {
-  const [entitiesText, setEntitiesText] = useState(() => JSON.stringify(SAMPLE_ENTITIES, null, 2));
+  const { data: records = [], isLoading } = useQuery({
+    queryKey: ['simulatedEntities'],
+    queryFn: () => base44.entities.SimulatedEntity.list(),
+  });
+
+  const dbEntities = useMemo(() => simulatedEntitiesToRuntime(records), [records]);
+  const [entitiesText, setEntitiesText] = useState('');
   const [runToken, setRunToken] = useState(0);
+
+  useEffect(() => {
+    if (dbEntities.length > 0) setEntitiesText(JSON.stringify(dbEntities, null, 2));
+  }, [dbEntities]);
 
   const { result, parseError } = useMemo(() => {
     let entities;
     try {
-      entities = JSON.parse(entitiesText);
+      entities = JSON.parse(entitiesText || '[]');
       if (!Array.isArray(entities)) throw new Error('必须是数组');
     } catch (e) {
       return { result: null, parseError: e.message };
@@ -25,7 +37,8 @@ export default function QuerySimulationPanel({ nodes, connections }) {
         <h3 className="text-sm font-bold text-[#e5e5e5]">查询模拟</h3>
         <div className="flex gap-1">
           <Button size="sm" className="h-6 px-2 bg-[#0D0F14] hover:bg-[#2A2E37] text-xs text-gray-400"
-            onClick={() => setEntitiesText(JSON.stringify(SAMPLE_ENTITIES, null, 2))}>
+            title="恢复为数据库中的模拟实体"
+            onClick={() => setEntitiesText(JSON.stringify(dbEntities, null, 2))}>
             <RotateCcw className="w-3 h-3" />
           </Button>
           <Button size="sm" className="h-6 px-2 bg-[#D97706] hover:bg-[#B45309] text-black text-xs"
@@ -35,14 +48,23 @@ export default function QuerySimulationPanel({ nodes, connections }) {
         </div>
       </div>
 
-      <div className="text-[10px] text-gray-500 mb-1">模拟实体集 (JSON)</div>
-      <textarea
-        value={entitiesText}
-        onChange={(e) => setEntitiesText(e.target.value)}
-        spellCheck={false}
-        className="w-full h-40 bg-[#0D0F14] border border-[#2A2E37] rounded p-2 text-[10px] font-mono text-[#e5e5e5] resize-y"
-      />
+      <div className="text-[10px] text-gray-500 mb-1">
+        模拟实体集 (来自 SimulatedEntity，共 {dbEntities.length} 个)
+      </div>
+      {isLoading ? (
+        <div className="text-xs text-gray-600">加载中...</div>
+      ) : (
+        <textarea
+          value={entitiesText}
+          onChange={(e) => setEntitiesText(e.target.value)}
+          spellCheck={false}
+          className="w-full h-40 bg-[#0D0F14] border border-[#2A2E37] rounded p-2 text-[10px] font-mono text-[#e5e5e5] resize-y"
+        />
+      )}
       {parseError && <div className="text-[10px] text-red-400 mt-1">JSON 错误：{parseError}</div>}
+      {!isLoading && dbEntities.length === 0 && (
+        <div className="text-[10px] text-gray-500 mt-1">数据库中暂无模拟实体，请先添加 SimulatedEntity 记录。</div>
+      )}
 
       {result && (
         <>
