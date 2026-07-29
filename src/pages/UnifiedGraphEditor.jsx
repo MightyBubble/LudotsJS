@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Network, Filter, Database, Share2 } from "lucide-react";
 import AssetBrowserPanel from "@/components/assetBrowser/AssetBrowserPanel";
-import useEditorMeta from "@/components/assetBrowser/useEditorMeta";
 import GraphCanvas from '../components/graph/GraphCanvas';
 import UnifiedNodeLibrary from '../components/graph/UnifiedNodeLibrary';
+import NodeSearchMenu from '../components/graph/NodeSearchMenu';
 import Toolbar from '../components/graph/Toolbar';
 import UnifiedNode from '../components/graph/UnifiedNode';
 import BlackboardPanel from '../components/graph/BlackboardPanel';
@@ -33,7 +33,8 @@ export default function UnifiedGraphEditorPage() {
   const [blackboard, setBlackboard] = useState({});
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [showLibrary, setShowLibrary] = useState(true);
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [nodeMenu, setNodeMenu] = useState(null);
   const [showBlackboard, setShowBlackboard] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newGraph, setNewGraph] = useState({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
@@ -47,7 +48,6 @@ export default function UnifiedGraphEditorPage() {
   const [selectedConnectionId, setSelectedConnectionId] = useState(null);
 
   const queryClient = useQueryClient();
-  const graphMeta = useEditorMeta('Graph');
 
   const { data: relations = [] } = useQuery({
     queryKey: ['entityRelations'],
@@ -394,9 +394,8 @@ export default function UnifiedGraphEditorPage() {
     createMutation.mutate(newGraph);
   };
 
-  if (currentGraph) {
-    return (
-      <div className="h-screen w-full bg-[#0D0F14] flex flex-col overflow-hidden">
+  const editorPane = currentGraph ? (
+      <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden min-w-0">
         <Toolbar
           onSave={saveGraph}
           onZoomIn={() => setZoom(prev => Math.min(prev + 0.1, 2))}
@@ -447,7 +446,18 @@ export default function UnifiedGraphEditorPage() {
               connectionValues={connectionValues}
               onSelectNode={(id) => setEditingNodeId(id)}
               onSelectConnection={(id) => setSelectedConnectionId(id)}
+              onPaneContextMenu={setNodeMenu}
             />
+
+            {nodeMenu && (
+              <NodeSearchMenu
+                x={nodeMenu.x}
+                y={nodeMenu.y}
+                graphType={currentGraph.graph_type}
+                onAdd={(type) => addNodeAtPosition(type, nodeMenu.position)}
+                onClose={() => setNodeMenu(null)}
+              />
+            )}
 
             <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded text-white/60 text-xs font-mono space-y-1 pointer-events-none">
               <div className="flex items-center gap-2">
@@ -594,8 +604,7 @@ export default function UnifiedGraphEditorPage() {
           )}
         </div>
       </div>
-    );
-  }
+  ) : null;
 
   return (
     <div className="h-screen flex flex-col bg-[#0D0F14] text-[#e5e5e5]">
@@ -676,8 +685,7 @@ export default function UnifiedGraphEditorPage() {
             subtitle: `${graphTypeLabel(g)}${g.entity_type === 'DataGraph' ? ` · ${g.return_type || 'number'}` : ''}`,
           })}
           selectedId={selectedGraph?.id}
-          onSelect={setSelectedGraph}
-          onOpen={openGraph}
+          onSelect={(g) => { setSelectedGraph(g); openGraph(g); }}
           onCreate={() => setIsCreating(true)}
           onDelete={(g) => {
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
@@ -687,44 +695,15 @@ export default function UnifiedGraphEditorPage() {
           }}
         />
 
-        <div className="flex-1 overflow-auto p-6">
-          {selectedGraph ? (
-            <div className="max-w-xl space-y-4">
-              <div className="flex items-center gap-2">
-                {selectedGraph.entity_type === 'DataGraph' ? <Network className="w-5 h-5 text-[#5b9bd5]" /> :
-                 selectedGraph.graph_type === 'query' ? <Filter className="w-5 h-5 text-[#70ad47]" /> :
-                 selectedGraph.graph_type === 'structure' ? <Share2 className="w-5 h-5 text-[#ffc000]" /> :
-                 <Database className="w-5 h-5 text-[#c97fff]" />}
-                <h2 className="text-xl font-bold text-[#E2D8B3]">{selectedGraph.name}</h2>
-              </div>
-              <div className="text-xs text-gray-500">
-                {graphTypeLabel(selectedGraph)}
-                {selectedGraph.entity_type === 'DataGraph' && ` · 出口 ${selectedGraph.return_type || 'number'}`}
-              </div>
-              {selectedGraph.description && <p className="text-sm text-gray-400">{selectedGraph.description}</p>}
-
-              <div className="pt-2">
-                <label className="text-xs text-gray-500 block mb-1">虚拟目录（用 / 分隔，留空为根目录）</label>
-                <Input
-                  key={selectedGraph.id}
-                  defaultValue={graphMeta.getCategory(selectedGraph.id)}
-                  placeholder="例如 曲线/属性成长"
-                  onBlur={(e) => graphMeta.setCategory(selectedGraph.id, e.target.value.trim())}
-                  className="h-8 max-w-xs bg-[#15171C] border-[#2A2E37] text-xs text-[#e5e5e5]"
-                />
-              </div>
-
-              <p className="text-xs text-gray-600">提示：在左侧树中双击可直接打开图</p>
+        {editorPane || (
+          <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
+            <div className="text-center">
+              <Network className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p>从左侧选择或新建一张图</p>
+              <p className="text-xs text-gray-600 mt-2">画布内右键可唤出节点菜单</p>
             </div>
-          ) : (
-            <div className="flex h-full items-center justify-center text-gray-500 text-sm">
-              <div className="text-center">
-                <Network className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                <p>从左侧选择或新建一张图</p>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

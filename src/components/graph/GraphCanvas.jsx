@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -85,11 +85,13 @@ function GraphCanvasInner({
   onAddNodeAtPosition,
   onSelectNode,
   onSelectConnection,
+  onPaneContextMenu,
   NodeComponent
 }) {
   const { screenToFlowPosition } = useReactFlow();
   const [rfNodes, setRfNodes] = useState([]);
   const [rfEdges, setRfEdges] = useState([]);
+  const containerRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [pendingDrop, setPendingDrop] = useState(null);
 
@@ -232,7 +234,25 @@ function GraphCanvasInner({
   }, [pendingDrop, onAddNodeAtPosition]);
 
   return (
-    <div className="w-full h-full bg-[#0B0D12] relative" onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div
+      ref={containerRef}
+      className="w-full h-full bg-[#0B0D12] relative"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onContextMenu={(e) => {
+        if (e.target.closest('.react-flow__node') || e.target.closest('.react-flow__edge')) return;
+        e.preventDefault();
+        const rect = containerRef.current.getBoundingClientRect();
+        onPaneContextMenu?.({
+          x: e.clientX,
+          y: e.clientY,
+          position: {
+            x: (e.clientX - rect.left - (pan?.x ?? 0)) / zoom,
+            y: (e.clientY - rect.top - (pan?.y ?? 0)) / zoom
+          }
+        });
+      }}
+    >
       <style>{`
         .react-flow__attribution { display: none; }
         .react-flow__handle { transition: none; }
@@ -250,11 +270,12 @@ function GraphCanvasInner({
         onMove={handleMove}
         onNodeClick={(_, node) => onSelectNode?.(node.id)}
         onEdgeClick={(_, edge) => onSelectConnection?.(edge.id)}
+
         defaultViewport={{ x: pan?.x ?? 0, y: pan?.y ?? 0, zoom }}
         minZoom={0.2}
         maxZoom={2}
         deleteKeyCode={['Delete', 'Backspace']}
-        panOnDrag={[1, 2]}
+        panOnDrag={[1]}
         selectionOnDrag
         multiSelectionKeyCode={['Control', 'Meta']}
         proOptions={{ hideAttribution: true }}
