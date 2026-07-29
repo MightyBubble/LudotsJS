@@ -11,6 +11,7 @@ import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
 import { evaluateGraph } from '@/lib/graphRuntime';
+import { structureToGraph, graphToStructure, legacyDataGraphToStructure } from '@/lib/structureAdapter';
 import {
   Dialog,
   DialogContent,
@@ -67,30 +68,47 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
-  // Structure graphs are stored in DataGraph with graph_type='structure'
-  // We need to separate them from 'data' type DataGraphs in UI if needed, or just treat them as DataGraphs
-  // But DataGraph.list() returns all. The backend filter isn't applied here.
-  // We will filter them in allGraphs.
+  // 结构图的唯一真源是 StructureDefinition；DataGraph 中的 structure 记录属于遗留数据
+  const { data: structureDefs = [] } = useQuery({
+    queryKey: ['structureDefinitions'],
+    queryFn: () => base44.entities.StructureDefinition.list(),
+    initialData: [],
+  });
 
   const allGraphs = useMemo(() => {
-    // DataGraph entity contains both 'data' and 'structure' graphs (and potentially others)
-    // We need to respect the graph_type field from the entity.
-    const dataGraphEntities = dataGraphs.map(g => ({ 
-      ...g, 
+    const dataGraphEntities = dataGraphs.map(g => ({
+      ...g,
       graph_type: g.graph_type || 'data', // Default to data if not set
-      entity_type: 'DataGraph' 
+      entity_type: 'DataGraph',
+      is_legacy_structure: g.graph_type === 'structure',
     }));
 
     return [
+      ...structureDefs.map(s => ({ ...s, graph_type: 'structure', entity_type: 'StructureDefinition' })),
       ...dataGraphEntities,
       ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
       ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' }))
     ];
-  }, [dataGraphs, queryGraphs, functionGraphs]);
+  }, [structureDefs, dataGraphs, queryGraphs, functionGraphs]);
+
+  const invalidateGraphs = useCallback(() => {
+    ['dataGraphs', 'entityQueries', 'functionGraphs', 'structureDefinitions'].forEach(key =>
+      queryClient.invalidateQueries({ queryKey: [key] })
+    );
+  }, [queryClient]);
 
   const createMutation = useMutation({
     mutationFn: (data) => {
-      if (data.graph_type === 'data' || data.graph_type === 'structure') {
+      if (data.graph_type === 'structure') {
+        return base44.entities.StructureDefinition.create({
+          structure_id: data.name.toLowerCase().replace(/\s+/g, '_'),
+          name: data.name,
+          description: data.description,
+          structure_type: 'graph',
+          nodes: [],
+          edges: []
+        });
+      } else if (data.graph_type === 'data') {
         return base44.entities.DataGraph.create({
           graph_id: data.name.toLowerCase().replace(/\s+/g, '_'),
           name: data.name,
@@ -117,18 +135,21 @@ export default function UnifiedGraphEditorPage() {
     },
     onSuccess: (graph, variables) => {
       // Invalidate the correct query key based on graph_type
-      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
+      invalidateGraphs();
       setIsCreating(false);
       setNewGraph({ name: '', description: '', graph_type: 'data', return_type: 'void' }); // Reset newGraph state, including return_type
-      // entity_type for structure is also DataGraph
-      const entityType = (variables.graph_type === 'data' || variables.graph_type === 'structure') ? 'DataGraph' : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
+      const entityType = variables.graph_type === 'structure' ? 'StructureDefinition'
+        : variables.graph_type === 'data' ? 'DataGraph'
+        : variables.graph_type === 'query' ? 'EntityQuery' : 'FunctionGraph';
       openGraph({ ...graph, graph_type: variables.graph_type, entity_type: entityType });
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data, entity_type }) => {
-      if (entity_type === 'DataGraph') {
+      if (entity_type === 'StructureDefinition') {
+        return base44.entities.StructureDefinition.update(id, data);
+      } else if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.update(id, data);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.update(id, data);
@@ -136,15 +157,24 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.FunctionGraph.update(id, data);
       }
     },
-    onSuccess: (_, variables) => {
-      // Invalidate the correct query key based on entity_type
-      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
+    onSuccess: () => invalidateGraphs(),
+  });
+
+  // 遗留 DataGraph(structure) 记录迁移为 StructureDefinition
+  const migrateMutation = useMutation({
+    mutationFn: async (legacyGraph) => {
+      const created = await base44.entities.StructureDefinition.create(legacyDataGraphToStructure(legacyGraph));
+      await base44.entities.DataGraph.delete(legacyGraph.id);
+      return created;
     },
+    onSuccess: () => invalidateGraphs(),
   });
 
   const deleteMutation = useMutation({
     mutationFn: ({ id, entity_type }) => {
-      if (entity_type === 'DataGraph') {
+      if (entity_type === 'StructureDefinition') {
+        return base44.entities.StructureDefinition.delete(id);
+      } else if (entity_type === 'DataGraph') {
         return base44.entities.DataGraph.delete(id);
       } else if (entity_type === 'EntityQuery') { // Added else if for EntityQuery
         return base44.entities.EntityQuery.delete(id);
@@ -152,10 +182,7 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.FunctionGraph.delete(id);
       }
     },
-    onSuccess: (_, variables) => {
-      // Invalidate the correct query key based on entity_type
-      queryClient.invalidateQueries({ queryKey: ['dataGraphs', 'entityQueries', 'functionGraphs'] });
-    },
+    onSuccess: () => invalidateGraphs(),
   });
 
   const filteredGraphs = useMemo(() => {
@@ -167,6 +194,15 @@ export default function UnifiedGraphEditorPage() {
   }, [allGraphs, searchQuery]);
 
   const openGraph = (graph) => {
+    if (graph.entity_type === 'StructureDefinition') {
+      const { nodes: structNodes, connections: structConns } = structureToGraph(graph);
+      setCurrentGraph(graph);
+      setNodes(structNodes);
+      setConnections(structConns);
+      setBlackboard({});
+      return;
+    }
+
     let graphDef;
     try {
       graphDef = typeof graph.graph_definition === 'string'
@@ -184,6 +220,15 @@ export default function UnifiedGraphEditorPage() {
 
   const saveGraph = useCallback(() => {
     if (!currentGraph) return;
+
+    if (currentGraph.entity_type === 'StructureDefinition') {
+      updateMutation.mutate({
+        id: currentGraph.id,
+        entity_type: 'StructureDefinition',
+        data: graphToStructure(nodes, connections)
+      });
+      return;
+    }
 
     updateMutation.mutate({
       id: currentGraph.id,
@@ -235,7 +280,7 @@ export default function UnifiedGraphEditorPage() {
       color: { r: 1, g: 1, b: 1 },
       blackboard_get: { key: '' },
       blackboard_set: { key: '' },
-      structure_node: { label: '新节点', nodeId: `node_${Date.now()}` },
+      structure_node: { label: '新节点', nodeId: `node_${Date.now()}`, description: '' },
       // Query node defaults
       entity_source: {},
       filter_prototype: { prototypeId: '' },
@@ -674,14 +719,28 @@ export default function UnifiedGraphEditorPage() {
                     {/* Conditional rendering for graph type display */}
                     {graph.graph_type === 'data' ? 'Data Graph' : 
                      graph.graph_type === 'query' ? 'Entity Query' : 
-                     graph.graph_type === 'structure' ? 'Structure Graph' :
+                     graph.graph_type === 'structure' ? (graph.is_legacy_structure ? 'Structure Graph (遗留 DataGraph)' : 'Structure Definition') :
                      `Function Graph (${graph.return_type || 'void'})`}
                   </div>
                 </div>
+                {graph.is_legacy_structure && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-400 border border-amber-800/50 whitespace-nowrap">遗留</span>
+                )}
               </div>
-              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
-                <Network className="w-3 h-3 mr-1" />可视化编辑
-              </Button>
+              {graph.is_legacy_structure ? (
+                <Button
+                  size="sm"
+                  disabled={migrateMutation.isPending}
+                  onClick={() => migrateMutation.mutate(graph)}
+                  className="w-full h-7 bg-amber-900/30 hover:bg-amber-900/50 text-amber-300 border border-amber-800/50"
+                >
+                  <Share2 className="w-3 h-3 mr-1" />迁移为结构定义
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
+                  <Network className="w-3 h-3 mr-1" />可视化编辑
+                </Button>
+              )}
             </div>
           ))}
         </div>

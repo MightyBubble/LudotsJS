@@ -33,12 +33,13 @@ GlobalConstant / DataTable → 全局可引用`,
 • 修复 graph_type 枚举矛盾：DataGraph 的枚举补齐为 data / structure / curve / attribute_calculation，并新增 usage 字段（general / curve / attribute_calculation）作为「用途标记」。属性编辑器与修饰器编辑器现在能同时选到新建的 data 图和遗留类型的图。
 • 抽出统一图执行引擎 src/lib/graphRuntime.js：拓扑求值 + 环检测，实现数值、向量、黑板、比较、逻辑、集合、条件、标签判断节点。图编辑器的实时连线值与属性模拟器的曲线计算已共用它，删除了模拟器里 magnitude = a*10+b*5 的硬编码。
 
+• Structure 统一：统一图编辑器的 structure 类型改为直接读写 StructureDefinition（EntityPrototype.structure_bindings 引用的就是它），新增 src/lib/structureAdapter.js 负责 StructureDefinition ↔ 画布(nodes/connections) 双向转换；DataGraph 里的 structure 记录标记「遗留」并提供一键迁移（转成 StructureDefinition 后删除旧记录）。
+
 待办（按优先级）：
-1. Structure 统一：以 StructureDefinition 为唯一真源（EntityPrototype.structure_bindings 引用的是它），让统一编辑器的 structure 类型直接读写该实体，迁移后废弃 DataGraph 中的 structure 记录。
-2. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
-3. Action Graph（第 5 种图，副作用图）：引入 exec 执行引脚、事件入口节点、动作节点（加/移标签、改属性键、施加修饰器、发射事件、增删关系）与真正的顺序 / 分支 / 遍历。之后各处硬编码副作用字段渐进式改为引用 action graph。
-4. Query / Function 节点的执行语义接入引擎（目前非纯数值节点为端口透传）。
-5. 零散项：TagHistory 接入写入、TagCountEvent 面板补 GameEvent 下拉、ConditionEditor 配色统一（若并入 Validator 则直接下线）。`,
+1. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
+2. Action Graph（第 5 种图，副作用图）：引入 exec 执行引脚、事件入口节点、动作节点（加/移标签、改属性键、施加修饰器、发射事件、增删关系）与真正的顺序 / 分支 / 遍历。之后各处硬编码副作用字段渐进式改为引用 action graph。
+3. Query / Function 节点的执行语义接入引擎（目前非纯数值节点为端口透传）。
+4. 零散项：TagHistory 接入写入、TagCountEvent 面板补 GameEvent 下拉、ConditionEditor 配色统一（若并入 Validator 则直接下线）。`,
     questions: [
       "Action Graph 的事件入口应该复用 GameEvent 实体，还是单独定义一套图触发器？"
     ]
@@ -270,7 +271,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 
 与 UnifiedGraphEditor 中 structure 图类型存在功能重叠。`,
     questions: [
-      "[已决策，待实施] 以 StructureDefinition 为唯一真源，统一编辑器的 structure 类型改为读写该实体，迁移后废弃 DataGraph 中的 structure 记录。详见「架构统一决策」模块。"
+      "[已完成] 统一编辑器的 structure 类型现在直接读写 StructureDefinition（唯一真源）；DataGraph 中的 structure 记录标记为「遗留」，卡片上提供一键「迁移为结构定义」。"
     ]
   },
   {
