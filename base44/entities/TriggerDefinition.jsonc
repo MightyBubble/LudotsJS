@@ -50,6 +50,54 @@
       "type": "object",
       "description": "\u5404\u7c7b\u578b\u4e13\u5c5e\u914d\u7f6e"
     },
+    "requests": {
+      "type": "array",
+      "description": "\u547d\u4e2d\u540e\u53d1\u8d77\u7684\u8bf7\u6c42\u3002Trigger \u4e0d\u80fd\u76f4\u63a5\u4fee\u6539 World\uff0c\u53ea\u80fd\u5165\u961f Request\uff08Effect / Ability / Entity Lifecycle\uff09",
+      "items": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string"
+          },
+          "request_type": {
+            "type": "string",
+            "enum": [
+              "apply_effect",
+              "remove_effect",
+              "activate_ability",
+              "entity_lifecycle_request"
+            ],
+            "default": "apply_effect"
+          },
+          "effect_id": {
+            "type": "string"
+          },
+          "ability_id": {
+            "type": "string"
+          },
+          "lifecycle_request": {
+            "type": "string",
+            "enum": [
+              "create",
+              "destroy"
+            ]
+          },
+          "prototype_id": {
+            "type": "string"
+          },
+          "target_scope": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "source",
+              "target",
+              "global"
+            ],
+            "default": "owner"
+          }
+        }
+      }
+    },
     "cooldown": {
       "type": "number",
       "default": 0,

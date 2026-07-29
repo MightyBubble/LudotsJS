@@ -229,15 +229,19 @@ export const ACTION_NODE_TYPES = {
     ]
   },
   destroy_entity: {
-    label: '销毁实体',
+    label: '销毁实体请求',
     icon: Trash2,
     category: '动作-副作用',
     graphTypes: ['action'],
+    description: '只生成 Entity Lifecycle Request（Alive→DestroyRequested→PendingDestroy→Cleanup→StructuralCommit→Destroyed），不直接删除实体',
     inputs: [
       { id: 'exec', label: '执行', type: 'exec' },
       { id: 'entity', label: '实体', type: 'entity' }
     ],
-    outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }]
+    outputs: [
+      { id: 'exec_out', label: '完成', type: 'exec' },
+      { id: 'request', label: '销毁请求', type: 'any' }
+    ]
   },
   set_entity_position: {
     label: '设置坐标',

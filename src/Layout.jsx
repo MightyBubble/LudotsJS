@@ -42,6 +42,19 @@ export default function Layout({ children, currentPageName }) {
           <Sparkles className="w-3.5 h-3.5" />效果
         </Link>
         <div className="h-5 w-px bg-[#2A2E37]" />
+        <Link to="/EffectLibrary" className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "EffectLibrary" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+          <Sparkles className="w-3.5 h-3.5" />Effect
+        </Link>
+        <Link to="/AbilityLibrary" className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "AbilityLibrary" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+          <Zap className="w-3.5 h-3.5" />Ability
+        </Link>
+        <Link to="/TriggerLibrary" className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "TriggerLibrary" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+          <KeyRound className="w-3.5 h-3.5" />Trigger
+        </Link>
+        <Link to="/AssetLibrary" className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "AssetLibrary" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
+          <Box className="w-3.5 h-3.5" />Asset
+        </Link>
+        <div className="h-5 w-px bg-[#2A2E37]" />
         <Link to={createPageUrl("UnifiedGraphEditor")} className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs transition-colors whitespace-nowrap font-medium ${currentPageName === "UnifiedGraphEditor" ? "bg-[#D97706] text-black" : "text-gray-400 hover:bg-[#2A2E37] hover:text-white"}`}>
           <Globe className="w-3.5 h-3.5" />图
         </Link>
