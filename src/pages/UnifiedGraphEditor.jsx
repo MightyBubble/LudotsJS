@@ -230,7 +230,6 @@ export default function UnifiedGraphEditorPage() {
     }
 
     let loadedNodes = graphDef.nodes || [];
-    if (graphDef.readOnly) loadedNodes = loadedNodes.map(node => ({ ...node, locked: true }));
     // 纯函数图必须存在入口与返回节点
     if (graph.graph_type === 'function' && !loadedNodes.some(n => n.type === 'function_entry')) {
       loadedNodes = [...buildFunctionDefaultNodes(graph.return_type || 'void'), ...loadedNodes];
@@ -459,20 +458,20 @@ export default function UnifiedGraphEditorPage() {
           pan={pan}
           onPanChange={setPan}
           onZoomChange={setZoom}
-          onUpdateNodePosition={runtimeReadOnly ? () => {} : updateNodePosition}
-          onUpdateNodeData={runtimeReadOnly ? () => {} : updateNodeData}
-          onDeleteNode={runtimeReadOnly ? () => {} : deleteNode}
-          onAddConnection={runtimeReadOnly ? () => {} : addConnection}
-          onDeleteConnection={runtimeReadOnly ? () => {} : deleteConnection}
-          onAddNodeAtPosition={runtimeReadOnly ? () => {} : addNodeAtPosition}
+          onUpdateNodePosition={updateNodePosition}
+          onUpdateNodeData={updateNodeData}
+          onDeleteNode={deleteNode}
+          onAddConnection={addConnection}
+          onDeleteConnection={deleteConnection}
+          onAddNodeAtPosition={addNodeAtPosition}
           NodeComponent={UnifiedNode}
           connectionValues={connectionValues}
           onSelectNode={(id) => setEditingNodeId(id)}
           onSelectConnection={(id) => setSelectedConnectionId(id)}
-          onPaneContextMenu={runtimeReadOnly ? () => {} : setNodeMenu}
+          onPaneContextMenu={setNodeMenu}
           />
 
-        {nodeMenu && !(currentGraph.action_id?.startsWith('Builtin.') || currentGraph.action_id === 'Graph.Lifecycle.DeployConsumeSource') && (
+        {nodeMenu && (
           <NodeSearchMenu
             x={nodeMenu.x}
             y={nodeMenu.y}
@@ -488,7 +487,7 @@ export default function UnifiedGraphEditorPage() {
           </FloatingPanel>
         )}
 
-        {showBlackboard && !runtimeReadOnly && (
+        {showBlackboard && (
           <FloatingPanel
             title={currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
             icon={Database}
@@ -532,7 +531,7 @@ export default function UnifiedGraphEditorPage() {
               </Dialog>
             </div>
           )}
-          <div>节点: {nodes.length} · 连接: {connections.length}{runtimeReadOnly ? ' · C# 只读' : ''}</div>
+          <div>节点: {nodes.length} · 连接: {connections.length}{runtimeReadOnly ? ' · Builtin 保存锁定' : ''}</div>
         </div>
       </div>
     </div>
