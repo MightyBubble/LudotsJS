@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLocation } from 'react-router-dom';
 import PageActions from '@/components/shell/PageActions';
 import { SearchBox, ToolButton } from '@/components/shell/ui';
+import { EFFECT_BUILTIN_OPERATIONS, buildEffectBuiltinGraph } from '@/components/graph/effectBuiltinGraphs';
 
 // 纯函数图默认节点：入口 + 返回
 function buildFunctionDefaultNodes(returnType) {
@@ -217,16 +218,19 @@ export default function UnifiedGraphEditorPage() {
   });
 
   const openGraph = (graph) => {
+    const builtin = EFFECT_BUILTIN_OPERATIONS.find(([actionId]) => actionId === graph.action_id);
+    const sourceGraph = builtin ? buildEffectBuiltinGraph(...builtin) : graph;
     let graphDef;
     try {
-      graphDef = typeof graph.graph_definition === 'string'
-        ? JSON.parse(graph.graph_definition)
-        : graph.graph_definition || {};
+      graphDef = typeof sourceGraph.graph_definition === 'string'
+        ? JSON.parse(sourceGraph.graph_definition)
+        : sourceGraph.graph_definition || {};
     } catch {
       graphDef = {};
     }
 
     let loadedNodes = graphDef.nodes || [];
+    if (graphDef.readOnly) loadedNodes = loadedNodes.map(node => ({ ...node, locked: true }));
     // 纯函数图必须存在入口与返回节点
     if (graph.graph_type === 'function' && !loadedNodes.some(n => n.type === 'function_entry')) {
       loadedNodes = [...buildFunctionDefaultNodes(graph.return_type || 'void'), ...loadedNodes];
@@ -246,6 +250,10 @@ export default function UnifiedGraphEditorPage() {
 
   const saveGraph = useCallback(() => {
     if (!currentGraph) return;
+    if (currentGraph.action_id?.startsWith('Builtin.') || currentGraph.action_id === 'Graph.Lifecycle.DeployConsumeSource') {
+      alert('C# Builtin 与内置 Runtime Graph 为只读引用，不能覆盖');
+      return;
+    }
 
     updateMutation.mutate({
       id: currentGraph.id,
@@ -430,6 +438,7 @@ export default function UnifiedGraphEditorPage() {
     createMutation.mutate(newGraph);
   };
 
+  const runtimeReadOnly = currentGraph?.action_id?.startsWith('Builtin.') || currentGraph?.action_id === 'Graph.Lifecycle.DeployConsumeSource';
   const editorPane = currentGraph ? (
     <div className="flex-1 bg-[#0D0F14] flex flex-col overflow-hidden min-w-0">
       <div className="flex-1 relative overflow-hidden overscroll-contain">
@@ -450,20 +459,20 @@ export default function UnifiedGraphEditorPage() {
           pan={pan}
           onPanChange={setPan}
           onZoomChange={setZoom}
-          onUpdateNodePosition={updateNodePosition}
-          onUpdateNodeData={updateNodeData}
-          onDeleteNode={deleteNode}
-          onAddConnection={addConnection}
-          onDeleteConnection={deleteConnection}
-          onAddNodeAtPosition={addNodeAtPosition}
+          onUpdateNodePosition={runtimeReadOnly ? () => {} : updateNodePosition}
+          onUpdateNodeData={runtimeReadOnly ? () => {} : updateNodeData}
+          onDeleteNode={runtimeReadOnly ? () => {} : deleteNode}
+          onAddConnection={runtimeReadOnly ? () => {} : addConnection}
+          onDeleteConnection={runtimeReadOnly ? () => {} : deleteConnection}
+          onAddNodeAtPosition={runtimeReadOnly ? () => {} : addNodeAtPosition}
           NodeComponent={UnifiedNode}
           connectionValues={connectionValues}
           onSelectNode={(id) => setEditingNodeId(id)}
           onSelectConnection={(id) => setSelectedConnectionId(id)}
-          onPaneContextMenu={setNodeMenu}
-        />
+          onPaneContextMenu={runtimeReadOnly ? () => {} : setNodeMenu}
+          />
 
-        {nodeMenu && (
+        {nodeMenu && !(currentGraph.action_id?.startsWith('Builtin.') || currentGraph.action_id === 'Graph.Lifecycle.DeployConsumeSource') && (
           <NodeSearchMenu
             x={nodeMenu.x}
             y={nodeMenu.y}
@@ -479,7 +488,7 @@ export default function UnifiedGraphEditorPage() {
           </FloatingPanel>
         )}
 
-        {showBlackboard && (
+        {showBlackboard && !runtimeReadOnly && (
           <FloatingPanel
             title={currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
             icon={Database}
@@ -523,7 +532,7 @@ export default function UnifiedGraphEditorPage() {
               </Dialog>
             </div>
           )}
-          <div>节点: {nodes.length} · 连接: {connections.length}</div>
+          <div>节点: {nodes.length} · 连接: {connections.length}{runtimeReadOnly ? ' · C# 只读' : ''}</div>
         </div>
       </div>
     </div>
@@ -537,7 +546,7 @@ export default function UnifiedGraphEditorPage() {
           if (typeFilter !== 'all') setNewGraph(prev => ({ ...prev, graph_type: typeFilter }));
           setIsCreating(true);
         }}>新建</ToolButton>
-        <ToolButton icon={Save} onClick={saveGraph} disabled={!currentGraph}>保存</ToolButton>
+        <ToolButton icon={Save} onClick={saveGraph} disabled={!currentGraph || currentGraph.action_id?.startsWith('Builtin.') || currentGraph.action_id === 'Graph.Lifecycle.DeployConsumeSource'}>保存</ToolButton>
       </PageActions>
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogContent className="bg-[#15171C] border-[#2A2E37] text-[#e5e5e5]">
@@ -614,7 +623,7 @@ export default function UnifiedGraphEditorPage() {
           onSelect={(g) => { setSelectedGraph(g); openGraph(g); }}
           hideSearch
           onDelete={(g) => {
-            if (g.action_id?.startsWith('Builtin.') || g.action_id === 'Graph.Lifecycle.DeployConsumeSource') { alert('Preset Main ActionGraph 不可删除，但可直接编辑节点'); return; }
+            if (g.action_id?.startsWith('Builtin.') || g.action_id === 'Graph.Lifecycle.DeployConsumeSource') { alert('C# Builtin 与内置 Runtime Graph 为只读引用，不可编辑或删除'); return; }
             if (window.confirm(`确定删除「${g.name}」吗？`)) {
               deleteMutation.mutate({ id: g.id, entity_type: g.entity_type });
               if (selectedGraph?.id === g.id) setSelectedGraph(null);

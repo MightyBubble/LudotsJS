@@ -30,7 +30,7 @@ export default function EffectLibraryPage() {
       onDelete={(r) => window.confirm(`确定删除「${r.effect_id}」吗？`) && editor.remove(r.id)}
       onSave={editor.save} dirty={editor.dirty} hideBrowserOnMobile
     >
-      {editor.draft && <EffectDetailsEditor draft={editor.draft} patch={editor.patch} refs={refs} issues={issues} />}
+      {editor.draft && <EffectDetailsEditor draft={editor.draft} patch={editor.patch} refs={refs} issues={issues} effects={editor.records.map(record => record.id === editor.draft.id ? editor.draft : record)} />}
     </RecordWorkspace>
   );
 }
