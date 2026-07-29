@@ -11,7 +11,7 @@ import BlackboardPanel from '../components/graph/BlackboardPanel';
 import { Input } from "@/components/ui/input";
 import { getNodeConfig } from '../components/graph/nodeConfigs';
 import { evaluateGraph } from '@/lib/graphRuntime';
-import { structureToGraph, graphToStructure, legacyDataGraphToStructure } from '@/lib/structureAdapter';
+import { structureToGraph, graphToStructure } from '@/lib/structureAdapter';
 import {
   Dialog,
   DialogContent,
@@ -68,7 +68,7 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
-  // 结构图的唯一真源是 StructureDefinition；DataGraph 中的 structure 记录属于遗留数据
+  // 结构图的唯一真源是 StructureDefinition
   const { data: structureDefs = [] } = useQuery({
     queryKey: ['structureDefinitions'],
     queryFn: () => base44.entities.StructureDefinition.list(),
@@ -80,7 +80,6 @@ export default function UnifiedGraphEditorPage() {
       ...g,
       graph_type: g.graph_type || 'data', // Default to data if not set
       entity_type: 'DataGraph',
-      is_legacy_structure: g.graph_type === 'structure',
     }));
 
     return [
@@ -156,16 +155,6 @@ export default function UnifiedGraphEditorPage() {
       } else { // Handle FunctionGraph update
         return base44.entities.FunctionGraph.update(id, data);
       }
-    },
-    onSuccess: () => invalidateGraphs(),
-  });
-
-  // 遗留 DataGraph(structure) 记录迁移为 StructureDefinition
-  const migrateMutation = useMutation({
-    mutationFn: async (legacyGraph) => {
-      const created = await base44.entities.StructureDefinition.create(legacyDataGraphToStructure(legacyGraph));
-      await base44.entities.DataGraph.delete(legacyGraph.id);
-      return created;
     },
     onSuccess: () => invalidateGraphs(),
   });
@@ -719,28 +708,14 @@ export default function UnifiedGraphEditorPage() {
                     {/* Conditional rendering for graph type display */}
                     {graph.graph_type === 'data' ? 'Data Graph' : 
                      graph.graph_type === 'query' ? 'Entity Query' : 
-                     graph.graph_type === 'structure' ? (graph.is_legacy_structure ? 'Structure Graph (遗留 DataGraph)' : 'Structure Definition') :
+                     graph.graph_type === 'structure' ? 'Structure Definition' :
                      `Function Graph (${graph.return_type || 'void'})`}
                   </div>
                 </div>
-                {graph.is_legacy_structure && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-400 border border-amber-800/50 whitespace-nowrap">遗留</span>
-                )}
               </div>
-              {graph.is_legacy_structure ? (
-                <Button
-                  size="sm"
-                  disabled={migrateMutation.isPending}
-                  onClick={() => migrateMutation.mutate(graph)}
-                  className="w-full h-7 bg-amber-900/30 hover:bg-amber-900/50 text-amber-300 border border-amber-800/50"
-                >
-                  <Share2 className="w-3 h-3 mr-1" />迁移为结构定义
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
-                  <Network className="w-3 h-3 mr-1" />可视化编辑
-                </Button>
-              )}
+              <Button size="sm" onClick={() => openGraph(graph)} className="w-full h-7 bg-[#D97706] hover:bg-[#B45309] text-black">
+                <Network className="w-3 h-3 mr-1" />可视化编辑
+              </Button>
             </div>
           ))}
         </div>

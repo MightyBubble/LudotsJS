@@ -68,24 +68,3 @@ export function graphToStructure(nodes, connections) {
     })),
   };
 }
-
-// 遗留的 DataGraph(structure) 记录 -> StructureDefinition 字段
-export function legacyDataGraphToStructure(dataGraph) {
-  let def = {};
-  try {
-    def = typeof dataGraph.graph_definition === 'string'
-      ? JSON.parse(dataGraph.graph_definition)
-      : (dataGraph.graph_definition || {});
-  } catch {
-    def = {};
-  }
-  const converted = graphToStructure(def.nodes || [], def.connections || []);
-  return {
-    structure_id: dataGraph.graph_id,
-    name: dataGraph.name,
-    description: dataGraph.description || '',
-    structure_type: 'graph',
-    nodes: converted.nodes,
-    edges: converted.edges,
-  };
-}

@@ -33,7 +33,7 @@ GlobalConstant / DataTable → 全局可引用`,
 • 修复 graph_type 枚举矛盾：DataGraph 的枚举补齐为 data / structure / curve / attribute_calculation，并新增 usage 字段（general / curve / attribute_calculation）作为「用途标记」。属性编辑器与修饰器编辑器现在能同时选到新建的 data 图和遗留类型的图。
 • 抽出统一图执行引擎 src/lib/graphRuntime.js：拓扑求值 + 环检测，实现数值、向量、黑板、比较、逻辑、集合、条件、标签判断节点。图编辑器的实时连线值与属性模拟器的曲线计算已共用它，删除了模拟器里 magnitude = a*10+b*5 的硬编码。
 
-• Structure 统一：统一图编辑器的 structure 类型改为直接读写 StructureDefinition（EntityPrototype.structure_bindings 引用的就是它），新增 src/lib/structureAdapter.js 负责 StructureDefinition ↔ 画布(nodes/connections) 双向转换；DataGraph 里的 structure 记录标记「遗留」并提供一键迁移（转成 StructureDefinition 后删除旧记录）。
+• Structure 统一：统一图编辑器的 structure 类型改为直接读写 StructureDefinition（EntityPrototype.structure_bindings 引用的就是它），新增 src/lib/structureAdapter.js 负责 StructureDefinition ↔ 画布(nodes/connections) 双向转换；旧的 DataGraph(structure) 数据已一次性迁移完毕并删除，DataGraph 的 graph_type 枚举已移除 structure，无遗留兼容代码。
 
 待办（按优先级）：
 1. 布尔体系收敛为两层：Validator = 原子判断 + 逻辑组合（并入 ConditionDefinition 能力，补齐 schema 缺失的 relation 字段）；Requirement = 面向玩家的解锁语义，补完 node_config / count_config 编辑 UI。
@@ -271,7 +271,7 @@ count_config 支持 validator_true_count 和 entity_count 两种计数模式。
 
 与 UnifiedGraphEditor 中 structure 图类型存在功能重叠。`,
     questions: [
-      "[已完成] 统一编辑器的 structure 类型现在直接读写 StructureDefinition（唯一真源）；DataGraph 中的 structure 记录标记为「遗留」，卡片上提供一键「迁移为结构定义」。"
+      "[已完成] 结构图已完全迁移：统一编辑器的 structure 类型直接读写 StructureDefinition（唯一真源），旧的 DataGraph(structure) 记录已全部转换并删除，DataGraph 的 graph_type 不再包含 structure，代码中无兼容分支。"
     ]
   },
   {
