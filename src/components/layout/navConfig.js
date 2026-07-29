@@ -45,17 +45,17 @@ export const NAV_GROUPS = [
       { page: 'AbilityLibrary', label: 'Abilities', icon: Wand2 },
       { page: 'EffectLibrary', label: 'Effects', icon: Sparkles },
       { page: 'ModifierDefinitionEditor', label: 'Modifier Definitions', icon: GitBranch },
-      { page: 'AttributeModifiers', label: 'Attribute Modifiers', icon: GitBranch },
+      { page: 'ValidatorEditor', label: 'Validators', icon: Shield },
     ],
   },
   {
     key: 'logic',
-    label: '逻辑',
+    label: '逻辑图',
     items: [
       { page: 'UnifiedGraphEditor', search: '?type=action', label: 'ActionGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=data', label: 'DataGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=function', label: 'FunctionGraph', icon: Globe },
-      { page: 'ValidatorEditor', label: 'Validators', icon: Shield },
+      { page: 'UnifiedGraphEditor', search: '?type=query', label: 'EntityQueryGraph', icon: Search },
     ],
   },
   {
@@ -65,7 +65,7 @@ export const NAV_GROUPS = [
   },
   {
     key: 'events',
-    label: '事件',
+    label: '规则',
     items: [
       { page: 'GameEventEditor', label: 'Game Events', icon: Zap },
       { page: 'InteractionEffects', label: 'Interaction Effects', icon: Sparkles },
