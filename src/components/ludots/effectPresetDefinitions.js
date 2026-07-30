@@ -1,3 +1,5 @@
+import { getGlobalTableRows, parseGlobalValue, LUDOTS_TABLE_IDS } from './globalTableRefs';
+
 export const EFFECT_PHASES = ['OnPropose', 'OnCalculate', 'OnResolve', 'OnHit', 'OnApply', 'OnPeriod', 'OnExpire', 'OnRemove'];
 
 const builtin = (id) => ({ type: 'graph', id: `Builtin.${id}`, builtin: true });
@@ -24,10 +26,27 @@ export const EFFECT_PRESETS = {
   RevealArea: { components: ['RevealAreaParams', 'DurationParams'], fields: ['revealArea', 'duration'], allowedLifetimes: ['Instant', 'After'], handlers: { OnApply: builtin('RevealArea'), OnPeriod: builtin('RevealArea'), OnRemove: builtin('DecayRevealArea') } },
 };
 
+const runtimeHandler = (handler) => handler?.type === 'builtin' ? builtin(handler.id) : handler?.type === 'graph' ? graph(handler.id) : null;
+
+export function getEffectPresetDefinition(presetType, constants = []) {
+  const local = EFFECT_PRESETS[presetType] || EFFECT_PRESETS.None;
+  const row = getGlobalTableRows(constants, LUDOTS_TABLE_IDS.effectPresets).find(item => item.constant_key === presetType);
+  const runtime = parseGlobalValue(row);
+  if (!runtime) return local;
+  const handlers = Object.fromEntries(Object.entries(runtime.defaultPhaseHandlers || {}).map(([phase, handler]) => [phase, runtimeHandler(handler)]).filter(([, handler]) => handler));
+  return { ...local, components: runtime.components || [], allowedLifetimes: runtime.allowedLifetimes || local.allowedLifetimes, handlers };
+}
+
+export function getEffectPresetOptions(constants = []) {
+  const rows = getGlobalTableRows(constants, LUDOTS_TABLE_IDS.effectPresets);
+  const values = rows.length ? ['None', ...rows.map(item => item.constant_key)] : Object.keys(EFFECT_PRESETS);
+  return values.map(value => ({ value, label: value }));
+}
+
 const MANAGED_FIELDS = ['modifiers', 'duration', 'targetQuery', 'targetFilter', 'targetDispatch', 'projectile', 'unitCreation', 'displacement', 'relation', 'revealArea', 'submitOrderFromBlackboard', 'progression'];
 
-export function presetPatch(draft, presetType) {
-  const def = EFFECT_PRESETS[presetType] || EFFECT_PRESETS.None;
+export function presetPatch(draft, presetType, constants = []) {
+  const def = getEffectPresetDefinition(presetType, constants);
   const allowed = new Set([...(def.fields || []), ...(def.optionalFields || [])]);
   const reservedByPreset = {
     ApplyForce2D: ['_ep.forceXTargetAttrId', '_ep.forceYTargetAttrId'],

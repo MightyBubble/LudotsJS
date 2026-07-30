@@ -3,11 +3,11 @@ import { Section } from './ui';
 import EffectObjectListEditor from './EffectObjectListEditor';
 import OptionalEffectSection from './OptionalEffectSection';
 import { EFFECT_OBJECTS, MODIFIER_FIELDS } from './effectConfigFields';
-import { EFFECT_PRESETS } from './effectPresetDefinitions';
+import { getEffectPresetDefinition } from './effectPresetDefinitions';
 import EffectReservedParamsEditor from './EffectReservedParamsEditor';
 
 export default function EffectPresetEditor({ draft, patch, refs }) {
-  const def = EFFECT_PRESETS[draft.presetType] || EFFECT_PRESETS.None;
+  const def = getEffectPresetDefinition(draft.presetType, refs.constants);
   return (
     <>
       <Section title={`Preset · ${draft.presetType || 'None'}`}>

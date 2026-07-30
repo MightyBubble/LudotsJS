@@ -5,14 +5,15 @@ const bool = (key, label = key) => ({ key, label, type: 'bool' });
 const list = (key, label = key) => ({ key, label, type: 'list' });
 const tag = (key, label = key) => ({ key, label, type: 'tag' });
 const effect = (key, label = key) => ({ key, label, type: 'effect' });
+const globalRef = (key, label, tableId) => ({ key, label, type: 'globalRef', tableId });
 
 export const EFFECT_OBJECTS = {
   expireCondition: { title: '到期条件 expireCondition', fields: [select('kind', 'kind', ['TagPresent', 'TagAbsent']), tag('tag'), select('sense', 'sense', ['Raw', 'Effective'])] },
-  duration: { title: '持续时间 duration', fields: [number('durationTicks'), number('periodTicks'), text('clockId')] },
+  duration: { title: '持续时间 duration', fields: [number('durationTicks'), number('periodTicks'), globalRef('clockId', 'clockId', 'ludots_gas_clock_ids')] },
   stack: { title: '叠加 stack', fields: [number('limit'), select('policy', 'policy', ['KeepDuration', 'RefreshDuration', 'AddDuration']), select('overflowPolicy', 'overflowPolicy', ['RejectNew', 'RemoveOldest'])] },
   targetQuery: { title: '目标查询 targetQuery', fields: [select('kind', 'kind', ['BuiltinSpatial', 'GraphProgram']), select('shape', 'shape', ['Circle', 'Cone', 'Rectangle', 'Line', 'Ring']), number('radius'), number('innerRadius'), number('halfAngle'), number('halfWidth'), number('halfHeight'), number('rotation'), number('length'), text('origin'), number('graphProgramId')] },
   targetFilter: { title: '目标过滤 targetFilter', fields: [text('relationFilter'), bool('excludeSource'), number('maxTargets'), list('layerMask')] },
-  targetDispatch: { title: '目标分发 targetDispatch', fields: [text('preset'), effect('payloadEffect'), text('contextMapping.payloadSource'), text('contextMapping.payloadTarget'), text('contextMapping.payloadTargetContext')] },
+  targetDispatch: { title: '目标分发 targetDispatch', fields: [globalRef('preset', 'preset', 'ludots_target_dispatch_presets'), effect('payloadEffect'), text('contextMapping.payloadSource'), text('contextMapping.payloadTarget'), text('contextMapping.payloadTargetContext')] },
   projectile: { title: '投射物 projectile', fields: [number('speed'), number('range'), number('arcHeight'), effect('impactEffect'), effect('hitEffect'), effect('presentationEffect'), select('travelMode', 'travelMode', ['Direction', 'TrackTarget']), select('impactPolicy', 'impactPolicy', ['DestroyOnFirstHit', 'ContinueOnHit']), number('collisionHalfWidth'), text('collisionRelationFilter'), bool('collisionExcludeSource'), number('maxHitCount')] },
   unitCreation: { title: '单位创建 unitCreation', fields: [select('placementPattern', 'placementPattern', ['Scatter', 'Circle']), select('facingPattern', 'facingPattern', ['RadialOutward', 'RadialInward', 'TangentClockwise', 'TangentCounterClockwise']), text('unitType'), text('templateId'), number('count'), number('offsetRadius'), number('placementRadiusCm'), number('placementStartAngleDeg'), effect('onSpawnEffect'), bool('copySourcePlayerOwner'), bool('linkSourceAsParent')] },
   displacement: { title: '位移 displacement', fields: [select('directionMode', 'directionMode', ['ToTarget', 'AwayFromSource', 'TowardSource', 'Fixed']), number('fixedDirectionDeg'), number('totalDistanceCm'), number('totalDurationTicks'), bool('overrideNavigation')] },

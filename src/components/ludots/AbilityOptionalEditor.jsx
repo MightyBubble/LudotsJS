@@ -20,6 +20,6 @@ export default function AbilityOptionalEditor({ draft, patch, refs = {}, domain 
       <RefListSelector label="激活效果 activeEffects（最多 4）" value={draft.toggleSpec?.activeEffects || []} options={effectOptions} onChange={activeEffects => patch({ toggleSpec: { ...(draft.toggleSpec || {}), activeEffects: activeEffects.slice(0, 4) } })} emptyText="暂无激活效果" />
     </Section>}
     {showState && draft.toggleSpec?.deactivateExec && <AbilityExecEditor title="关闭执行 Deactivate Exec" value={draft.toggleSpec.deactivateExec} refs={refs} onChange={deactivateExec => patch({ toggleSpec: { ...draft.toggleSpec, deactivateExec } })} />}
-    {showTargeting && <AbilityInputEditor value={draft.input || {}} onChange={input => patch({ input })} />}
+    {showTargeting && <AbilityInputEditor value={draft.input || {}} refs={refs} onChange={input => patch({ input })} />}
   </>;
 }
