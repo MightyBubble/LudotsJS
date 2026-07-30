@@ -1,0 +1,59 @@
+{
+  "name": "InputBindingProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "\u8f93\u5165\u7ed1\u5b9a\u914d\u7f6e\u552f\u4e00\u6807\u8bc6"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "inputContextId": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u8f93\u5165\u4e0a\u4e0b\u6587"
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "actionId": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "PressedThisFrame",
+              "ReleasedThisFrame",
+              "Held",
+              "DoubleTap"
+            ]
+          },
+          "intentId": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "actionId",
+          "trigger",
+          "intentId",
+          "enabled"
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "name",
+    "inputContextId",
+    "bindings"
+  ]
+}

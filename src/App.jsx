@@ -21,6 +21,8 @@ import InputOrderEditor from './pages/InputOrderEditor';
 import CastCommitEditor from './pages/CastCommitEditor';
 import CastDispatchEditor from './pages/CastDispatchEditor';
 import AbilityPlayground from './pages/AbilityPlayground';
+import InputBindingEditor from './pages/InputBindingEditor';
+import ControlPlaneEditor from './pages/ControlPlaneEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
 
@@ -86,6 +88,8 @@ const AuthenticatedApp = () => {
       <Route path="/CastCommitEditor" element={<LayoutWrapper currentPageName="CastCommitEditor"><CastCommitEditor /></LayoutWrapper>} />
       <Route path="/CastDispatchEditor" element={<LayoutWrapper currentPageName="CastDispatchEditor"><CastDispatchEditor /></LayoutWrapper>} />
       <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
+      <Route path="/InputBindingEditor" element={<LayoutWrapper currentPageName="InputBindingEditor"><InputBindingEditor /></LayoutWrapper>} />
+      <Route path="/ControlPlaneEditor" element={<LayoutWrapper currentPageName="ControlPlaneEditor"><ControlPlaneEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

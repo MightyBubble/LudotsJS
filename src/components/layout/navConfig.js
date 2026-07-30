@@ -71,6 +71,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    key: 'command_control',
+    label: '命令与控制',
+    items: [
+      { page: 'InputBindingEditor', label: '输入绑定', icon: Gamepad2 },
+      { page: 'ControlPlaneEditor', label: '控制平面', icon: Network },
+    ],
+  },
+  {
     key: 'events',
     label: '规则',
     items: [
@@ -112,10 +120,16 @@ export const ALL_MODULE_KEYS = NAV_GROUPS.map(g => g.key);
 
 /** 按项目的 enabled_modules / navigation_profile 过滤与排序顶层模块 */
 export function getVisibleNavGroups(project) {
-  const enabled = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
-  const order = project?.navigation_profile?.tab_order?.length
+  const configuredEnabled = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
+  const enabled = configuredEnabled.includes('command_control')
+    ? configuredEnabled
+    : [...configuredEnabled, 'command_control'];
+  const configuredOrder = project?.navigation_profile?.tab_order?.length
     ? project.navigation_profile.tab_order
     : enabled;
+  const order = configuredOrder.includes('command_control')
+    ? configuredOrder
+    : [...configuredOrder, 'command_control'];
   const labels = project?.navigation_profile?.tab_labels || {};
   return order
     .map(key => NAV_GROUPS.find(g => g.key === key))
