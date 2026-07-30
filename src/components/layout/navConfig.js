@@ -43,6 +43,7 @@ export const NAV_GROUPS = [
     label: 'Gameplay',
     items: [
       { page: 'AbilityLibrary', label: 'Abilities', icon: Wand2 },
+      { page: 'AbilityFormSetEditor', label: 'Ability Form Sets', icon: ListTree },
       { page: 'EffectLibrary', label: 'Effects', icon: Sparkles },
       { page: 'ModifierDefinitionEditor', label: 'Modifier Definitions', icon: GitBranch },
       { page: 'ValidatorEditor', label: 'Validators', icon: Shield },

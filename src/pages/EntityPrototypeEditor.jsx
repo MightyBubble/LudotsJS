@@ -40,6 +40,12 @@ export default function EntityPrototypeEditorPage() {
     initialData: [],
   });
 
+  const { data: formSets = [] } = useQuery({
+    queryKey: ['ability-form-sets'],
+    queryFn: () => base44.entities.AbilityFormSet.list('form_set_id'),
+    initialData: [],
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.EntityPrototype.create(data),
     onSuccess: (record) => {
@@ -189,6 +195,7 @@ export default function EntityPrototypeEditorPage() {
             abilityIds={editData.ability_ids || []}
             formSetRef={editData.ability_form_set_ref}
             abilities={abilities}
+            formSets={formSets}
             onChange={(patch) => setEditData({ ...editData, ...patch })}
           />
           <Section title="结构绑定">
