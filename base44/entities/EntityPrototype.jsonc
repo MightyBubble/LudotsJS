@@ -21,6 +21,17 @@
       },
       "description": "\u5f15\u7528\u7684\u5c5e\u6027ID\u5217\u8868"
     },
+    "ability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u8be5\u539f\u578b\u6388\u4e88\u7684\u6280\u80fd\uff08\u6709\u5e8f\uff0c\u7d22\u5f15\u5373\u69fd\u4f4d\uff09\u3002\u5bf9\u5e94 C# AbilityStateBuffer.abilityIds"
+    },
+    "ability_form_set_ref": {
+      "type": "string",
+      "description": "\u5f15\u7528\u7684\u6280\u80fd\u7ec4 ID\u3002\u5bf9\u5e94 C# AbilityFormSetRef.formSetId"
+    },
     "static_relations": {
       "type": "array",
       "items": {

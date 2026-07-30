@@ -7,6 +7,7 @@ import { Search, Plus, Trash2, Box, Edit3, Save, X } from "lucide-react";
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import { Section } from '@/components/ludots/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PrototypeAbilitiesSection from '@/components/prototype/PrototypeAbilitiesSection';
 
 export default function EntityPrototypeEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +31,12 @@ export default function EntityPrototypeEditorPage() {
   const { data: structures = [] } = useQuery({
     queryKey: ['structureDefinitions'],
     queryFn: () => base44.entities.StructureDefinition.list(),
+    initialData: [],
+  });
+
+  const { data: abilities = [] } = useQuery({
+    queryKey: ['abilities'],
+    queryFn: () => base44.entities.Ability.list(),
     initialData: [],
   });
 
@@ -71,6 +78,8 @@ export default function EntityPrototypeEditorPage() {
       name: "新原型",
       description: "",
       referenced_attributes: [],
+      ability_ids: [],
+      ability_form_set_ref: "",
       structure_bindings: []
     };
     createMutation.mutate(newPrototype);
@@ -81,6 +90,8 @@ export default function EntityPrototypeEditorPage() {
     setEditData({ 
       ...prototype, 
       referenced_attributes: prototype.referenced_attributes || [],
+      ability_ids: prototype.ability_ids || [],
+      ability_form_set_ref: prototype.ability_form_set_ref || "",
       structure_bindings: prototype.structure_bindings || []
     });
   };
@@ -96,6 +107,8 @@ export default function EntityPrototypeEditorPage() {
       name: editData.name,
       description: editData.description || "",
       referenced_attributes: editData.referenced_attributes || [],
+      ability_ids: (editData.ability_ids || []).filter(Boolean),
+      ability_form_set_ref: editData.ability_form_set_ref || "",
       structure_bindings: editData.structure_bindings || []
     };
     
@@ -149,6 +162,7 @@ export default function EntityPrototypeEditorPage() {
         { key: 'name', label: '名称', width: 180 },
         { key: 'description', label: '描述' },
         { key: 'referenced_attributes', label: '引用属性', render: (item) => `${(item.referenced_attributes || []).length} 项` },
+        { key: 'ability_ids', label: '技能', render: (item) => `${(item.ability_ids || []).length} 个${item.ability_form_set_ref ? ' · 有技能组' : ''}` },
         { key: 'structure_bindings', label: '结构绑定', render: (item) => `${(item.structure_bindings || []).length} 项` },
       ]}
       selectedId={editingRow}
@@ -171,6 +185,12 @@ export default function EntityPrototypeEditorPage() {
             <div className="space-y-2">{(editData.referenced_attributes || []).map((attributeId, index) => <div key={`${attributeId}-${index}`} className="flex gap-2"><Select value={attributeId} onValueChange={(value) => handleUpdateAttribute(index, value)}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{attributes.map((attribute) => <SelectItem key={attribute.id} value={attribute.attribute_id}>{attribute.name}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="ghost" onClick={() => handleRemoveAttribute(index)} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button></div>)}</div>
             <Button size="sm" onClick={handleAddAttribute} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加属性</Button>
           </Section>
+          <PrototypeAbilitiesSection
+            abilityIds={editData.ability_ids || []}
+            formSetRef={editData.ability_form_set_ref}
+            abilities={abilities}
+            onChange={(patch) => setEditData({ ...editData, ...patch })}
+          />
           <Section title="结构绑定">
             <div className="space-y-2">{(editData.structure_bindings || []).map((binding, index) => { const structure = structures.find(item => item.structure_id === binding.structure_id); return <div key={index} className="grid grid-cols-[1fr_1fr_32px] gap-2"><Select value={binding.structure_id || ''} onValueChange={(value) => { const list = [...editData.structure_bindings]; list[index] = { structure_id: value, node_id: '' }; setEditData({ ...editData, structure_bindings: list }); }}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue placeholder="结构" /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{structures.map((item) => <SelectItem key={item.id} value={item.structure_id}>{item.name}</SelectItem>)}</SelectContent></Select><Select value={binding.node_id || ''} onValueChange={(value) => { const list = [...editData.structure_bindings]; list[index] = { ...binding, node_id: value }; setEditData({ ...editData, structure_bindings: list }); }}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue placeholder="节点" /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{(structure?.nodes || []).map((node) => <SelectItem key={node.node_id} value={node.node_id}>{node.name}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="ghost" onClick={() => setEditData({ ...editData, structure_bindings: editData.structure_bindings.filter((_, itemIndex) => itemIndex !== index) })} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button></div>; })}</div>
             <Button size="sm" onClick={() => setEditData({ ...editData, structure_bindings: [...(editData.structure_bindings || []), { structure_id: '', node_id: '' }] })} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加绑定</Button>
