@@ -144,21 +144,6 @@
         "type": "string"
       }
     },
-    "cooldown": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "valueAttribute": {
-          "type": "string"
-        },
-        "tag": {
-          "type": "string"
-        }
-      }
-    },
     "blockTags": {
       "type": [
         "object",

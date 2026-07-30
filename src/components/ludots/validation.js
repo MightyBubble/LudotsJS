@@ -46,7 +46,6 @@ export function validateEffect(effect, refs = {}) {
 export function validateAbility(ability, refs = {}) {
   const out = [];
   const effectIds = new Set((refs.effects || []).map(effect => effect.effect_id));
-  const attributeIds = new Set((refs.attributes || []).map(attribute => attribute.attribute_id));
   const graphIds = new Set([...(refs.actionGraphs || []).map(graph => graph.action_id), ...(refs.dataGraphs || []).map(graph => graph.graph_id)]);
   if (!ability.ability_id) out.push(issue('error', 'ability_id', '缺少 GAS ability id', '填写唯一 id'));
   if (!ability.exec?.clockId) out.push(issue('error', 'exec.clockId', 'AbilityExecLoader 要求 clockId', '填写 FixedFrame 等有效时钟'));
@@ -64,8 +63,6 @@ export function validateAbility(ability, refs = {}) {
   if ((ability.onActivateEffects || []).length > 16) out.push(issue('error', 'onActivateEffects', '超过 C# 容量 16', '减少 Effect 数量'));
   if ((ability.toggleSpec?.activeEffects || []).length > 4) out.push(issue('error', 'toggleSpec.activeEffects', '超过 C# 容量 4', '减少 activeEffects'));
   (ability.toggleSpec?.activeEffects || []).forEach((id, index) => { if (!effectIds.has(id)) out.push(issue('error', `toggleSpec.activeEffects[${index}]`, `Effect 引用无效：${id}`, '选择现有 Effect')); });
-  if (ability.cooldown && !ability.cooldown.valueAttribute && !ability.cooldown.tag) out.push(issue('error', 'cooldown', 'cooldown 必须声明 valueAttribute 或 tag', '补全冷却来源'));
-  if (ability.cooldown?.valueAttribute && !attributeIds.has(ability.cooldown.valueAttribute)) out.push(issue('error', 'cooldown.valueAttribute', 'Attribute 引用无效', '选择现有 Attribute'));
   if (ability.activationPrecondition?.validationGraph && !graphIds.has(ability.activationPrecondition.validationGraph)) out.push(issue('error', 'activationPrecondition.validationGraph', 'Graph 引用无效', '选择现有 Graph'));
   if (ability.targeting && (ability.targeting.castRangeCm === undefined || !ability.targeting.impactEffect)) out.push(issue('error', 'targeting', 'targeting 必须同时提供 castRangeCm 与 impactEffect', '补全目标字段'));
   if (ability.targeting?.impactEffect && !effectIds.has(ability.targeting.impactEffect)) out.push(issue('error', 'targeting.impactEffect', 'Effect 引用无效', '选择现有 Effect'));

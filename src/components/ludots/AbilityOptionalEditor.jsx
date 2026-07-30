@@ -1,5 +1,5 @@
 import React from 'react';
-import { NumberField, Section, TextField } from '@/components/ludots/ui';
+import { NumberField, Section } from '@/components/ludots/ui';
 import AbilityExecEditor from './AbilityExecEditor';
 import AbilityInputEditor from './AbilityInputEditor';
 import EffectSelect from './EffectSelect';
@@ -11,10 +11,6 @@ export default function AbilityOptionalEditor({ draft, patch, refs = {}, domain 
   const showTargeting = domain === 'all' || domain === 'targeting';
   const effectOptions = (refs.effects || []).map(effect => ({ value: effect.effect_id, label: effect.effect_id }));
   return <>
-    {showState && <Section title="冷却 Cooldown">
-      <TextField label="冷却值属性 valueAttribute" value={draft.cooldown?.valueAttribute} onChange={valueAttribute => patch({ cooldown: { ...(draft.cooldown || {}), valueAttribute } })} />
-      <GameplayTagSelect label="冷却标签 tag" value={draft.cooldown?.tag} tags={refs.tags || []} onChange={tag => patch({ cooldown: { ...(draft.cooldown || {}), tag } })} />
-    </Section>}
     {showTargeting && <Section title="目标 Targeting">
       <NumberField label="施法范围 cm castRangeCm" value={draft.targeting?.castRangeCm} onChange={castRangeCm => patch({ targeting: { ...(draft.targeting || {}), castRangeCm } })} />
       <EffectSelect label="命中效果 impactEffect" value={draft.targeting?.impactEffect} effects={refs.effects || []} onChange={impactEffect => patch({ targeting: { ...(draft.targeting || {}), impactEffect } })} />
