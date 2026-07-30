@@ -63,11 +63,11 @@ export const NAV_GROUPS = [
     label: '输入与订单',
     items: [
       { page: 'InputConfigEditor', label: 'Input Config', icon: Gamepad2 },
-      { page: 'ControlSchemeEditor', label: 'Control Schemes', icon: Settings },
-      { page: 'CommandIntentEditor', label: 'Command Intent', icon: GitBranch },
       { page: 'InputOrderEditor', label: 'Input Order Mapping', icon: ListTree },
-      { page: 'CastCommitEditor', label: 'Cast Commit', icon: CheckSquare },
+      { page: 'CommandIntentEditor', label: 'Command Intent', icon: GitBranch },
       { page: 'CastDispatchEditor', label: 'Cast Dispatch', icon: Network },
+      { page: 'ControlSchemeEditor', label: 'Control Schemes', icon: Settings },
+      { page: 'CastCommitEditor', label: 'Cast Commit', icon: CheckSquare },
     ],
   },
   {
