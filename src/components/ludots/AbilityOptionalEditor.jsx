@@ -1,7 +1,7 @@
 import React from 'react';
 import { ListField, NumberField, Section, TextField } from '@/components/ludots/ui';
 import AbilityExecEditor from './AbilityExecEditor';
-import AbilityJsonField from './AbilityJsonField';
+import AbilityInputEditor from './AbilityInputEditor';
 
 export default function AbilityOptionalEditor({ draft, patch }) {
   return <>
@@ -18,6 +18,6 @@ export default function AbilityOptionalEditor({ draft, patch }) {
       <ListField label="激活效果 activeEffects（最多 4）" value={draft.toggleSpec?.activeEffects || []} onChange={activeEffects => patch({ toggleSpec: { ...(draft.toggleSpec || {}), activeEffects } })} />
     </Section>
     {draft.toggleSpec?.deactivateExec && <AbilityExecEditor title="关闭执行 Deactivate Exec" value={draft.toggleSpec.deactivateExec} onChange={deactivateExec => patch({ toggleSpec: { ...draft.toggleSpec, deactivateExec } })} />}
-    <Section title="输入覆盖 Input"><AbilityJsonField label="input" value={draft.input || {}} onChange={input => patch({ input })} hint="trigger、heldPolicy、castModeOverride、autoTargetPolicy、autoTargetRangeCm" /></Section>
+    <AbilityInputEditor value={draft.input || {}} onChange={input => patch({ input })} />
   </>;
 }

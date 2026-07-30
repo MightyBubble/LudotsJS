@@ -51,6 +51,8 @@ export function validateAbility(ability, refs = {}) {
   if (!ability.ability_id) out.push(issue('error', 'ability_id', '缺少 GAS ability id', '填写唯一 id'));
   if (!ability.exec?.clockId) out.push(issue('error', 'exec.clockId', 'AbilityExecLoader 要求 clockId', '填写 FixedFrame 等有效时钟'));
   if (!Array.isArray(ability.exec?.items)) out.push(issue('error', 'exec.items', 'AbilityExecLoader 要求 items 数组', '至少添加 End item'));
+  if ((ability.exec?.items || []).length > 16) out.push(issue('error', 'exec.items', '超过 AbilityExecSpec.MAX_ITEMS 16', '减少 Exec Item'));
+  if ((ability.exec?.callerParams || []).length > 4) out.push(issue('error', 'exec.callerParams', '超过 AbilityExecCallerParamsPool.MAX_SETS 4', '减少调用参数组'));
   (ability.exec?.items || []).forEach((item, index) => {
     if (!item.kind) out.push(issue('error', `exec.items[${index}].kind`, '缺少 ExecItemKind', '选择原生 kind'));
     if (!Number.isInteger(item.tick)) out.push(issue('error', `exec.items[${index}].tick`, 'tick 必须是整数', '填写执行 tick'));
@@ -67,5 +69,6 @@ export function validateAbility(ability, refs = {}) {
   if (ability.activationPrecondition?.validationGraph && !graphIds.has(ability.activationPrecondition.validationGraph)) out.push(issue('error', 'activationPrecondition.validationGraph', 'Graph 引用无效', '选择现有 Graph'));
   if (ability.targeting && (ability.targeting.castRangeCm === undefined || !ability.targeting.impactEffect)) out.push(issue('error', 'targeting', 'targeting 必须同时提供 castRangeCm 与 impactEffect', '补全目标字段'));
   if (ability.targeting?.impactEffect && !effectIds.has(ability.targeting.impactEffect)) out.push(issue('error', 'targeting.impactEffect', 'Effect 引用无效', '选择现有 Effect'));
+  if (ability.input && !Object.values(ability.input).some(value => value !== undefined && value !== '')) out.push(issue('error', 'input', 'input 至少声明一个覆盖字段', '选择触发、策略或施法模式'));
   return out;
 }

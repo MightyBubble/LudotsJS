@@ -12,7 +12,12 @@
       "additionalProperties": false,
       "properties": {
         "clockId": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "FixedFrame",
+            "Step",
+            "EntityLocal"
+          ]
         },
         "interruptAny": {
           "type": "array",
@@ -39,8 +44,7 @@
                     "value": {
                       "type": [
                         "string",
-                        "number",
-                        "boolean"
+                        "number"
                       ]
                     }
                   },
@@ -87,7 +91,12 @@
                 "type": "integer"
               },
               "clock": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "FixedFrame",
+                  "Step",
+                  "EntityLocal"
+                ]
               },
               "tag": {
                 "type": "string"
@@ -190,7 +199,10 @@
         "validationGraph": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "validationGraph"
+      ]
     },
     "toggleSpec": {
       "type": [
@@ -212,7 +224,10 @@
         "deactivateExec": {
           "type": "object"
         }
-      }
+      },
+      "required": [
+        "toggleTag"
+      ]
     },
     "targeting": {
       "type": [
@@ -228,7 +243,11 @@
         "impactEffect": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "castRangeCm",
+        "impactEffect"
+      ]
     },
     "presentation": {
       "type": [
@@ -274,19 +293,42 @@
       "additionalProperties": false,
       "properties": {
         "trigger": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "PressedThisFrame",
+            "ReleasedThisFrame",
+            "Held",
+            "DoubleTap"
+          ]
         },
         "heldPolicy": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "EveryFrame",
+            "StartEnd"
+          ]
         },
         "castModeOverride": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "TargetFirst",
+            "SmartCast",
+            "AimCast",
+            "SmartCastWithIndicator",
+            "ContextScored",
+            "PressReleaseAimCast"
+          ]
         },
         "autoTargetPolicy": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "None",
+            "NearestInRange",
+            "NearestEnemyInRange"
+          ]
         },
         "autoTargetRangeCm": {
-          "type": "number",
+          "type": "integer",
           "minimum": 0
         }
       }

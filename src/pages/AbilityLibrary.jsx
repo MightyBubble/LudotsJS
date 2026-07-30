@@ -17,7 +17,7 @@ export default function AbilityLibraryPage() {
   const issues = editor.draft ? validateAbility(editor.draft, refs) : [];
 
   return <RecordWorkspace
-    entityName="Ability" records={editor.records}
+    entityName="Ability" records={editor.records} hideBrowserOnMobile
     columns={[
       { key: 'ability_id', label: 'Ability ID', width: 240, render: record => <span className="font-mono text-[#E2D8B3]">{record.ability_id}</span> },
       { key: 'presentation', label: '显示名称', width: 180, render: getAbilityDisplayName },
