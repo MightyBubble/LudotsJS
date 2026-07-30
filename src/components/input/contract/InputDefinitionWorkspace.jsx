@@ -1,22 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section } from '@/components/ludots/ui';
 import ContractFields from '@/components/input/contract/ContractFields';
 import ConfigGuideButton from '@/components/help/ConfigGuideButton';
+import ConfigGuideSidebar from '@/components/help/ConfigGuideSidebar';
 import { inputConfigGuides } from '@/components/input/contract/inputConfigGuides';
 import { inputConfigFieldGuides } from '@/components/input/contract/inputConfigFieldGuides';
 
 export default function InputDefinitionWorkspace({ config }) {
   const editor = useRecordEditor(config.entity, config.queryKey, config.buildNew);
   const core = useCoreRefs();
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guide = { ...inputConfigGuides[config.entity], ...inputConfigFieldGuides[config.entity] };
   const refs = { tags: core.tags || [], tagOptions: (core.tags || []).map(t => ({ value: t.full_path, label: t.full_path })) };
   return <RecordWorkspace entityName={config.entity} records={editor.records} hideBrowserOnMobile
     columns={[{ key: config.idKey, label: config.idLabel, width: 280 }]}
     toItem={record => ({ id: record.id, name: record[config.idKey], subtitle: config.title })}
     selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
-    headerRight={<ConfigGuideButton guide={{ ...inputConfigGuides[config.entity], ...inputConfigFieldGuides[config.entity] }} />}
+    headerRight={<ConfigGuideButton guide={guide} open={guideOpen} onToggle={() => setGuideOpen(open => !open)} />}
+    detailAside={guideOpen ? <ConfigGuideSidebar guide={guide} onClose={() => setGuideOpen(false)} /> : null}
     onDelete={record => window.confirm(`确定删除「${record[config.idKey]}」吗？`) && editor.remove(record.id)} onSave={editor.save} dirty={editor.dirty}>
     {editor.draft && <Section title="配置详情"><ContractFields fields={config.fields} value={editor.draft} onChange={editor.patch} refs={refs} /></Section>}
   </RecordWorkspace>;

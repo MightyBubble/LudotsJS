@@ -23,6 +23,7 @@ export default function RecordWorkspace({
   onSave,
   dirty,
   headerRight,
+  detailAside,
   children,
   hideBrowserOnMobile = false,
   emptyHint = '从左侧选择或新建一条记录',
@@ -88,6 +89,7 @@ export default function RecordWorkspace({
           <div className="flex-1 overflow-y-auto p-4 min-w-0">
             {children || <div className={S.empty}>{emptyHint}</div>}
           </div>
+          {detailAside}
         </div>
       )}
     </div>
