@@ -74,8 +74,8 @@ export const NAV_GROUPS = [
     key: 'command_control',
     label: '命令与控制',
     items: [
-      { page: 'InputBindingEditor', label: '输入绑定', icon: Gamepad2 },
-      { page: 'ControlPlaneEditor', label: '控制平面', icon: Network },
+      { page: 'InputBindingEditor', label: 'Input Config', icon: Gamepad2 },
+      { page: 'ControlPlaneEditor', search: '?type=query', label: 'Entity Query Graph', icon: Search },
     ],
   },
   {

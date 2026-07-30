@@ -1,7 +1,6 @@
 import React from 'react';
-import CommandControlWorkspace from '@/components/commandControl/CommandControlWorkspace';
-import { inputBindingSpec } from '@/components/commandControl/commandControlSpecs';
+import InputConfigEditor from '@/pages/InputConfigEditor';
 
 export default function InputBindingEditor() {
-  return <CommandControlWorkspace config={inputBindingSpec} />;
+  return <InputConfigEditor />;
 }

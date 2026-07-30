@@ -1,7 +1,11 @@
 import React from 'react';
-import CommandControlWorkspace from '@/components/commandControl/CommandControlWorkspace';
-import { controlPlaneSpec } from '@/components/commandControl/commandControlSpecs';
+import { Navigate, useLocation } from 'react-router-dom';
+import UnifiedGraphEditor from '@/pages/UnifiedGraphEditor';
 
 export default function ControlPlaneEditor() {
-  return <CommandControlWorkspace config={controlPlaneSpec} />;
+  const location = useLocation();
+  if (new URLSearchParams(location.search).get('type') !== 'query') {
+    return <Navigate to="/ControlPlaneEditor?type=query" replace />;
+  }
+  return <UnifiedGraphEditor />;
 }
