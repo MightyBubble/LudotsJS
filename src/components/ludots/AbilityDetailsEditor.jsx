@@ -6,7 +6,7 @@ import AbilityOptionalEditor from './AbilityOptionalEditor';
 import AbilityPresentationEditor from './AbilityPresentationEditor';
 
 export default function AbilityDetailsEditor({ draft, patch, refs, issues }) {
-  return <div className="max-w-2xl">
+  return <div className="max-w-6xl">
     <Section title="标识 Identity">
       <TextField label="Ability ID (JSON id)" value={draft.ability_id} onChange={ability_id => patch({ ability_id })} hint="平台保留 id，因此存储为 ability_id；导出时映射回 id" />
     </Section>
