@@ -4,6 +4,7 @@ import useRecordEditor from '@/components/ludots/useRecordEditor';
 import InputConfigDetails from '@/components/input/InputConfigDetails';
 import ConfigGuideButton from '@/components/help/ConfigGuideButton';
 import { inputConfigGuides } from '@/components/input/contract/inputConfigGuides';
+import { inputConfigFieldGuides } from '@/components/input/contract/inputConfigFieldGuides';
 
 export default function InputConfigEditorPage() {
   const editor = useRecordEditor('InputConfig', 'input-configs', () => ({
@@ -15,7 +16,7 @@ export default function InputConfigEditorPage() {
     columns={[{ key: 'config_id', label: 'Config ID', width: 240 }, { key: 'name', label: '名称' }, { key: 'actions', label: 'Actions', render: r => r.actions?.length || 0 }, { key: 'contexts', label: 'Contexts', render: r => r.contexts?.length || 0 }]}
     toItem={r => ({ id: r.id, name: r.name, subtitle: `${r.config_id} · ${r.actions?.length || 0} Actions` })}
     selectedId={editor.selectedId} onSelect={r => editor.setSelectedId(r.id)} onCreate={editor.create}
-    headerRight={<ConfigGuideButton guide={inputConfigGuides.InputConfig} />}
+    headerRight={<ConfigGuideButton guide={{ ...inputConfigGuides.InputConfig, ...inputConfigFieldGuides.InputConfig }} />}
     onDelete={r => window.confirm(`确定删除「${r.name}」吗？`) && editor.remove(r.id)} onSave={editor.save} dirty={editor.dirty}>
     {editor.draft && <InputConfigDetails draft={editor.draft} patch={editor.patch} />}
   </RecordWorkspace>;
