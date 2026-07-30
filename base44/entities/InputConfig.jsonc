@@ -1,0 +1,159 @@
+{
+  "name": "InputConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "config_id": {
+      "type": "string",
+      "description": "\u8f93\u5165\u914d\u7f6e\u552f\u4e00\u6807\u8bc6"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Button",
+              "Axis1D",
+              "Axis2D",
+              "Axis3D"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      }
+    },
+    "contexts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "default": 0
+          },
+          "bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "actionId": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "compositeType": {
+                  "type": "string"
+                },
+                "compositeParts": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/bindingPart"
+                  }
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/modifier"
+                  }
+                },
+                "interactions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/modifier"
+                  }
+                }
+              },
+              "required": [
+                "actionId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "bindings"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "modifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameter"
+          }
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "bindingPart": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actionId": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "config_id",
+    "name",
+    "actions",
+    "contexts"
+  ]
+}

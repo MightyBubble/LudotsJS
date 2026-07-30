@@ -61,7 +61,10 @@ export const NAV_GROUPS = [
   {
     key: 'input',
     label: '输入与订单',
-    items: [{ page: 'InputSystem', label: '输入与订单（规划中）', icon: Gamepad2 }],
+    items: [
+      { page: 'InputConfigEditor', label: 'Input Config', icon: Gamepad2 },
+      { page: 'InputSystem', label: '输入与订单管线', icon: ListTree },
+    ],
   },
   {
     key: 'events',
@@ -94,6 +97,7 @@ export const NAV_GROUPS = [
     items: [
       { page: 'NewAttributeSimulator', label: '属性计算器', icon: Calculator },
       { page: 'TagSimulator', label: '标签模拟器', icon: Zap },
+      { page: 'AbilityPlayground', label: 'Ability Playground', icon: Gamepad2 },
       { page: 'History', label: 'Tag History', icon: Activity },
       { page: 'DesignDoc', label: '设计文档', icon: BookOpen },
     ],

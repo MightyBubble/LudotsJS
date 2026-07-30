@@ -14,6 +14,8 @@ import EffectLibrary from './pages/EffectLibrary';
 import AbilityLibrary from './pages/AbilityLibrary';
 import ProjectOverview from './pages/ProjectOverview';
 import InputSystem from './pages/InputSystem';
+import InputConfigEditor from './pages/InputConfigEditor';
+import AbilityPlayground from './pages/AbilityPlayground';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
 
@@ -72,6 +74,8 @@ const AuthenticatedApp = () => {
       <Route path="/AbilityLibrary" element={<LayoutWrapper currentPageName="AbilityLibrary"><AbilityLibrary /></LayoutWrapper>} />
       <Route path="/ProjectOverview" element={<LayoutWrapper currentPageName="ProjectOverview"><ProjectOverview /></LayoutWrapper>} />
       <Route path="/InputSystem" element={<LayoutWrapper currentPageName="InputSystem"><InputSystem /></LayoutWrapper>} />
+      <Route path="/InputConfigEditor" element={<LayoutWrapper currentPageName="InputConfigEditor"><InputConfigEditor /></LayoutWrapper>} />
+      <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
