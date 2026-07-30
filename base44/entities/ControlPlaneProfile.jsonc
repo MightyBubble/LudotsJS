@@ -1,0 +1,18 @@
+{
+  "name": "ControlPlaneProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "control_plane_id": {
+      "type": "string",
+      "description": "\u63a7\u5236\u9762\u914d\u7f6e\u7684\u7a33\u5b9a\u6807\u8bc6"
+    },
+    "entity_query_graph_ref": {
+      "type": "string",
+      "description": "\u5f15\u7528 EntityQuery.query_name\uff1b\u67e5\u8be2\u4ee5\u63a7\u5236\u8005\u5316\u8eab\u4e3a\u4e0a\u4e0b\u6587\u5e76\u8f93\u51fa\u53ef\u63a7 Actor \u96c6\u5408"
+    }
+  },
+  "required": [
+    "control_plane_id"
+  ]
+}

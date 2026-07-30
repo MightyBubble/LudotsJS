@@ -24,6 +24,36 @@ GlobalConstant / DataTable → 全局可引用`,
     questions: []
   },
   {
+    id: "command-control",
+    title: "命令与控制 (Command & Control)",
+    overview: "以客户端控制者化身为锚点，通过关系投影生成可控制 Actor 集合，再由输入意图向集合提交命令。",
+    definition: "命令与控制是 Input、Actor Collection 与 Order 之间的领域边界。Input Config 只描述输入动作与绑定；Control Plane 只引用一个 Entity Query Graph，用于从当前控制者化身解析可控制 Actor 集合。",
+    intent: "保留 Ludots 的集合式控制创新：玩家控制的不是硬编码单 Actor，而是由关系图实时投影出的 Actor Collection，从而统一支持 RTS 编队、MOBA 英雄与召唤物、ARPG 化身与伙伴。",
+    architecture: `一级模块：命令与控制
+二级配置：
+• Input Config：原有输入配置，原封不动迁入本模块
+• Control Plane：极简配置，仅包含 control_plane_id 与 entity_query_graph_ref
+
+领域边界：
+• Avatar / Player Entity：当前客户端控制域的锚点，由运行时上下文提供，不写进配置
+• Entity Query Graph：接收控制者化身上下文，沿 Controls 等关系查询并输出可控制 Actor 集合
+• Actor Collection：命令作用对象的集合语义；actorCollectionKey 必须保留
+• Command Intent：根据集合成员与目标上下文决定 Order，不拥有控制关系
+• Input Binding：只触发 Intent，不解析关系、不保存 Actor 列表
+
+单一数据源：
+控制权限与成员关系只存在于实体关系图；Control Plane 不复制 relation id、遍历深度、筛选器或 Actor 列表。关系变化后，下一次查询自然得到新的控制集合。
+
+约束：
+1. Control Plane 查询必须输出 Entities/Actor Collection，而不是单个 Actor。
+2. 查询图只能读取世界关系并选择 Actor，不提交 Order，也不修改 World。
+3. Primary Actor 只是集合的兼容投影，不能替代集合模型。
+4. InputOrderMapping 对集合只保存稳定的 actorCollectionKey 引用。`,
+    questions: [
+      "Control Plane 第一版是否固定使用一个全局配置，还是允许按游戏模式选择不同 profile？"
+    ]
+  },
+  {
     id: "architecture-decisions",
     title: "架构统一决策 (Roadmap)",
     overview: "对文档中全部疑问的根因分析与统一方案。",

@@ -59,10 +59,17 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    key: 'command_control',
+    label: '命令与控制',
+    items: [
+      { page: 'InputConfigEditor', label: 'Input Config', icon: Gamepad2 },
+      { page: 'ControlPlaneEditor', label: 'Control Plane', icon: Network },
+    ],
+  },
+  {
     key: 'input',
     label: '输入与订单',
     items: [
-      { page: 'InputConfigEditor', label: 'Input Config', icon: Gamepad2 },
       { page: 'InputOrderEditor', label: 'Input Order Mapping', icon: ListTree },
       { page: 'CommandIntentEditor', label: 'Command Intent', icon: GitBranch },
       { page: 'CastDispatchEditor', label: 'Cast Dispatch', icon: Network },
