@@ -5,7 +5,7 @@
   "properties": {
     "profile_id": {
       "type": "string",
-      "description": "C# CastDispatchProfileDefinition.Id"
+      "description": "\u65bd\u6cd5\u5206\u53d1\u914d\u7f6e\u552f\u4e00\u6807\u8bc6"
     },
     "selector": {
       "type": "object",

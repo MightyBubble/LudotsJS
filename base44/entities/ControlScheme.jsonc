@@ -5,7 +5,7 @@
   "properties": {
     "scheme_id": {
       "type": "string",
-      "description": "C# ControlSchemeDefinition.Id"
+      "description": "\u63a7\u5236\u65b9\u6848\u552f\u4e00\u6807\u8bc6"
     },
     "inputContexts": {
       "type": "array",

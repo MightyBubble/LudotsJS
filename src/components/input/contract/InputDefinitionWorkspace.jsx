@@ -14,6 +14,6 @@ export default function InputDefinitionWorkspace({ config }) {
     toItem={record => ({ id: record.id, name: record[config.idKey], subtitle: config.title })}
     selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
     onDelete={record => window.confirm(`确定删除「${record[config.idKey]}」吗？`) && editor.remove(record.id)} onSave={editor.save} dirty={editor.dirty}>
-    {editor.draft && <Section title={`C# ${config.contract}`}><ContractFields fields={config.fields} value={editor.draft} onChange={editor.patch} refs={refs} /></Section>}
+    {editor.draft && <Section title="配置详情"><ContractFields fields={config.fields} value={editor.draft} onChange={editor.patch} refs={refs} /></Section>}
   </RecordWorkspace>;
 }
