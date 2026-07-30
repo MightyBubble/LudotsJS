@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { getAvailableNodes } from './nodeConfigs';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function NodeSearchMenu({ x, y, graphType = 'data', onAdd, onClose }) {
   const [search, setSearch] = useState('');
   const inputRef = useRef(null);
+  const { locale, t } = useI18n();
 
   useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => {
@@ -13,10 +15,10 @@ export default function NodeSearchMenu({ x, y, graphType = 'data', onAdd, onClos
   }, [onClose]);
 
   const nodes = useMemo(() => {
-    const all = getAvailableNodes(graphType);
+    const all = getAvailableNodes(graphType).map(node => ({ ...node, localized: node.getLocalizedText?.(locale) }));
     const q = search.trim().toLowerCase();
-    return q ? all.filter(n => n.label.toLowerCase().includes(q) || n.type.includes(q)) : all;
-  }, [graphType, search]);
+    return q ? all.filter(n => [n.label, n.localized?.label, n.localized?.secondary, n.type].some(value => value?.toLowerCase().includes(q))) : all;
+  }, [graphType, search, locale]);
 
   const categories = useMemo(() => [...new Set(nodes.map(n => n.category))], [nodes]);
 
@@ -35,7 +37,7 @@ export default function NodeSearchMenu({ x, y, graphType = 'data', onAdd, onClos
             ref={inputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="搜索节点..."
+            placeholder={t('graph.searchNodes', '搜索节点...')}
             className="w-full h-7 px-2 bg-[#0D0F14] border border-[#2A2E37] rounded text-xs text-[#e5e5e5] outline-none focus:border-[#D97706]"
           />
         </div>
@@ -54,7 +56,10 @@ export default function NodeSearchMenu({ x, y, graphType = 'data', onAdd, onClos
                       className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors hover:bg-[#262626] border-l-2 border-[#2A2E37] hover:border-[#D97706]"
                     >
                       <Icon className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-[11px] text-[#e5e5e5]">{nodeType.label}</span>
+                      <span className="min-w-0">
+                        <span className="block text-[11px] text-[#e5e5e5]">{nodeType.localized?.label || nodeType.label}</span>
+                        {nodeType.localized && <span className="block truncate text-[9px] text-gray-500">{nodeType.localized.secondary} · {nodeType.localized.description}</span>}
+                      </span>
                     </button>
                   );
                 })}

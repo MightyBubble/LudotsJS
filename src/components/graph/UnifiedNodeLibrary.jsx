@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { getAvailableNodes, getCategories } from './nodeConfigs';
+import { useI18n } from '@/i18n/I18nProvider';
 
 export default function UnifiedNodeLibrary({ graphType = 'data', onAddNode, onClose }) {
   const [activeTab, setActiveTab] = useState(
     graphType === 'query' ? 'query' : graphType === 'function' ? 'function' : 'compute'
   );
-  
-  const availableNodes = getAvailableNodes(graphType);
+  const { locale } = useI18n();
+  const availableNodes = getAvailableNodes(graphType).map(node => ({ ...node, localized: node.getLocalizedText?.(locale) }));
   const categories = getCategories(graphType);
   
   // 区分不同类型的节点
@@ -94,7 +95,10 @@ export default function UnifiedNodeLibrary({ graphType = 'data', onAddNode, onCl
                     className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-all hover:bg-[#262626] active:scale-95 border-l-2 border-[#2A2E37] hover:border-[#D97706]"
                   >
                     <Icon className="w-3.5 h-3.5 text-gray-400" />
-                    <span className="text-[11px] text-[#e5e5e5]">{nodeType.label}</span>
+                    <span className="min-w-0">
+                      <span className="block text-[11px] text-[#e5e5e5]">{nodeType.localized?.label || nodeType.label}</span>
+                      {nodeType.localized && <span className="block truncate text-[9px] text-gray-500">{nodeType.localized.secondary} · {nodeType.localized.description}</span>}
+                    </span>
                   </div>
                 );
               })}

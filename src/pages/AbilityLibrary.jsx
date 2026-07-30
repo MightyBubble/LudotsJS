@@ -1,102 +1,35 @@
 import React from 'react';
-import { Wand2 } from 'lucide-react';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
-import { Section, TextField, SelectField, ListField, BoolField } from '@/components/ludots/ui';
-import TargetResolverEditor from '@/components/ludots/TargetResolverEditor';
-import RefListSelector from '@/components/ludots/RefListSelector';
-import PhaseListenersEditor from '@/components/ludots/PhaseListenersEditor';
-import { ABILITY_LISTENER_PHASES } from '@/components/ludots/phaseModel';
+import AbilityDetailsEditor from '@/components/ludots/AbilityDetailsEditor';
+import { getAbilityDisplayName, toAbilityContract } from '@/components/ludots/abilityContract';
 import { validateAbility } from '@/components/ludots/validation';
 
-const OPT = (arr) => arr.map(v => ({ value: v, label: v }));
-
 export default function AbilityLibraryPage() {
-  const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
-    'Ability', 'abilities',
-    () => ({
-      ability_id: `ability_${Date.now()}`, name: '新能力', is_active: true, activation_mode: 'active',
-      ability_tags: [], activation_requirements: [], target: { kind: 'explicit_target' },
-      cost_effect_ids: [], cooldown_effect_ids: [], activation_effect_ids: [], cancellation_effect_ids: [],
-      listeners: [], blackboard: {}, input_binding: {},
-    })
-  );
+  const editor = useRecordEditor('Ability', 'abilities', () => ({
+    ability_id: `Ability.New.${Date.now()}`,
+    exec: { clockId: 'FixedFrame', interruptAny: [], callerParams: [], items: [{ kind: 'End', tick: 0 }] },
+    onActivateEffects: [], blockTags: { requiredAll: [], blockedAny: [] }, catalogTags: [],
+    presentation: { displayName: '新能力' },
+  }), toAbilityContract);
   const refs = useCoreRefs();
-  const effectOptions = refs.effects.map(e => ({ value: e.effect_id, label: e.name }));
-  const issues = draft ? validateAbility(draft, refs) : [];
+  const issues = editor.draft ? validateAbility(editor.draft, refs) : [];
 
-  return (
-    <RecordWorkspace
-      entityName="Ability"
-      records={records}
-      columns={[
-        { key: 'ability_id', label: '能力ID', width: 200, render: (r) => <span className="font-mono text-[#E2D8B3]">{r.ability_id}</span> },
-        { key: 'name', label: '名称', width: 160 },
-        { key: 'activation_mode', label: '激活模式', width: 120, render: (r) => r.activation_mode || 'active' },
-        { key: 'ability_tags', label: '标签', render: (r) => (r.ability_tags || []).join(', ') || '-' },
-        { key: 'activation_effect_ids', label: '激活效果', width: 100, render: (r) => (r.activation_effect_ids || []).length },
-        { key: 'is_active', label: '启用', width: 70, render: (r) => (r.is_active !== false ? '是' : '否') },
-      ]}
-      toItem={(r) => ({ id: r.id, name: r.name, subtitle: `${r.activation_mode || 'active'} · ${(r.activation_effect_ids || []).length} 效果` })}
-      selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
-      onCreate={create}
-      onDelete={(r) => window.confirm(`确定删除「${r.name}」吗？`) && remove(r.id)}
-      onSave={save} dirty={dirty}
-    >
-      {draft && (
-        <div className="max-w-2xl">
-          <Section title="基础 Basic">
-            <TextField label="能力 ID (ability_id)" value={draft.ability_id} onChange={(v) => patch({ ability_id: v })} />
-            <TextField label="名称" value={draft.name} onChange={(v) => patch({ name: v })} />
-            <TextField label="描述" value={draft.description} onChange={(v) => patch({ description: v })} />
-            <SelectField label="图标资源" value={draft.icon_asset_id} options={refs.assets.map(a => ({ value: a.asset_id, label: a.name }))} onChange={(v) => patch({ icon_asset_id: v })} />
-            <ListField label="能力标签 ability_tags" value={draft.ability_tags} onChange={(v) => patch({ ability_tags: v })} />
-            <BoolField label="启用" value={draft.is_active !== false} onChange={(v) => patch({ is_active: v })} />
-          </Section>
-
-          <Section title="激活模式与输入">
-            <SelectField label="激活模式 activation_mode" value={draft.activation_mode || 'active'} options={OPT(['active', 'passive', 'event_driven'])} onChange={(v) => patch({ activation_mode: v })} />
-            <TextField label="输入绑定键 (input_binding.key)" value={draft.input_binding?.key} onChange={(v) => patch({ input_binding: { ...(draft.input_binding || {}), key: v } })} />
-            <p className="text-[10px] text-gray-600">被动 / 事件驱动能力由 Trigger 激活，但仍走同一激活管线。</p>
-          </Section>
-
-          <Section title="需求与目标">
-            <RefListSelector label="激活需求 activation_requirements" value={draft.activation_requirements || []} options={refs.requirements.map(r => ({ value: r.requirement_id, label: r.name }))} onChange={(v) => patch({ activation_requirements: v })} />
-            <TargetResolverEditor value={draft.target || { kind: 'explicit_target' }} onChange={(v) => patch({ target: v })} entityQueries={refs.entityQueries} />
-          </Section>
-
-          <Section title="效果编排 Effects">
-            <RefListSelector label="成本 cost_effect_ids" value={draft.cost_effect_ids || []} options={effectOptions} onChange={(v) => patch({ cost_effect_ids: v })} />
-            <RefListSelector label="冷却 cooldown_effect_ids" value={draft.cooldown_effect_ids || []} options={effectOptions} onChange={(v) => patch({ cooldown_effect_ids: v })} />
-            <RefListSelector label="激活 activation_effect_ids" value={draft.activation_effect_ids || []} options={effectOptions} onChange={(v) => patch({ activation_effect_ids: v })} />
-            <RefListSelector label="取消 cancellation_effect_ids" value={draft.cancellation_effect_ids || []} options={effectOptions} onChange={(v) => patch({ cancellation_effect_ids: v })} />
-            <p className="text-[10px] text-gray-600">激活顺序：构造上下文 → 校验 → 预检成本 → 成本 → 冷却 → 激活效果 → 发出 activated / completed 或 failed 事件。</p>
-          </Section>
-
-          <Section title="Phase Listeners（能力激活管线）">
-            <PhaseListenersEditor listeners={draft.listeners || []} onChange={(v) => patch({ listeners: v })} phaseOptions={ABILITY_LISTENER_PHASES} refs={refs} />
-          </Section>
-
-          <Section title="黑板 Blackboard">
-            <ListField
-              label="变量名列表"
-              value={Object.keys(draft.blackboard || {})}
-              onChange={(keys) => patch({ blackboard: keys.reduce((acc, k) => ({ ...acc, [k]: (draft.blackboard || {})[k] || { type: 'number' } }), {}) })}
-            />
-          </Section>
-
-          <Section title="校验 Validation">
-            {issues.length === 0
-              ? <p className="text-[11px] text-green-500">未发现问题</p>
-              : issues.map((i, idx) => (
-                <p key={idx} className={`text-[11px] ${i.severity === 'error' ? 'text-red-400' : 'text-yellow-500'}`}>
-                  [{i.severity}] {i.field_path}：{i.message}　→ {i.fix}
-                </p>
-              ))}
-          </Section>
-        </div>
-      )}
-    </RecordWorkspace>
-  );
+  return <RecordWorkspace
+    entityName="Ability" records={editor.records}
+    columns={[
+      { key: 'ability_id', label: 'Ability ID', width: 240, render: record => <span className="font-mono text-[#E2D8B3]">{record.ability_id}</span> },
+      { key: 'presentation', label: '显示名称', width: 180, render: getAbilityDisplayName },
+      { key: 'exec', label: 'Exec Items', width: 90, render: record => record.exec?.items?.length || 0 },
+      { key: 'onActivateEffects', label: '激活效果', width: 90, render: record => record.onActivateEffects?.length || 0 },
+      { key: 'catalogTags', label: '目录标签', render: record => (record.catalogTags || []).join(', ') || '-' },
+    ]}
+    toItem={record => ({ id: record.id, name: getAbilityDisplayName(record), subtitle: `${record.ability_id} · ${record.exec?.items?.length || 0} Exec Items` })}
+    selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
+    onDelete={record => window.confirm(`确定删除「${getAbilityDisplayName(record)}」吗？`) && editor.remove(record.id)}
+    onSave={editor.save} dirty={editor.dirty}
+  >
+    {editor.draft && <AbilityDetailsEditor draft={editor.draft} patch={editor.patch} refs={refs} issues={issues} />}
+  </RecordWorkspace>;
 }

@@ -1,5 +1,6 @@
 import { Braces, Calculator, Database, GitBranch, Link, MapPin, Play, Settings2, Tag, Zap } from 'lucide-react';
 import { CSHARP_GRAPH_OPS } from '@/lib/runtime/csharpGraphContract';
+import { getLudotsNodeText } from './ludotsNodeI18n';
 
 export const RUNTIME_FLOW_OPS = new Set([
   'Jump','JumpIfFalse','ApplyEffectTemplate','FanOutApplyEffect','ApplyEffectDynamic','FanOutApplyEffectDynamic','RemoveEffectTemplate','FanOutDispatchEffect','FanOutDispatchEffectDynamic','ModifyAttributeAdd','SendEvent',
@@ -36,6 +37,7 @@ export const LUDOTS_GRAPH_NODE_TYPES = Object.fromEntries([...CSHARP_GRAPH_OPS].
   const dataInputs = Array.from({ length: inputCount(op) }, (_, i) => ({ id: `in${i}`, label: `Input ${i}`, type: 'any' }));
   return [`ludots_${op}`, {
     label: op, icon: flow ? Play : iconFor(category), category, graphTypes: ['action'], runtimeOp: op,
+    getLocalizedText: locale => getLudotsNodeText(op, locale),
     configFields: (fields[op] || []).map(([key, type, defaultValue]) => ({ key, type, defaultValue })),
     defaultData: { runtimeOp: op, ...Object.fromEntries((fields[op] || []).map(([key,, value]) => [key, value])) },
     inputs: [...(flow ? [{ id: 'exec', label: 'Exec', type: 'exec' }] : []), ...dataInputs],

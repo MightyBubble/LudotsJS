@@ -5,6 +5,7 @@ import BlackboardVarNode from './BlackboardVarNode';
 import { Input } from '@/components/ui/input';
 import { getNodeConfig, getNodeLabel } from './nodeConfigs';
 import RuntimeNodeFields from './RuntimeNodeFields';
+import { useI18n } from '@/i18n/I18nProvider';
 
 const nodeAccentColors = {
   number: '#5b9bd5',
@@ -89,6 +90,8 @@ export default function Node({
   const accentColor = nodeAccentColors[node?.type] || nodeAccentColors.number;
   const isLocked = node?.locked || (node?.id && node.id.startsWith('output-'));
   const nodeConfig = getNodeConfig(node?.type);
+  const { locale } = useI18n();
+  const localized = nodeConfig?.getLocalizedText?.(locale);
 
   if (!node) {
     return null;
@@ -289,7 +292,7 @@ export default function Node({
         }}
       >
         <span className="font-medium text-xs text-[#E2D8B3]">
-          {node.data?.label || nodeLabels[node.type] || getNodeLabel(node.type)}
+          {node.data?.label || localized?.label || nodeLabels[node.type] || getNodeLabel(node.type)}
         </span>
         {!isLocked && (
           <button
@@ -307,13 +310,14 @@ export default function Node({
       </div>
 
       <div className="p-3 space-y-0">
+        {localized && <div className="mb-2 border-b border-[#2A2E37] pb-2"><div className="text-[9px] text-gray-500">{localized.secondary}</div><div className="mt-0.5 text-[9px] leading-4 text-gray-400">{localized.description}</div></div>}
         {node.data?.details?.length > 0 && (
           <div className="mb-2 space-y-0.5 border-b border-[#2A2E37] pb-2">
             {node.data.details.map(detail => <div key={detail} className="font-mono text-[9px] leading-4 text-gray-400">{detail}</div>)}
           </div>
         )}
         <div className="nodrag">
-          <RuntimeNodeFields fields={nodeConfig?.configFields} data={node.data || {}} onChange={data => onUpdateData(node.id, data)} />
+          <RuntimeNodeFields fields={nodeConfig?.configFields} data={node.data || {}} onChange={data => onUpdateData(node.id, data)} locale={locale} />
           {renderInlineInputs()}
         </div>
 

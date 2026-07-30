@@ -45,34 +45,27 @@ export function validateEffect(effect, refs = {}) {
 
 export function validateAbility(ability, refs = {}) {
   const out = [];
-  const { effects = [], requirements = [], assets = [], triggers = [] } = refs;
-  const effectIds = new Set(effects.map(e => e.effect_id));
-  const reqIds = new Set(requirements.map(r => r.requirement_id));
-
-  if (!ability.ability_id) out.push(issue('error', 'ability_id', '缺少 ability_id', '填写唯一 ID'));
-  ['cost_effect_ids', 'cooldown_effect_ids', 'activation_effect_ids', 'cancellation_effect_ids'].forEach(field => {
-    (ability[field] || []).forEach(id => {
-      if (!effectIds.has(id)) out.push(issue('error', field, `效果引用无效：${id}`, '重新选择效果'));
-    });
+  const effectIds = new Set((refs.effects || []).map(effect => effect.effect_id));
+  const attributeIds = new Set((refs.attributes || []).map(attribute => attribute.attribute_id));
+  const graphIds = new Set([...(refs.actionGraphs || []).map(graph => graph.action_id), ...(refs.dataGraphs || []).map(graph => graph.graph_id)]);
+  if (!ability.ability_id) out.push(issue('error', 'ability_id', '缺少 GAS ability id', '填写唯一 id'));
+  if (!ability.exec?.clockId) out.push(issue('error', 'exec.clockId', 'AbilityExecLoader 要求 clockId', '填写 FixedFrame 等有效时钟'));
+  if (!Array.isArray(ability.exec?.items)) out.push(issue('error', 'exec.items', 'AbilityExecLoader 要求 items 数组', '至少添加 End item'));
+  (ability.exec?.items || []).forEach((item, index) => {
+    if (!item.kind) out.push(issue('error', `exec.items[${index}].kind`, '缺少 ExecItemKind', '选择原生 kind'));
+    if (!Number.isInteger(item.tick)) out.push(issue('error', `exec.items[${index}].tick`, 'tick 必须是整数', '填写执行 tick'));
+    if (['EffectClip','EffectSignal'].includes(item.kind) && (!item.template || !effectIds.has(item.template))) out.push(issue('error', `exec.items[${index}].template`, 'Effect 模板引用无效', '选择现有 Effect'));
+    if (item.kind === 'GraphSignal' && (!item.graph || !graphIds.has(item.graph))) out.push(issue('error', `exec.items[${index}].graph`, 'Graph 程序引用无效', '选择现有 Graph'));
+    if (item.kind === 'InputGate' && item.payloadA === undefined) out.push(issue('error', `exec.items[${index}].payloadA`, 'InputGate 必须提供 payloadA', '填写输入门载荷'));
   });
-  (ability.activation_requirements || []).forEach(id => {
-    if (!reqIds.has(id)) out.push(issue('error', 'activation_requirements', `需求引用无效：${id}`, '重新选择需求'));
-  });
-  if (ability.icon_asset_id && !assets.some(a => a.asset_id === ability.icon_asset_id)) {
-    out.push(issue('warning', 'icon_asset_id', '图标资源引用无效', '重新选择资源'));
-  }
-  if ((ability.activation_effect_ids || []).length === 0) {
-    out.push(issue('warning', 'activation_effect_ids', '未配置激活效果，激活后不会产生任何结果', '添加激活效果'));
-  }
-  if (ability.activation_mode === 'event_driven' && !triggers.some(t => (t.requests || []).some(r => r.ability_id === ability.ability_id))) {
-    out.push(issue('warning', 'activation_mode', '事件驱动能力应由 Trigger 发起 Ability Request', '在触发器中配置 activate_ability 请求'));
-  }
-  (ability.listeners || []).forEach((l, i) => {
-    (l.responses || []).forEach((r, ri) => {
-      if (r.response_type === 'activate_ability' && r.ability_id === ability.ability_id) {
-        out.push(issue('error', `listeners[${i}].responses[${ri}]`, 'Listener 重新激活自身，存在递归风险', '改为其它能力或设置 max_executions'));
-      }
-    });
-  });
+  (ability.onActivateEffects || []).forEach((id, index) => { if (!effectIds.has(id)) out.push(issue('error', `onActivateEffects[${index}]`, `Effect 引用无效：${id}`, '选择现有 Effect')); });
+  if ((ability.onActivateEffects || []).length > 16) out.push(issue('error', 'onActivateEffects', '超过 C# 容量 16', '减少 Effect 数量'));
+  if ((ability.toggleSpec?.activeEffects || []).length > 4) out.push(issue('error', 'toggleSpec.activeEffects', '超过 C# 容量 4', '减少 activeEffects'));
+  (ability.toggleSpec?.activeEffects || []).forEach((id, index) => { if (!effectIds.has(id)) out.push(issue('error', `toggleSpec.activeEffects[${index}]`, `Effect 引用无效：${id}`, '选择现有 Effect')); });
+  if (ability.cooldown && !ability.cooldown.valueAttribute && !ability.cooldown.tag) out.push(issue('error', 'cooldown', 'cooldown 必须声明 valueAttribute 或 tag', '补全冷却来源'));
+  if (ability.cooldown?.valueAttribute && !attributeIds.has(ability.cooldown.valueAttribute)) out.push(issue('error', 'cooldown.valueAttribute', 'Attribute 引用无效', '选择现有 Attribute'));
+  if (ability.activationPrecondition?.validationGraph && !graphIds.has(ability.activationPrecondition.validationGraph)) out.push(issue('error', 'activationPrecondition.validationGraph', 'Graph 引用无效', '选择现有 Graph'));
+  if (ability.targeting && (ability.targeting.castRangeCm === undefined || !ability.targeting.impactEffect)) out.push(issue('error', 'targeting', 'targeting 必须同时提供 castRangeCm 与 impactEffect', '补全目标字段'));
+  if (ability.targeting?.impactEffect && !effectIds.has(ability.targeting.impactEffect)) out.push(issue('error', 'targeting.impactEffect', 'Effect 引用无效', '选择现有 Effect'));
   return out;
 }
