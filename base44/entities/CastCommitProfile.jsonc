@@ -1,0 +1,59 @@
+{
+  "name": "CastCommitProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [
+            "pushFrame",
+            "popFrame",
+            "submitOrder"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "contextProfileId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "op"
+      ]
+    }
+  },
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "C# CastCommitProfileDefinition.Id"
+    },
+    "onActivate": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "frameActions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/operation"
+        }
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "onActivate",
+    "frameActions"
+  ]
+}

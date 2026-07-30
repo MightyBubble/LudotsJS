@@ -15,6 +15,11 @@ import AbilityLibrary from './pages/AbilityLibrary';
 import ProjectOverview from './pages/ProjectOverview';
 import InputSystem from './pages/InputSystem';
 import InputConfigEditor from './pages/InputConfigEditor';
+import ControlSchemeEditor from './pages/ControlSchemeEditor';
+import CommandIntentEditor from './pages/CommandIntentEditor';
+import InputOrderEditor from './pages/InputOrderEditor';
+import CastCommitEditor from './pages/CastCommitEditor';
+import CastDispatchEditor from './pages/CastDispatchEditor';
 import AbilityPlayground from './pages/AbilityPlayground';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
@@ -75,6 +80,11 @@ const AuthenticatedApp = () => {
       <Route path="/ProjectOverview" element={<LayoutWrapper currentPageName="ProjectOverview"><ProjectOverview /></LayoutWrapper>} />
       <Route path="/InputSystem" element={<LayoutWrapper currentPageName="InputSystem"><InputSystem /></LayoutWrapper>} />
       <Route path="/InputConfigEditor" element={<LayoutWrapper currentPageName="InputConfigEditor"><InputConfigEditor /></LayoutWrapper>} />
+      <Route path="/ControlSchemeEditor" element={<LayoutWrapper currentPageName="ControlSchemeEditor"><ControlSchemeEditor /></LayoutWrapper>} />
+      <Route path="/CommandIntentEditor" element={<LayoutWrapper currentPageName="CommandIntentEditor"><CommandIntentEditor /></LayoutWrapper>} />
+      <Route path="/InputOrderEditor" element={<LayoutWrapper currentPageName="InputOrderEditor"><InputOrderEditor /></LayoutWrapper>} />
+      <Route path="/CastCommitEditor" element={<LayoutWrapper currentPageName="CastCommitEditor"><CastCommitEditor /></LayoutWrapper>} />
+      <Route path="/CastDispatchEditor" element={<LayoutWrapper currentPageName="CastDispatchEditor"><CastDispatchEditor /></LayoutWrapper>} />
       <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

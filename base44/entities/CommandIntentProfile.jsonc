@@ -1,0 +1,112 @@
+{
+  "name": "CommandIntentProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "C# CommandIntentProfileDefinition.Id"
+    },
+    "groupPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "independent"
+          ]
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "priority": {
+            "type": "integer"
+          },
+          "actor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "hasAbilityWithTag": {
+                "type": "string"
+              },
+              "allTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "anyTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "target": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "allTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "anyTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "stance": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "hasEntity": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "route": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "orderTypeKey": {
+                "type": "string"
+              },
+              "slot": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "orderTypeKey"
+            ]
+          }
+        },
+        "required": [
+          "priority",
+          "actor",
+          "target",
+          "route"
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "groupPolicy",
+    "rules"
+  ]
+}

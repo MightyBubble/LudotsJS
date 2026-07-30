@@ -1,0 +1,51 @@
+{
+  "name": "ControlScheme",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "scheme_id": {
+      "type": "string",
+      "description": "C# ControlSchemeDefinition.Id"
+    },
+    "inputContexts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "commandIntentId": {
+          "type": "string"
+        },
+        "castDispatchProfileId": {
+          "type": "string"
+        }
+      }
+    },
+    "axisMove": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actionId": {
+          "type": "string"
+        },
+        "orderTypeKey": {
+          "type": "string"
+        },
+        "throttleTicks": {
+          "type": "integer"
+        },
+        "stepDistanceCm": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "required": [
+    "scheme_id",
+    "inputContexts"
+  ]
+}

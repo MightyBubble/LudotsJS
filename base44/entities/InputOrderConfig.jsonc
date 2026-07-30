@@ -1,0 +1,310 @@
+{
+  "name": "InputOrderConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "args": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "i0": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "i1": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "i2": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "i3": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "f0": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "f1": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "f2": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "f3": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "properties": {
+    "config_id": {
+      "type": "string",
+      "description": "\u7f16\u8f91\u5668\u8d44\u4ea7\u6807\u8bc6\uff1b\u5bfc\u51fa InputOrderMappingConfig \u65f6\u4e0d\u5305\u542b"
+    },
+    "interactionMode": {
+      "type": "string",
+      "enum": [
+        "TargetFirst",
+        "SmartCast",
+        "AimCast",
+        "SmartCastWithIndicator",
+        "ContextScored",
+        "PressReleaseAimCast"
+      ]
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "actionId": {
+            "type": "string"
+          },
+          "trigger": {
+            "type": "string",
+            "enum": [
+              "PressedThisFrame",
+              "ReleasedThisFrame",
+              "Held",
+              "DoubleTap"
+            ]
+          },
+          "doubleTapWindowSeconds": {
+            "type": "number"
+          },
+          "orderTypeKey": {
+            "type": "string"
+          },
+          "actorOrderRouting": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "orderTypeKey": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "integer"
+                    },
+                    "match": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "requiredAllTags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "blockedAnyTags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "abilitySlotIndex": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "abilityIdKey": {
+                          "type": "string"
+                        },
+                        "abilityIdKeySuffix": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "targetType": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "None",
+                        "Position",
+                        "Entity",
+                        "Entities",
+                        "Direction",
+                        "Vector",
+                        "HoveredEntityOrPosition",
+                        null
+                      ]
+                    }
+                  },
+                  "required": [
+                    "orderTypeKey",
+                    "priority",
+                    "match"
+                  ]
+                }
+              }
+            }
+          },
+          "argsTemplate": {
+            "$ref": "#/$defs/args"
+          },
+          "requireTarget": {
+            "type": "boolean"
+          },
+          "actorCollectionKey": {
+            "type": "string"
+          },
+          "targetCollectionKey": {
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string",
+            "enum": [
+              "None",
+              "Position",
+              "Entity",
+              "Entities",
+              "Direction",
+              "Vector",
+              "HoveredEntityOrPosition"
+            ]
+          },
+          "modifierBehavior": {
+            "type": "string",
+            "enum": [
+              "IgnoreModifier",
+              "QueueOnModifier",
+              "AlwaysImmediate",
+              "AlwaysQueued"
+            ]
+          },
+          "isSkillMapping": {
+            "type": "boolean"
+          },
+          "heldPolicy": {
+            "type": "string",
+            "enum": [
+              "EveryFrame",
+              "StartEnd"
+            ]
+          },
+          "castModeOverride": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "TargetFirst",
+              "SmartCast",
+              "AimCast",
+              "SmartCastWithIndicator",
+              "ContextScored",
+              "PressReleaseAimCast",
+              null
+            ]
+          },
+          "autoTargetPolicy": {
+            "type": "string",
+            "enum": [
+              "None",
+              "NearestInRange",
+              "NearestEnemyInRange"
+            ]
+          },
+          "autoTargetRangeCm": {
+            "type": "integer"
+          },
+          "cursorTargetPolicy": {
+            "type": "string",
+            "enum": [
+              "None",
+              "NearestInRange",
+              "NearestEnemyInRange"
+            ]
+          },
+          "cursorTargetRangeCm": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "actionId",
+          "trigger",
+          "orderTypeKey",
+          "argsTemplate",
+          "targetType",
+          "modifierBehavior",
+          "heldPolicy"
+        ]
+      }
+    },
+    "groupMoveTargetLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Grid"
+          ]
+        },
+        "spacingCm": {
+          "type": "integer"
+        },
+        "orderTypeKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "userOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "persistPath": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "config_id",
+    "interactionMode",
+    "mappings",
+    "groupMoveTargetLayout",
+    "userOverrides"
+  ]
+}

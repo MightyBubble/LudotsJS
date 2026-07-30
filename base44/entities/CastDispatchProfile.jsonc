@@ -1,0 +1,82 @@
+{
+  "name": "CastDispatchProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "C# CastDispatchProfileDefinition.Id"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "all",
+            "topN",
+            "cycle"
+          ]
+        },
+        "n": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "advanceOn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "scorer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "utility"
+          ]
+        },
+        "considerations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "router": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "parallel",
+            "sequential"
+          ]
+        },
+        "sharedOrderId": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    }
+  },
+  "required": [
+    "profile_id",
+    "selector",
+    "router"
+  ]
+}
