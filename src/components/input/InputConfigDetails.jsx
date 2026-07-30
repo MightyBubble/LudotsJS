@@ -2,12 +2,9 @@ import React from 'react';
 import { Section, TextField } from '@/components/ludots/ui';
 import InputActionEditor from '@/components/input/InputActionEditor';
 import InputContextEditor from '@/components/input/InputContextEditor';
-import ExampleConfigPanel from '@/components/input/ExampleConfigPanel';
-import { inputEditorExamples } from '@/components/input/contract/inputEditorExamples';
 
 export default function InputConfigDetails({ draft, patch }) {
   return <div className="h-full overflow-auto p-3">
-    <ExampleConfigPanel example={inputEditorExamples.InputConfig} />
     <Section title="C# InputConfigRoot">
       <div className="grid gap-3 md:grid-cols-2">
         <TextField label="Config ID" value={draft.config_id} onChange={config_id => patch({ config_id })} />

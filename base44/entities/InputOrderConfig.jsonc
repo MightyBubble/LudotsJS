@@ -2,62 +2,6 @@
   "name": "InputOrderConfig",
   "type": "object",
   "additionalProperties": false,
-  "$defs": {
-    "args": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "i0": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "i1": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "i2": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "i3": {
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "f0": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "f1": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "f2": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "f3": {
-          "type": [
-            "number",
-            "null"
-          ]
-        }
-      }
-    }
-  },
   "properties": {
     "config_id": {
       "type": "string",
@@ -174,7 +118,58 @@
             }
           },
           "argsTemplate": {
-            "$ref": "#/$defs/args"
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "i0": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "i1": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "i2": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "i3": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "f0": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "f1": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "f2": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "f3": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
           },
           "requireTarget": {
             "type": "boolean"

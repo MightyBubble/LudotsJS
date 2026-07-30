@@ -2,34 +2,6 @@
   "name": "CastCommitProfile",
   "type": "object",
   "additionalProperties": false,
-  "$defs": {
-    "operation": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "op": {
-          "type": "string",
-          "enum": [
-            "pushFrame",
-            "popFrame",
-            "submitOrder"
-          ]
-        },
-        "payload": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "contextProfileId": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "op"
-      ]
-    }
-  },
   "properties": {
     "profile_id": {
       "type": "string",
@@ -38,7 +10,30 @@
     "onActivate": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/operation"
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "pushFrame",
+              "popFrame",
+              "submitOrder"
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "contextProfileId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "op"
+        ]
       }
     },
     "frameActions": {
@@ -46,7 +41,30 @@
       "additionalProperties": {
         "type": "array",
         "items": {
-          "$ref": "#/$defs/operation"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "pushFrame",
+                "popFrame",
+                "submitOrder"
+              ]
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "contextProfileId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ]
         }
       }
     }
