@@ -8,6 +8,6 @@ export default function PlaygroundControls({ abilities, selectedId, onSelect, on
     <Select value={selectedId} onValueChange={onSelect}><SelectTrigger aria-label="测试 Ability" className="w-72 bg-[#0D0F14]"><SelectValue placeholder="选择 Ability" /></SelectTrigger><SelectContent>{abilities.map(a => <SelectItem key={a.id} value={a.id}>{a.presentation?.displayName || a.ability_id}</SelectItem>)}</SelectContent></Select>
     <Button onClick={onCast} disabled={!selectedId}><Zap className="mr-1 h-4 w-4" />施放</Button>
     <Button variant="outline" onClick={onReset}><RotateCcw className="mr-1 h-4 w-4" />重置</Button>
-    <span className="text-[11px] text-gray-500">右键地面移动；进入范围后施放，按 Exec tick 输出事件。</span>
+    <span className="text-[11px] text-gray-500">非放置状态下右键地面移动；进入范围后施放，按 Exec tick 输出事件。</span>
   </div>;
 }
