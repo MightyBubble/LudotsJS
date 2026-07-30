@@ -46,7 +46,7 @@ export function SelectField({ label, value, options, onChange, hint }) {
   return (
     <Field label={label} hint={hint}>
       <Select value={value ?? ''} onValueChange={onChange}>
-        <SelectTrigger className={inputCls}><SelectValue placeholder="未设置" /></SelectTrigger>
+        <SelectTrigger aria-label={label} className={inputCls}><SelectValue placeholder="未设置" /></SelectTrigger>
         <SelectContent className="bg-[#15171C] border-[#2A2E37]">
           {options.map(o => (
             <SelectItem key={o.value} value={o.value} className="text-[#e5e5e5] text-xs">{o.label}</SelectItem>

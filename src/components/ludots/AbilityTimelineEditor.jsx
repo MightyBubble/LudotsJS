@@ -5,7 +5,7 @@ import AbilityTimelineRuler from './AbilityTimelineRuler';
 import AbilityTimelineToolbar from './AbilityTimelineToolbar';
 import { createTimelineItem, itemEnd, timelineEnd } from './abilityTimelineModel';
 
-export default function AbilityTimelineEditor({ items = [], callerParams = [], onChange }) {
+export default function AbilityTimelineEditor({ items = [], callerParams = [], refs = {}, onChange }) {
   const [selected, setSelected] = useState(items.length ? 0 : null);
   const [zoom, setZoom] = useState(8);
   useEffect(() => { if (selected != null && selected >= items.length) setSelected(items.length ? items.length - 1 : null); }, [items.length, selected]);
@@ -22,12 +22,16 @@ export default function AbilityTimelineEditor({ items = [], callerParams = [], o
   const remove = index => { onChange(items.filter((_, i) => i !== index)); setSelected(null); };
   return <div className="overflow-hidden rounded border border-[#2A2E37] bg-[#0D0F14]">
     <AbilityTimelineToolbar count={items.length} zoom={zoom} onZoom={setZoom} onAdd={add} />
-    <div className="max-h-[28rem] overflow-auto">
-      <div style={{ minWidth: 128 + ticks * zoom }}><AbilityTimelineRuler ticks={ticks} pixelsPerTick={zoom} />
-        {items.map((item, index) => <AbilityTimelineItem key={index} item={item} index={index} selected={selected === index} pixelsPerTick={zoom} ticks={ticks} onSelect={() => setSelected(index)} onChange={next => update(index, next)} />)}
+    <div className="grid min-h-72 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="min-w-0 overflow-auto border-b border-[#2A2E37] lg:max-h-[42rem] lg:border-b-0 lg:border-r">
+        <div style={{ minWidth: 128 + ticks * zoom }}><AbilityTimelineRuler ticks={ticks} pixelsPerTick={zoom} />
+          {items.map((item, index) => <AbilityTimelineItem key={index} item={item} index={index} selected={selected === index} pixelsPerTick={zoom} ticks={ticks} onSelect={() => setSelected(index)} onChange={next => update(index, next)} />)}
+        </div>
+        {!items.length && <p className="p-6 text-center text-xs text-muted-foreground">添加第一个 Exec Item 开始编排</p>}
       </div>
+      <aside className="max-h-[42rem] overflow-auto bg-[#111419] p-3">
+        {selected != null && items[selected] ? <AbilityExecItemEditor item={items[selected]} index={selected} callerParams={callerParams} refs={refs} onChange={next => update(selected, next)} onRemove={() => remove(selected)} /> : <div className="flex h-full min-h-48 items-center justify-center text-center text-xs text-muted-foreground">选择左侧 Clip<br />查看和编辑 Detail</div>}
+      </aside>
     </div>
-    {selected != null && items[selected] && <div className="border-t border-[#2A2E37] p-3"><AbilityExecItemEditor item={items[selected]} index={selected} callerParams={callerParams} onChange={next => update(selected, next)} onRemove={() => remove(selected)} /></div>}
-    {!items.length && <p className="p-6 text-center text-xs text-muted-foreground">添加第一个 Exec Item 开始编排</p>}
   </div>;
 }
