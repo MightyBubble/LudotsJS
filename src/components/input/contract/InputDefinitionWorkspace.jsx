@@ -7,6 +7,7 @@ import ContractFields from '@/components/input/contract/ContractFields';
 import ConfigGuideButton from '@/components/help/ConfigGuideButton';
 import { inputConfigGuides } from '@/components/input/contract/inputConfigGuides';
 import { inputConfigFieldGuides } from '@/components/input/contract/inputConfigFieldGuides';
+import ExampleConfigPanel from '@/components/input/ExampleConfigPanel';
 
 export default function InputDefinitionWorkspace({ config }) {
   const editor = useRecordEditor(config.entity, config.queryKey, config.buildNew);
@@ -18,6 +19,6 @@ export default function InputDefinitionWorkspace({ config }) {
     selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
     headerRight={<ConfigGuideButton guide={{ ...inputConfigGuides[config.entity], ...inputConfigFieldGuides[config.entity] }} />}
     onDelete={record => window.confirm(`确定删除「${record[config.idKey]}」吗？`) && editor.remove(record.id)} onSave={editor.save} dirty={editor.dirty}>
-    {editor.draft && <Section title="配置详情"><ContractFields fields={config.fields} value={editor.draft} onChange={editor.patch} refs={refs} /></Section>}
+    {editor.draft && <><ExampleConfigPanel example={config.example} /><Section title="配置详情"><ContractFields fields={config.fields} value={editor.draft} onChange={editor.patch} refs={refs} /></Section></>}
   </RecordWorkspace>;
 }
