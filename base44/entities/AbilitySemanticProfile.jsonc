@@ -1,0 +1,48 @@
+{
+  "name": "AbilitySemanticProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "\u8bed\u4e49\u7ec4\u6807\u8bc6\uff08\u5982 hero / building / worker\uff09\u3002\u5b9e\u4f53\u539f\u578b\u901a\u8fc7\u5b83\u5f15\u7528\u8fd9\u5957\u8bed\u4e49"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\uff08\u5982 \u82f1\u96c4 / \u5efa\u7b51\uff09"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u8bf4\u660e\uff1a\u8fd9\u5957\u8bed\u4e49\u9002\u7528\u4e8e\u54ea\u4e00\u7c7b\u5b9e\u4f53"
+    },
+    "roles": {
+      "type": "array",
+      "description": "\u8be5\u5b9e\u4f53\u65cf\u62e5\u6709\u7684\u6280\u80fd\u8bed\u4e49\u5217\u8868\u3002AI / \u5173\u5361\u811a\u672c\u6309 role_id \u5bfb\u5740",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "description": "\u8bed\u4e49\u6807\u8bc6\uff08\u5982 Skill.Primary / Skill.Ultimate / Build.First\uff09"
+          },
+          "label": {
+            "type": "string",
+            "description": "\u663e\u793a\u540d\uff08\u5982 \u4e00\u6280\u80fd / \u5927\u62db\uff09"
+          },
+          "description": {
+            "type": "string",
+            "description": "\u8bf4\u660e"
+          }
+        },
+        "required": [
+          "role_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "roles"
+  ]
+}

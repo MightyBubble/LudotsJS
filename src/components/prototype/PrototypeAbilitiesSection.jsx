@@ -5,7 +5,6 @@ import { Trash2, Plus, ChevronUp, ChevronDown } from "lucide-react";
 import { Section } from "@/components/ludots/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const SLOT_LABELS = ["槽位 0 (Q)", "槽位 1 (W)", "槽位 2 (E)", "槽位 3 (R)"];
 const inputCls = "h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white";
 
 export default function PrototypeAbilitiesSection({ abilityIds = [], formSetRef = "", abilities = [], formSets = [], onChange }) {
@@ -23,7 +22,7 @@ export default function PrototypeAbilitiesSection({ abilityIds = [], formSetRef 
       <div className="space-y-2">
         {abilityIds.map((abilityId, index) => (
           <div key={index} className="grid grid-cols-[92px_1fr_auto] gap-2 items-center">
-            <span className="text-[10px] text-gray-500 font-mono">{SLOT_LABELS[index] || `槽位 ${index}`}</span>
+            <span className="text-[10px] text-gray-500 font-mono">槽位 {index}</span>
             <Select value={abilityId} onValueChange={(value) => { const list = [...abilityIds]; list[index] = value; setList(list); }}>
               <SelectTrigger className={inputCls}><SelectValue placeholder="选择技能" /></SelectTrigger>
               <SelectContent className="bg-[#15171C] border-[#2A2E37]">

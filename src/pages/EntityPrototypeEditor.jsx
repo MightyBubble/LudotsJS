@@ -8,6 +8,7 @@ import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import { Section } from '@/components/ludots/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PrototypeAbilitiesSection from '@/components/prototype/PrototypeAbilitiesSection';
+import PrototypeRoleBindingsSection from '@/components/prototype/PrototypeRoleBindingsSection';
 
 export default function EntityPrototypeEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +44,12 @@ export default function EntityPrototypeEditorPage() {
   const { data: formSets = [] } = useQuery({
     queryKey: ['ability-form-sets'],
     queryFn: () => base44.entities.AbilityFormSet.list('form_set_id'),
+    initialData: [],
+  });
+
+  const { data: semanticProfiles = [] } = useQuery({
+    queryKey: ['ability-semantic-profiles'],
+    queryFn: () => base44.entities.AbilitySemanticProfile.list('profile_id'),
     initialData: [],
   });
 
@@ -86,6 +93,8 @@ export default function EntityPrototypeEditorPage() {
       referenced_attributes: [],
       ability_ids: [],
       ability_form_set_ref: "",
+      semantic_profile_ref: "",
+      role_bindings: [],
       structure_bindings: []
     };
     createMutation.mutate(newPrototype);
@@ -98,6 +107,8 @@ export default function EntityPrototypeEditorPage() {
       referenced_attributes: prototype.referenced_attributes || [],
       ability_ids: prototype.ability_ids || [],
       ability_form_set_ref: prototype.ability_form_set_ref || "",
+      semantic_profile_ref: prototype.semantic_profile_ref || "",
+      role_bindings: prototype.role_bindings || [],
       structure_bindings: prototype.structure_bindings || []
     });
   };
@@ -115,6 +126,8 @@ export default function EntityPrototypeEditorPage() {
       referenced_attributes: editData.referenced_attributes || [],
       ability_ids: (editData.ability_ids || []).filter(Boolean),
       ability_form_set_ref: editData.ability_form_set_ref || "",
+      semantic_profile_ref: editData.semantic_profile_ref || "",
+      role_bindings: (editData.role_bindings || []).filter(b => b.role_id && b.ability_id),
       structure_bindings: editData.structure_bindings || []
     };
     
@@ -196,6 +209,13 @@ export default function EntityPrototypeEditorPage() {
             formSetRef={editData.ability_form_set_ref}
             abilities={abilities}
             formSets={formSets}
+            onChange={(patch) => setEditData({ ...editData, ...patch })}
+          />
+          <PrototypeRoleBindingsSection
+            profileRef={editData.semantic_profile_ref}
+            roleBindings={editData.role_bindings || []}
+            profiles={semanticProfiles}
+            abilityIds={editData.ability_ids || []}
             onChange={(patch) => setEditData({ ...editData, ...patch })}
           />
           <Section title="结构绑定">
