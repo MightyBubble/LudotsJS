@@ -39,6 +39,12 @@ export default function CommandPanelRuntimePage() {
     log.info('panel', `交换栏位 ${fromSlot} ↔ ${toSlot}`, { [fromSlot]: b, [toSlot]: a });
   };
 
+  // 换内容：单向把某个技能塞进栏位（同一张覆盖表）
+  const assignSlot = (slotId, abilityId) => {
+    setSlotOverrides(prev => ({ ...prev, [slotId]: abilityId }));
+    log.info('panel', `替换栏位内容 ${slotId} ← ${abilityId}`);
+  };
+
   return (
     <div className="h-full flex overflow-hidden">
       <div className="w-72 shrink-0 border-r border-[#2A2E37] overflow-auto p-3">
@@ -59,6 +65,7 @@ export default function CommandPanelRuntimePage() {
                   result={result}
                   onActivate={activate}
                   onSwapSlots={swapSlots}
+                  onAssignSlot={assignSlot}
                   onResetSlots={() => { setSlotOverrides({}); log.info('panel', '覆盖表已清空，回到出厂预设'); }}
                   hasOverrides={Object.keys(slotOverrides).length > 0}
                 />

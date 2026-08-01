@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import RuntimeCommandButton from './RuntimeCommandButton';
 
 /** 运行时面板渲染：按 runtime 解析结果落位按钮，点击即产出激活意图。fixed 模式支持拖拽换位。 */
-export default function RuntimePanelView({ result, onActivate, onSwapSlots, onResetSlots, hasOverrides }) {
+export default function RuntimePanelView({ result, onActivate, onSwapSlots, onAssignSlot, onResetSlots, hasOverrides }) {
   const columns = result.grid?.columns || 4;
   const visibleRows = result.grid?.visible_rows || null;
   const swappable = result.mode === 'fixed' && !!onSwapSlots;
@@ -13,7 +13,7 @@ export default function RuntimePanelView({ result, onActivate, onSwapSlots, onRe
     <div className="space-y-3">
       {swappable && (
         <div className="flex items-center gap-3 text-[10px] text-gray-500">
-          <span>拖拽按钮可交换栏位（写入运行时覆盖表，不影响配置）</span>
+          <span>拖拽按钮可交换栏位；从左侧技能列表拖入可替换栏位内容（均写入运行时覆盖表，不影响配置）</span>
           {hasOverrides && (
             <button onClick={onResetSlots} className="text-[#cbd3dc] underline">重置为出厂预设</button>
           )}
@@ -33,10 +33,16 @@ export default function RuntimePanelView({ result, onActivate, onSwapSlots, onRe
               draggable={swappable}
               onDragStart={() => { draggingRef.current = b.slot_id; setDragging(b.slot_id); }}
               onDragEnd={() => { draggingRef.current = null; setDragging(null); }}
-              onDragOver={(e) => { if (swappable && draggingRef.current && draggingRef.current !== b.slot_id) e.preventDefault(); }}
-              onDrop={() => {
+              onDragOver={(e) => {
+                if (!swappable) return;
+                const isAbility = e.dataTransfer.types.includes('application/x-ludots-ability');
+                if (isAbility || (draggingRef.current && draggingRef.current !== b.slot_id)) e.preventDefault();
+              }}
+              onDrop={(e) => {
+                const abilityId = e.dataTransfer.getData('application/x-ludots-ability');
                 const from = draggingRef.current;
-                if (from && from !== b.slot_id) onSwapSlots(from, b.slot_id);
+                if (abilityId) onAssignSlot?.(b.slot_id, abilityId);
+                else if (from && from !== b.slot_id) onSwapSlots(from, b.slot_id);
                 draggingRef.current = null;
                 setDragging(null);
               }}
