@@ -5,7 +5,7 @@
   "properties": {
     "panel_id": {
       "type": "string",
-      "description": "\u9762\u677f\u552f\u4e00\u6807\u8bc6\u3002\u4e00\u6761\u8bb0\u5f55\u5c31\u662f\u4e00\u4e2a\u9762\u677f"
+      "description": "\u9762\u677f\u552f\u4e00\u6807\u8bc6\uff1b\u4e00\u6761\u8bb0\u5f55\u5c31\u662f\u4e00\u4e2a\u9762\u677f"
     },
     "label": {
       "type": "string",
@@ -15,126 +15,191 @@
       "type": "string",
       "description": "\u8bf4\u660e"
     },
-    "layout_mode": {
-      "type": "string",
-      "enum": [
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collection_key": {
+          "type": "string",
+          "description": "\u8bfb\u53d6\u7684 EntityCollection.collection_key"
+        }
+      },
+      "required": [
+        "collection_key"
+      ]
+    },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required_all_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684 catalogTags"
+        },
+        "blocked_any_tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u6280\u80fd\u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664\u7684 catalogTags"
+        }
+      }
+    },
+    "grouping": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "type": "array",
+          "description": "\u591a\u4e2a Actor \u7684\u6280\u80fd\u6309\u94ae\u805a\u5408\u89c4\u5219\uff1b\u5148\u547d\u4e2d\u5148\u751f\u6548",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "match_all_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "\u7559\u7a7a\u5219\u547d\u4e2d\u5168\u90e8\u6280\u80fd"
+              },
+              "aggregate_key_tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "\u7559\u7a7a\u5219\u6309 ability_id \u5224\u7b49"
+              }
+            },
+            "required": [
+              "match_all_tags"
+            ]
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "dynamic"
+          ],
+          "default": "dynamic"
+        },
+        "grid": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "columns": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "\u6bcf\u884c\u6309\u94ae\u6570"
+            },
+            "visible_rows": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "\u53ef\u89c6\u884c\u6570\uff0c\u8d85\u51fa\u540e\u9762\u677f\u5185\u6eda\u52a8"
+            }
+          }
+        },
+        "fixed": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "slots": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "slot_id": {
+                    "type": "string",
+                    "description": "\u9762\u677f\u5185\u552f\u4e00\u7684\u69fd\u4f4d\u8bed\u4e49"
+                  },
+                  "action_id": {
+                    "type": "string",
+                    "description": "\u7ed1\u5b9a\u7684 InputConfig action id"
+                  },
+                  "required_all_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "blocked_any_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "slot_id"
+                ]
+              }
+            }
+          }
+        },
+        "dynamic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "buckets": {
+              "type": "array",
+              "description": "\u6709\u5e8f\u6392\u5e8f\u6876\uff1b\u6309\u94ae\u8fdb\u5165\u9996\u4e2a\u547d\u4e2d\u7684\u6876\uff0c\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e\uff0c\u540c\u6876\u6309 ability_id \u7a33\u5b9a\u6392\u5e8f",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "required_all_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "blocked_any_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "hotkey_action_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "\u6309\u6700\u7ec8\u843d\u4f4d\u987a\u5e8f\u4f9d\u6b21\u5206\u914d\u7684 Input Action"
+            }
+          }
+        }
+      },
+      "required": [
+        "mode",
+        "grid",
         "fixed",
         "dynamic"
-      ],
-      "default": "dynamic",
-      "description": "\u843d\u4f4d\u65b9\u5f0f\uff1afixed = \u6309\u8bed\u4e49\u69fd\u4f4d\u56fa\u5b9a\u6446\u653e\uff08\u672a\u547d\u4e2d\u7684\u69fd\u4f4d\u7559\u7a7a\u5360\u4f4d\uff0c\u4e0d\u584c\u7f29\uff09\uff1bdynamic = \u6309\u6392\u5e8f\u89c4\u5219\u52a8\u6001\u6392\u5217\u5e76\u987a\u5e8f\u53d6\u5feb\u6377\u952e"
-    },
-    "actor_collection_key": {
-      "type": "string",
-      "description": "\u9762\u677f\u8bfb\u53d6\u54ea\u4e2a EntityCollection.collection_key\uff1b\u96c6\u5408\u5185\u5bb9\u7531\u751f\u4ea7\u8005\u5199\u5165\uff0c\u9762\u677f\u53ea\u6d88\u8d39"
-    },
-    "required_all_tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "\u8fc7\u6ee4\uff1a\u6280\u80fd catalogTags \u5fc5\u987b\u5168\u90e8\u547d\u4e2d\u624d\u8fdb\u5165\u672c\u9762\u677f"
-    },
-    "blocked_any_tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "\u8fc7\u6ee4\uff1a\u6280\u80fd catalogTags \u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664"
-    },
-    "aggregate_rules": {
-      "type": "array",
-      "description": "\u805a\u5408\u89c4\u5219\uff0c\u5148\u547d\u4e2d\u5148\u751f\u6548\u3002\u672a\u547d\u4e2d\u4efb\u4f55\u89c4\u5219\u7684\u6280\u80fd\u4e0d\u805a\u5408\uff0c\u6bcf\u4e2a Actor \u5404\u81ea\u6210\u72ec\u7acb\u6309\u94ae\uff1b\u89c4\u5219\u4e3a\u7a7a\u5373\u6574\u4e2a\u9762\u677f\u4e0d\u805a\u5408",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "match_all_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "\u547d\u4e2d\u6761\u4ef6\uff1a\u6280\u80fd catalogTags \u987b\u5168\u90e8\u547d\u4e2d\uff1b\u7559\u7a7a\u5219\u547d\u4e2d\u672c\u9762\u677f\u5185\u5168\u90e8\u6280\u80fd"
-          },
-          "aggregate_key_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "\u53d6\u6280\u80fd catalogTags \u4e2d\u843d\u5728\u8fd9\u4e9b\u7ef4\u5ea6\u4e0b\u7684\u90e8\u5206\u4f5c\u4e3a\u805a\u5408 key\uff0ckey \u76f8\u540c\u5373\u540c\u4e00\u6309\u94ae\uff1b\u7559\u7a7a\u5219\u6309 ability_id \u5224\u7b49"
-          }
-        },
-        "required": [
-          "match_all_tags"
-        ]
-      }
-    },
-    "columns": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "description": "\u6bcf\u884c\u6309\u94ae\u6570"
-    },
-    "visible_rows": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "description": "\u53ef\u89c6\u884c\u6570\uff08\u89c6\u53e3\u9ad8\u5ea6\uff09\uff1b\u6309\u94ae\u8d85\u51fa\u540e\u9762\u677f\u5185\u6eda\u52a8"
-    },
-    "slots": {
-      "type": "array",
-      "description": "layout_mode = fixed \u65f6\u751f\u6548\u3002\u8bed\u4e49\u69fd\u4f4d\u8868\uff1b\u547d\u4e2d\u6761\u4ef6\u7559\u7a7a\u7684\u69fd\u4f4d\u59cb\u7ec8\u4e3a\u7a7a\u5360\u4f4d",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "slot_id": {
-            "type": "string",
-            "description": "\u69fd\u4f4d\u8bed\u4e49\u6807\u8bc6\uff0c\u672c\u9762\u677f\u5185\u552f\u4e00\uff08\u5982 primary / build_first\uff09"
-          },
-          "action_id": {
-            "type": "string",
-            "description": "\u7ed1\u5b9a\u7684 InputConfig action id"
-          },
-          "required_all_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "\u5360\u7528\u8be5\u69fd\u4f4d\u7684\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684\u6807\u7b7e"
-          },
-          "blocked_any_tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "\u547d\u4e2d\u4efb\u4e00\u5219\u4e0d\u5360\u7528\u8be5\u69fd\u4f4d"
-          }
-        },
-        "required": [
-          "slot_id"
-        ]
-      }
-    },
-    "sort_tag_priority": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f\u6807\u7b7e\u4f18\u5148\u7ea7\uff1a\u6280\u80fd\u6309\u547d\u4e2d\u7684\u7b2c\u4e00\u4e2a\u6807\u7b7e\u5728\u6b64\u5217\u8868\u4e2d\u7684\u4f4d\u7f6e\u6392\u5217\uff1b\u90fd\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e"
-    },
-    "hotkey_action_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f InputConfig action id \u5e8f\u5217\uff08\u5982 Q W E R\uff09\uff1b\u6309\u94ae\u6309\u843d\u4f4d\u987a\u5e8f\u4f9d\u6b21\u53d6\u952e\uff0c\u7528\u5c3d\u540e\u4e0d\u518d\u5206\u914d"
+      ]
     }
   },
   "required": [
     "panel_id",
-    "layout_mode"
+    "source",
+    "filter",
+    "grouping",
+    "layout"
   ]
 }

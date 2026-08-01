@@ -4,16 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import GameplayTagListSelect from '@/components/ludots/GameplayTagListSelect';
 
-export default function PanelAggregationEditor({ draft, patch, tags = [] }) {
-  const rules = draft.aggregate_rules || [];
-  const patchAt = (i, p) => patch({ aggregate_rules: rules.map((r, idx) => idx === i ? { ...r, ...p } : r) });
+export default function PanelAggregationEditor({ value = [], onChange, tags = [] }) {
+  const rules = value;
+  const patchAt = (i, p) => onChange(rules.map((r, idx) => idx === i ? { ...r, ...p } : r));
 
   return (
     <Section
       title="聚合：多个 Actor 的技能怎么合并"
       right={
         <Button size="sm" variant="outline" className="h-6 text-[11px]"
-          onClick={() => patch({ aggregate_rules: [...rules, { match_all_tags: [], aggregate_key_tags: [] }] })}>
+          onClick={() => onChange([...rules, { match_all_tags: [], aggregate_key_tags: [] }])}>
           <Plus className="w-3 h-3 mr-1" />添加聚合规则
         </Button>
       }
@@ -27,7 +27,7 @@ export default function PanelAggregationEditor({ draft, patch, tags = [] }) {
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-gray-500">规则 #{i + 1}</span>
             <Button size="sm" variant="ghost" className="h-6 w-6 p-0"
-              onClick={() => patch({ aggregate_rules: rules.filter((_, idx) => idx !== i) })}>
+              onClick={() => onChange(rules.filter((_, idx) => idx !== i))}>
               <Trash2 className="w-3 h-3" />
             </Button>
           </div>

@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import CommandPanelProfileDetails from '@/components/commandPanel/CommandPanelProfileDetails';
+import { normalizePanelProfile, preparePanelProfileSave } from '@/components/commandPanel/panelProfileModel';
 
 export default function CommandPanelEditorPage() {
   const { data: tags = [] } = useQuery({
@@ -28,12 +29,22 @@ export default function CommandPanelEditorPage() {
     panel_id: `panel_${Date.now()}`,
     label: '',
     description: '',
-    layout_mode: 'dynamic',
-    aggregate_rules: [],
-    slots: [],
-  }));
+    source: { collection_key: '' },
+    filter: { required_all_tags: [], blocked_any_tags: [] },
+    grouping: { rules: [] },
+    layout: {
+      mode: 'dynamic',
+      grid: {},
+      fixed: { slots: [] },
+      dynamic: { buckets: [], hotkey_action_ids: [] },
+    },
+  }), preparePanelProfileSave);
+  const displayRecords = editor.records.map(record => {
+    const panel = normalizePanelProfile(record);
+    return { ...record, layout_mode: panel.layout.mode, actor_collection_key: panel.source.collection_key };
+  });
 
-  return <RecordWorkspace entityName="CommandPanelProfile" records={editor.records} hideBrowserOnMobile
+  return <RecordWorkspace entityName="CommandPanelProfile" records={displayRecords} hideBrowserOnMobile
     columns={[
       { key: 'panel_id', label: 'Panel ID', width: 240 },
       { key: 'label', label: '显示名', width: 160 },
