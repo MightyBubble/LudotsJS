@@ -181,6 +181,10 @@ button:focus-visible {
 .silver-editor [class*="bg-[#0D0F14]"] { background-color: #0c0f13 !important; }
 .silver-editor [class*="bg-[#15171C]"] { background-color: #171b21 !important; }
 .silver-editor [class*="bg-[#1E2128]"] { background-color: #242a32 !important; }
+.silver-editor button[class*="bg-[#1E2128]"] { color: #d7dde4 !important; border: 1px solid #424a55; }
+.silver-editor button[class*="bg-[#1E2128]"]:hover { background-color: #303845 !important; border-color: #566070; }
+.silver-editor [class*="text-gray-600"] { color: #828b97 !important; }
+.silver-editor [class*="text-gray-500"] { color: #99a2ae !important; }
 .silver-editor [class*="border-[#2A2E37]"] { border-color: #424a55 !important; }
 .silver-editor [class*="bg-[#D97706]"] { background-color: #b9c2cc !important; }
 .silver-editor [class*="border-[#D97706]"] { border-color: #cbd3dc !important; }
