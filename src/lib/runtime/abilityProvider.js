@@ -11,6 +11,8 @@ export function createAbilityProvider(abilities = []) {
       catalogTags: a.catalogTags || [],
       displayName: a.presentation?.displayName || a.ability_id,
       iconGlyph: a.presentation?.iconGlyph || '',
+      accentColor: a.presentation?.accentColor || '',
+      hintText: a.presentation?.hintText || '',
       input: a.input || null,
       raw: a,
     });
