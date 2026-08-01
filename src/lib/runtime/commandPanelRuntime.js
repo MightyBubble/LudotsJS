@@ -17,14 +17,27 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log, 
     const buttons = [];
     const errors = [];
     (panel.layout.fixed.slots || []).forEach((slot, index) => {
+      // 覆盖表存的是引用：{ kind: 'role' | 'ability', id }。有语义走语义，没语义直接指技能
       const override = slotOverrides[slot.slot_id];
-      // 覆盖表与配置同层：都是语义 role_id；技能仍由实体的 role_bindings 解析
-      const roleId = override || slot.role_id;
-      const owner = entities.find(e => (e.role_bindings || []).some(b => b.role_id === roleId));
-      const abilityId = owner && (owner.role_bindings.find(b => b.role_id === roleId) || {}).ability_id;
-      if (!abilityId) {
-        errors.push({ slot_id: slot.slot_id, reason: 'no_entity_bound_to_role', role_id: roleId });
-        return;
+      const ref = override || { kind: 'role', id: slot.role_id };
+      let roleId = null;
+      let abilityId = null;
+      let owner = null;
+      if (ref.kind === 'ability') {
+        abilityId = ref.id;
+        owner = entities.find(e => (e.ability_ids || []).includes(abilityId));
+        if (!owner) {
+          errors.push({ slot_id: slot.slot_id, reason: 'no_entity_owns_ability', ability_id: abilityId });
+          return;
+        }
+      } else {
+        roleId = ref.id;
+        owner = entities.find(e => (e.role_bindings || []).some(b => b.role_id === roleId));
+        abilityId = owner && (owner.role_bindings.find(b => b.role_id === roleId) || {}).ability_id;
+        if (!abilityId) {
+          errors.push({ slot_id: slot.slot_id, reason: 'no_entity_bound_to_role', role_id: roleId });
+          return;
+        }
       }
       const ability = abilityProvider.get(abilityId);
       if (!ability) {
@@ -33,12 +46,13 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log, 
       }
       buttons.push({
         button_id: slot.slot_id, index, ability_id: abilityId, ability,
-        slot_id: slot.slot_id, role_id: roleId, configured_role_id: slot.role_id, action_id: slot.action_id || '',
+        slot_id: slot.slot_id, role_id: roleId, configured_role_id: slot.role_id,
+        source_ref: ref, action_id: slot.action_id || '',
         actors: [owner.entity_id],
         unavailable: false,
         trace: [
-          override ? `覆盖表 ${slot.slot_id} → role ${roleId}` : `配置 ${slot.slot_id} → role ${roleId}`,
-          `role ${roleId} → ${owner.entity_id} → ${abilityId}`,
+          `${override ? '覆盖表' : '配置'} ${slot.slot_id} → ${ref.kind} ${ref.id}`,
+          roleId ? `role ${roleId} → ${owner.entity_id} → ${abilityId}` : `ability ${abilityId} → ${owner.entity_id}`,
         ],
       });
     });

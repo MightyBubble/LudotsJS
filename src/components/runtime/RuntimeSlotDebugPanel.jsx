@@ -6,10 +6,11 @@ export default function RuntimeSlotDebugPanel({ baseResult, result, slotOverride
   if (!result || result.mode !== 'fixed') return null;
   const rows = (baseResult?.buttons || []).map(b => {
     const now = result.buttons.find(x => x.slot_id === b.slot_id) || {};
+    const ov = slotOverrides[b.slot_id];
     return {
       slot_id: b.slot_id,
       configured_role: b.configured_role_id || b.role_id,
-      override: slotOverrides[b.slot_id] || null,
+      override: ov ? `${ov.kind}:${ov.id}` : null,
       effective_role: now.role_id || null,
       effective_ability: now.ability_id || null,
     };
@@ -23,7 +24,7 @@ export default function RuntimeSlotDebugPanel({ baseResult, result, slotOverride
             <tr className="text-left">
               <th className="py-1 pr-2">slot_id</th>
               <th className="py-1 pr-2">配置 role_id</th>
-              <th className="py-1 pr-2">覆盖 role_id</th>
+              <th className="py-1 pr-2">覆盖引用</th>
               <th className="py-1 pr-2">生效 role_id</th>
               <th className="py-1">解析出的 ability_id</th>
             </tr>
@@ -42,7 +43,7 @@ export default function RuntimeSlotDebugPanel({ baseResult, result, slotOverride
         </table>
       </div>
       <div>
-        <div className="text-[10px] text-gray-500 mb-1">slotOverrides：slot_id → role_id（与配置同层，不进配置）</div>
+        <div className="text-[10px] text-gray-500 mb-1">slotOverrides：slot_id → {`{ kind: role | ability, id }`}（运行时态，不进配置）</div>
         <pre className="bg-[#0D0F14] border border-[#2A2E37] rounded p-2 text-[10px] text-gray-300 overflow-auto">
 {JSON.stringify(slotOverrides, null, 2)}
         </pre>

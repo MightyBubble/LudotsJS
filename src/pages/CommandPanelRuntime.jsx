@@ -37,27 +37,22 @@ export default function CommandPanelRuntimePage() {
 
   const activate = (button) => createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides }).setEntities(entities).activate(button);
 
-  // 覆盖表与配置同层：存的是语义 role_id
+  // 覆盖表存引用：有语义换语义，没语义直接指技能
   const swapSlots = (fromSlot, toSlot) => {
-    const roleOf = (slotId) => (result?.buttons.find(b => b.slot_id === slotId) || {}).role_id;
-    const a = roleOf(fromSlot);
-    const b = roleOf(toSlot);
+    const refOf = (slotId) => (result?.buttons.find(b => b.slot_id === slotId) || {}).source_ref;
+    const a = refOf(fromSlot);
+    const b = refOf(toSlot);
     if (!a || !b) return;
     setSlotOverrides(prev => ({ ...prev, [fromSlot]: b, [toSlot]: a }));
-    log.info('panel', `交换栏位 ${fromSlot} ↔ ${toSlot}（role ${a} ↔ ${b}）`);
+    log.info('panel', `交换栏位 ${fromSlot} ↔ ${toSlot}（${a.kind} ${a.id} ↔ ${b.kind} ${b.id}）`);
   };
 
-  // 换内容：从技能反查其语义 role，再写入覆盖表；无语义指向的技能不可入栏位
+  // 换内容：技能有语义绑定则写 role 引用，否则退化为 ability 引用
   const assignSlot = (slotId, abilityId) => {
-    const binding = entities
-      .flatMap(e => e.role_bindings || [])
-      .find(b => b.ability_id === abilityId);
-    if (!binding) {
-      log.warn('panel', `${abilityId} 没有语义绑定，无法放入栏位`, { slot_id: slotId });
-      return;
-    }
-    setSlotOverrides(prev => ({ ...prev, [slotId]: binding.role_id }));
-    log.info('panel', `替换栏位内容 ${slotId} ← role ${binding.role_id}（${abilityId}）`);
+    const binding = entities.flatMap(e => e.role_bindings || []).find(b => b.ability_id === abilityId);
+    const ref = binding ? { kind: 'role', id: binding.role_id } : { kind: 'ability', id: abilityId };
+    setSlotOverrides(prev => ({ ...prev, [slotId]: ref }));
+    log.info('panel', `替换栏位内容 ${slotId} ← ${ref.kind} ${ref.id}`);
   };
 
   return (
