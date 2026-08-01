@@ -23,14 +23,7 @@ export default function CommandPanelProfileDetails({
       <Section title="来源">
         <TextField label="Actor 集合键" value={draft.actor_collection_key}
           onChange={actor_collection_key => patch({ actor_collection_key })}
-          hint="由 ControlPlane 查询图输出" />
-        <div className="grid grid-cols-2 gap-2">
-          <SelectField label="Actor 排序规则" value={draft.actor_sort_key}
-            options={sortKeys.map(k => ({ value: k, label: k }))}
-            onChange={actor_sort_key => patch({ actor_sort_key })} hint="在全局常量中维护" />
-          <NumberField label="Actor 上限" value={draft.max_actors} onChange={max_actors => patch({ max_actors })}
-            hint="1 = 只看排序后的第一个单位；留空为全体" />
-        </div>
+          hint="由 ControlPlane 查询图输出；集合的排序与裁剪由查询图负责，面板只消费结果" />
       </Section>
 
       <Section title="过滤：面板收哪些技能">

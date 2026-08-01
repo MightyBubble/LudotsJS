@@ -26,18 +26,7 @@
     },
     "actor_collection_key": {
       "type": "string",
-      "description": "\u9762\u677f\u770b\u54ea\u4e2a Actor \u96c6\u5408\uff08ControlPlane \u67e5\u8be2\u56fe\u8f93\u51fa\uff09"
-    },
-    "actor_sort_key": {
-      "type": "string",
-      "description": "\u53c2\u4e0e\u524d\u5bf9 Actor \u7684\u6392\u5e8f\u89c4\u5219\u952e\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff09"
-    },
-    "max_actors": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "description": "\u53c2\u4e0e\u7684 Actor \u4e0a\u9650\uff1b1 \u5373\u53ea\u770b\u6392\u5e8f\u540e\u7684\u7b2c\u4e00\u4e2a\u5355\u4f4d\uff0c\u7559\u7a7a\u4e3a\u5168\u4f53"
+      "description": "\u9762\u677f\u770b\u54ea\u4e2a Actor \u96c6\u5408\uff08ControlPlane \u67e5\u8be2\u56fe\u8f93\u51fa\uff1b\u96c6\u5408\u7684\u6392\u5e8f\u4e0e\u88c1\u526a\u7531\u67e5\u8be2\u56fe\u8d1f\u8d23\uff0c\u9762\u677f\u53ea\u6d88\u8d39\u7ed3\u679c\uff09"
     },
     "required_all_tags": {
       "type": "array",
