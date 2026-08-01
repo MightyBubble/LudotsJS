@@ -15,13 +15,22 @@
       "type": "string",
       "description": "\u8bf4\u660e"
     },
+    "layout_mode": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "dynamic"
+      ],
+      "default": "dynamic",
+      "description": "\u843d\u4f4d\u65b9\u5f0f\uff1afixed = \u6309\u8bed\u4e49\u69fd\u4f4d\u56fa\u5b9a\u6446\u653e\uff08\u672a\u547d\u4e2d\u7684\u69fd\u4f4d\u7559\u7a7a\u5360\u4f4d\uff0c\u4e0d\u584c\u7f29\uff09\uff1bdynamic = \u6309\u6392\u5e8f\u89c4\u5219\u52a8\u6001\u6392\u5217\u5e76\u987a\u5e8f\u53d6\u5feb\u6377\u952e"
+    },
     "actor_collection_key": {
       "type": "string",
       "description": "\u9762\u677f\u770b\u54ea\u4e2a Actor \u96c6\u5408\uff08ControlPlane \u67e5\u8be2\u56fe\u8f93\u51fa\uff09"
     },
-    "actor_sort": {
+    "actor_sort_key": {
       "type": "string",
-      "description": "\u53c2\u4e0e\u805a\u5408\u524d\u5bf9 Actor \u7684\u6392\u5e8f\u89c4\u5219\u952e"
+      "description": "\u53c2\u4e0e\u524d\u5bf9 Actor \u7684\u6392\u5e8f\u89c4\u5219\u952e\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff09"
     },
     "max_actors": {
       "type": [
@@ -35,19 +44,26 @@
       "items": {
         "type": "string"
       },
-      "description": "\u9762\u677f\u6536\u54ea\u4e9b\u6280\u80fd\uff1acatalogTags \u5fc5\u987b\u5168\u90e8\u547d\u4e2d"
+      "description": "\u8fc7\u6ee4\uff1a\u6280\u80fd catalogTags \u5fc5\u987b\u5168\u90e8\u547d\u4e2d\u624d\u8fdb\u5165\u672c\u9762\u677f"
     },
     "blocked_any_tags": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "\u9762\u677f\u6392\u9664\u54ea\u4e9b\u6280\u80fd\uff1acatalogTags \u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664"
+      "description": "\u8fc7\u6ee4\uff1a\u6280\u80fd catalogTags \u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664"
     },
     "aggregate": {
       "type": "boolean",
       "default": true,
-      "description": "true = \u96c6\u5408\u5185\u591a\u4e2a\u5b9e\u4f53\u62e5\u6709\u540c\u4e00\u6280\u80fd\u65f6\u805a\u5408\u6210\u4e00\u4e2a\u6309\u94ae\uff1bfalse = \u6bcf\u4e2a\u5b9e\u4f53\u7684\u6280\u80fd\u5404\u81ea\u5e73\u94fa\u6210\u72ec\u7acb\u6309\u94ae"
+      "description": "\u805a\u5408\uff1a\u591a\u4e2a Actor \u7684\u6280\u80fd\u662f\u5426\u5408\u5e76\u6210\u4e00\u4e2a\u6309\u94ae\u3002false = \u6bcf\u4e2a Actor \u7684\u6280\u80fd\u5404\u81ea\u6210\u72ec\u7acb\u6309\u94ae"
+    },
+    "aggregate_key_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u805a\u5408\u8eab\u4efd\u7ef4\u5ea6\uff1a\u53d6\u6280\u80fd catalogTags \u4e2d\u843d\u5728\u8fd9\u4e9b\u7ef4\u5ea6\u4e0b\u7684\u90e8\u5206\u4f5c\u4e3a\u805a\u5408 key\uff0ckey \u76f8\u540c\u5373\u540c\u4e00\u6309\u94ae\uff08\u4f7f\u4e0d\u540c ability_id \u7684\u540c\u4e49\u547d\u4ee4\u53ef\u5408\u5e76\uff09\u3002\u7559\u7a7a\u5219\u6309 ability_id \u5224\u7b49"
     },
     "columns": {
       "type": [
@@ -56,23 +72,23 @@
       ],
       "description": "\u6bcf\u884c\u6309\u94ae\u6570"
     },
-    "rows": {
+    "visible_rows": {
       "type": [
         "integer",
         "null"
       ],
-      "description": "\u884c\u6570\uff1b\u7559\u7a7a\u8868\u793a\u6309\u94ae\u8d85\u8fc7\u4e00\u884c\u540e\u81ea\u52a8\u6362\u884c\u3001\u4e0d\u9650\u884c\u6570"
+      "description": "\u53ef\u89c6\u884c\u6570\uff08\u89c6\u53e3\u9ad8\u5ea6\uff09\uff1b\u6309\u94ae\u8d85\u51fa\u540e\u9762\u677f\u5185\u6eda\u52a8"
     },
     "slots": {
       "type": "array",
-      "description": "\u56fa\u5b9a\u69fd\u4f4d\u3002\u914d\u4e86\u5c31\u6309\u69fd\u4f4d\u6446\uff1a\u6bcf\u4e2a\u69fd\u4f4d\u7528\u81ea\u5df1\u7684\u8fc7\u6ee4\u6761\u4ef6\u9501\u5b9a\u653e\u54ea\u4e2a\u6280\u80fd\uff0c\u5e76\u7ed1\u5b9a\u4e00\u4e2a input action\u3002\u6574\u4e2a\u5217\u8868\u7559\u7a7a\u5219\u4e0d\u56fa\u5b9a\uff0c\u5168\u90e8\u6309\u515c\u5e95\u6392\u5e8f\u52a8\u6001\u6392\u5217",
+      "description": "layout_mode = fixed \u65f6\u751f\u6548\u3002\u8bed\u4e49\u69fd\u4f4d\u8868\uff1b\u547d\u4e2d\u6761\u4ef6\u7559\u7a7a\u7684\u69fd\u4f4d\u59cb\u7ec8\u4e3a\u7a7a\u5360\u4f4d",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
           "slot_id": {
             "type": "string",
-            "description": "\u69fd\u4f4d\u6807\u8bc6\uff08\u5982 Q / W / E / R\uff09"
+            "description": "\u8bed\u4e49\u5316\u69fd\u4f4d\u6807\u8bc6\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff0c\u5982 Slot.Primary / Slot.Build.First\uff09"
           },
           "action_id": {
             "type": "string",
@@ -83,7 +99,7 @@
             "items": {
               "type": "string"
             },
-            "description": "\u5360\u7528\u8be5\u69fd\u4f4d\u7684\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684\u6807\u7b7e\uff1b\u7559\u7a7a\u5219\u8be5\u69fd\u4f4d\u4ea4\u7ed9\u52a8\u6001\u586b\u5145"
+            "description": "\u5360\u7528\u8be5\u69fd\u4f4d\u7684\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684\u6807\u7b7e"
           },
           "blocked_any_tags": {
             "type": "array",
@@ -98,12 +114,17 @@
         ]
       }
     },
-    "fallback_sort": {
+    "sort_key": {
       "type": "string",
-      "description": "\u52a8\u6001\u6392\u5217\u7684\u6392\u5e8f\u89c4\u5219\u952e\uff1a\u672a\u88ab\u56fa\u5b9a\u69fd\u4f4d\u9501\u5b9a\u7684\u6280\u80fd\u6309\u6b64\u987a\u5e8f\u586b\u5165\u5269\u4f59\u4f4d\u7f6e"
+      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6309\u94ae\u6392\u5217\u7684\u6392\u5e8f\u89c4\u5219\u952e\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff09"
+    },
+    "hotkey_sequence_ref": {
+      "type": "string",
+      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f action \u5e8f\u5217\u7684\u5f15\u7528\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff0c\u5982 Q W E R\uff09\uff1b\u6309\u94ae\u6309\u843d\u4f4d\u987a\u5e8f\u4f9d\u6b21\u53d6\u952e"
     }
   },
   "required": [
-    "panel_id"
+    "panel_id",
+    "layout_mode"
   ]
 }
