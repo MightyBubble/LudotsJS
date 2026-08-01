@@ -21,9 +21,6 @@ export function normalizePanelProfile(record = {}) {
 
 export function preparePanelProfileSave(record) {
   const panel = normalizePanelProfile(record);
-  const slots = (panel.layout.fixed?.slots || []).map(slot => ({
-    slot_id: slot.slot_id || '', role_id: slot.role_id || '', action_id: slot.action_id || '',
-  }));
   return {
     panel_id: panel.panel_id,
     label: panel.label || '',
@@ -31,6 +28,6 @@ export function preparePanelProfileSave(record) {
     source: panel.source,
     filter: panel.filter,
     grouping: panel.grouping,
-    layout: { ...panel.layout, fixed: { slots } },
+    layout: panel.layout,
   };
 }

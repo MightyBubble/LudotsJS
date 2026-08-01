@@ -37,14 +37,14 @@
           "items": {
             "type": "string"
           },
-          "description": "\u52a8\u6001\u5019\u9009\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684\u9886\u57df\u6807\u7b7e"
+          "description": "\u6280\u80fd\u987b\u5168\u90e8\u547d\u4e2d\u7684 catalogTags"
         },
         "blocked_any_tags": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "\u52a8\u6001\u5019\u9009\u6280\u80fd\u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664\u7684\u9886\u57df\u6807\u7b7e"
+          "description": "\u6280\u80fd\u547d\u4e2d\u4efb\u4e00\u5373\u6392\u9664\u7684 catalogTags"
         }
       }
     },
@@ -71,7 +71,7 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "\u6309\u9886\u57df\u6807\u7b7e\u524d\u7f00\u63d0\u53d6\u805a\u5408\u952e\uff1b\u7559\u7a7a\u6309 ability_id \u5224\u7b49"
+                "description": "\u7559\u7a7a\u5219\u6309 ability_id \u5224\u7b49"
               }
             },
             "required": [
@@ -125,20 +125,27 @@
                 "properties": {
                   "slot_id": {
                     "type": "string",
-                    "description": "\u9762\u677f\u5185\u552f\u4e00\u7684\u7269\u7406\u69fd\u4f4d\u6807\u8bc6"
-                  },
-                  "role_id": {
-                    "type": "string",
-                    "description": "\u901a\u8fc7 EntityPrototype.role_bindings \u89e3\u6790 Ability \u7684\u9886\u57df\u8bed\u4e49"
+                    "description": "\u9762\u677f\u5185\u552f\u4e00\u7684\u69fd\u4f4d\u8bed\u4e49"
                   },
                   "action_id": {
                     "type": "string",
                     "description": "\u7ed1\u5b9a\u7684 InputConfig action id"
+                  },
+                  "required_all_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "blocked_any_tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
-                  "slot_id",
-                  "role_id"
+                  "slot_id"
                 ]
               }
             }
@@ -150,7 +157,7 @@
           "properties": {
             "buckets": {
               "type": "array",
-              "description": "\u6709\u5e8f\u6392\u5e8f\u6876\uff1b\u6309\u94ae\u8fdb\u5165\u9996\u4e2a\u547d\u4e2d\u7684\u6876\uff0c\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e",
+              "description": "\u6709\u5e8f\u6392\u5e8f\u6876\uff1b\u6309\u94ae\u8fdb\u5165\u9996\u4e2a\u547d\u4e2d\u7684\u6876\uff0c\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e\uff0c\u540c\u6876\u6309 ability_id \u7a33\u5b9a\u6392\u5e8f",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
