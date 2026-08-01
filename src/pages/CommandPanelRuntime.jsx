@@ -9,6 +9,7 @@ import RuntimeEntityListPanel from '@/components/runtime/RuntimeEntityListPanel'
 import RuntimeStatePanel from '@/components/runtime/RuntimeStatePanel';
 import RuntimePanelView from '@/components/runtime/RuntimePanelView';
 import RuntimeConsole from '@/components/runtime/RuntimeConsole';
+import RuntimeSlotDebugPanel from '@/components/runtime/RuntimeSlotDebugPanel';
 
 export default function CommandPanelRuntimePage() {
   const { data: panels = [] } = useQuery({ queryKey: ['CommandPanelProfile'], queryFn: () => base44.entities.CommandPanelProfile.list() });
@@ -27,6 +28,12 @@ export default function CommandPanelRuntimePage() {
     if (!panelProfile) return null;
     return createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides }).setEntities(entities).resolve();
   }, [panelProfile, abilityProvider, entities, log, slotOverrides]);
+
+  // 无覆盖的基线解析，用于调试面板做前后对照
+  const baseResult = useMemo(() => {
+    if (!panelProfile) return null;
+    return createCommandPanelRuntime({ panelProfile, abilityProvider, log: createRuntimeLog(), slotOverrides: {} }).setEntities(entities).resolve();
+  }, [panelProfile, abilityProvider, entities]);
 
   const activate = (button) => createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides }).setEntities(entities).activate(button);
 
@@ -71,6 +78,7 @@ export default function CommandPanelRuntimePage() {
                 />
               : <p className="text-[11px] text-gray-500">选择一个面板以启动运行时。</p>}
           </Section>
+          <RuntimeSlotDebugPanel baseResult={baseResult} result={result} slotOverrides={slotOverrides} />
         </div>
         <div className="h-56 shrink-0 p-3 pt-0">
           <RuntimeConsole log={log} />
