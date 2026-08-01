@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
-import { Section, SelectField } from '@/components/ludots/ui';
+import { Section, SelectField, TextField } from '@/components/ludots/ui';
 import GameplayTagListSelect from '@/components/ludots/GameplayTagListSelect';
 
-export default function PanelFixedSlotsEditor({ value = [], tags = [], actions = [], slotKeys = [], onChange }) {
+export default function PanelFixedSlotsEditor({ value = [], tags = [], actions = [], onChange }) {
   const patchAt = (i, patch) => onChange(value.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
 
   return (
@@ -19,9 +19,8 @@ export default function PanelFixedSlotsEditor({ value = [], tags = [], actions =
         <div key={i} className="border border-[#2A2E37] rounded p-2 space-y-2">
           <div className="flex items-start gap-2">
             <div className="flex-1 grid grid-cols-2 gap-2">
-              <SelectField label="槽位语义" value={slot.slot_id}
-                options={slotKeys.map(k => ({ value: k, label: k }))}
-                onChange={slot_id => patchAt(i, { slot_id })} hint="在全局常量中维护" />
+              <TextField label="槽位语义" value={slot.slot_id}
+                onChange={slot_id => patchAt(i, { slot_id })} hint="本面板内唯一，如 primary" />
               <SelectField label="Input Action" value={slot.action_id}
                 options={actions.map(a => ({ value: a.id, label: a.name || a.id }))}
                 onChange={action_id => patchAt(i, { action_id })} />

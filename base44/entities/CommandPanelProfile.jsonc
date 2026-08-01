@@ -26,7 +26,7 @@
     },
     "actor_collection_key": {
       "type": "string",
-      "description": "\u9762\u677f\u770b\u54ea\u4e2a Actor \u96c6\u5408\uff08ControlPlane \u67e5\u8be2\u56fe\u8f93\u51fa\uff1b\u96c6\u5408\u7684\u6392\u5e8f\u4e0e\u88c1\u526a\u7531\u67e5\u8be2\u56fe\u8d1f\u8d23\uff0c\u9762\u677f\u53ea\u6d88\u8d39\u7ed3\u679c\uff09"
+      "description": "\u9762\u677f\u8bfb\u53d6\u54ea\u4e2a EntityCollection.collection_key\uff1b\u96c6\u5408\u5185\u5bb9\u7531\u751f\u4ea7\u8005\u5199\u5165\uff0c\u9762\u677f\u53ea\u6d88\u8d39"
     },
     "required_all_tags": {
       "type": "array",
@@ -44,7 +44,7 @@
     },
     "aggregate_rules": {
       "type": "array",
-      "description": "\u805a\u5408\u89c4\u5219\uff0c\u5148\u547d\u4e2d\u5148\u751f\u6548\u3002\u672a\u547d\u4e2d\u4efb\u4f55\u89c4\u5219\u7684\u6280\u80fd\u4e0d\u805a\u5408\uff0c\u6bcf\u4e2a Actor \u5404\u81ea\u6210\u72ec\u7acb\u6309\u94ae\uff1b\u89c4\u5219\u4e3a\u7a7a\u5373\u6574\u4e2a\u9762\u677f\u4e0d\u805a\u5408\u3002\u89c4\u5219\u53ea\u5b58\u5728\u4e8e\u9762\u677f\u4fa7\uff0c\u6280\u80fd\u4e0d\u627f\u8f7d\u4efb\u4f55 UI \u8bed\u4e49",
+      "description": "\u805a\u5408\u89c4\u5219\uff0c\u5148\u547d\u4e2d\u5148\u751f\u6548\u3002\u672a\u547d\u4e2d\u4efb\u4f55\u89c4\u5219\u7684\u6280\u80fd\u4e0d\u805a\u5408\uff0c\u6bcf\u4e2a Actor \u5404\u81ea\u6210\u72ec\u7acb\u6309\u94ae\uff1b\u89c4\u5219\u4e3a\u7a7a\u5373\u6574\u4e2a\u9762\u677f\u4e0d\u805a\u5408",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -92,7 +92,7 @@
         "properties": {
           "slot_id": {
             "type": "string",
-            "description": "\u8bed\u4e49\u5316\u69fd\u4f4d\u6807\u8bc6\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff0c\u5982 Slot.Primary / Slot.Build.First\uff09"
+            "description": "\u69fd\u4f4d\u8bed\u4e49\u6807\u8bc6\uff0c\u672c\u9762\u677f\u5185\u552f\u4e00\uff08\u5982 primary / build_first\uff09"
           },
           "action_id": {
             "type": "string",
@@ -118,13 +118,19 @@
         ]
       }
     },
-    "sort_key": {
-      "type": "string",
-      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6309\u94ae\u6392\u5217\u7684\u6392\u5e8f\u89c4\u5219\u952e\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff09"
+    "sort_tag_priority": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f\u6807\u7b7e\u4f18\u5148\u7ea7\uff1a\u6280\u80fd\u6309\u547d\u4e2d\u7684\u7b2c\u4e00\u4e2a\u6807\u7b7e\u5728\u6b64\u5217\u8868\u4e2d\u7684\u4f4d\u7f6e\u6392\u5217\uff1b\u90fd\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e"
     },
-    "hotkey_sequence_ref": {
-      "type": "string",
-      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f action \u5e8f\u5217\u7684\u5f15\u7528\uff08\u5f15\u7528\u5168\u5c40\u5e38\u91cf\uff0c\u5982 Q W E R\uff09\uff1b\u6309\u94ae\u6309\u843d\u4f4d\u987a\u5e8f\u4f9d\u6b21\u53d6\u952e"
+    "hotkey_action_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "layout_mode = dynamic \u65f6\u751f\u6548\u3002\u6709\u5e8f InputConfig action id \u5e8f\u5217\uff08\u5982 Q W E R\uff09\uff1b\u6309\u94ae\u6309\u843d\u4f4d\u987a\u5e8f\u4f9d\u6b21\u53d6\u952e\uff0c\u7528\u5c3d\u540e\u4e0d\u518d\u5206\u914d"
     }
   },
   "required": [

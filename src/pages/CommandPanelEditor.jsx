@@ -16,12 +16,6 @@ export default function CommandPanelEditorPage() {
     queryFn: () => base44.entities.InputConfig.list(),
     initialData: [],
   });
-  const { data: constants = [] } = useQuery({
-    queryKey: ['global-constants'],
-    queryFn: () => base44.entities.GlobalConstant.list('constant_key'),
-    initialData: [],
-  });
-
   const { data: collections = [] } = useQuery({
     queryKey: ['entity-collections'],
     queryFn: () => base44.entities.EntityCollection.list('collection_key'),
@@ -29,7 +23,6 @@ export default function CommandPanelEditorPage() {
   });
 
   const actions = inputConfigs.flatMap(c => c.actions || []);
-  const keysOf = category => constants.filter(c => c.category === category).map(c => c.constant_key);
 
   const editor = useRecordEditor('CommandPanelProfile', 'command-panel-profiles', () => ({
     panel_id: `panel_${Date.now()}`,
@@ -56,7 +49,6 @@ export default function CommandPanelEditorPage() {
     onDelete={record => window.confirm(`确定删除「${record.panel_id}」吗？`) && editor.remove(record.id)}
     onSave={editor.save} dirty={editor.dirty}>
     {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} tags={tags} actions={actions}
-      sortKeys={keysOf('panel_sort')} slotKeys={keysOf('panel_slot')} hotkeySequences={keysOf('panel_hotkey_sequence')}
       collections={collections} />}
   </RecordWorkspace>;
 }

@@ -1,16 +1,17 @@
 import React from 'react';
-import { Section, SelectField } from '@/components/ludots/ui';
+import { Section } from '@/components/ludots/ui';
+import GameplayTagListSelect from '@/components/ludots/GameplayTagListSelect';
+import HotkeySequenceEditor from './HotkeySequenceEditor';
 
-export default function PanelDynamicLayoutEditor({ draft, patch, sortKeys = [], hotkeySequences = [] }) {
+export default function PanelDynamicLayoutEditor({ draft, patch, tags = [], actions = [] }) {
   return (
     <Section title="动态排列">
-      <SelectField label="排序规则" value={draft.sort_key}
-        options={sortKeys.map(k => ({ value: k, label: k }))}
-        onChange={sort_key => patch({ sort_key })} hint="按钮按此顺序填入网格；在全局常量中维护" />
-      <SelectField label="快捷键序列" value={draft.hotkey_sequence_ref}
-        options={hotkeySequences.map(k => ({ value: k, label: k }))}
-        onChange={hotkey_sequence_ref => patch({ hotkey_sequence_ref })}
-        hint="有序 action 序列（如 Q W E R），按钮按落位顺序依次取键" />
+      <GameplayTagListSelect label="排序优先级（自上而下）" value={draft.sort_tag_priority} tags={tags}
+        onChange={sort_tag_priority => patch({ sort_tag_priority })} />
+      <p className="text-[10px] text-gray-600">技能按命中的第一个标签在列表中的位置排列；都未命中的排在末尾。</p>
+      <HotkeySequenceEditor label="快捷键序列" value={draft.hotkey_action_ids} actions={actions}
+        onChange={hotkey_action_ids => patch({ hotkey_action_ids })}
+        hint="按钮按落位顺序依次取键，用尽后不再分配" />
     </Section>
   );
 }

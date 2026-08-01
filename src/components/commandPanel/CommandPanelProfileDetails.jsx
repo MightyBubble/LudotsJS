@@ -6,7 +6,7 @@ import PanelFixedSlotsEditor from './PanelFixedSlotsEditor';
 import PanelDynamicLayoutEditor from './PanelDynamicLayoutEditor';
 
 export default function CommandPanelProfileDetails({
-  draft, patch, tags = [], actions = [], sortKeys = [], slotKeys = [], hotkeySequences = [], collections = [],
+  draft, patch, tags = [], actions = [], collections = [],
 }) {
   return (
     <>
@@ -47,9 +47,9 @@ export default function CommandPanelProfileDetails({
       </Section>
 
       {draft.layout_mode === 'fixed'
-        ? <PanelFixedSlotsEditor value={draft.slots || []} tags={tags} actions={actions} slotKeys={slotKeys}
+        ? <PanelFixedSlotsEditor value={draft.slots || []} tags={tags} actions={actions}
             onChange={slots => patch({ slots })} />
-        : <PanelDynamicLayoutEditor draft={draft} patch={patch} sortKeys={sortKeys} hotkeySequences={hotkeySequences} />}
+        : <PanelDynamicLayoutEditor draft={draft} patch={patch} tags={tags} actions={actions} />}
     </>
   );
 }
