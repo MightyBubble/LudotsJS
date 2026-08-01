@@ -65,6 +65,7 @@ export const NAV_GROUPS = [
     items: [
       { page: 'InputConfigEditor', label: 'Input Config', icon: Gamepad2 },
       { page: 'ControlPlaneEditor', label: 'Control Plane', icon: Network },
+      { page: 'ActorProjectionEditor', label: 'Actor Projections', icon: Search },
       { page: 'CommandPanelEditor', label: 'Command Panels', icon: ListTree },
     ],
   },

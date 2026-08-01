@@ -6,7 +6,7 @@ import PanelFixedSlotsEditor from './PanelFixedSlotsEditor';
 import PanelDynamicLayoutEditor from './PanelDynamicLayoutEditor';
 
 export default function CommandPanelProfileDetails({
-  draft, patch, tags = [], actions = [], sortKeys = [], slotKeys = [], hotkeySequences = [],
+  draft, patch, tags = [], actions = [], sortKeys = [], slotKeys = [], hotkeySequences = [], projections = [],
 }) {
   return (
     <>
@@ -22,9 +22,11 @@ export default function CommandPanelProfileDetails({
       </Section>
 
       <Section title="来源">
-        <TextField label="Actor 集合键" value={draft.actor_collection_key}
+        <SelectField label="Actor 投影" value={draft.actor_collection_key}
+          options={projections.map(p => ({ value: p.collection_key, label: p.label ? `${p.collection_key} · ${p.label}` : p.collection_key }))}
           onChange={actor_collection_key => patch({ actor_collection_key })}
-          hint="由 ControlPlane 查询图输出；集合的排序与裁剪由查询图负责，面板只消费结果" />
+          hint="引用 Actor Projections 中声明的投影；集合的排序与裁剪由投影规则负责，面板只消费结果" />
+        {!projections.length && <p className="text-[10px] text-gray-500">请先在「Actor Projections」中声明投影键。</p>}
       </Section>
 
       <Section title="过滤：面板收哪些技能">

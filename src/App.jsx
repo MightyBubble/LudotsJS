@@ -21,6 +21,7 @@ import InputOrderEditor from './pages/InputOrderEditor';
 import CastCommitEditor from './pages/CastCommitEditor';
 import CastDispatchEditor from './pages/CastDispatchEditor';
 import ControlPlaneEditor from './pages/ControlPlaneEditor';
+import ActorProjectionEditor from './pages/ActorProjectionEditor';
 import CommandPanelEditor from './pages/CommandPanelEditor';
 import AbilityPlayground from './pages/AbilityPlayground';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
       <Route path="/CastCommitEditor" element={<LayoutWrapper currentPageName="CastCommitEditor"><CastCommitEditor /></LayoutWrapper>} />
       <Route path="/CastDispatchEditor" element={<LayoutWrapper currentPageName="CastDispatchEditor"><CastDispatchEditor /></LayoutWrapper>} />
       <Route path="/ControlPlaneEditor" element={<LayoutWrapper currentPageName="ControlPlaneEditor"><ControlPlaneEditor /></LayoutWrapper>} />
+      <Route path="/ActorProjectionEditor" element={<LayoutWrapper currentPageName="ActorProjectionEditor"><ActorProjectionEditor /></LayoutWrapper>} />
       <Route path="/CommandPanelEditor" element={<LayoutWrapper currentPageName="CommandPanelEditor"><CommandPanelEditor /></LayoutWrapper>} />
       <Route path="/AbilitySemanticProfileEditor" element={<LayoutWrapper currentPageName="AbilitySemanticProfileEditor"><AbilitySemanticProfileEditor /></LayoutWrapper>} />
       <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />

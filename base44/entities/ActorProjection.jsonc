@@ -1,0 +1,30 @@
+{
+  "name": "ActorProjection",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "collection_key": {
+      "type": "string",
+      "description": "\u6295\u5f71\u952e\uff1a\u6d88\u8d39\u65b9\uff08\u5982\u547d\u4ee4\u9762\u677f\uff09\u5f15\u7528\u7684\u7a33\u5b9a\u6807\u8bc6\uff0c\u5982 Selection.All / Selection.Leader"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u8bf4\u660e\uff1a\u8fd9\u4e2a\u6295\u5f71\u4ee3\u8868\u54ea\u4e00\u6279 Actor"
+    },
+    "control_plane_ref": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u63a7\u5236\u9762\uff08ControlPlaneProfile.control_plane_id\uff09\uff1b\u6295\u5f71\u5728\u8be5\u63a7\u5236\u9762\u8f93\u51fa\u7684\u53ef\u63a7\u96c6\u5408\u4e4b\u4e0a\u518d\u53d6\u5b50\u96c6"
+    },
+    "entity_query_graph_ref": {
+      "type": "string",
+      "description": "\u6295\u5f71\u89c4\u5219\uff1a\u5f15\u7528 EntityQuery.query_name\uff0c\u4ee5\u63a7\u5236\u9762\u96c6\u5408\u4e3a\u4e0a\u4e0b\u6587\u8f93\u51fa\u672c\u6295\u5f71\u7684 Actor \u96c6\u5408\u4e0e\u987a\u5e8f"
+    }
+  },
+  "required": [
+    "collection_key"
+  ]
+}
