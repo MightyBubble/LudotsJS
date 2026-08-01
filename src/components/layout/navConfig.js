@@ -67,6 +67,7 @@ export const NAV_GROUPS = [
       { page: 'ControlPlaneEditor', label: 'Control Plane', icon: Network },
       { page: 'EntityCollectionEditor', label: 'Entity Collections', icon: Search },
       { page: 'CommandPanelEditor', label: 'Command Panels', icon: ListTree },
+      { page: 'CommandPanelRuntime', label: 'Panel Runtime', icon: Activity },
     ],
   },
   {

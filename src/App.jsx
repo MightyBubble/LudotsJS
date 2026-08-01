@@ -23,6 +23,7 @@ import CastDispatchEditor from './pages/CastDispatchEditor';
 import ControlPlaneEditor from './pages/ControlPlaneEditor';
 import EntityCollectionEditor from './pages/EntityCollectionEditor';
 import CommandPanelEditor from './pages/CommandPanelEditor';
+import CommandPanelRuntime from './pages/CommandPanelRuntime';
 import AbilityPlayground from './pages/AbilityPlayground';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
@@ -92,6 +93,7 @@ const AuthenticatedApp = () => {
       <Route path="/ControlPlaneEditor" element={<LayoutWrapper currentPageName="ControlPlaneEditor"><ControlPlaneEditor /></LayoutWrapper>} />
       <Route path="/EntityCollectionEditor" element={<LayoutWrapper currentPageName="EntityCollectionEditor"><EntityCollectionEditor /></LayoutWrapper>} />
       <Route path="/CommandPanelEditor" element={<LayoutWrapper currentPageName="CommandPanelEditor"><CommandPanelEditor /></LayoutWrapper>} />
+      <Route path="/CommandPanelRuntime" element={<LayoutWrapper currentPageName="CommandPanelRuntime"><CommandPanelRuntime /></LayoutWrapper>} />
       <Route path="/AbilitySemanticProfileEditor" element={<LayoutWrapper currentPageName="AbilitySemanticProfileEditor"><AbilitySemanticProfileEditor /></LayoutWrapper>} />
       <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
