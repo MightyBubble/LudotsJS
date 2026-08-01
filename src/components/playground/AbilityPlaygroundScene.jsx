@@ -14,6 +14,6 @@ const AbilityPlaygroundScene = forwardRef(function AbilityPlaygroundScene({ abil
     runtimeRef.current = createAbilityPlaygroundScene(mountRef.current, ability, onEvent, onSpawn);
     return () => runtimeRef.current?.dispose();
   }, [ability, onEvent, onSpawn]);
-  return <div ref={mountRef} className="h-full min-h-[420px] w-full overflow-hidden rounded border border-[#2A2E37]" />;
+  return <div ref={mountRef} className="h-full min-h-0 w-full overflow-hidden border border-border bg-card" />;
 });
 export default AbilityPlaygroundScene;

@@ -6,8 +6,10 @@ import PanelFixedSlotsEditor from './PanelFixedSlotsEditor';
 import PanelDynamicLayoutEditor from './PanelDynamicLayoutEditor';
 import { normalizePanelProfile } from './panelProfileModel';
 
-export default function CommandPanelProfileDetails({ draft, patch, tags = [], actions = [], collections = [] }) {
+export default function CommandPanelProfileDetails({ draft, patch, tags = [], actions = [], collections = [], semanticProfiles = [] }) {
   const panel = normalizePanelProfile(draft);
+  const roles = semanticProfiles.flatMap(profile => (profile.roles || []).map(role => ({ role_id: role.role_id, label: `${role.label || role.role_id} · ${profile.profile_id}` })));
+  const uniqueRoles = [...new Map(roles.map(role => [role.role_id, role])).values()];
   const patchSection = (key, update) => patch({ [key]: { ...panel[key], ...update } });
   const layout = panel.layout;
   const patchLayoutPart = (key, update) => patchSection('layout', { [key]: { ...layout[key], ...update } });
@@ -60,7 +62,7 @@ export default function CommandPanelProfileDetails({ draft, patch, tags = [], ac
         </Section>
 
         {isFixed
-          ? <PanelFixedSlotsEditor value={layout.fixed.slots} tags={tags} actions={actions}
+          ? <PanelFixedSlotsEditor value={layout.fixed.slots} roles={uniqueRoles} actions={actions}
               onChange={slots => patchLayoutPart('fixed', { slots })} />
           : <PanelDynamicLayoutEditor value={layout.dynamic} tags={tags} actions={actions}
               onChange={dynamic => patchSection('layout', { dynamic })} />}
