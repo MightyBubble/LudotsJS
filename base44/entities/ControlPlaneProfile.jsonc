@@ -9,7 +9,11 @@
     },
     "entity_query_graph_ref": {
       "type": "string",
-      "description": "\u5f15\u7528 EntityQuery.query_name\uff1b\u67e5\u8be2\u4ee5\u63a7\u5236\u8005\u5316\u8eab\u4e3a\u4e0a\u4e0b\u6587\u5e76\u8f93\u51fa\u53ef\u63a7 Actor \u96c6\u5408"
+      "description": "\u5f15\u7528 EntityQuery.query_name\uff1b\u67e5\u8be2\u4ee5\u63a7\u5236\u8005\u5316\u8eab\u4e3a\u4e0a\u4e0b\u6587\uff0c\u8f93\u51fa\u8be5 entity \u53ef\u63a7\u5236\u7684\u5176\u4ed6 entity \u96c6\u5408"
+    },
+    "output_collection_key": {
+      "type": "string",
+      "description": "\u6295\u5f71\u76ee\u6807\uff1a\u628a\u67e5\u8be2\u7ed3\u679c\u5199\u5165\u54ea\u4e2a EntityCollection.collection_key\uff0c\u6d88\u8d39\u65b9\u901a\u8fc7\u8be5\u952e\u8bfb\u53d6"
     }
   },
   "required": [

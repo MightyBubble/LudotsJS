@@ -1,0 +1,22 @@
+{
+  "name": "EntityCollection",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "collection_key": {
+      "type": "string",
+      "description": "\u5b9e\u4f53\u96c6\u5408\u952e\uff1a\u7eaf\u6807\u8bc6\uff0c\u4e0d\u542b\u4efb\u4f55\u6765\u6e90\u6216\u89c4\u5219\u4fe1\u606f\u3002\u8c01\u5199\u5165\u7531 ControlPlane \u7b49\u751f\u4ea7\u8005\u58f0\u660e\uff0c\u8c01\u8bfb\u53d6\u7531\u9762\u677f\u7b49\u6d88\u8d39\u8005\u5f15\u7528"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u8bf4\u660e"
+    }
+  },
+  "required": [
+    "collection_key"
+  ]
+}
