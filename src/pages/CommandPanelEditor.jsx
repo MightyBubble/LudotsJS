@@ -6,18 +6,24 @@ import useRecordEditor from '@/components/ludots/useRecordEditor';
 import CommandPanelProfileDetails from '@/components/commandPanel/CommandPanelProfileDetails';
 
 export default function CommandPanelEditorPage() {
-  const { data: semanticProfiles = [] } = useQuery({
-    queryKey: ['ability-semantic-profiles'],
-    queryFn: () => base44.entities.AbilitySemanticProfile.list('profile_id'),
+  const { data: tags = [] } = useQuery({
+    queryKey: ['gameplay-tags'],
+    queryFn: () => base44.entities.GameplayTag.list('full_path'),
     initialData: [],
   });
+  const { data: inputConfigs = [] } = useQuery({
+    queryKey: ['input-configs'],
+    queryFn: () => base44.entities.InputConfig.list(),
+    initialData: [],
+  });
+  const actions = inputConfigs.flatMap(c => c.actions || []);
 
   const editor = useRecordEditor('CommandPanelProfile', 'command-panel-profiles', () => ({
     panel_id: `panel_${Date.now()}`,
     label: '',
     description: '',
+    aggregate: true,
     slots: [],
-    role_slot_map: [],
   }));
 
   return <RecordWorkspace entityName="CommandPanelProfile" records={editor.records} hideBrowserOnMobile
@@ -34,6 +40,6 @@ export default function CommandPanelEditorPage() {
     selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
     onDelete={record => window.confirm(`确定删除「${record.panel_id}」吗？`) && editor.remove(record.id)}
     onSave={editor.save} dirty={editor.dirty}>
-    {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} semanticProfiles={semanticProfiles} />}
+    {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} tags={tags} actions={actions} />}
   </RecordWorkspace>;
 }

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Section, ListField, NumberField, SelectField, TextField } from '@/components/ludots/ui';
-import RoleSlotMapEditor from './RoleSlotMapEditor';
+import { Section, NumberField, TextField, BoolField } from '@/components/ludots/ui';
+import GameplayTagListSelect from '@/components/ludots/GameplayTagListSelect';
+import PanelSlotsEditor from './PanelSlotsEditor';
 
-export default function CommandPanelProfileDetails({ draft, patch, semanticProfiles = [] }) {
-  const profile = semanticProfiles.find(p => p.profile_id === draft.semantic_profile_ref);
-
+export default function CommandPanelProfileDetails({ draft, patch, tags = [], actions = [] }) {
   return (
     <>
       <Section title="基础信息">
@@ -26,25 +25,25 @@ export default function CommandPanelProfileDetails({ draft, patch, semanticProfi
         </div>
       </Section>
 
-      <Section title="技能过滤与聚合">
-        <ListField label="必须命中的标签" value={draft.required_all_tags}
+      <Section title="面板收哪些技能">
+        <GameplayTagListSelect label="须命中标签" value={draft.required_all_tags} tags={tags}
           onChange={required_all_tags => patch({ required_all_tags })} />
-        <ListField label="排除的标签" value={draft.blocked_any_tags}
+        <GameplayTagListSelect label="排除标签" value={draft.blocked_any_tags} tags={tags}
           onChange={blocked_any_tags => patch({ blocked_any_tags })} />
-        <ListField label="聚合对齐标签" value={draft.aggregation_key_tags}
-          onChange={aggregation_key_tags => patch({ aggregation_key_tags })}
-          hint="按标签判定跨单位是否同一个技能（如 Ability.Blink），与 ability_id 无关。" />
+        <BoolField label="聚合显示（集合内多个实体的同一技能合成一个按钮；关闭则每个实体各自平铺）"
+          value={draft.aggregate} onChange={aggregate => patch({ aggregate })} />
       </Section>
 
-      <Section title="槽位落位">
-        <SelectField label="槽位语义组" value={draft.semantic_profile_ref}
-          options={semanticProfiles.map(p => ({ value: p.profile_id, label: p.label || p.profile_id }))}
-          onChange={semantic_profile_ref => patch({ semantic_profile_ref, role_slot_map: [] })} />
-        <ListField label="槽位布局" value={draft.slots} onChange={slots => patch({ slots })} hint="按顺序，如 Q, W, E, R" />
-        <RoleSlotMapEditor value={draft.role_slot_map || []} slots={draft.slots || []}
-          roles={profile?.roles || []} onChange={role_slot_map => patch({ role_slot_map })} />
-        <TextField label="兜底排序规则" value={draft.fallback_sort} onChange={fallback_sort => patch({ fallback_sort })}
-          hint="未命中语义的技能按此规则填充剩余空槽。" />
+      <Section title="排列">
+        <div className="grid grid-cols-2 gap-2">
+          <NumberField label="每行按钮数" value={draft.columns} onChange={columns => patch({ columns })} />
+          <NumberField label="行数" value={draft.rows} onChange={rows => patch({ rows })}
+            hint="留空 = 超出一行自动换行、不限行数" />
+        </div>
+        <TextField label="动态排序规则" value={draft.fallback_sort} onChange={fallback_sort => patch({ fallback_sort })}
+          hint="未被固定槽位锁定的技能按此顺序填入剩余位置。" />
+        <PanelSlotsEditor value={draft.slots || []} tags={tags} actions={actions}
+          onChange={slots => patch({ slots })} />
       </Section>
     </>
   );
