@@ -20,7 +20,6 @@ export function normalizePanelProfile(record = {}) {
       slots: (rawLayout.fixed?.slots || []).map(slot => ({
         slot_id: slot.slot_id || '',
         role_id: slot.role_id || '',
-        container_slot_index: slot.container_slot_index ?? null,
         action_id: slot.action_id || '',
       })),
     },

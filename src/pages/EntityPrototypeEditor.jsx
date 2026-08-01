@@ -9,7 +9,6 @@ import { Section } from '@/components/ludots/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PrototypeAbilitiesSection from '@/components/prototype/PrototypeAbilitiesSection';
 import PrototypeRoleBindingsSection from '@/components/prototype/PrototypeRoleBindingsSection';
-import PrototypeContainerSlotsSection from '@/components/prototype/PrototypeContainerSlotsSection';
 
 export default function EntityPrototypeEditorPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,7 +101,6 @@ export default function EntityPrototypeEditorPage() {
       ability_ids: prototype.ability_ids || [],
       semantic_profile_ref: prototype.semantic_profile_ref || "",
       role_bindings: prototype.role_bindings || [],
-      container_slots: prototype.container_slots || [],
       structure_bindings: prototype.structure_bindings || []
     });
   };
@@ -121,7 +119,6 @@ export default function EntityPrototypeEditorPage() {
       ability_ids: (editData.ability_ids || []).filter(Boolean),
       semantic_profile_ref: editData.semantic_profile_ref || "",
       role_bindings: (editData.role_bindings || []).filter(b => b.role_id && b.ability_id),
-      container_slots: (editData.container_slots || []).filter(s => s.slot_index != null),
       structure_bindings: editData.structure_bindings || []
     };
     
@@ -207,11 +204,6 @@ export default function EntityPrototypeEditorPage() {
             profileRef={editData.semantic_profile_ref}
             roleBindings={editData.role_bindings || []}
             profiles={semanticProfiles}
-            abilityIds={editData.ability_ids || []}
-            onChange={(patch) => setEditData({ ...editData, ...patch })}
-          />
-          <PrototypeContainerSlotsSection
-            containerSlots={editData.container_slots || []}
             abilityIds={editData.ability_ids || []}
             onChange={(patch) => setEditData({ ...editData, ...patch })}
           />
