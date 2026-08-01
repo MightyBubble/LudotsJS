@@ -1,5 +1,6 @@
 import React from 'react';
-import { Section, NumberField, TextField, BoolField, SelectField } from '@/components/ludots/ui';
+import { Section, NumberField, TextField, SelectField } from '@/components/ludots/ui';
+import PanelAggregationEditor from './PanelAggregationEditor';
 import GameplayTagListSelect from '@/components/ludots/GameplayTagListSelect';
 import PanelFixedSlotsEditor from './PanelFixedSlotsEditor';
 import PanelDynamicLayoutEditor from './PanelDynamicLayoutEditor';
@@ -33,13 +34,7 @@ export default function CommandPanelProfileDetails({
           onChange={blocked_any_tags => patch({ blocked_any_tags })} />
       </Section>
 
-      <Section title="聚合：多个 Actor 的技能怎么合并">
-        <BoolField label="聚合成一个按钮（关闭则每个 Actor 的技能各自成独立按钮）"
-          value={draft.aggregate} onChange={aggregate => patch({ aggregate })} />
-        <GameplayTagListSelect label="聚合身份维度" value={draft.aggregate_key_tags} tags={tags}
-          onChange={aggregate_key_tags => patch({ aggregate_key_tags })}
-          hint="取技能标签中落在这些维度下的部分作为聚合 key，key 相同即同一按钮；留空则按 ability_id 判等" />
-      </Section>
+      <PanelAggregationEditor draft={draft} patch={patch} tags={tags} />
 
       <Section title="网格">
         <div className="grid grid-cols-2 gap-2">
