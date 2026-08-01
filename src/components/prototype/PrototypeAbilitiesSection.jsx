@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const inputCls = "h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white";
 
-export default function PrototypeAbilitiesSection({ abilityIds = [], formSetRef = "", abilities = [], formSets = [], onChange }) {
+export default function PrototypeAbilitiesSection({ abilityIds = [], abilities = [], onChange }) {
   const setList = (list) => onChange({ ability_ids: list });
   const move = (index, delta) => {
     const next = index + delta;
@@ -38,16 +38,6 @@ export default function PrototypeAbilitiesSection({ abilityIds = [], formSetRef 
         ))}
       </div>
       <Button size="sm" onClick={() => setList([...abilityIds, ""])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加技能</Button>
-
-      <div className="pt-2">
-        <label className="block text-xs text-gray-400 mb-1">技能组引用 (form set id)</label>
-        <select value={formSetRef || ""} onChange={(e) => onChange({ ability_form_set_ref: e.target.value })}
-          className="w-full h-7 bg-[#0D0F14] border border-[#2A2E37] text-xs text-white rounded px-2">
-          <option value="">留空表示无形态切换</option>
-          {formSets.map((f) => <option key={f.id} value={f.form_set_id}>{f.form_set_id}</option>)}
-        </select>
-        <p className="text-[10px] text-gray-500 mt-1">对应 AbilityFormSetRef.formSetId；技能组本体（routes / slotOverrides）在 Gameplay → Ability Form Sets 中配置。</p>
-      </div>
     </Section>
   );
 }

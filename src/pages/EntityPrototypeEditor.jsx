@@ -41,12 +41,6 @@ export default function EntityPrototypeEditorPage() {
     initialData: [],
   });
 
-  const { data: formSets = [] } = useQuery({
-    queryKey: ['ability-form-sets'],
-    queryFn: () => base44.entities.AbilityFormSet.list('form_set_id'),
-    initialData: [],
-  });
-
   const { data: semanticProfiles = [] } = useQuery({
     queryKey: ['ability-semantic-profiles'],
     queryFn: () => base44.entities.AbilitySemanticProfile.list('profile_id'),
@@ -92,7 +86,6 @@ export default function EntityPrototypeEditorPage() {
       description: "",
       referenced_attributes: [],
       ability_ids: [],
-      ability_form_set_ref: "",
       semantic_profile_ref: "",
       role_bindings: [],
       structure_bindings: []
@@ -106,7 +99,6 @@ export default function EntityPrototypeEditorPage() {
       ...prototype, 
       referenced_attributes: prototype.referenced_attributes || [],
       ability_ids: prototype.ability_ids || [],
-      ability_form_set_ref: prototype.ability_form_set_ref || "",
       semantic_profile_ref: prototype.semantic_profile_ref || "",
       role_bindings: prototype.role_bindings || [],
       structure_bindings: prototype.structure_bindings || []
@@ -125,7 +117,6 @@ export default function EntityPrototypeEditorPage() {
       description: editData.description || "",
       referenced_attributes: editData.referenced_attributes || [],
       ability_ids: (editData.ability_ids || []).filter(Boolean),
-      ability_form_set_ref: editData.ability_form_set_ref || "",
       semantic_profile_ref: editData.semantic_profile_ref || "",
       role_bindings: (editData.role_bindings || []).filter(b => b.role_id && b.ability_id),
       structure_bindings: editData.structure_bindings || []
@@ -181,7 +172,7 @@ export default function EntityPrototypeEditorPage() {
         { key: 'name', label: '名称', width: 180 },
         { key: 'description', label: '描述' },
         { key: 'referenced_attributes', label: '引用属性', render: (item) => `${(item.referenced_attributes || []).length} 项` },
-        { key: 'ability_ids', label: '技能', render: (item) => `${(item.ability_ids || []).length} 个${item.ability_form_set_ref ? ' · 有技能组' : ''}` },
+        { key: 'ability_ids', label: '技能', render: (item) => `${(item.ability_ids || []).length} 个` },
         { key: 'structure_bindings', label: '结构绑定', render: (item) => `${(item.structure_bindings || []).length} 项` },
       ]}
       selectedId={editingRow}
@@ -206,9 +197,7 @@ export default function EntityPrototypeEditorPage() {
           </Section>
           <PrototypeAbilitiesSection
             abilityIds={editData.ability_ids || []}
-            formSetRef={editData.ability_form_set_ref}
             abilities={abilities}
-            formSets={formSets}
             onChange={(patch) => setEditData({ ...editData, ...patch })}
           />
           <PrototypeRoleBindingsSection
