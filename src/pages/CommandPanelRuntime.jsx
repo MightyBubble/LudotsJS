@@ -19,14 +19,25 @@ export default function CommandPanelRuntimePage() {
   const abilityProvider = useMemo(() => createAbilityProvider(abilities), [abilities]);
   const [panelId, setPanelId] = useState('');
   const [entities, setEntities] = useState([]);
+  // 玩家侧覆盖表：slot_id -> ability_id，初始为空，命中即覆盖出厂预设
+  const [slotOverrides, setSlotOverrides] = useState({});
 
   const panelProfile = panels.find(p => p.panel_id === panelId);
   const result = useMemo(() => {
     if (!panelProfile) return null;
-    return createCommandPanelRuntime({ panelProfile, abilityProvider, log }).setEntities(entities).resolve();
-  }, [panelProfile, abilityProvider, entities, log]);
+    return createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides }).setEntities(entities).resolve();
+  }, [panelProfile, abilityProvider, entities, log, slotOverrides]);
 
-  const activate = (button) => createCommandPanelRuntime({ panelProfile, abilityProvider, log }).setEntities(entities).activate(button);
+  const activate = (button) => createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides }).setEntities(entities).activate(button);
+
+  const swapSlots = (fromSlot, toSlot) => {
+    const abilityOf = (slotId) => (result?.buttons.find(b => b.slot_id === slotId) || {}).ability_id;
+    const a = abilityOf(fromSlot);
+    const b = abilityOf(toSlot);
+    if (!a || !b) return;
+    setSlotOverrides(prev => ({ ...prev, [fromSlot]: b, [toSlot]: a }));
+    log.info('panel', `交换栏位 ${fromSlot} ↔ ${toSlot}`, { [fromSlot]: b, [toSlot]: a });
+  };
 
   return (
     <div className="h-full flex overflow-hidden">
@@ -40,11 +51,17 @@ export default function CommandPanelRuntimePage() {
             <SelectField
               label="Command Panel"
               value={panelId}
-              onChange={setPanelId}
+              onChange={(v) => { setPanelId(v); setSlotOverrides({}); }}
               options={panels.filter(p => p.panel_id).map(p => ({ value: p.panel_id, label: `${p.label || p.panel_id} · ${p.layout?.mode || 'dynamic'}` }))}
             />
             {result
-              ? <RuntimePanelView result={result} onActivate={activate} />
+              ? <RuntimePanelView
+                  result={result}
+                  onActivate={activate}
+                  onSwapSlots={swapSlots}
+                  onResetSlots={() => { setSlotOverrides({}); log.info('panel', '覆盖表已清空，回到出厂预设'); }}
+                  hasOverrides={Object.keys(slotOverrides).length > 0}
+                />
               : <p className="text-[11px] text-gray-500">选择一个面板以启动运行时。</p>}
           </Section>
         </div>

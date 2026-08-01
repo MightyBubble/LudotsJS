@@ -9,7 +9,7 @@ function matchBucketIndex(tags, buckets = []) {
 }
 
 /** 命令面板运行时：正式 API。输入有序 entity 列表 + 面板配置，输出按钮落位结果。 */
-export function createCommandPanelRuntime({ panelProfile, abilityProvider, log }) {
+export function createCommandPanelRuntime({ panelProfile, abilityProvider, log, slotOverrides = {} }) {
   const panel = normalizePanelProfile(panelProfile || {});
   let entities = [];
 
@@ -17,22 +17,32 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log }
     const buttons = [];
     const errors = [];
     (panel.layout.fixed.slots || []).forEach((slot, index) => {
-      const owner = entities.find(e => (e.role_bindings || []).some(b => b.role_id === slot.role_id));
-      const abilityId = owner && (owner.role_bindings.find(b => b.role_id === slot.role_id) || {}).ability_id;
-      const ability = abilityId ? abilityProvider.get(abilityId) : null;
-      if (!owner) {
+      const override = slotOverrides[slot.slot_id];
+      // 覆盖表命中就用它，否则回落到出厂预设的 role_id
+      const roleOwner = entities.find(e => (e.role_bindings || []).some(b => b.role_id === slot.role_id));
+      const roleAbilityId = roleOwner && (roleOwner.role_bindings.find(b => b.role_id === slot.role_id) || {}).ability_id;
+      const abilityId = override || roleAbilityId;
+      if (!abilityId) {
         errors.push({ slot_id: slot.slot_id, reason: 'no_entity_bound_to_role', role_id: slot.role_id });
         return;
       }
+      const ability = abilityProvider.get(abilityId);
       if (!ability) {
         errors.push({ slot_id: slot.slot_id, reason: 'ability_not_found', role_id: slot.role_id, ability_id: abilityId });
         return;
       }
+      // 覆盖表里的技能若当前实体已不再拥有，保留绑定但标记为不可用
+      const owner = override
+        ? entities.find(e => (e.ability_ids || []).includes(abilityId))
+        : roleOwner;
       buttons.push({
         button_id: slot.slot_id, index, ability_id: abilityId, ability,
         slot_id: slot.slot_id, role_id: slot.role_id, action_id: slot.action_id || '',
-        actors: [owner.entity_id],
-        trace: [`role ${slot.role_id} → ${owner.entity_id} → ${abilityId}`],
+        actors: owner ? [owner.entity_id] : [],
+        unavailable: !owner,
+        trace: override
+          ? [`覆盖表 ${slot.slot_id} → ${abilityId}`, owner ? `持有者 ${owner.entity_id}` : '当前无实体拥有该技能']
+          : [`role ${slot.role_id} → ${roleOwner.entity_id} → ${abilityId}`],
       });
     });
     return { buttons, errors };
@@ -87,6 +97,10 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log }
     },
     /** 激活入口：当前打通到意图层，Ability 执行接口留在 onActivate 回调上 */
     activate(button, source = 'click') {
+      if (button.unavailable) {
+        log?.warn('intent', `${button.ability_id} 当前无实体拥有，忽略激活`, { slot_id: button.slot_id });
+        return null;
+      }
       const intent = {
         type: 'ActivateAbility', ability_id: button.ability_id, actors: button.actors,
         action_id: button.action_id || null, panel_id: panel.panel_id, source, at: Date.now(),
