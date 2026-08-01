@@ -49,6 +49,23 @@
         }
       }
     },
+    "container_slots": {
+      "type": "array",
+      "description": "\u73a9\u5bb6\u53ef\u6362\u4f4d\u5bb9\u5668\uff08War3 \u7269\u54c1\u680f / LoL \u88c5\u5907\u680f\uff09\uff1a\u69fd\u4f4d\u7d22\u5f15 \u2192 \u6280\u80fd\u3002\u987a\u5e8f\u7531\u73a9\u5bb6\u8fd0\u884c\u65f6\u62d6\u52a8\u51b3\u5b9a\uff0c\u4e0d\u662f\u8bbe\u8ba1\u5e08\u7684\u6392\u7248\u610f\u56fe\uff1b\u9762\u677f fixed \u69fd\u4f4d\u901a\u8fc7 container_slot_index \u8bfb\u53d6\u672c\u8868\u3002\u4ea4\u6362\u4f4d\u7f6e\u53ea\u6539\u8fd9\u91cc\uff0c\u9762\u677f\u914d\u7f6e\u4e0d\u52a8",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slot_index": {
+            "type": "number",
+            "description": "\u5bb9\u5668\u5185\u7684\u69fd\u4f4d\u7d22\u5f15\uff08\u4ece 0 \u5f00\u59cb\uff0c\u53ef\u7559\u7a7a\u4f4d\uff09"
+          },
+          "ability_id": {
+            "type": "string",
+            "description": "\u5360\u636e\u8be5\u69fd\u4f4d\u7684\u6280\u80fd\uff0c\u5fc5\u987b\u6765\u81ea\u672c\u539f\u578b\u7684 ability_ids"
+          }
+        }
+      }
+    },
     "static_relations": {
       "type": "array",
       "items": {

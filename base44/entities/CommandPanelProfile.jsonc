@@ -119,7 +119,7 @@
           "properties": {
             "slots": {
               "type": "array",
-              "description": "\u56fa\u5b9a\u5c55\u793a\u69fd\u4f4d\uff1b\u901a\u8fc7\u8bed\u4e49\u89d2\u8272\u89e3\u6790\u5f53\u524d\u5b9e\u4f53\u539f\u578b\u7ed1\u5b9a\u7684 Ability\uff0c\u4e0d\u4f9d\u8d56 Ability \u7684\u754c\u9762\u6807\u7b7e\u6216\u6570\u7ec4\u7d22\u5f15",
+              "description": "\u56fa\u5b9a\u5c55\u793a\u69fd\u4f4d\uff1b\u4e24\u79cd\u53d6\u503c\u6765\u6e90\u4e8c\u9009\u4e00\uff1a\u8bed\u4e49\u89d2\u8272\uff08\u8bbe\u8ba1\u5e08\u610f\u56fe\uff0c\u73a9\u5bb6\u4e0d\u53ef\u6539\uff09\u6216\u5bb9\u5668\u69fd\u4f4d\u7d22\u5f15\uff08\u73a9\u5bb6\u53ef\u6362\u4f4d\uff0c\u8bfb\u5b9e\u4f53 container_slots\uff09",
               "items": {
                 "type": "object",
                 "additionalProperties": false,
@@ -132,14 +132,20 @@
                     "type": "string",
                     "description": "AbilitySemanticProfile.roles.role_id\uff1b\u7531 EntityPrototype.role_bindings \u89e3\u6790\u5230 ability_id"
                   },
+                  "container_slot_index": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "\u73a9\u5bb6\u53ef\u6362\u4f4d\u5bb9\u5668\u7684\u69fd\u4f4d\u7d22\u5f15\uff1b\u8bbe\u7f6e\u540e\u5ffd\u7565 role_id\uff0c\u4ece EntityPrototype.container_slots \u89e3\u6790\u3002\u5feb\u6377\u952e\u7ed1\u683c\u5b50\u4e0d\u7ed1\u6280\u80fd\uff0c\u73a9\u5bb6\u6362\u4f4d\u540e\u5feb\u6377\u952e\u8ddf\u7740\u683c\u5b50\u8d70"
+                  },
                   "action_id": {
                     "type": "string",
                     "description": "\u7ed1\u5b9a\u7684 InputConfig action id"
                   }
                 },
                 "required": [
-                  "slot_id",
-                  "role_id"
+                  "slot_id"
                 ]
               }
             }
@@ -151,7 +157,7 @@
           "properties": {
             "buckets": {
               "type": "array",
-              "description": "\u6709\u5e8f\u6392\u5217\u6876\uff1b\u6309\u94ae\u8fdb\u5165\u9996\u4e2a\u547d\u4e2d\u7684\u6876\uff0c\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e\uff0c\u540c\u6876\u6309 ability_id \u7a33\u5b9a\u6392\u5e8f",
+              "description": "\u6709\u5e8f\u6392\u5217\u6876\uff1b\u6309\u94ae\u8fdb\u5165\u9996\u4e2a\u547d\u4e2d\u7684\u6876\uff0c\u672a\u547d\u4e2d\u7684\u6392\u5728\u672b\u5c3e\uff0c\u540c\u6876\u6309 ability_id \u7a33\u5b9a\u6392\u5e8f\u3002\u4ec5\u7528\u4e8e\u8bbe\u8ba1\u5e08\u51b3\u5b9a\u987a\u5e8f\u7684\u5bb9\u5668\uff0c\u73a9\u5bb6\u53ef\u6362\u4f4d\u5bb9\u5668\u8bf7\u6539\u7528 fixed + container_slot_index",
               "items": {
                 "type": "object",
                 "additionalProperties": false,

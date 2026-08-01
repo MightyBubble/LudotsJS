@@ -17,6 +17,33 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log }
     const buttons = [];
     const errors = [];
     (panel.layout.fixed.slots || []).forEach((slot, index) => {
+      // 玩家可换位容器：格子只认索引，填什么由实体的 container_slots 数据决定（玩家拖动改的是那份数据）
+      if (slot.container_slot_index != null) {
+        const owner = entities.find(e => (e.container_slots || []).some(s => s.slot_index === slot.container_slot_index));
+        const abilityId = owner && (owner.container_slots.find(s => s.slot_index === slot.container_slot_index) || {}).ability_id;
+        const ability = abilityId ? abilityProvider.get(abilityId) : null;
+        // 空格子是容器的常态：占位保留，不算落位失败，玩家换位时格子不会左移
+        if (!owner) {
+          buttons.push({
+            button_id: slot.slot_id, index, ability_id: null, ability: null, empty: true,
+            slot_id: slot.slot_id, container_slot_index: slot.container_slot_index,
+            action_id: slot.action_id || '', actors: [], trace: [`容器槽位 #${slot.container_slot_index} 为空`],
+          });
+          return;
+        }
+        if (!ability) {
+          errors.push({ slot_id: slot.slot_id, reason: 'ability_not_found', ability_id: abilityId });
+          return;
+        }
+        buttons.push({
+          button_id: slot.slot_id, index, ability_id: abilityId, ability,
+          slot_id: slot.slot_id, container_slot_index: slot.container_slot_index,
+          action_id: slot.action_id || '',
+          actors: [owner.entity_id],
+          trace: [`容器槽位 #${slot.container_slot_index} → ${owner.entity_id} → ${abilityId}`],
+        });
+        return;
+      }
       const owner = entities.find(e => (e.role_bindings || []).some(b => b.role_id === slot.role_id));
       const abilityId = owner && (owner.role_bindings.find(b => b.role_id === slot.role_id) || {}).ability_id;
       const ability = abilityId ? abilityProvider.get(abilityId) : null;

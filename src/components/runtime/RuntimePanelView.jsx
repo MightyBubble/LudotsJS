@@ -16,7 +16,9 @@ export default function RuntimePanelView({ result, onActivate }) {
           style={{ gridTemplateColumns: `repeat(${columns}, 64px)` }}
         >
           {result.buttons.map(b => (
-            <RuntimeCommandButton key={b.button_id} button={b} onActivate={onActivate} />
+            b.empty
+              ? <div key={b.button_id} className="aspect-square rounded bg-[#15171C] border border-dashed border-[#2A2E37]" />
+              : <RuntimeCommandButton key={b.button_id} button={b} onActivate={onActivate} />
           ))}
         </div>
         {result.buttons.length === 0 && (

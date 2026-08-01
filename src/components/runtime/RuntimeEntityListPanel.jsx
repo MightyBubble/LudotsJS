@@ -7,7 +7,7 @@ import { X, Plus } from 'lucide-react';
 export default function RuntimeEntityListPanel({ prototypes = [], entities = [], onChange }) {
   const add = (prototype) => onChange([
     ...entities,
-    { entity_id: `${prototype.prototype_id}#${entities.length + 1}`, prototype_id: prototype.prototype_id, ability_ids: prototype.ability_ids || [], role_bindings: prototype.role_bindings || [] },
+    { entity_id: `${prototype.prototype_id}#${entities.length + 1}`, prototype_id: prototype.prototype_id, ability_ids: prototype.ability_ids || [], role_bindings: prototype.role_bindings || [], container_slots: prototype.container_slots || [] },
   ]);
 
   return (
