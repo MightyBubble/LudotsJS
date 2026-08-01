@@ -30,7 +30,7 @@ export default function CommandPanelEditorPage() {
     label: '',
     description: '',
     layout_mode: 'dynamic',
-    aggregate: true,
+    aggregate_rules: [],
     slots: [],
   }));
 
