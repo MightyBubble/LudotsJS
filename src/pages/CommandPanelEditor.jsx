@@ -22,8 +22,14 @@ export default function CommandPanelEditorPage() {
     queryFn: () => base44.entities.EntityCollection.list('collection_key'),
     initialData: [],
   });
+  const { data: semanticProfiles = [] } = useQuery({
+    queryKey: ['ability-semantic-profiles'],
+    queryFn: () => base44.entities.AbilitySemanticProfile.list('profile_id'),
+    initialData: [],
+  });
 
-  const actions = inputConfigs.flatMap(c => c.actions || []);
+  const actions = [...new Map(inputConfigs.flatMap(c => c.actions || []).map(action => [action.id, action])).values()];
+  const roles = [...new Map(semanticProfiles.flatMap(profile => profile.roles || []).map(role => [role.role_id, role])).values()];
 
   const editor = useRecordEditor('CommandPanelProfile', 'command-panel-profiles', () => ({
     panel_id: `panel_${Date.now()}`,
@@ -59,7 +65,7 @@ export default function CommandPanelEditorPage() {
     selectedId={editor.selectedId} onSelect={record => editor.setSelectedId(record.id)} onCreate={editor.create}
     onDelete={record => window.confirm(`确定删除「${record.panel_id}」吗？`) && editor.remove(record.id)}
     onSave={editor.save} dirty={editor.dirty}>
-    {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} tags={tags} actions={actions}
+    {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} tags={tags} roles={roles} actions={actions}
       collections={collections} />}
   </RecordWorkspace>;
 }
