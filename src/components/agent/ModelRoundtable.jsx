@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { base44 } from '@/api/base44Client';
 import { Loader2, Send } from 'lucide-react';
 import { AGENT_MODELS, modelLabel } from './agentModels';
 import { runMiniAgent } from '@/lib/agentkit/miniAgent';
 import AgentThreadSteps from './AgentThreadSteps';
+import RoundtableSessionList from './RoundtableSessionList';
 
 export default function ModelRoundtable() {
   const [selected, setSelected] = useState(['gpt_5_4', 'claude_sonnet_4_6']);
@@ -12,6 +13,50 @@ export default function ModelRoundtable() {
   const [input, setInput] = useState('');
   const [transcript, setTranscript] = useState([]);
   const [running, setRunning] = useState(false);
+  const [sessions, setSessions] = useState([]);
+  const [activeId, setActiveId] = useState(null);
+
+  useEffect(() => {
+    base44.entities.RoundtableSession.list('-updated_date', 50).then(setSessions);
+  }, []);
+
+  const persist = async (log) => {
+    const payload = {
+      title: (log.find((m) => m.role === 'user')?.content || '未命名会话').slice(0, 60),
+      models: selected,
+      rounds,
+      transcript_json: JSON.stringify(log),
+    };
+    if (activeId) {
+      const updated = await base44.entities.RoundtableSession.update(activeId, payload);
+      setSessions((s) => s.map((x) => (x.id === activeId ? updated : x)));
+      return activeId;
+    }
+    const created = await base44.entities.RoundtableSession.create(payload);
+    setSessions((s) => [created, ...s]);
+    setActiveId(created.id);
+    return created.id;
+  };
+
+  const selectSession = (id) => {
+    const s = sessions.find((x) => x.id === id);
+    if (!s) return;
+    setActiveId(id);
+    setTranscript(JSON.parse(s.transcript_json || '[]'));
+    if (s.models?.length) setSelected(s.models);
+    if (s.rounds) setRounds(s.rounds);
+  };
+
+  const createSession = () => {
+    setActiveId(null);
+    setTranscript([]);
+  };
+
+  const deleteSession = async (s) => {
+    await base44.entities.RoundtableSession.delete(s.id);
+    setSessions((prev) => prev.filter((x) => x.id !== s.id));
+    if (s.id === activeId) createSession();
+  };
 
   const toggle = (v) =>
     setSelected((s) => (s.includes(v) ? s.filter((x) => x !== v) : [...s, v]));
@@ -44,11 +89,19 @@ export default function ModelRoundtable() {
         setTranscript(log);
       }
     }
+    await persist(log);
     setRunning(false);
   };
 
   return (
     <div className="flex flex-col h-full min-h-0">
+      <RoundtableSessionList
+        sessions={sessions}
+        activeId={activeId}
+        onSelect={selectSession}
+        onCreate={createSession}
+        onDelete={deleteSession}
+      />
       <div className="border-b border-[#2A2E37] p-2 space-y-2">
         <div className="text-[10px] uppercase tracking-wider text-gray-500">参与模型（可多选）</div>
         <div className="flex flex-wrap gap-1">
