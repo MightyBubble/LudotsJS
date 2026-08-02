@@ -20,6 +20,7 @@ function ConfigWorkspace({ type }) {
 }
 
 export default function PresentationConfigEditor() {
-  const type = new URLSearchParams(useLocation().search).get('type') || 'mesh';
+  const requestedType = new URLSearchParams(useLocation().search).get('type') || 'mesh';
+  const type = PRESENTATION_CONFIGS[requestedType] ? requestedType : 'mesh';
   return <ConfigWorkspace key={type} type={type} />;
 }

@@ -9,8 +9,6 @@ export const PRESENTATION_CONFIGS = {
     blank: () => ({ controller_id: `controller_${Date.now()}`, default_state_index: 0, states: [], transitions: [] }) },
   profile: { entity: 'AnimationProfileDefinition', key: 'profile_id', title: 'Animation Profiles', query: 'animation_profiles',
     blank: () => ({ profile_id: `profile_${Date.now()}`, animator_controller_id: '', state_clips: [], builtin_clips: [] }) },
-  prefab: { entity: 'PresentationPrefab', key: 'prefab_id', title: 'Prefabs', query: 'presentation_prefabs',
-    blank: () => ({ prefab_id: `prefab_${Date.now()}`, mesh_asset_id: '', base_scale: 1, parts: [] }) },
   text: { entity: 'PresentationTextToken', key: 'token_id', title: 'Text Tokens', query: 'presentation_text_tokens',
     blank: () => ({ token_id: `text_${Date.now()}`, arg_count: 0, locales: {} }) },
 };
