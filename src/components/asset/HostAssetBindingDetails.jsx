@@ -26,8 +26,8 @@ export default function HostAssetBindingDetails({ draft, patch }) {
     </Section>
 
     <Section title="编辑器预览资源（不导出）">
-      <SelectField label="关联 Asset" value={draft.editor_asset_id || ''}
-        options={[{ value: '', label: '（未关联）' }, ...assets.map(a => ({ value: a.asset_id, label: `${a.name} · ${a.asset_type}` }))]}
+      <ReferenceSelect label="关联 Asset" value={draft.editor_asset_id}
+        options={assets.map(a => ({ value: a.asset_id, label: `${a.name} · ${a.asset_type}` }))}
         onChange={editor_asset_id => patch({ editor_asset_id })} />
       {linked?.asset_type === 'audio' && linked.uri && <audio controls src={linked.uri} className="w-full h-8" />}
       {linked?.asset_type === 'model' && <ModelPreview uri={linked.uri} />}
