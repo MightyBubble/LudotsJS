@@ -29,7 +29,7 @@ const inputCls = "bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5] h-8 text-xs";
 export function TextField({ label, value, onChange, placeholder, hint }) {
   return (
     <Field label={label} hint={hint}>
-      <Input value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={inputCls} />
+      <Input aria-label={label} value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={inputCls} />
     </Field>
   );
 }
@@ -37,7 +37,7 @@ export function TextField({ label, value, onChange, placeholder, hint }) {
 export function NumberField({ label, value, onChange, hint }) {
   return (
     <Field label={label} hint={hint}>
-      <Input type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))} className={inputCls} />
+      <Input aria-label={label} type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))} className={inputCls} />
     </Field>
   );
 }
@@ -61,6 +61,7 @@ export function ListField({ label, value = [], onChange, hint }) {
   return (
     <Field label={label} hint={hint || '多个值用逗号分隔'}>
       <Input
+        aria-label={label}
         value={(value || []).join(', ')}
         onChange={(e) => onChange(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
         className={inputCls}

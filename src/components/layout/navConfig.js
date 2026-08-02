@@ -20,21 +20,21 @@ export const NAV_GROUPS = [
   },
   {
     key: 'participants',
-    label: '参与者',
+    label: '世界',
     items: [
-      { page: 'MapConfigEditor', label: 'Map Config', icon: MapIcon },
+      { page: 'MapConfigEditor', label: 'Maps', icon: MapIcon },
       { page: 'ParticipantEditor', label: 'Players & Teams', icon: Users },
+      { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
+      { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
+      { page: 'EntityRelationEditor', search: '?view=static', label: 'Static Relations', icon: Network },
     ],
   },
   {
     key: 'world',
-    label: '世界模型',
+    label: '属性与标签',
     items: [
       { page: 'TagEditor', label: 'Gameplay Tags', icon: Edit3 },
       { page: 'AttributeEditor', label: 'Attributes', icon: Layers },
-      { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
-      { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
-      { page: 'EntityRelationEditor', search: '?view=static', label: 'Static Relations', icon: Network },
     ],
   },
   {

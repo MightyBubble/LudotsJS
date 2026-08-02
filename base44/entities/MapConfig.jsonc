@@ -5,15 +5,19 @@
   "properties": {
     "map_id": {
       "type": "string",
-      "description": "\u5bf9\u5e94 Ludots MapConfig.Id"
+      "description": "Ludots MapConfig.Id"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "Ludots MapConfig.ParentId"
     },
     "label": {
       "type": "string",
-      "description": "\u663e\u793a\u540d\u79f0"
+      "description": "\u7f16\u8f91\u5668\u663e\u793a\u540d\u79f0"
     },
     "description": {
       "type": "string",
-      "description": "\u5730\u56fe\u8bf4\u660e"
+      "description": "\u7f16\u8f91\u5668\u8bf4\u660e"
     },
     "scope_type": {
       "type": "string",
@@ -35,9 +39,37 @@
         "null"
       ]
     },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "visual_heightmap_asset": {
+      "type": "string"
+    },
+    "structure_collision_asset": {
+      "type": "string"
+    },
+    "structure_aware_grounding": {
+      "type": "boolean",
+      "default": false
+    },
+    "structure_aware_navigation": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object"
+    },
     "entities": {
       "type": "array",
-      "description": "MapConfig.Entities\uff1binstance_id \u662f\u56fe\u5185\u552f\u4e00\u4e14\u7a33\u5b9a\u7684\u5b9e\u4f53\u7ed1\u5b9a\u952e",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -45,26 +77,238 @@
           "instance_id": {
             "type": "string"
           },
-          "prototype_id": {
+          "template": {
             "type": "string",
-            "description": "\u5bf9\u5e94 EntitySpawnData.Template"
+            "description": "EntitySpawnData.Template"
           },
-          "spatial": {
-            "type": "boolean",
-            "default": false,
-            "description": "\u662f\u5426\u5e26\u7a7a\u95f4\u7ec4\u4ef6"
+          "position": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ]
+          },
+          "overrides": {
+            "type": "object"
+          },
+          "performer_param_overrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "param_key": {
+                  "type": "string"
+                },
+                "lane": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "float_value": {
+                  "type": "number"
+                },
+                "int_value": {
+                  "type": "integer"
+                },
+                "vector_value": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "param_key"
+              ]
+            }
           }
         },
         "required": [
           "instance_id",
-          "prototype_id",
-          "spatial"
+          "template",
+          "position"
         ]
+      }
+    },
+    "boards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "default": "default"
+          },
+          "spatial_type": {
+            "type": "string",
+            "enum": [
+              "Grid",
+              "HexGrid",
+              "NodeGraph"
+            ],
+            "default": "Grid"
+          },
+          "width_in_macro_tiles": {
+            "type": "integer",
+            "default": 64
+          },
+          "height_in_macro_tiles": {
+            "type": "integer",
+            "default": 64
+          },
+          "grid_cell_size_cm": {
+            "type": "integer",
+            "default": 100
+          },
+          "hex_edge_length_cm": {
+            "type": "integer",
+            "default": 400
+          },
+          "chunk_size_cells": {
+            "type": "integer",
+            "default": 64
+          },
+          "loaded_chunk_capacity": {
+            "type": "integer",
+            "default": 0
+          },
+          "data_file": {
+            "type": "string"
+          },
+          "visual_heightmap_asset": {
+            "type": "string"
+          },
+          "structure_collision_asset": {
+            "type": "string"
+          },
+          "structure_aware_grounding": {
+            "type": "boolean",
+            "default": false
+          },
+          "structure_aware_navigation": {
+            "type": "boolean",
+            "default": false
+          },
+          "navigation_enabled": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "name",
+          "spatial_type",
+          "width_in_macro_tiles",
+          "height_in_macro_tiles",
+          "grid_cell_size_cm",
+          "hex_edge_length_cm",
+          "chunk_size_cells",
+          "loaded_chunk_capacity",
+          "structure_aware_grounding",
+          "structure_aware_navigation",
+          "navigation_enabled"
+        ]
+      }
+    },
+    "visual_heightmap": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string"
+        },
+        "board_name": {
+          "type": "string"
+        },
+        "default_layer_index": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "asset",
+        "board_name",
+        "default_layer_index"
+      ]
+    },
+    "trigger_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "MapConfig.TriggerTypes\uff1b\u58f0\u660e\u5730\u56fe\u4f5c\u7528\u57df Trigger \u7c7b\u578b\u540d"
+    },
+    "default_camera": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "virtual_camera_id": {
+          "type": "string"
+        },
+        "target_x_cm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "target_y_cm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "yaw": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "pitch": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "distance_cm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fov_y_deg": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
       }
     }
   },
   "required": [
     "map_id",
-    "entities"
+    "dependencies",
+    "structure_aware_grounding",
+    "structure_aware_navigation",
+    "tags",
+    "metadata",
+    "entities",
+    "boards",
+    "trigger_types"
   ]
 }

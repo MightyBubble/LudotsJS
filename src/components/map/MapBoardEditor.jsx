@@ -1,0 +1,18 @@
+import React from 'react';
+import { Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Section, BoolField, NumberField, SelectField, TextField } from '@/components/ludots/ui';
+
+const blankBoard = () => ({ name: 'default', spatial_type: 'Grid', width_in_macro_tiles: 64, height_in_macro_tiles: 64, grid_cell_size_cm: 100, hex_edge_length_cm: 400, chunk_size_cells: 64, loaded_chunk_capacity: 0, data_file: '', visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, navigation_enabled: false });
+export default function MapBoardEditor({ boards = [], onChange }) {
+  const patch = (i, next) => onChange(boards.map((board, index) => index === i ? { ...board, ...next } : board));
+  return <Section title="Boards" right={<Button size="sm" onClick={() => onChange([...boards, blankBoard()])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加 Board</Button>}>
+    <p className="text-xs text-gray-500">每个 Board 是独立空间域；NodeGraph 必须配置 Loaded Chunk Capacity。</p>
+    {boards.map((board, i) => <div key={i} className="rounded border border-[#2A2E37] bg-[#0D0F14] p-3 space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3"><TextField label="Name" value={board.name} onChange={name => patch(i, { name })} /><SelectField label="Spatial Type" value={board.spatial_type} options={['Grid','HexGrid','NodeGraph'].map(value => ({ value, label: value }))} onChange={spatial_type => patch(i, { spatial_type })} /><TextField label="Data File" value={board.data_file} onChange={data_file => patch(i, { data_file })} /></div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3"><NumberField label="Width / Macro Tiles" value={board.width_in_macro_tiles} onChange={width_in_macro_tiles => patch(i, { width_in_macro_tiles })} /><NumberField label="Height / Macro Tiles" value={board.height_in_macro_tiles} onChange={height_in_macro_tiles => patch(i, { height_in_macro_tiles })} /><NumberField label="Grid Cell Size (cm)" value={board.grid_cell_size_cm} onChange={grid_cell_size_cm => patch(i, { grid_cell_size_cm })} /><NumberField label="Hex Edge (cm)" value={board.hex_edge_length_cm} onChange={hex_edge_length_cm => patch(i, { hex_edge_length_cm })} /><NumberField label="Chunk Size Cells" value={board.chunk_size_cells} onChange={chunk_size_cells => patch(i, { chunk_size_cells })} /><NumberField label="Loaded Chunk Capacity" value={board.loaded_chunk_capacity} onChange={loaded_chunk_capacity => patch(i, { loaded_chunk_capacity })} /></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3"><TextField label="Visual Heightmap Asset" value={board.visual_heightmap_asset} onChange={visual_heightmap_asset => patch(i, { visual_heightmap_asset })} /><TextField label="Structure Collision Asset" value={board.structure_collision_asset} onChange={structure_collision_asset => patch(i, { structure_collision_asset })} /></div>
+      <div className="flex flex-wrap gap-5"><BoolField label="Navigation Enabled" value={board.navigation_enabled} onChange={navigation_enabled => patch(i, { navigation_enabled })} /><BoolField label="Structure-aware Grounding" value={board.structure_aware_grounding} onChange={structure_aware_grounding => patch(i, { structure_aware_grounding })} /><BoolField label="Structure-aware Navigation" value={board.structure_aware_navigation} onChange={structure_aware_navigation => patch(i, { structure_aware_navigation })} /><Button size="sm" variant="ghost" onClick={() => onChange(boards.filter((_, index) => index !== i))} className="ml-auto h-7 text-red-400"><Trash2 className="w-3 h-3" />删除</Button></div>
+    </div>)}
+  </Section>;
+}
