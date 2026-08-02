@@ -1,0 +1,41 @@
+{
+  "name": "HostAssetBinding",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "binding_id": {
+      "type": "string",
+      "description": "host_assets.json id"
+    },
+    "asset_kind": {
+      "type": "string",
+      "description": "assetKind\uff0c\u4f8b\u5982 Mesh / SkinnedMesh / Sound / Decal"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "assetId\uff1a\u903b\u8f91\u8d44\u4ea7 id\uff08mesh_assets / animation_clips \u7b49\u8868\u4e2d\u7684 id\uff09"
+    },
+    "backend_id": {
+      "type": "string",
+      "description": "backendId\uff1a\u6e32\u67d3/\u97f3\u9891\u540e\u7aef\u6807\u8bc6\uff0c\u4f8b\u5982 raylib / browser"
+    },
+    "source_uris": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "sourceUris\uff1aMod:\u76f8\u5bf9\u8def\u5f84 \u5f62\u5f0f\u7684\u5bbf\u4e3b\u8d44\u6e90\u5730\u5740\uff0c\u6309\u987a\u5e8f\u56de\u9000"
+    },
+    "editor_asset_id": {
+      "type": "string",
+      "description": "\u7f16\u8f91\u5668\u5185 Asset.asset_id \u5f15\u7528\uff0c\u7528\u4e8e\u9884\u89c8\u4e0e\u751f\u6210\uff0c\u4e0d\u5bfc\u51fa"
+    }
+  },
+  "required": [
+    "binding_id",
+    "asset_kind",
+    "asset_id",
+    "backend_id",
+    "source_uris"
+  ]
+}

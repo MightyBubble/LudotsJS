@@ -5,6 +5,8 @@ import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section, TextField, SelectField, ListField, NumberField, BoolField } from '@/components/ludots/ui';
+import AssetGenerationPanel from '@/components/asset/AssetGenerationPanel';
+import ModelPreview from '@/components/asset/ModelPreview';
 
 const ASSET_TYPES = ['image', 'audio', 'model', 'animation', 'material', 'particle', 'prefab', 'data', 'script', 'other'];
 const SOURCE_TYPES = ['uploaded', 'url', 'builtin', 'generated'];
@@ -65,10 +67,13 @@ export default function AssetLibraryPage() {
             </div>
           </Section>
 
+          <AssetGenerationPanel draft={draft} patch={patch} />
+
           <Section title="地址与预览">
             <TextField label="资源地址 (uri)" value={draft.uri} onChange={(v) => patch({ uri: v })} />
             <TextField label="预览地址 (preview_uri)" value={draft.preview_uri} onChange={(v) => patch({ preview_uri: v })} />
             {draft.asset_type === 'audio' && draft.uri && <audio controls src={draft.uri} className="w-full h-8" />}
+            {draft.asset_type === 'model' && <ModelPreview uri={draft.uri} />}
             {(draft.preview_uri || (draft.asset_type === 'image' && draft.uri)) && (
               <img src={draft.preview_uri || draft.uri} alt={draft.name} className="max-h-48 rounded border border-[#2A2E37]" />
             )}

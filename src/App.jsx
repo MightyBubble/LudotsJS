@@ -28,6 +28,8 @@ import AbilityPlayground from './pages/AbilityPlayground';
 import ParticipantEditor from './pages/ParticipantEditor';
 import MapConfigEditor from './pages/MapConfigEditor';
 import LevelBlueprintEditor from './pages/LevelBlueprintEditor';
+import PerformerEditor from './pages/PerformerEditor';
+import HostAssetBindingEditor from './pages/HostAssetBindingEditor';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
@@ -102,6 +104,8 @@ const AuthenticatedApp = () => {
       <Route path="/ParticipantEditor" element={<LayoutWrapper currentPageName="ParticipantEditor"><ParticipantEditor /></LayoutWrapper>} />
       <Route path="/MapConfigEditor" element={<LayoutWrapper currentPageName="MapConfigEditor"><MapConfigEditor /></LayoutWrapper>} />
       <Route path="/LevelBlueprintEditor" element={<LayoutWrapper currentPageName="LevelBlueprintEditor"><LevelBlueprintEditor /></LayoutWrapper>} />
+      <Route path="/PerformerEditor" element={<LayoutWrapper currentPageName="PerformerEditor"><PerformerEditor /></LayoutWrapper>} />
+      <Route path="/HostAssetBindingEditor" element={<LayoutWrapper currentPageName="HostAssetBindingEditor"><HostAssetBindingEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

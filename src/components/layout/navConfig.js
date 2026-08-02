@@ -108,6 +108,8 @@ export const NAV_GROUPS = [
     key: 'presentation',
     label: '表现',
     items: [
+      { page: 'PerformerEditor', label: 'Performers', icon: Sparkles },
+      { page: 'HostAssetBindingEditor', label: 'Host Asset Bindings', icon: LinkIcon },
       { page: 'AssetLibrary', label: '全部资源', icon: Box },
       { page: 'AssetLibrary', search: '?type=model', label: '模型', icon: Box },
       { page: 'AssetLibrary', search: '?type=animation', label: '动画', icon: Film },

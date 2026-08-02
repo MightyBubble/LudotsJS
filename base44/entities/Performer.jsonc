@@ -1,0 +1,502 @@
+{
+  "name": "Performer",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "performer_id": {
+      "type": "string",
+      "description": "Ludots performers.json id"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u7f16\u8f91\u5668\u663e\u793a\u540d\u79f0\uff0c\u4e0d\u5bfc\u51fa"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u7f16\u8f91\u5668\u8bf4\u660e\uff0c\u4e0d\u5bfc\u51fa"
+    },
+    "extends": {
+      "type": "string",
+      "description": "\u7ee7\u627f\u7684 performer id"
+    },
+    "default_color": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "defaultColor RGBA"
+    },
+    "default_lifetime": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "defaultLifetime \u79d2"
+    },
+    "default_font_size": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "defaultFontSize"
+    },
+    "position_offset": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "positionOffset XYZ"
+    },
+    "position_y_drift_per_second": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "positionYDriftPerSecond"
+    },
+    "alpha_fade_over_lifetime": {
+      "type": "boolean",
+      "default": false
+    },
+    "world_text_mode": {
+      "type": "string",
+      "description": "worldTextMode"
+    },
+    "visibility_inline": {
+      "type": "string",
+      "description": "visibility.inline"
+    },
+    "visibility_graph_program_id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "visibility.graphProgramId"
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u5b50 performer id \u5217\u8868"
+    },
+    "behaviors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "AssetBinding",
+              "AttributeBinding",
+              "TagBinding",
+              "Animator",
+              "Attachment",
+              "Sound",
+              "Material",
+              "Spline"
+            ]
+          },
+          "activeByDefault": {
+            "type": "boolean",
+            "default": true
+          },
+          "activationCondition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "inline": {
+                "type": "string"
+              },
+              "graphProgramId": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          },
+          "assetBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "assetKind": {
+                "type": "string"
+              },
+              "assetId": {
+                "type": "string"
+              },
+              "renderPath": {
+                "type": "string"
+              },
+              "mobility": {
+                "type": "string"
+              },
+              "localOffset": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "localRotation": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "localScale": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "scaleParamKey": {
+                "type": "string"
+              },
+              "colorParamKey": {
+                "type": "string"
+              },
+              "materialParamKey": {
+                "type": "string"
+              },
+              "assetSwapParamKey": {
+                "type": "string"
+              },
+              "visibilityParamKey": {
+                "type": "string"
+              },
+              "assetSwapTable": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "paramValue": {
+                      "type": "number"
+                    },
+                    "assetId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "attributeBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attributeId": {
+                "type": "string"
+              },
+              "targetParamKey": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string"
+              },
+              "thresholds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "threshold": {
+                      "type": "number"
+                    },
+                    "outputParamKey": {
+                      "type": "string"
+                    },
+                    "outputValue": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tagBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "tagId": {
+                "type": "string"
+              },
+              "targetParamKey": {
+                "type": "string"
+              },
+              "invertLogic": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          },
+          "animator": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "animatorControllerId": {
+                "type": "string"
+              },
+              "animationProfileId": {
+                "type": "string"
+              },
+              "speedParamKey": {
+                "type": "string"
+              },
+              "stateParamKey": {
+                "type": "string"
+              }
+            }
+          },
+          "attachment": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "boneId": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "offset": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "rotationOffset": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "inheritScale": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "sound": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "soundAssetId": {
+                "type": "string"
+              },
+              "loop": {
+                "type": "boolean",
+                "default": false
+              },
+              "volume": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "volumeParamKey": {
+                "type": "string"
+              }
+            }
+          },
+          "material": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "baseMaterialId": {
+                "type": "string"
+              },
+              "materialSwapParamKey": {
+                "type": "string"
+              },
+              "swapTable": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "paramValue": {
+                      "type": "number"
+                    },
+                    "materialId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "spline": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "splineAssetId": {
+                "type": "string"
+              },
+              "usage": {
+                "type": "string"
+              },
+              "widthParamKey": {
+                "type": "string"
+              },
+              "colorParamKey": {
+                "type": "string"
+              },
+              "speedParamKey": {
+                "type": "string"
+              },
+              "progressParamKey": {
+                "type": "string"
+              },
+              "loop": {
+                "type": "boolean",
+                "default": false
+              },
+              "pingPong": {
+                "type": "boolean",
+                "default": false
+              },
+              "waypointEventId": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "slot",
+          "kind"
+        ]
+      }
+    },
+    "paramDefaults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "paramKey": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string",
+            "enum": [
+              "Float",
+              "Int",
+              "Vector"
+            ],
+            "default": "Float"
+          },
+          "floatValue": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "intValue": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "vectorValue": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "paramKey",
+          "lane"
+        ]
+      }
+    },
+    "bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "paramKey": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string"
+          },
+          "constantValue": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "paramKey",
+          "source"
+        ]
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "event": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "keyId": {
+                "type": "string"
+              },
+              "gained": {
+                "type": "boolean"
+              }
+            }
+          },
+          "command": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "paramKey": {
+                "type": "string"
+              },
+              "paramLane": {
+                "type": "string"
+              },
+              "valueSource": {
+                "type": "string"
+              },
+              "paramValue": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "performer_id"
+  ]
+}
