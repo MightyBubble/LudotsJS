@@ -40,6 +40,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
   const pointer = new THREE.Vector2();
   const entities = [];
   const mapMeshes = [];
+  const selectionVisuals = [];
   let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0;
   const applyView = () => entities.forEach((entity) => {
     if (!view?.id) entity.mesh.visible = true;
@@ -73,16 +74,35 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     });
   };
 
-  const pick = (event) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.set(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
-    );
+  const pickScreenPoint = (point) => {
+    pointer.set((point.x / renderer.domElement.clientWidth) * 2 - 1, -(point.y / renderer.domElement.clientHeight) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
     const hit = raycaster.intersectObject(ground)[0]?.point;
-    if (!hit) return null;
-    return new THREE.Vector3(clamp(hit.x, -HALF_X, HALF_X), 0, clamp(hit.z, -HALF_Z, HALF_Z));
+    return hit ? new THREE.Vector3(clamp(hit.x, -HALF_X, HALF_X), 0, clamp(hit.z, -HALF_Z, HALF_Z)) : null;
+  };
+  const pick = (event) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    return pickScreenPoint({ x: event.clientX - rect.left, y: event.clientY - rect.top });
+  };
+  const clearWorldSelection = () => selectionVisuals.splice(0).forEach(disposeMesh);
+  const worldPolygon = (points, shape) => {
+    const picked = points.map(pickScreenPoint).filter(Boolean);
+    if (shape !== 'box' || picked.length < 2) return picked;
+    const first = picked[0], last = picked[picked.length - 1];
+    return [new THREE.Vector3(first.x, 0, first.z), new THREE.Vector3(last.x, 0, first.z), new THREE.Vector3(last.x, 0, last.z), new THREE.Vector3(first.x, 0, last.z)];
+  };
+  const updateWorldSelection = (points, shape, style = {}) => {
+    clearWorldSelection();
+    const polygon = worldPolygon(points, shape);
+    if (polygon.length < 2) return;
+    const fill = new THREE.Shape(polygon.map(point => new THREE.Vector2(point.x, point.z)));
+    const fillColor = style.fill_color?.slice(0, 7) || '#38BDF8';
+    const alpha = style.fill_color?.length === 9 ? parseInt(style.fill_color.slice(7), 16) / 255 : 0.2;
+    const fillMesh = new THREE.Mesh(new THREE.ShapeGeometry(fill), new THREE.MeshBasicMaterial({ color: fillColor, transparent: true, opacity: alpha, side: THREE.DoubleSide, depthWrite: false }));
+    fillMesh.rotation.x = -Math.PI / 2; fillMesh.position.y = 0.025;
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(polygon.map(point => new THREE.Vector3(point.x, 0.04, point.z)));
+    const line = new THREE.LineLoop(lineGeometry, new THREE.LineBasicMaterial({ color: style.stroke_color || '#7DD3FC', linewidth: style.line_width || 2 }));
+    scene.add(fillMesh, line); selectionVisuals.push(fillMesh, line);
   };
 
   const handleMove = (event) => {
@@ -166,6 +186,14 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
         : point => points.reduce((inside, current, index) => { const previous = points[(index + points.length - 1) % points.length]; const crosses = ((current.y > point.y) !== (previous.y > point.y)) && point.x < (previous.x - current.x) * (point.y - current.y) / (previous.y - current.y || 1) + current.x; return crosses ? !inside : inside; }, false);
       return mapMeshes.filter(mesh => mesh.visible !== false && contains((() => { const projected = mesh.position.clone().project(camera); return { x: (projected.x + 1) * renderer.domElement.clientWidth / 2, y: (1 - projected.y) * renderer.domElement.clientHeight / 2 }; })())).map(mesh => mesh.userData.entity);
     },
+    selectByWorldShape(points, shape = 'box') {
+      const polygon = worldPolygon(points, shape);
+      if (polygon.length < 2) return [];
+      const contains = point => polygon.reduce((inside, current, index) => { const previous = polygon[(index + polygon.length - 1) % polygon.length]; const crosses = ((current.z > point.z) !== (previous.z > point.z)) && point.x < (previous.x - current.x) * (point.z - current.z) / (previous.z - current.z || 1) + current.x; return crosses ? !inside : inside; }, false);
+      return mapMeshes.filter(mesh => mesh.visible !== false && contains(mesh.position)).map(mesh => mesh.userData.entity);
+    },
+    updateWorldSelection,
+    clearWorldSelection,
     clear() {
       entities.forEach((e) => {
         scene.remove(e.mesh);
@@ -182,6 +210,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       renderer.domElement.removeEventListener('pointermove', handleMove);
       renderer.domElement.removeEventListener('click', handleClick);
       mapMeshes.splice(0).forEach(disposeMesh);
+      clearWorldSelection();
       renderer.dispose();
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     },

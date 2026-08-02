@@ -29,7 +29,7 @@ export default function useLevelLifecycleRuntime({ map, blueprints, actionGraphs
       onAction: action => setLastAction(action.action_id),
     }));
     emit(LEVEL_EVENT.Initializing);
-    emit(LEVEL_EVENT.Ready);
+    emit(LEVEL_EVENT.Ready, { entities: map?.entities || [] });
     return () => {
       emit(LEVEL_EVENT.Unloading);
       emit(LEVEL_EVENT.Unloaded);

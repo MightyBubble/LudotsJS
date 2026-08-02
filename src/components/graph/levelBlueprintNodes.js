@@ -68,13 +68,11 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
     configFields: [
       { key: 'profileId', type: 'select', optionsSource: 'commandPanels', placeholder: '选择 Command Panel Profile' },
       { key: 'instanceKey', type: 'text', defaultValue: 'command-panel' },
-      { key: 'tabGroup', type: 'text', defaultValue: 'command-control' },
-      { key: 'tabId', type: 'text', defaultValue: 'commands' },
       { key: 'anchorHorizontal', type: 'select', options: [{ value: 'left', label: '左' }, { value: 'center', label: '中' }, { value: 'right', label: '右' }] },
       { key: 'anchorVertical', type: 'select', options: [{ value: 'top', label: '上' }, { value: 'center', label: '中' }, { value: 'bottom', label: '下' }] },
       { key: 'offsetX', type: 'number', defaultValue: 12 }, { key: 'offsetY', type: 'number', defaultValue: 12 },
     ],
-    defaultData: { profileId: '', instanceKey: 'command-panel', tabGroup: 'command-control', tabId: 'commands', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
+    defaultData: { profileId: '', instanceKey: 'command-panel', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
     inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
   level_create_entity_panel: {
@@ -82,13 +80,11 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
     configFields: [
       { key: 'profileId', type: 'select', optionsSource: 'entityPanels', placeholder: '选择 Entity Panel Profile' },
       { key: 'instanceKey', type: 'text', defaultValue: 'entity-panel' },
-      { key: 'tabGroup', type: 'text', defaultValue: 'command-control' },
-      { key: 'tabId', type: 'text', defaultValue: 'entities' },
       { key: 'anchorHorizontal', type: 'select', options: [{ value: 'left', label: '左' }, { value: 'center', label: '中' }, { value: 'right', label: '右' }] },
       { key: 'anchorVertical', type: 'select', options: [{ value: 'top', label: '上' }, { value: 'center', label: '中' }, { value: 'bottom', label: '下' }] },
       { key: 'offsetX', type: 'number', defaultValue: 12 }, { key: 'offsetY', type: 'number', defaultValue: 12 },
     ],
-    defaultData: { profileId: '', instanceKey: 'entity-panel', tabGroup: 'command-control', tabId: 'entities', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
+    defaultData: { profileId: '', instanceKey: 'entity-panel', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
     inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
   level_close_runtime_profile: {
@@ -100,12 +96,6 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
     label: '更新集合上下文', icon: Crosshair, category: '关卡 UI · Context', graphTypes: ['level'],
     configFields: [{ key: 'collectionKey', type: 'select', optionsSource: 'entityCollections', placeholder: '选择 EntityCollection' }],
     defaultData: { collectionKey: '' }, inputs: [{ id: 'exec', label: '执行', type: 'exec' }, { id: 'entities', label: '实体集合', type: 'any' }],
-    outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
-  },
-  level_focus_panel_tab: {
-    label: '切换 Panel Tab', icon: PanelsTopLeft, category: '关卡 UI · Context', graphTypes: ['level'],
-    configFields: [{ key: 'tabGroup', type: 'text', defaultValue: 'command-control' }, { key: 'tabId', type: 'text', defaultValue: 'entities' }],
-    defaultData: { tabGroup: 'command-control', tabId: 'entities' }, inputs: [{ id: 'exec', label: '执行', type: 'exec' }],
     outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
   level_execute_action: {

@@ -18,7 +18,12 @@ const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, templat
   useEffect(() => { sceneRef.current?.setView(view || null); }, [view]);
   useEffect(() => { sceneRef.current?.setPaused(paused); }, [paused]);
   useEffect(() => { if (clearToken) sceneRef.current?.clear(); }, [clearToken]);
-  useImperativeHandle(ref, () => ({ selectByScreenShape: (points, shape) => sceneRef.current?.selectByScreenShape(points, shape) || [] }), []);
+  useImperativeHandle(ref, () => ({
+    selectByScreenShape: (points, shape) => sceneRef.current?.selectByScreenShape(points, shape) || [],
+    selectByWorldShape: (points, shape) => sceneRef.current?.selectByWorldShape(points, shape) || [],
+    updateWorldSelection: (points, shape, style) => sceneRef.current?.updateWorldSelection(points, shape, style),
+    clearWorldSelection: () => sceneRef.current?.clearWorldSelection(),
+  }), []);
 
   return <div ref={mountRef} className="absolute inset-0" data-testid="playground-viewport" />;
 });

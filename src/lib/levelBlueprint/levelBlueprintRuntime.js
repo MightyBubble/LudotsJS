@@ -51,7 +51,6 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
         result.panelOperations.push({
           action: 'create', kind: node.type === 'level_create_command_panel' ? 'command' : 'entity',
           profileId: node.data?.profileId, instanceKey: node.data?.instanceKey,
-          tabGroup: node.data?.tabGroup, tabId: node.data?.tabId,
           anchor: { horizontal: node.data?.anchorHorizontal, vertical: node.data?.anchorVertical, offsetX: node.data?.offsetX, offsetY: node.data?.offsetY },
         });
       } else if (node.type === 'level_close_runtime_profile') {
@@ -59,8 +58,6 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
         result.controlPlaneOperations.push({ action: 'close', instanceKey: node.data?.instanceKey });
       } else if (node.type === 'level_set_collection_context') {
         result.collectionUpdates.push({ collectionKey: node.data?.collectionKey, entities: readInput(node, 'entities', eventPayload) || [] });
-      } else if (node.type === 'level_focus_panel_tab') {
-        result.panelOperations.push({ action: 'focus', tabGroup: node.data?.tabGroup, tabId: node.data?.tabId });
       } else if (node.type === 'level_execute_action') {
         const actionId = node.data?.actionId;
         const action = actions.get(actionId);
