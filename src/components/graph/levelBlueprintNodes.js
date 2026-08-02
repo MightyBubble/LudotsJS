@@ -1,4 +1,4 @@
-import { Radio, Play, Download, Upload } from 'lucide-react';
+import { Radio, Play, Download, Upload, ListTree, GitBranch, ScrollText } from 'lucide-react';
 import { LEVEL_LIFECYCLE_EVENTS, levelBuiltinEventNodeType } from '@/lib/levelBlueprint/levelLifecycle';
 
 const eventOutputs = [
@@ -30,6 +30,28 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
     label: '旧版关卡事件', icon: Radio, category: '关卡事件 · 旧版', graphTypes: ['level'], hidden: true,
     configFields: [{ key: 'eventId', type: 'select', options: LEVEL_LIFECYCLE_EVENTS }],
     defaultData: { eventId: 'Level.Started' }, inputs: [], outputs: eventOutputs,
+  },
+  level_sequence: {
+    label: '顺序执行', icon: ListTree, category: '关卡控制流', graphTypes: ['level'],
+    defaultData: {}, inputs: [{ id: 'exec', label: '执行', type: 'exec' }],
+    outputs: [
+      { id: 'then_0', label: '步骤 1', type: 'exec' },
+      { id: 'then_1', label: '步骤 2', type: 'exec' },
+      { id: 'then_2', label: '步骤 3', type: 'exec' },
+    ],
+  },
+  level_branch: {
+    label: '条件分支', icon: GitBranch, category: '关卡控制流', graphTypes: ['level'],
+    defaultData: { condition: true },
+    inputs: [{ id: 'exec', label: '执行', type: 'exec' }, { id: 'condition', label: '条件', type: 'boolean' }],
+    outputs: [{ id: 'true', label: 'True', type: 'exec' }, { id: 'false', label: 'False', type: 'exec' }],
+  },
+  level_log: {
+    label: '记录日志', icon: ScrollText, category: '关卡调试', graphTypes: ['level'],
+    configFields: [{ key: 'message', type: 'text', defaultValue: '' }],
+    defaultData: { message: '' },
+    inputs: [{ id: 'exec', label: '执行', type: 'exec' }, { id: 'payload', label: '数据', type: 'any' }],
+    outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
   level_execute_action: {
     label: '执行 ActionGraph', icon: Play, category: '关卡动作', graphTypes: ['level'],

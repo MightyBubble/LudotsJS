@@ -18,7 +18,7 @@ export default function PlaygroundToolbar({ maps, mapId, onMap, mapEntityCount, 
       </button>
       <ParticipantViewSelector {...participantView} />
       <span className="ml-auto text-[10px] text-gray-500 whitespace-nowrap">
-        生命周期 {lifecycle.status} · 蓝图 {lifecycle.blueprintCount}{lifecycle.lastAction ? ` · Action ${lifecycle.lastAction}` : ''} · {templateName ? `待放置：${templateName}` : '未选择模板'} · 地图实体 {mapEntityCount} · 临时实体 {count} · 时间 {elapsed.toFixed(1)}s
+        生命周期 {lifecycle.status} · 蓝图 {lifecycle.blueprintCount}{lifecycle.lastAction ? ` · Action ${lifecycle.lastAction}` : ''}{lifecycle.lastVariableWrites?.length ? ` · 写入 ${lifecycle.lastVariableWrites.join(', ')}` : ''}{lifecycle.lastLogs?.length ? ` · 日志 ${lifecycle.lastLogs.length}` : ''}{lifecycle.lastLog ? ` · Log ${lifecycle.lastLog}` : ''} · {templateName ? `待放置：${templateName}` : '未选择模板'} · 地图实体 {mapEntityCount} · 临时实体 {count} · 时间 {elapsed.toFixed(1)}s
       </span>
     </div>
   );

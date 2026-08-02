@@ -7,10 +7,14 @@ export default function useLevelLifecycleRuntime({ map, blueprints, actionGraphs
   const instanceId = useRef('');
   const [status, setStatus] = useState('未加载');
   const [lastAction, setLastAction] = useState('');
+  const [lastResults, setLastResults] = useState([]);
   const emit = useCallback((eventId, payload = {}) => {
-    const context = { levelInstanceId: instanceId.current, mapId: map?.map_id || null, at: Date.now(), ...payload };
+    const context = Array.isArray(payload)
+      ? payload
+      : { levelInstanceId: instanceId.current, mapId: map?.map_id || null, at: Date.now(), ...payload };
     const results = runtimes.current.map(runtime => runtime.dispatch(eventId, context));
     setStatus(eventId);
+    setLastResults(results);
     return results;
   }, [map?.map_id]);
 
@@ -36,6 +40,10 @@ export default function useLevelLifecycleRuntime({ map, blueprints, actionGraphs
     status,
     lastAction,
     blueprintCount: runtimes.current.length,
+    lastLogs: lastResults.flatMap(result => result.logs || []),
+    lastLog: lastResults.flatMap(result => result.logs || []).at(-1) || '',
+    lastVariableWrites: lastResults.flatMap(result => result.variableWrites || []),
+    dispatch: emit,
     start: () => emit(LEVEL_EVENT.Started),
     pause: () => emit(LEVEL_EVENT.Paused),
     resume: () => emit(LEVEL_EVENT.Resumed),

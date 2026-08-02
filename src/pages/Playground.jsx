@@ -24,6 +24,11 @@ export default function PlaygroundPage() {
   const binding = viewMode === 'Players' ? { owner_player_id: player?.player_id || null, team_id: player?.team_id || null } : { owner_player_id: null, team_id: viewId || null };
   const view = topology && viewId ? { mode: viewMode, id: viewId } : null;
   const lifecycle = useLevelLifecycleRuntime({ map, blueprints, actionGraphs });
+  useEffect(() => {
+    const onLevelEvent = (event) => lifecycle.dispatch(event.detail?.eventId, event.detail?.payload);
+    window.addEventListener('ludots:level-event', onLevelEvent);
+    return () => window.removeEventListener('ludots:level-event', onLevelEvent);
+  }, [lifecycle.dispatch]);
   const togglePlayback = () => { if (paused) { if (lifecycle.status === 'Level.Ready' || lifecycle.status === 'Level.Ended') lifecycle.start(); else lifecycle.resume(); } else lifecycle.pause(); setPaused(value => !value); };
   const endLevel = () => { lifecycle.end('manual'); setPaused(true); };
   const chooseMap = (id) => { const next = maps.find((item) => item.id === id); const nextTopology = topologies.find((item) => item.map_id === next?.map_id); setMapId(id); setTopologyId(nextTopology?.id || ''); setViewMode('Players'); setViewId(nextTopology?.players[0]?.player_id || 0); setPlaced([]); setClearToken((token) => token + 1); };

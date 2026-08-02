@@ -25,14 +25,27 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
   };
 
   const dispatch = (eventId, payload = {}) => {
-    const result = { eventId, actions: [], variableWrites: [], errors: [] };
+    const result = { eventId, actions: [], variableWrites: [], logs: [], errors: [] };
     const walk = (nodeId, eventPayload, visited = new Set()) => {
       if (visited.has(nodeId)) { result.errors.push(`执行流存在循环：${nodeId}`); return; }
       const node = nodes.get(nodeId);
       if (!node) return;
       const nextVisited = new Set(visited).add(nodeId);
       let nextPort = 'exec_out';
-      if (node.type === 'level_execute_action') {
+      if (node.type === 'level_sequence') {
+        node.outputs
+          ?.filter(output => output.id.startsWith('then_'))
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .forEach(output => outgoing(node.id, output.id).forEach(link => walk(link.toNode, eventPayload, nextVisited)));
+        return;
+      }
+      if (node.type === 'level_branch') {
+        nextPort = Boolean(readInput(node, 'condition', eventPayload)) ? 'true' : 'false';
+      } else if (node.type === 'level_log') {
+        const value = readInput(node, 'payload', eventPayload);
+        const count = Array.isArray(value) ? ` · 实体 ${value.length}` : '';
+        result.logs.push(`${node.data?.message || 'LevelBlueprint'}${count}`);
+      } else if (node.type === 'level_execute_action') {
         const actionId = node.data?.actionId;
         const action = actions.get(actionId);
         if (!action) result.errors.push(`ActionGraph 不存在：${actionId || '(空)'}`);
