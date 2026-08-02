@@ -31,6 +31,10 @@ import LevelBlueprintEditor from './pages/LevelBlueprintEditor';
 import PerformerEditor from './pages/PerformerEditor';
 import HostAssetBindingEditor from './pages/HostAssetBindingEditor';
 import PresentationConfigEditor from './pages/PresentationConfigEditor';
+import PresentationAnimationEditor from './pages/PresentationAnimationEditor';
+import PresentationRenderAssetEditor from './pages/PresentationRenderAssetEditor';
+import PresentationHostResourceEditor from './pages/PresentationHostResourceEditor';
+import PresentationTextEditor from './pages/PresentationTextEditor';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
@@ -108,6 +112,10 @@ const AuthenticatedApp = () => {
       <Route path="/PerformerEditor" element={<LayoutWrapper currentPageName="PerformerEditor"><PerformerEditor /></LayoutWrapper>} />
       <Route path="/HostAssetBindingEditor" element={<LayoutWrapper currentPageName="HostAssetBindingEditor"><HostAssetBindingEditor /></LayoutWrapper>} />
       <Route path="/PresentationConfigEditor" element={<LayoutWrapper currentPageName="PresentationConfigEditor"><PresentationConfigEditor /></LayoutWrapper>} />
+      <Route path="/PresentationAnimationEditor" element={<LayoutWrapper currentPageName="PresentationAnimationEditor"><PresentationAnimationEditor /></LayoutWrapper>} />
+      <Route path="/PresentationRenderAssetEditor" element={<LayoutWrapper currentPageName="PresentationRenderAssetEditor"><PresentationRenderAssetEditor /></LayoutWrapper>} />
+      <Route path="/PresentationHostResourceEditor" element={<LayoutWrapper currentPageName="PresentationHostResourceEditor"><PresentationHostResourceEditor /></LayoutWrapper>} />
+      <Route path="/PresentationTextEditor" element={<LayoutWrapper currentPageName="PresentationTextEditor"><PresentationTextEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

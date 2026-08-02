@@ -6,7 +6,7 @@ import PresentationConfigDetails from '@/components/presentation/PresentationCon
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import { PRESENTATION_CONFIGS } from '@/components/presentation/presentationConfigSpecs';
 
-function ConfigWorkspace({ type }) {
+export function ConfigWorkspace({ type }) {
   const spec = PRESENTATION_CONFIGS[type] || PRESENTATION_CONFIGS.mesh;
   const refs = usePresentationRefs();
   const editor = useRecordEditor(spec.entity, spec.query, spec.blank);
