@@ -22,8 +22,7 @@ export const productMessages = {
     'page.UnifiedGraphEditor?type=function': '函数图', 'page.UnifiedGraphEditor?type=query': '实体查询图',
     'page.InputSystem': '输入与订单（规划中）', 'page.InputConfigEditor': 'Input Config', 'page.ControlPlaneEditor': 'Control Plane', 'page.GameEventEditor': '游戏事件',
     'page.InteractionEffects': '交互效果', 'page.UnlockableCommands': '可解锁命令', 'page.RequirementEditor': '需求',
-    'page.AssetLibrary': '全部资源', 'page.AssetLibrary?type=model': '模型', 'page.AssetLibrary?type=animation': '动画',
-    'page.AssetLibrary?type=audio': '音效', 'page.AssetLibrary?type=image': '图像',
+    'page.AssetLibrary': '资源库',
     'page.NewAttributeSimulator': '属性计算器', 'page.TagSimulator': '标签模拟器', 'page.History': '标签历史', 'page.DesignDoc': '设计文档'
   },
   'en-US': {
@@ -47,8 +46,7 @@ export const productMessages = {
     'page.UnifiedGraphEditor?type=function': 'Function Graph', 'page.UnifiedGraphEditor?type=query': 'Entity Query Graph',
     'page.InputSystem': 'Input & Orders (Planned)', 'page.InputConfigEditor': 'Input Config', 'page.ControlPlaneEditor': 'Control Plane', 'page.GameEventEditor': 'Game Events',
     'page.InteractionEffects': 'Interaction Effects', 'page.UnlockableCommands': 'Unlockable Commands', 'page.RequirementEditor': 'Requirements',
-    'page.AssetLibrary': 'All Assets', 'page.AssetLibrary?type=model': 'Models', 'page.AssetLibrary?type=animation': 'Animations',
-    'page.AssetLibrary?type=audio': 'Audio', 'page.AssetLibrary?type=image': 'Images',
+    'page.AssetLibrary': 'Asset Library',
     'page.NewAttributeSimulator': 'Attribute Calculator', 'page.TagSimulator': 'Tag Simulator', 'page.History': 'Tag History', 'page.DesignDoc': 'Design Docs'
   }
 };

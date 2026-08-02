@@ -1,7 +1,7 @@
 import {
   Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Gamepad2,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
-  Image as ImageIcon, Music, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon,
+  Image as ImageIcon, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon,
 } from 'lucide-react';
 
 /**
@@ -116,11 +116,7 @@ export const NAV_GROUPS = [
       { page: 'PresentationConfigEditor', search: '?type=material', label: 'Material Assets', icon: ImageIcon },
       { page: 'HostAssetBindingEditor', label: 'Host Asset Bindings', icon: LinkIcon },
       { page: 'PresentationConfigEditor', search: '?type=text', label: 'Text Tokens', icon: BookOpen },
-      { page: 'AssetLibrary', label: '全部资源', icon: Box },
-      { page: 'AssetLibrary', search: '?type=model', label: '模型', icon: Box },
-      { page: 'AssetLibrary', search: '?type=animation', label: '动画', icon: Film },
-      { page: 'AssetLibrary', search: '?type=audio', label: '音效', icon: Music },
-      { page: 'AssetLibrary', search: '?type=image', label: '图像', icon: ImageIcon },
+      { page: 'AssetLibrary', label: '资源库', icon: Box },
     ],
   },
   {
