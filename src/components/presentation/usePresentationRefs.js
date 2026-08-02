@@ -13,6 +13,9 @@ const defs = [
   ['attributes', 'Attribute', 'attribute_id', 'name'],
   ['tags', 'GameplayTag', 'full_path', 'name'],
   ['effects', 'Effect', 'effect_id'],
+  ['abilities', 'Ability', 'ability_id'],
+  ['prototypes', 'EntityPrototype', 'prototype_id', 'name'],
+  ['collections', 'EntityCollection', 'collection_key', 'label'],
 ];
 
 export default function usePresentationRefs() {

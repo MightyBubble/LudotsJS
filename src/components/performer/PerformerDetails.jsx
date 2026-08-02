@@ -48,6 +48,6 @@ export default function PerformerDetails({ draft, patch }) {
       paramDefaults={draft.paramDefaults}
       onChangeParams={paramDefaults => patch({ paramDefaults })}
     />
-    <PerformerRulesSection rules={draft.rules} eventKeys={refs.eventKeys} onChange={rules => patch({ rules })} />
+    <PerformerRulesSection rules={draft.rules} refs={refs} onChange={rules => patch({ rules })} />
   </div>;
 }

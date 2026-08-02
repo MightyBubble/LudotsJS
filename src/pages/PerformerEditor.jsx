@@ -6,12 +6,13 @@ import PerformerDetails from '@/components/performer/PerformerDetails';
 export default function PerformerEditorPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Performer', 'performers',
-    () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], bindings: [], rules: [], children: [], required_attribute_ids: [], instanced_batches: [] })
+    () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], rules: [], children: [], required_attribute_ids: [], instanced_batches: [] })
   );
 
   return (
     <RecordWorkspace
       entityName="Performer"
+      hideBrowserOnMobile
       records={records}
       columns={[
         { key: 'performer_id', label: 'Performer ID', width: 240, render: r => <span className="font-mono text-[#E2D8B3]">{r.performer_id}</span> },
