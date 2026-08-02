@@ -13,8 +13,9 @@ export default function MapConfigEditor() {
   const scope = useProjectScope();
   const [error, setError] = useState('');
   const [guideOpen, setGuideOpen] = useState(false);
-  const editor = useRecordEditor('MapConfig', 'map-configs', () => ({ map_id: `Map.${Date.now()}`, parent_id: '', label: '新地图', description: '', ...scope.newScopeFields(), visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, tags: [], metadata: {}, entities: [], boards: [{ name: 'default', spatial_type: 'Grid', width_in_macro_tiles: 64, height_in_macro_tiles: 64, grid_cell_size_cm: 100, hex_edge_length_cm: 400, chunk_size_cells: 64, loaded_chunk_capacity: 0, data_file: '', visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, navigation_enabled: false }], visual_heightmap: null, trigger_types: [], default_camera: null }));
+  const editor = useRecordEditor('MapConfig', 'map-configs', () => ({ map_id: `Map.${Date.now()}`, label: '新地图', description: '', ...scope.newScopeFields(), visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, tags: [], metadata: {}, entities: [], boards: [{ name: 'default', spatial_type: 'Grid', width_in_macro_tiles: 64, height_in_macro_tiles: 64, grid_cell_size_cm: 100, hex_edge_length_cm: 400, chunk_size_cells: 64, loaded_chunk_capacity: 0, data_file: '', visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, navigation_enabled: false }], visual_heightmap: null, trigger_types: [], default_camera: null }));
   const { data: prototypes = [] } = useQuery({ queryKey: ['entityPrototypes'], queryFn: () => base44.entities.EntityPrototype.list('name', 200), initialData: [] });
+  const { data: blueprints = [] } = useQuery({ queryKey: ['level-blueprints'], queryFn: () => base44.entities.LevelBlueprint.list('-updated_date', 200), initialData: [] });
   const records = editor.records.filter(scope.inScope);
   const save = () => { if (!editor.draft?.map_id?.trim()) return setError('Map ID 必填。'); setError(''); editor.save(); };
   return <RecordWorkspace entityName="MapConfig" records={records} hideBrowserOnMobile
@@ -24,6 +25,6 @@ export default function MapConfigEditor() {
     headerRight={<ConfigGuideButton guide={mapConfigFieldGuide} open={guideOpen} onToggle={() => setGuideOpen(open => !open)} />}
     detailAside={guideOpen ? <ConfigGuideSidebar guide={mapConfigFieldGuide} onClose={() => setGuideOpen(false)} /> : null}
     onDelete={r => window.confirm(`确定删除「${r.label || r.map_id}」吗？`) && editor.remove(r.id)} onSave={save} dirty={editor.dirty}>
-    {editor.draft && <MapConfigDetails draft={editor.draft} patch={editor.patch} prototypes={prototypes} error={error} />}
+    {editor.draft && <MapConfigDetails draft={editor.draft} patch={editor.patch} prototypes={prototypes} blueprints={blueprints.filter(scope.inScope)} error={error} />}
   </RecordWorkspace>;
 }

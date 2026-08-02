@@ -7,10 +7,6 @@
       "type": "string",
       "description": "Ludots MapConfig.Id"
     },
-    "parent_id": {
-      "type": "string",
-      "description": "Ludots MapConfig.ParentId"
-    },
     "label": {
       "type": "string",
       "description": "\u7f16\u8f91\u5668\u663e\u793a\u540d\u79f0"
@@ -243,7 +239,7 @@
       "items": {
         "type": "string"
       },
-      "description": "MapConfig.TriggerTypes\uff1b\u58f0\u660e\u5730\u56fe\u4f5c\u7528\u57df Trigger \u7c7b\u578b\u540d"
+      "description": "MapConfig.TriggerTypes\uff1b\u7531\u52fe\u9009\u7684\u5173\u5361\u84dd\u56fe\u5199\u5165\u7684 C# Trigger \u7c7b\u578b\u540d"
     },
     "default_camera": {
       "type": [

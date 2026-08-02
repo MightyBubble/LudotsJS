@@ -23,6 +23,7 @@ export const NAV_GROUPS = [
     label: '世界',
     items: [
       { page: 'MapConfigEditor', label: 'Maps', icon: MapIcon },
+      { page: 'LevelBlueprintEditor', label: '关卡蓝图', icon: BookOpen },
       { page: 'ParticipantEditor', label: 'Players & Teams', icon: Users },
       { page: 'EntityPrototypeEditor', label: 'Entity Prototypes', icon: Box },
       { page: 'EntityRelationEditor', label: 'Entity Relations', icon: LinkIcon },
