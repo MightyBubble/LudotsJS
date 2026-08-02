@@ -30,7 +30,7 @@ import PageActions from '@/components/shell/PageActions';
 import { SearchBox, ToolButton } from '@/components/shell/ui';
 import { EFFECT_BUILTIN_OPERATIONS, buildEffectBuiltinGraph } from '@/components/graph/effectBuiltinGraphs';
 import useProjectScope from '@/lib/projectScope';
-import { parseLevelBlueprintGraph, serializeLevelBlueprintGraph } from '@/lib/levelBlueprint/levelBlueprintGraphContract';
+import { defaultLevelBlueprintGraph, parseLevelBlueprintGraph, serializeLevelBlueprintGraph } from '@/lib/levelBlueprint/levelBlueprintGraphContract';
 
 // 纯函数图默认节点：入口 + 返回
 function buildFunctionDefaultNodes(returnType) {
@@ -172,7 +172,7 @@ export default function UnifiedGraphEditorPage() {
           label: data.name,
           description: data.description,
           trigger_type_name: `Ludots.LevelBlueprint.${slug}`,
-          graph_definition: serializeLevelBlueprintGraph(),
+          graph_definition: serializeLevelBlueprintGraph(...Object.values(defaultLevelBlueprintGraph())),
           ...scope.newScopeFields()
         });
       } else if (data.graph_type === 'query') { // Added else if for query type

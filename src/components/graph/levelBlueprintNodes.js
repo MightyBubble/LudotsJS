@@ -1,10 +1,11 @@
 import { Radio, Play, Download, Upload } from 'lucide-react';
+import { LEVEL_LIFECYCLE_EVENTS } from '@/lib/levelBlueprint/levelLifecycle';
 
 export const LEVEL_BLUEPRINT_NODE_TYPES = {
   level_event_listener: {
     label: '监听关卡事件', icon: Radio, category: '关卡-事件', graphTypes: ['level'],
-    configFields: [{ key: 'eventId', type: 'text', defaultValue: '' }],
-    defaultData: { eventId: '' }, inputs: [],
+    configFields: [{ key: 'eventId', type: 'select', defaultValue: 'Level.Started', options: LEVEL_LIFECYCLE_EVENTS }],
+    defaultData: { eventId: 'Level.Started' }, inputs: [],
     outputs: [{ id: 'exec', label: '触发', type: 'exec' }, { id: 'payload', label: '事件数据', type: 'object' }]
   },
   level_execute_action: {
