@@ -24,7 +24,7 @@ import ControlPlaneEditor from './pages/ControlPlaneEditor';
 import EntityCollectionEditor from './pages/EntityCollectionEditor';
 import CommandPanelEditor from './pages/CommandPanelEditor';
 import CommandPanelRuntime from './pages/CommandPanelRuntime';
-import AbilityPlayground from './pages/AbilityPlayground';
+import Playground from './pages/Playground';
 import ParticipantEditor from './pages/ParticipantEditor';
 import MapConfigEditor from './pages/MapConfigEditor';
 import LevelBlueprintEditor from './pages/LevelBlueprintEditor';
@@ -105,7 +105,7 @@ const AuthenticatedApp = () => {
       <Route path="/CommandPanelEditor" element={<LayoutWrapper currentPageName="CommandPanelEditor"><CommandPanelEditor /></LayoutWrapper>} />
       <Route path="/CommandPanelRuntime" element={<LayoutWrapper currentPageName="CommandPanelRuntime"><CommandPanelRuntime /></LayoutWrapper>} />
       <Route path="/AbilitySemanticProfileEditor" element={<LayoutWrapper currentPageName="AbilitySemanticProfileEditor"><AbilitySemanticProfileEditor /></LayoutWrapper>} />
-      <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
+      <Route path="/Playground" element={<LayoutWrapper currentPageName="Playground"><Playground /></LayoutWrapper>} />
       <Route path="/ParticipantEditor" element={<LayoutWrapper currentPageName="ParticipantEditor"><ParticipantEditor /></LayoutWrapper>} />
       <Route path="/MapConfigEditor" element={<LayoutWrapper currentPageName="MapConfigEditor"><MapConfigEditor /></LayoutWrapper>} />
       <Route path="/LevelBlueprintEditor" element={<LayoutWrapper currentPageName="LevelBlueprintEditor"><LevelBlueprintEditor /></LayoutWrapper>} />

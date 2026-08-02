@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import { boardCellGrid } from '@/lib/map/spatialScale';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-const HALF_X = 10, HALF_Z = 7;
+let HALF_X = 10, HALF_Z = 7;
 
 // 干净的 playground 场景：地面 + 模板放置 + 播放/暂停时钟。
 export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
@@ -27,7 +28,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
   );
   ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
-  scene.add(new THREE.GridHelper(HALF_X * 2, HALF_X * 2, 0x4b5563, 0x242a32));
+  let gridHelper = new THREE.GridHelper(HALF_X * 2, HALF_X * 2, 0x4b5563, 0x242a32);
+  scene.add(gridHelper);
 
   const ghostMaterial = new THREE.MeshBasicMaterial({ color: 0xcbd3dc, transparent: true, opacity: 0.35 });
   const ghost = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.8, 5, 12), ghostMaterial);
@@ -37,6 +39,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const entities = [];
+  const mapMeshes = [];
   let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0;
   const applyView = () => entities.forEach((entity) => {
     if (!view?.id) entity.mesh.visible = true;
@@ -44,6 +47,30 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       ? entity.owner_player_id === view.id
       : entity.team_id === view.id;
   });
+  const disposeMaterial = (material) => Array.isArray(material) ? material.forEach((item) => item.dispose()) : material.dispose();
+  const disposeMesh = (mesh) => { scene.remove(mesh); mesh.geometry.dispose(); disposeMaterial(mesh.material); };
+  const loadMap = (map) => {
+    const grid = boardCellGrid(map?.boards?.[0] || {});
+    HALF_X = 10;
+    HALF_Z = clamp(HALF_X * (grid.height / Math.max(grid.width, 1)), 3, 20);
+    ground.geometry.dispose();
+    ground.geometry = new THREE.PlaneGeometry(HALF_X * 2, HALF_Z * 2);
+    scene.remove(gridHelper);
+    gridHelper.geometry.dispose();
+    disposeMaterial(gridHelper.material);
+    gridHelper = new THREE.GridHelper(HALF_X * 2, Math.min(grid.width, 64), 0x4b5563, 0x242a32);
+    gridHelper.scale.z = HALF_Z / HALF_X;
+    scene.add(gridHelper);
+    mapMeshes.splice(0).forEach(disposeMesh);
+    (map?.entities || []).forEach((entity) => {
+      const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0x7f8b99, emissive: 0x1b2027, emissiveIntensity: 0.4 }));
+      const x = ((Number(entity.position?.x) + 0.5) / grid.width) * HALF_X * 2 - HALF_X;
+      const z = ((Number(entity.position?.y) + 0.5) / grid.height) * HALF_Z * 2 - HALF_Z;
+      marker.position.set(x, 0.55, z);
+      scene.add(marker);
+      mapMeshes.push(marker);
+    });
+  };
 
   const pick = (event) => {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -114,6 +141,9 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
   window.addEventListener('resize', resize);
 
   return {
+    setMap(next) {
+      loadMap(next);
+    },
     setTemplate(next) {
       template = next;
       ghost.visible = false;
@@ -143,6 +173,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       window.removeEventListener('resize', resize);
       renderer.domElement.removeEventListener('pointermove', handleMove);
       renderer.domElement.removeEventListener('click', handleClick);
+      mapMeshes.splice(0).forEach(disposeMesh);
       renderer.dispose();
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     },

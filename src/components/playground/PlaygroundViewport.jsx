@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPlaygroundScene } from '@/lib/playground/playgroundScene';
 
-export default function PlaygroundViewport({ template, binding, view, paused, clearToken, onPlace, onTick }) {
+export default function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick }) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
 
@@ -12,6 +12,7 @@ export default function PlaygroundViewport({ template, binding, view, paused, cl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => { sceneRef.current?.setMap(map || null); }, [map]);
   useEffect(() => { sceneRef.current?.setTemplate(template || null); }, [template]);
   useEffect(() => { sceneRef.current?.setBinding(binding || null); }, [binding]);
   useEffect(() => { sceneRef.current?.setView(view || null); }, [view]);

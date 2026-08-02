@@ -24,7 +24,7 @@ export const productMessages = {
     'page.InteractionEffects': '交互效果', 'page.UnlockableCommands': '可解锁命令', 'page.RequirementEditor': '需求',
     'page.AssetLibrary': '资源库', 'page.PerformerEditor': '主体', 'page.PresentationAnimationEditor': '动画',
     'page.PresentationRenderAssetEditor': '渲染资产', 'page.PresentationHostResourceEditor': '宿主资源', 'page.PresentationTextEditor': '文本',
-    'page.NewAttributeSimulator': '属性计算器', 'page.TagSimulator': '标签模拟器', 'page.History': '标签历史', 'page.DesignDoc': '设计文档'
+    'page.NewAttributeSimulator': '属性计算器', 'page.TagSimulator': '标签模拟器', 'page.Playground': 'Playground', 'page.History': '标签历史', 'page.DesignDoc': '设计文档'
   },
   'en-US': {
     'locale.label': 'Interface language', 'locale.zh': '中文', 'locale.en': 'English',
@@ -49,6 +49,6 @@ export const productMessages = {
     'page.InteractionEffects': 'Interaction Effects', 'page.UnlockableCommands': 'Unlockable Commands', 'page.RequirementEditor': 'Requirements',
     'page.AssetLibrary': 'Asset Library', 'page.PerformerEditor': 'Subjects', 'page.PresentationAnimationEditor': 'Animation',
     'page.PresentationRenderAssetEditor': 'Render Assets', 'page.PresentationHostResourceEditor': 'Host Resources', 'page.PresentationTextEditor': 'Text',
-    'page.NewAttributeSimulator': 'Attribute Calculator', 'page.TagSimulator': 'Tag Simulator', 'page.History': 'Tag History', 'page.DesignDoc': 'Design Docs'
+    'page.NewAttributeSimulator': 'Attribute Calculator', 'page.TagSimulator': 'Tag Simulator', 'page.Playground': 'Playground', 'page.History': 'Tag History', 'page.DesignDoc': 'Design Docs'
   }
 };

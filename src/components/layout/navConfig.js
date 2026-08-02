@@ -121,7 +121,7 @@ export const NAV_GROUPS = [
     items: [
       { page: 'NewAttributeSimulator', label: '属性计算器', icon: Calculator },
       { page: 'TagSimulator', label: '标签模拟器', icon: Zap },
-      { page: 'AbilityPlayground', label: 'Ability Playground', icon: Gamepad2 },
+      { page: 'Playground', label: 'Playground', icon: Gamepad2 },
       { page: 'History', label: 'Tag History', icon: Activity },
       { page: 'DesignDoc', label: '设计文档', icon: BookOpen },
     ],
