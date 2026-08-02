@@ -14,10 +14,10 @@ export function Section({ title, right, children }) {
   );
 }
 
-export function Field({ label, hint, children }) {
+export function Field({ label, hint, helpIndex, children }) {
   return (
     <div>
-      <label className="text-[11px] text-gray-400 mb-1 block">{label}</label>
+      <label className="text-[11px] text-gray-400 mb-1 flex items-center gap-1.5">{helpIndex && <span className="inline-flex h-4 min-w-4 items-center justify-center rounded bg-[#303845] px-1 text-[9px] text-[#dce2e8]">{helpIndex}</span>}{label}</label>
       {children}
       {hint && <p className="text-[10px] text-gray-600 mt-1">{hint}</p>}
     </div>
@@ -26,25 +26,25 @@ export function Field({ label, hint, children }) {
 
 const inputCls = "bg-[#0D0F14] border-[#2A2E37] text-[#e5e5e5] h-8 text-xs";
 
-export function TextField({ label, value, onChange, placeholder, hint }) {
+export function TextField({ label, value, onChange, placeholder, hint, helpIndex }) {
   return (
-    <Field label={label} hint={hint}>
+    <Field label={label} hint={hint} helpIndex={helpIndex}>
       <Input aria-label={label} value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={inputCls} />
     </Field>
   );
 }
 
-export function NumberField({ label, value, onChange, hint }) {
+export function NumberField({ label, value, onChange, hint, helpIndex }) {
   return (
-    <Field label={label} hint={hint}>
+    <Field label={label} hint={hint} helpIndex={helpIndex}>
       <Input aria-label={label} type="number" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))} className={inputCls} />
     </Field>
   );
 }
 
-export function SelectField({ label, value, options, onChange, hint }) {
+export function SelectField({ label, value, options, onChange, hint, helpIndex }) {
   return (
-    <Field label={label} hint={hint}>
+    <Field label={label} hint={hint} helpIndex={helpIndex}>
       <Select value={value ?? ''} onValueChange={onChange}>
         <SelectTrigger aria-label={label} className={inputCls}><SelectValue placeholder="未设置" /></SelectTrigger>
         <SelectContent className="bg-[#15171C] border-[#2A2E37]">
@@ -57,9 +57,9 @@ export function SelectField({ label, value, options, onChange, hint }) {
   );
 }
 
-export function ListField({ label, value = [], onChange, hint }) {
+export function ListField({ label, value = [], onChange, hint, helpIndex }) {
   return (
-    <Field label={label} hint={hint || '多个值用逗号分隔'}>
+    <Field label={label} hint={hint || '多个值用逗号分隔'} helpIndex={helpIndex}>
       <Input
         aria-label={label}
         value={(value || []).join(', ')}
@@ -70,10 +70,11 @@ export function ListField({ label, value = [], onChange, hint }) {
   );
 }
 
-export function BoolField({ label, value, onChange }) {
+export function BoolField({ label, value, onChange, helpIndex }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer">
       <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} className="accent-[#D97706]" />
+      {helpIndex && <span className="inline-flex h-4 min-w-4 items-center justify-center rounded bg-[#303845] px-1 text-[9px] text-[#dce2e8]">{helpIndex}</span>}
       <span className="text-[11px] text-gray-300">{label}</span>
     </label>
   );

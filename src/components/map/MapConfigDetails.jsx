@@ -11,10 +11,10 @@ export default function MapConfigDetails({ draft, patch, prototypes, error }) {
     {error && <p className="mb-3 text-xs text-red-300">{error}</p>}
     <Section title="基础信息">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <TextField label="Map ID" value={draft.map_id} onChange={map_id => patch({ map_id })} />
-        <TextField label="Parent ID" value={draft.parent_id} onChange={parent_id => patch({ parent_id })} />
-        <TextField label="名称" value={draft.label} onChange={label => patch({ label })} />
-        <TextField label="描述" value={draft.description} onChange={description => patch({ description })} />
+        <TextField helpIndex={1} label="Map ID" value={draft.map_id} onChange={map_id => patch({ map_id })} />
+        <TextField helpIndex={2} label="Parent ID" value={draft.parent_id} onChange={parent_id => patch({ parent_id })} />
+        <TextField helpIndex={3} label="名称" value={draft.label} onChange={label => patch({ label })} />
+        <TextField helpIndex={4} label="描述" value={draft.description} onChange={description => patch({ description })} />
       </div>
     </Section>
     <MapBoardEditor boards={draft.boards} onChange={boards => patch({ boards })} />

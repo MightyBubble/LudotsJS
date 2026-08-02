@@ -3,15 +3,13 @@ const r = (title, setup, result) => ({ title, setup, result });
 
 export const mapConfigFieldGuide = {
   title: 'Map Config',
-  description: '字段直接对应 Ludots C# MapConfig、BoardConfig、EntitySpawnData、VisualHeightmapConfig 与 VirtualCameraConfig；参与者和队伍在 Players & Teams 中按 Map ID 关联。',
+  description: '编号与编辑区字段角标一一对应。MapManager 先通过 ConfigPipeline 收集 Maps/{mapId}.json 的 Core/Mod 片段并合并，再递归处理 ParentId 继承；参与者和队伍在 Players & Teams 中按 Map ID 关联。',
   fields: [
     f('map_id / Id', '地图配置的稳定唯一标识，其他配置通过它引用地图。', '用于运行时装载、继承与参与者拓扑绑定。'),
-    f('parent_id / ParentId', '可选父地图 ID；当前地图在父配置基础上覆盖或追加内容。', '复用公共地图基线，减少重复配置。'),
+    f('parent_id / ParentId', 'C# MapConfig 的真实字段。MapManager 递归加载父地图，先取得父配置，再让子地图覆盖或追加，并检测循环继承。', '让地图进入同一套 ConfigPipeline 片段合并后，再复用父地图基线。'),
     f('label', '仅供编辑器显示的可读名称，不参与运行时判断。', '方便策划识别地图。'),
     f('description', '地图用途、规则或维护说明。', '为配置维护者提供上下文。'),
-    f('scope_type', '决定记录属于当前项目还是工作区共享资产。', '控制地图可在哪些项目中出现。'),
-    f('workspace_id / project_id', '记录所属工作区和项目，由当前作用域自动写入。', '保证资产列表只显示当前作用域数据。'),
-    f('dependencies', '字符串键值表；键是依赖槽名，值是目标配置或资源 ID。', '在装载地图前解析其外部依赖。'),
+    f('dependencies / Dependencies', 'C# MapConfig 的字符串字典。MapManager 会在 Core/Mod 片段与父子地图之间按键合并，但当前 Ludots 源码中未找到读取这些键值的运行时系统。', '目前应视为保留字段，而不是已生效的资源预加载或模块依赖。'),
     f('tags', '地图自身的分类与查询标签。', '支持玩法、环境或关卡类型筛选。'),
     f('metadata', '不进入固定 C# 字段的扩展 JSON 元数据。', '保存工具链需要的附加信息。'),
     f('visual_heightmap_asset', '地图级视觉高度图资源路径。', '为未单独覆盖资源的空间系统提供默认高度图。'),
