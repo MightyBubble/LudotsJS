@@ -1,24 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import useProjectScope from '@/lib/projectScope';
-import ParticipantConfigList from '@/components/participant/ParticipantConfigList';
-import ParticipantHeader from '@/components/participant/ParticipantHeader';
+import RecordWorkspace from '@/components/ludots/RecordWorkspace';
+import useRecordEditor from '@/components/ludots/useRecordEditor';
 import ParticipantConfigDetails from '@/components/participant/ParticipantConfigDetails';
 import { blankTopology, validateTopology } from '@/components/participant/participantModel';
 
 export default function ParticipantEditor() {
   const scope = useProjectScope();
-  const [records, setRecords] = useState([]), [prototypes, setPrototypes] = useState([]);
-  const [value, setValue] = useState(null), [saving, setSaving] = useState(false), [error, setError] = useState('');
-  useEffect(() => { Promise.all([base44.entities.ParticipantTopology.list('-updated_date', 100), base44.entities.EntityPrototype.list('name', 200)]).then(([r, p]) => { const scoped = r.filter(scope.inScope); setRecords(scoped); setPrototypes(p); setValue(scoped[0] || null); }); }, [scope.projectId]);
-  const select = (id) => { setValue(records.find((r) => r.id === id)); setError(''); };
-  const create = () => { setValue(blankTopology(scope.newScopeFields())); setError(''); };
-  const save = async () => { const message = validateTopology(value); if (message) return setError(message); setSaving(true); setError(''); const saved = value.id ? await base44.entities.ParticipantTopology.update(value.id, value) : await base44.entities.ParticipantTopology.create(value); setRecords((rs) => value.id ? rs.map((r) => r.id === saved.id ? saved : r) : [saved, ...rs]); setValue(saved); setSaving(false); };
-  const remove = async () => { if (!window.confirm('删除这份参与者拓扑配置？')) return; await base44.entities.ParticipantTopology.delete(value.id); const next = records.filter((r) => r.id !== value.id); setRecords(next); setValue(next[0] || null); };
-  return <div className="flex h-full min-h-0 bg-[#0D0F14] text-gray-200">
-    <ParticipantConfigList records={records} activeId={value?.id} onSelect={select} onCreate={create} />
-    <main className="flex-1 min-w-0 min-h-0 flex flex-col">
-      {value ? <><ParticipantHeader value={value} onChange={setValue} onSave={save} onDelete={remove} saving={saving} />{error && <p className="px-3 py-2 text-xs text-red-300 bg-red-950/30">{error}</p>}<ParticipantConfigDetails value={value} prototypes={prototypes} onChange={setValue} /></> : <div className="m-auto text-xs text-gray-600">新建一份地图参与者配置。</div>}
-    </main>
-  </div>;
+  const [error, setError] = useState('');
+  const { data: allMaps = [] } = useQuery({ queryKey: ['map-configs', scope.projectId], queryFn: () => base44.entities.MapConfig.list('-updated_date'), initialData: [] });
+  const maps = allMaps.filter(scope.inScope);
+  const editor = useRecordEditor('ParticipantTopology', 'participant-topologies', () => blankTopology(maps[0]?.map_id, scope.newScopeFields()));
+  const records = editor.records.filter(scope.inScope);
+  const map = maps.find(item => item.map_id === editor.draft?.map_id);
+  const create = () => maps.length ? editor.create() : setError('请先在 Map Config 中创建地图配置。');
+  const save = () => { const message = validateTopology(editor.draft, map); if (message) return setError(message); setError(''); editor.save(); };
+  return <RecordWorkspace entityName="ParticipantTopology" records={records} hideBrowserOnMobile
+    columns={[{ key: 'config_id', label: 'Config ID', width: 240 }, { key: 'label', label: '名称' }, { key: 'map_id', label: 'Map' }, { key: 'teams', label: 'Teams', render: r => r.teams?.length || 0 }, { key: 'players', label: 'Players', render: r => r.players?.length || 0 }]}
+    toItem={r => ({ id: r.id, name: r.label || r.config_id, subtitle: `${r.map_id} · ${r.players?.length || 0} Players` })}
+    selectedId={editor.selectedId} onSelect={r => { setError(''); editor.setSelectedId(r.id); }} onCreate={create}
+    onDelete={r => window.confirm(`确定删除「${r.label || r.config_id}」吗？`) && editor.remove(r.id)} onSave={save} dirty={editor.dirty}
+    emptyHint={maps.length ? '从左侧选择或新建参与者配置' : '请先在 Map Config 中创建地图配置'}>
+    {editor.draft && <ParticipantConfigDetails value={editor.draft} maps={maps} map={map} onChange={editor.patch} error={error} />}
+  </RecordWorkspace>;
 }

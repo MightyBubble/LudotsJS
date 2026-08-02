@@ -1,7 +1,7 @@
 import {
   Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Gamepad2,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
-  Image as ImageIcon, Music, Film, FolderKanban, Users, Activity, Search, ListTree,
+  Image as ImageIcon, Music, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon,
 } from 'lucide-react';
 
 /**
@@ -22,6 +22,7 @@ export const NAV_GROUPS = [
     key: 'participants',
     label: '参与者',
     items: [
+      { page: 'MapConfigEditor', label: 'Map Config', icon: MapIcon },
       { page: 'ParticipantEditor', label: 'Players & Teams', icon: Users },
     ],
   },

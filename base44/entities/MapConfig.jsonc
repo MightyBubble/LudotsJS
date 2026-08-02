@@ -1,0 +1,70 @@
+{
+  "name": "MapConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "map_id": {
+      "type": "string",
+      "description": "\u5bf9\u5e94 Ludots MapConfig.Id"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u5730\u56fe\u8bf4\u660e"
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": [
+        "project",
+        "workspace"
+      ],
+      "default": "project"
+    },
+    "workspace_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "entities": {
+      "type": "array",
+      "description": "MapConfig.Entities\uff1binstance_id \u662f\u56fe\u5185\u552f\u4e00\u4e14\u7a33\u5b9a\u7684\u5b9e\u4f53\u7ed1\u5b9a\u952e",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "instance_id": {
+            "type": "string"
+          },
+          "prototype_id": {
+            "type": "string",
+            "description": "\u5bf9\u5e94 EntitySpawnData.Template"
+          },
+          "spatial": {
+            "type": "boolean",
+            "default": false,
+            "description": "\u662f\u5426\u5e26\u7a7a\u95f4\u7ec4\u4ef6"
+          }
+        },
+        "required": [
+          "instance_id",
+          "prototype_id",
+          "spatial"
+        ]
+      }
+    }
+  },
+  "required": [
+    "map_id",
+    "entities"
+  ]
+}
