@@ -39,12 +39,6 @@
         "null"
       ]
     },
-    "dependencies": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
     "visual_heightmap_asset": {
       "type": "string"
     },
@@ -302,7 +296,6 @@
   },
   "required": [
     "map_id",
-    "dependencies",
     "structure_aware_grounding",
     "structure_aware_navigation",
     "tags",

@@ -9,7 +9,6 @@ export const mapConfigFieldGuide = {
     f('parent_id / ParentId', 'C# MapConfig 的真实字段。MapManager 递归加载父地图，先取得父配置，再让子地图覆盖或追加，并检测循环继承。', '让地图进入同一套 ConfigPipeline 片段合并后，再复用父地图基线。'),
     f('label', '仅供编辑器显示的可读名称，不参与运行时判断。', '方便策划识别地图。'),
     f('description', '地图用途、规则或维护说明。', '为配置维护者提供上下文。'),
-    f('dependencies / Dependencies', 'C# MapConfig 的字符串字典。MapManager 会在 Core/Mod 片段与父子地图之间按键合并，但当前 Ludots 源码中未找到读取这些键值的运行时系统。', '目前应视为保留字段，而不是已生效的资源预加载或模块依赖。'),
     f('tags', '地图自身的分类与查询标签。', '支持玩法、环境或关卡类型筛选。'),
     f('metadata', '不进入固定 C# 字段的扩展 JSON 元数据。', '保存工具链需要的附加信息。'),
     f('visual_heightmap_asset', '地图级视觉高度图资源路径。', '为未单独覆盖资源的空间系统提供默认高度图。'),
