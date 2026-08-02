@@ -31,16 +31,13 @@ export default function PerformerDetails({ draft, patch }) {
         <VectorField label="defaultColor (RGBA)" length={4} value={draft.default_color} onChange={default_color => patch({ default_color })} />
         <VectorField label="positionOffset (XYZ)" length={3} value={draft.position_offset} onChange={position_offset => patch({ position_offset })} />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <TextField label="worldTextMode" value={draft.world_text_mode} onChange={world_text_mode => patch({ world_text_mode })} />
-        <TextField label="visibility.inline" hint="None / ..." value={draft.visibility_inline} onChange={visibility_inline => patch({ visibility_inline })} />
-        <NumberField label="visibility.graphProgramId" value={draft.visibility_graph_program_id} onChange={visibility_graph_program_id => patch({ visibility_graph_program_id })} />
         <div className="pt-5"><BoolField label="alphaFadeOverLifetime" value={Boolean(draft.alpha_fade_over_lifetime)} onChange={alpha_fade_over_lifetime => patch({ alpha_fade_over_lifetime })} /></div>
       </div>
     </Section>
 
     <Section title="C# Runtime 扩展块">
-      <ReferenceSelect label="Required Attribute" value={(draft.required_attribute_ids || [])[0]} options={refs.attributes} onChange={id => patch({ required_attribute_ids: id ? [id] : [] })} />
       <JsonValueField label="Instanced Batches" value={draft.instanced_batches} onChange={instanced_batches => patch({ instanced_batches })} />
       <JsonValueField label="Surface" value={draft.surface} onChange={surface => patch({ surface })} />
     </Section>
