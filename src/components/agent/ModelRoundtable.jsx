@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import { base44 } from '@/api/base44Client';
 import { Loader2, Send } from 'lucide-react';
 import { AGENT_MODELS, modelLabel } from './agentModels';
+import { runMiniAgent } from '@/lib/agentkit/miniAgent';
+import AgentThreadSteps from './AgentThreadSteps';
 
 export default function ModelRoundtable() {
   const [selected, setSelected] = useState(['gpt_5_4', 'claude_sonnet_4_6']);
@@ -26,11 +28,19 @@ export default function ModelRoundtable() {
         const history = log
           .map((m) => (m.role === 'user' ? `【用户】${m.content}` : `【${modelLabel(m.model)}】${m.content}`))
           .join('\n\n');
-        const content = await base44.integrations.Core.InvokeLLM({
+        log = [...log, { model, role: 'assistant', content: '', round: r + 1, steps: [] }];
+        const idx = log.length - 1;
+        setTranscript(log);
+        const { answer, steps } = await runMiniAgent({
           model,
-          prompt: `你正在参与一场多模型交叉讨论，你的身份是「${modelLabel(model)}」。请用中文，简洁（200 字内）地给出你的观点：可以补充、也可以明确反驳其他模型的说法，并说明理由。\n\n讨论记录：\n${history}`,
+          role: modelLabel(model),
+          task: `请针对以下讨论表达你的观点，可补充或明确反驳其他模型。\n\n讨论记录：\n${history}`,
+          onStep: (step) => {
+            log = log.map((m, i) => (i === idx ? { ...m, steps: [...m.steps, step] } : m));
+            setTranscript(log);
+          },
         });
-        log = [...log, { model, role: 'assistant', content: typeof content === 'string' ? content : JSON.stringify(content), round: r + 1 }];
+        log = log.map((m, i) => (i === idx ? { ...m, content: answer, steps } : m));
         setTranscript(log);
       }
     }
@@ -74,6 +84,7 @@ export default function ModelRoundtable() {
             <div className="text-[10px] text-gray-500 mb-1">
               {m.role === 'user' ? '你' : `${modelLabel(m.model)} · 第 ${m.round} 轮`}
             </div>
+            {m.role !== 'user' && <AgentThreadSteps steps={m.steps} />}
             {m.role === 'user'
               ? <p className="whitespace-pre-wrap">{m.content}</p>
               : <ReactMarkdown className="prose prose-invert prose-sm max-w-none text-xs">{m.content}</ReactMarkdown>}
