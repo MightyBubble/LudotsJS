@@ -394,31 +394,6 @@
         ]
       }
     },
-    "bindings": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "paramKey": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "attributeId": {
-            "type": "string"
-          },
-          "constantValue": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "paramKey",
-          "source"
-        ]
-      }
-    },
     "rules": {
       "type": "array",
       "items": {

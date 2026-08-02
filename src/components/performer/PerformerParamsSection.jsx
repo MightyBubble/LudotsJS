@@ -3,13 +3,11 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, SelectField } from '@/components/ludots/ui';
 import VectorField from './VectorField';
-import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 
 const LANES = ['Float', 'Int', 'Vector'];
 
-export default function PerformerParamsSection({ paramDefaults = [], bindings = [], attributes = [], onChangeParams, onChangeBindings }) {
+export default function PerformerParamsSection({ paramDefaults = [], onChangeParams }) {
   const patchParam = (i, next) => onChangeParams(paramDefaults.map((p, idx) => idx === i ? { ...p, ...next } : p));
-  const patchBinding = (i, next) => onChangeBindings(bindings.map((b, idx) => idx === i ? { ...b, ...next } : b));
 
   return <>
     <Section title="Param Defaults" right={
@@ -25,19 +23,6 @@ export default function PerformerParamsSection({ paramDefaults = [], bindings = 
             ? <NumberField label="intValue" value={p.intValue} onChange={intValue => patchParam(i, { intValue })} />
             : <NumberField label="floatValue" value={p.floatValue} onChange={floatValue => patchParam(i, { floatValue })} />}
         <Button size="sm" variant="ghost" onClick={() => onChangeParams(paramDefaults.filter((_, idx) => idx !== i))} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button>
-      </div>)}
-    </Section>
-
-    <Section title="Param Bindings" right={
-      <Button size="sm" onClick={() => onChangeBindings([...bindings, { paramKey: '', source: 'constant', constantValue: 0 }])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加绑定</Button>
-    }>
-      <p className="text-xs text-gray-500">参数的数据来源，例如 attributeRatio 取属性比值、constant 取固定值。</p>
-      {bindings.map((b, i) => <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_160px_1fr_140px_auto] gap-3 items-end rounded border border-[#2A2E37] bg-[#0D0F14] p-3">
-        <TextField label="Param Key" value={b.paramKey} onChange={paramKey => patchBinding(i, { paramKey })} />
-        <TextField label="Source" hint="attributeRatio / constant" value={b.source} onChange={source => patchBinding(i, { source })} />
-        <ReferenceSelect label="Attribute Id" value={b.attributeId} options={attributes} onChange={attributeId => patchBinding(i, { attributeId })} />
-        <NumberField label="Constant Value" value={b.constantValue} onChange={constantValue => patchBinding(i, { constantValue })} />
-        <Button size="sm" variant="ghost" onClick={() => onChangeBindings(bindings.filter((_, idx) => idx !== i))} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button>
       </div>)}
     </Section>
   </>;

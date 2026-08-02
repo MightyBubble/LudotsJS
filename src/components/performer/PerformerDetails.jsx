@@ -46,10 +46,7 @@ export default function PerformerDetails({ draft, patch }) {
     <PerformerBehaviorList behaviors={draft.behaviors} refs={refs} onChange={behaviors => patch({ behaviors })} />
     <PerformerParamsSection
       paramDefaults={draft.paramDefaults}
-      bindings={draft.bindings}
-      attributes={refs.attributes}
       onChangeParams={paramDefaults => patch({ paramDefaults })}
-      onChangeBindings={bindings => patch({ bindings })}
     />
     <PerformerRulesSection rules={draft.rules} eventKeys={refs.eventKeys} onChange={rules => patch({ rules })} />
   </div>;
