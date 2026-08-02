@@ -19,6 +19,13 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    key: 'participants',
+    label: '参与者',
+    items: [
+      { page: 'ParticipantEditor', label: 'Players & Teams', icon: Users },
+    ],
+  },
+  {
     key: 'world',
     label: '世界模型',
     items: [
@@ -123,10 +130,12 @@ export const ALL_MODULE_KEYS = NAV_GROUPS.map(g => g.key);
 
 /** 按项目的 enabled_modules / navigation_profile 过滤与排序顶层模块 */
 export function getVisibleNavGroups(project) {
-  const enabled = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
-  const order = project?.navigation_profile?.tab_order?.length
+  const configured = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
+  const enabled = configured.includes('participants') ? configured : [...configured, 'participants'];
+  const configuredOrder = project?.navigation_profile?.tab_order?.length
     ? project.navigation_profile.tab_order
     : enabled;
+  const order = configuredOrder.includes('participants') ? configuredOrder : [...configuredOrder.slice(0, 1), 'participants', ...configuredOrder.slice(1)];
   const labels = project?.navigation_profile?.tab_labels || {};
   return order
     .map(key => NAV_GROUPS.find(g => g.key === key))

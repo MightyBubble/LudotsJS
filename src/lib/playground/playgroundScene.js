@@ -37,7 +37,13 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const entities = [];
-  let template = null, paused = false, disposed = false, elapsed = 0;
+  let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0;
+  const applyView = () => entities.forEach((entity) => {
+    if (!view?.id) entity.mesh.visible = true;
+    else entity.mesh.visible = view.mode === 'Players'
+      ? entity.owner_player_id === view.id
+      : entity.team_id === view.id;
+  });
 
   const pick = (event) => {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -73,11 +79,14 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       id: `${template.prototype_id || 'entity'}-${entities.length + 1}`,
       prototype_id: template.prototype_id,
       name: template.name,
+      owner_player_id: binding?.owner_player_id || null,
+      team_id: binding?.team_id || null,
       position: { x: Number(point.x.toFixed(2)), z: Number(point.z.toFixed(2)) },
       mesh,
     };
     entities.push(entity);
-    onPlace?.({ id: entity.id, prototype_id: entity.prototype_id, name: entity.name, position: entity.position });
+    applyView();
+    onPlace?.({ id: entity.id, prototype_id: entity.prototype_id, name: entity.name, owner_player_id: entity.owner_player_id, team_id: entity.team_id, position: entity.position });
   };
 
   renderer.domElement.addEventListener('pointermove', handleMove);
@@ -90,9 +99,6 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     const dt = Math.min(clock.getDelta(), 0.05);
     if (!paused) {
       elapsed += dt;
-      entities.forEach((e, i) => {
-        e.mesh.position.y = 0.85 + Math.sin(elapsed * 2 + i) * 0.08;
-      });
       onTick?.(elapsed);
     }
     renderer.render(scene, camera);
@@ -114,6 +120,13 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     },
     setPaused(next) {
       paused = next;
+    },
+    setBinding(next) {
+      binding = next;
+    },
+    setView(next) {
+      view = next;
+      applyView();
     },
     clear() {
       entities.forEach((e) => {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Play, Pause, Trash2 } from 'lucide-react';
+import ParticipantViewSelector from './ParticipantViewSelector';
 
-export default function PlaygroundToolbar({ paused, onToggle, onClear, count, elapsed, templateName }) {
+export default function PlaygroundToolbar({ paused, onToggle, onClear, count, elapsed, templateName, participantView }) {
   return (
     <div className="h-11 shrink-0 border-b border-[#2A2E37] bg-[#15171C] flex items-center gap-2 px-3">
       <button
@@ -17,6 +18,7 @@ export default function PlaygroundToolbar({ paused, onToggle, onClear, count, el
       >
         <Trash2 className="w-3.5 h-3.5" />清空
       </button>
+      <ParticipantViewSelector {...participantView} />
       <span className="ml-auto text-[10px] text-gray-500">
         {templateName ? `待放置：${templateName}` : '未选择模板'} · 实体 {count} · 时间 {elapsed.toFixed(1)}s
       </span>

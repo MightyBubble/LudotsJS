@@ -1,0 +1,230 @@
+{
+  "name": "ParticipantTopology",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "config_id": {
+      "type": "string",
+      "description": "\u53c2\u4e0e\u8005\u62d3\u6251\u914d\u7f6e\u552f\u4e00\u6807\u8bc6"
+    },
+    "label": {
+      "type": "string",
+      "description": "\u663e\u793a\u540d\u79f0"
+    },
+    "map_id": {
+      "type": "string",
+      "description": "\u5bf9\u5e94 Ludots MapConfig.Id"
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": [
+        "project",
+        "workspace"
+      ],
+      "default": "project"
+    },
+    "workspace_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "entities": {
+      "type": "array",
+      "description": "MapConfig.Entities \u4e2d\u53ef\u88ab participant binding \u5f15\u7528\u7684 map-authored entity\uff1binstance_id \u662f\u7a33\u5b9a\u4e14\u56fe\u5185\u552f\u4e00\u7684\u7ed1\u5b9a\u952e",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "instance_id": {
+            "type": "string"
+          },
+          "prototype_id": {
+            "type": "string",
+            "description": "\u5bf9\u5e94 EntitySpawnData.Template"
+          },
+          "spatial": {
+            "type": "boolean",
+            "default": false,
+            "description": "\u662f\u5426\u662f\u5e26\u7a7a\u95f4\u7ec4\u4ef6\u7684\u5316\u8eab\uff1bfalse \u8868\u793a logical representative"
+          }
+        },
+        "required": [
+          "instance_id",
+          "prototype_id",
+          "spatial"
+        ]
+      }
+    },
+    "teams": {
+      "type": "array",
+      "description": "MapConfig.Teams",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "team_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "representative_instance_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "team_id",
+          "representative_instance_id"
+        ]
+      }
+    },
+    "players": {
+      "type": "array",
+      "description": "MapConfig.Players\uff1brepresentative entity \u662f\u73a9\u5bb6\u8eab\u4efd\u771f\u76f8\uff0c\u4e5f\u53ef\u4f5c\u4e3a\u7a7a\u95f4\u5316\u8eab",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "player_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "team_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "representative_instance_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "player_id",
+          "team_id",
+          "representative_instance_id"
+        ]
+      }
+    },
+    "participant_relationships": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "team_a": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "team_b": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "type_id": {
+                "type": "string"
+              },
+              "attitude": {
+                "type": "string"
+              },
+              "symmetric": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "team_a",
+              "team_b",
+              "type_id",
+              "attitude",
+              "symmetric"
+            ]
+          }
+        },
+        "players": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "player_a": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "player_b": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "type_id": {
+                "type": "string"
+              },
+              "symmetric": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "player_a",
+              "player_b",
+              "type_id",
+              "symmetric"
+            ]
+          }
+        },
+        "player_teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "player_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "team_id": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "type_id": {
+                "type": "string"
+              },
+              "attitude": {
+                "type": "string"
+              },
+              "symmetric": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "player_id",
+              "team_id",
+              "type_id",
+              "attitude",
+              "symmetric"
+            ]
+          }
+        }
+      },
+      "required": [
+        "teams",
+        "players",
+        "player_teams"
+      ]
+    }
+  },
+  "required": [
+    "config_id",
+    "map_id",
+    "entities",
+    "teams",
+    "players",
+    "participant_relationships"
+  ]
+}

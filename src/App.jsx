@@ -25,6 +25,7 @@ import EntityCollectionEditor from './pages/EntityCollectionEditor';
 import CommandPanelEditor from './pages/CommandPanelEditor';
 import CommandPanelRuntime from './pages/CommandPanelRuntime';
 import AbilityPlayground from './pages/AbilityPlayground';
+import ParticipantEditor from './pages/ParticipantEditor';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
@@ -96,6 +97,7 @@ const AuthenticatedApp = () => {
       <Route path="/CommandPanelRuntime" element={<LayoutWrapper currentPageName="CommandPanelRuntime"><CommandPanelRuntime /></LayoutWrapper>} />
       <Route path="/AbilitySemanticProfileEditor" element={<LayoutWrapper currentPageName="AbilitySemanticProfileEditor"><AbilitySemanticProfileEditor /></LayoutWrapper>} />
       <Route path="/AbilityPlayground" element={<LayoutWrapper currentPageName="AbilityPlayground"><AbilityPlayground /></LayoutWrapper>} />
+      <Route path="/ParticipantEditor" element={<LayoutWrapper currentPageName="ParticipantEditor"><ParticipantEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
