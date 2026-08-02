@@ -21,7 +21,8 @@ const RFNodeWrapper = ({ data, selected }) => {
     connectedInputPorts,
     onUpdateData,
     onUpdateNode,
-    onDelete
+    onDelete,
+    nodeFieldOptions,
   } = data;
   const Comp = NodeComponent || Node;
   const noop = () => {};
@@ -39,6 +40,7 @@ const RFNodeWrapper = ({ data, selected }) => {
       onSelect={noop}
       onStartConnection={noop}
       onEndConnection={noop}
+      nodeFieldOptions={nodeFieldOptions}
     />
   );
 };
@@ -87,7 +89,8 @@ function GraphCanvasInner({
   onSelectConnection,
   onPaneContextMenu,
   NodeComponent,
-  variableNodeTypes = { read: 'blackboard_get', write: 'blackboard_set' }
+  variableNodeTypes = { read: 'blackboard_get', write: 'blackboard_set' },
+  nodeFieldOptions = {},
 }) {
   const { screenToFlowPosition } = useReactFlow();
   const [rfNodes, setRfNodes] = useState([]);
@@ -124,12 +127,13 @@ function GraphCanvasInner({
             connectedInputPorts,
             onUpdateData: onUpdateNodeData,
             onUpdateNode,
-            onDelete: onDeleteNode
+            onDelete: onDeleteNode,
+            nodeFieldOptions,
           }
         };
       });
     });
-  }, [nodes, NodeComponent, connectedInputPorts, onUpdateNodeData, onUpdateNode, onDeleteNode]);
+  }, [nodes, NodeComponent, connectedInputPorts, onUpdateNodeData, onUpdateNode, onDeleteNode, nodeFieldOptions]);
 
   useEffect(() => {
     setRfEdges(prev => {

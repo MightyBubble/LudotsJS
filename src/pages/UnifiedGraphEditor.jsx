@@ -113,6 +113,18 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
+  const { data: gameEvents = [] } = useQuery({
+    queryKey: ['gameEvents'],
+    queryFn: () => base44.entities.GameEvent.list(),
+    initialData: [],
+  });
+
+  const levelNodeOptions = useMemo(() => ({
+    levelVariables: Object.entries(blackboard).map(([key, spec]) => ({ value: key, label: `${key} · ${spec.type || 'any'}` })),
+    gameEvents: gameEvents.map(event => ({ value: event.event_id, label: `${event.name} · ${event.event_id}` })),
+    actionGraphs: actionGraphs.map(action => ({ value: action.action_id, label: `${action.name || action.action_id} · ${action.action_id}` })),
+  }), [blackboard, gameEvents, actionGraphs]);
+
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
       ...g,
@@ -505,6 +517,7 @@ export default function UnifiedGraphEditorPage() {
           onSelectConnection={(id) => setSelectedConnectionId(id)}
           onPaneContextMenu={setNodeMenu}
           variableNodeTypes={currentGraph.graph_type === 'level' ? { read: 'level_variable_read', write: 'level_variable_write' } : undefined}
+          nodeFieldOptions={currentGraph.graph_type === 'level' ? levelNodeOptions : undefined}
           />
 
         {nodeMenu && (

@@ -10,6 +10,9 @@ export const LEVEL_LIFECYCLE_EVENTS = [
   { value: 'Level.Unloaded', label: 'Unloaded · 卸载完成' },
 ];
 
+export const levelBuiltinEventNodeType = (eventId) =>
+  `level_builtin_event_${eventId.slice('Level.'.length).replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase()}`;
+
 export const LEVEL_EVENT = Object.fromEntries(
   LEVEL_LIFECYCLE_EVENTS.map(({ value }) => [value.slice('Level.'.length), value])
 );

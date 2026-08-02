@@ -85,7 +85,8 @@ export default function Node({
   onDelete,
   onSelect,
   onStartConnection,
-  onEndConnection 
+  onEndConnection,
+  nodeFieldOptions,
 }) {
   const accentColor = nodeAccentColors[node?.type] || nodeAccentColors.number;
   const isLocked = node?.locked || (node?.id && node.id.startsWith('output-'));
@@ -317,7 +318,7 @@ export default function Node({
           </div>
         )}
         <div className="nodrag">
-          <RuntimeNodeFields fields={nodeConfig?.configFields} data={node.data || {}} onChange={data => onUpdateData(node.id, data)} locale={locale} />
+          <RuntimeNodeFields fields={nodeConfig?.configFields} data={node.data || {}} onChange={data => onUpdateData(node.id, data)} locale={locale} optionSets={nodeFieldOptions} />
           {renderInlineInputs()}
         </div>
 

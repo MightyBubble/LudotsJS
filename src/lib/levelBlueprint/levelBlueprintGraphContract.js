@@ -1,4 +1,4 @@
-import { LEVEL_LIFECYCLE_EVENTS } from './levelLifecycle';
+import { LEVEL_LIFECYCLE_EVENTS, levelBuiltinEventNodeType } from './levelLifecycle';
 
 export const LEVEL_BLUEPRINT_GRAPH_DOMAIN = 'level_blueprint';
 export const LEVEL_BLUEPRINT_GRAPH_SCHEMA_VERSION = 1;
@@ -11,7 +11,7 @@ export function defaultLevelBlueprintGraph() {
   return {
     nodes: LEVEL_LIFECYCLE_EVENTS.map((event, index) => ({
       id: `lifecycle-${event.value.slice('Level.'.length).toLowerCase()}`,
-      type: 'level_event_listener',
+      type: levelBuiltinEventNodeType(event.value),
       position: { x: 120 + (index % 3) * 300, y: 100 + Math.floor(index / 3) * 180 },
       data: { eventId: event.value },
       inputs: [],

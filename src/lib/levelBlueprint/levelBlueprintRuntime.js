@@ -7,11 +7,14 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
   const variables = Object.fromEntries(Object.entries(graph.variables).map(([key, spec]) => [key, { ...spec }]));
   const outgoing = (nodeId, port) => graph.connections.filter(link => link.fromNode === nodeId && link.fromPort === port);
   const incoming = (nodeId, port) => graph.connections.find(link => link.toNode === nodeId && link.toPort === port);
+  const isEventListener = (node) => node?.type === 'level_event_listener'
+    || node?.type === 'level_custom_event_listener'
+    || node?.type?.startsWith('level_builtin_event_');
 
   const readOutput = (nodeId, port, payload) => {
     const node = nodes.get(nodeId);
     if (!node) return undefined;
-    if (node.type === 'level_event_listener' && port === 'payload') return payload;
+    if (isEventListener(node) && port === 'payload') return payload;
     if (node.type === 'level_variable_read' && port === 'value') return variables[node.data?.variableKey]?.value;
     return node.data?.[port];
   };
@@ -45,12 +48,12 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
           variables[key] = { ...variables[key], value: readInput(node, 'value', eventPayload) };
           result.variableWrites.push(key);
         }
-      } else if (node.type === 'level_event_listener') nextPort = 'exec';
+      } else if (isEventListener(node)) nextPort = 'exec';
       outgoing(node.id, nextPort).forEach(link => walk(link.toNode, eventPayload, nextVisited));
     };
 
     graph.nodes
-      .filter(node => node.type === 'level_event_listener' && node.data?.eventId === eventId)
+      .filter(node => isEventListener(node) && node.data?.eventId === eventId)
       .forEach(listener => walk(listener.id, payload));
     return { ...result, variables: Object.fromEntries(Object.entries(variables).map(([key, spec]) => [key, spec.value])) };
   };

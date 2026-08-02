@@ -791,10 +791,10 @@ export const NODE_TYPES = {
 // 动作图额外可用所有纯函数图节点（纯求值，无副作用）
 export function getAvailableNodes(graphType) {
   return Object.entries(NODE_TYPES)
-    .filter(([_, config]) =>
+    .filter(([_, config]) => !config.hidden && (
       config.graphTypes.includes(graphType) ||
       (graphType === 'action' && config.graphTypes.includes('function'))
-    )
+    ))
     .map(([type, config]) => ({ type, ...config }));
 }
 
