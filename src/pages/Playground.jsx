@@ -10,7 +10,7 @@ export default function PlaygroundPage() {
   const [templates, setTemplates] = useState([]), [topologies, setTopologies] = useState([]), [maps, setMaps] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
-  const [paused, setPaused] = useState(false), [clearToken, setClearToken] = useState(0);
+  const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
   const [placed, setPlaced] = useState([]), [elapsed, setElapsed] = useState(0);
 
   useEffect(() => { Promise.all([base44.entities.EntityPrototype.list('name', 200), base44.entities.ParticipantTopology.list('-updated_date', 100), base44.entities.MapConfig.list('-updated_date', 100)]).then(([p, t, m]) => { const scopedMaps = m.filter(scope.inScope); setTemplates(p); setTopologies(t.filter(scope.inScope)); setMaps(scopedMaps); setMapId(scopedMaps[0]?.id || ''); }); }, [scope.projectId]);

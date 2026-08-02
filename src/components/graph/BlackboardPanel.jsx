@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-export default function BlackboardPanel({ blackboard, onChange }) {
+export default function BlackboardPanel({ blackboard, onChange, terminology = '黑板变量' }) {
   const [isAdding, setIsAdding] = useState(false);
   const [newVar, setNewVar] = useState({ name: '', value: 0, type: 'number', public: true });
 
@@ -148,13 +148,13 @@ export default function BlackboardPanel({ blackboard, onChange }) {
       <div className="flex items-center justify-end px-2 pt-2">
         <Dialog open={isAdding} onOpenChange={setIsAdding}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-6 px-2 bg-[#D97706] hover:bg-[#1177bb] text-white">
+            <Button aria-label={`添加${terminology}`} size="sm" className="h-6 px-2 bg-[#D97706] hover:bg-[#1177bb] text-white">
               <Plus className="w-3 h-3" />
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#15171C] border-[#2A2E37] text-white">
             <DialogHeader>
-              <DialogTitle className="text-white">添加黑板变量</DialogTitle>
+              <DialogTitle className="text-white">添加{terminology}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>

@@ -20,6 +20,8 @@ export function graphTypeLabel(graph) {
       return 'Entity Query';
     case 'ActionGraph':
       return '动作图';
+    case 'LevelBlueprint':
+      return '关卡蓝图';
     default:
       return `纯函数图 (${graph.return_type || 'void'})`;
   }

@@ -29,6 +29,8 @@ import { useLocation } from 'react-router-dom';
 import PageActions from '@/components/shell/PageActions';
 import { SearchBox, ToolButton } from '@/components/shell/ui';
 import { EFFECT_BUILTIN_OPERATIONS, buildEffectBuiltinGraph } from '@/components/graph/effectBuiltinGraphs';
+import useProjectScope from '@/lib/projectScope';
+import { parseLevelBlueprintGraph, serializeLevelBlueprintGraph } from '@/lib/levelBlueprint/levelBlueprintGraphContract';
 
 // 纯函数图默认节点：入口 + 返回
 function buildFunctionDefaultNodes(returnType) {
@@ -55,6 +57,7 @@ function buildFunctionDefaultNodes(returnType) {
 }
 
 export default function UnifiedGraphEditorPage() {
+  const scope = useProjectScope();
   const [selectedGraph, setSelectedGraph] = useState(null);
   const [currentGraph, setCurrentGraph] = useState(null);
   const [nodes, setNodes] = useState([]);
@@ -104,6 +107,12 @@ export default function UnifiedGraphEditorPage() {
     initialData: [],
   });
 
+  const { data: levelBlueprints = [] } = useQuery({
+    queryKey: ['levelBlueprints'],
+    queryFn: () => base44.entities.LevelBlueprint.list(),
+    initialData: [],
+  });
+
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
       ...g,
@@ -115,12 +124,13 @@ export default function UnifiedGraphEditorPage() {
       ...dataGraphEntities,
       ...queryGraphs.map(g => ({ ...g, name: g.query_name, graph_type: 'query', entity_type: 'EntityQuery' })),
       ...functionGraphs.map(g => ({ ...g, graph_type: 'function', entity_type: 'FunctionGraph' })),
-      ...actionGraphs.map(g => ({ ...g, graph_type: 'action', entity_type: 'ActionGraph' }))
+      ...actionGraphs.map(g => ({ ...g, graph_type: 'action', entity_type: 'ActionGraph' })),
+      ...levelBlueprints.filter(scope.inScope).map(g => ({ ...g, name: g.label || g.blueprint_id, graph_type: 'level', entity_type: 'LevelBlueprint' }))
     ];
-  }, [dataGraphs, queryGraphs, functionGraphs, actionGraphs]);
+  }, [dataGraphs, queryGraphs, functionGraphs, actionGraphs, levelBlueprints, scope.projectId]);
 
   const invalidateGraphs = useCallback(() => {
-    ['dataGraphs', 'entityQueries', 'functionGraphs', 'actionGraphs'].forEach(key =>
+    ['dataGraphs', 'entityQueries', 'functionGraphs', 'actionGraphs', 'levelBlueprints'].forEach(key =>
       queryClient.invalidateQueries({ queryKey: [key] })
     );
   }, [queryClient]);
@@ -155,6 +165,16 @@ export default function UnifiedGraphEditorPage() {
             blackboard: {}
           })
         });
+      } else if (data.graph_type === 'level') {
+        const slug = data.name.trim().replace(/\s+/g, '_');
+        return base44.entities.LevelBlueprint.create({
+          blueprint_id: `Level.${slug}`,
+          label: data.name,
+          description: data.description,
+          trigger_type_name: `Ludots.LevelBlueprint.${slug}`,
+          graph_definition: serializeLevelBlueprintGraph(),
+          ...scope.newScopeFields()
+        });
       } else if (data.graph_type === 'query') { // Added else if for query type
         return base44.entities.EntityQuery.create({
           query_name: data.name,
@@ -183,7 +203,8 @@ export default function UnifiedGraphEditorPage() {
       setNewGraph({ name: '', description: '', graph_type: 'data', usage: 'general', return_type: 'number' });
       const entityType = variables.graph_type === 'data' ? 'DataGraph'
         : variables.graph_type === 'query' ? 'EntityQuery'
-        : variables.graph_type === 'action' ? 'ActionGraph' : 'FunctionGraph';
+        : variables.graph_type === 'action' ? 'ActionGraph'
+        : variables.graph_type === 'level' ? 'LevelBlueprint' : 'FunctionGraph';
       openGraph({ ...graph, graph_type: variables.graph_type, entity_type: entityType });
     },
   });
@@ -196,6 +217,8 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.EntityQuery.update(id, data);
       } else if (entity_type === 'ActionGraph') {
         return base44.entities.ActionGraph.update(id, data);
+      } else if (entity_type === 'LevelBlueprint') {
+        return base44.entities.LevelBlueprint.update(id, data);
       } else { // Handle FunctionGraph update
         return base44.entities.FunctionGraph.update(id, data);
       }
@@ -211,6 +234,8 @@ export default function UnifiedGraphEditorPage() {
         return base44.entities.EntityQuery.delete(id);
       } else if (entity_type === 'ActionGraph') {
         return base44.entities.ActionGraph.delete(id);
+      } else if (entity_type === 'LevelBlueprint') {
+        return base44.entities.LevelBlueprint.delete(id);
       } else { // Handle FunctionGraph delete
         return base44.entities.FunctionGraph.delete(id);
       }
@@ -222,12 +247,17 @@ export default function UnifiedGraphEditorPage() {
     const builtin = EFFECT_BUILTIN_OPERATIONS.find(([actionId]) => actionId === graph.action_id);
     const sourceGraph = builtin ? buildEffectBuiltinGraph(...builtin) : graph;
     let graphDef;
-    try {
-      graphDef = typeof sourceGraph.graph_definition === 'string'
-        ? JSON.parse(sourceGraph.graph_definition)
-        : sourceGraph.graph_definition || {};
-    } catch {
-      graphDef = {};
+    if (graph.entity_type === 'LevelBlueprint') {
+      const levelGraph = parseLevelBlueprintGraph(sourceGraph.graph_definition);
+      graphDef = { nodes: levelGraph.nodes, connections: levelGraph.connections, blackboard: levelGraph.variables };
+    } else {
+      try {
+        graphDef = typeof sourceGraph.graph_definition === 'string'
+          ? JSON.parse(sourceGraph.graph_definition)
+          : sourceGraph.graph_definition || {};
+      } catch {
+        graphDef = {};
+      }
     }
 
     let loadedNodes = graphDef.nodes || [];
@@ -258,12 +288,13 @@ export default function UnifiedGraphEditorPage() {
     const runtimeGraph = currentGraph.entity_type === 'ActionGraph'
       ? compileRuntimeGraph(currentGraph.action_id, nodes, connections)
       : null;
+    const graphDefinition = currentGraph.entity_type === 'LevelBlueprint'
+      ? serializeLevelBlueprintGraph(nodes, connections, blackboard)
+      : JSON.stringify({ nodes, connections, blackboard, ...(runtimeGraph ? { runtimeGraph } : {}) });
     updateMutation.mutate({
       id: currentGraph.id,
       entity_type: currentGraph.entity_type,
-      data: {
-        graph_definition: JSON.stringify({ nodes, connections, blackboard, ...(runtimeGraph ? { runtimeGraph } : {}) })
-      }
+      data: { graph_definition: graphDefinition }
     });
   }, [currentGraph, nodes, connections, blackboard, updateMutation]);
 
@@ -362,7 +393,7 @@ export default function UnifiedGraphEditorPage() {
       id: `node-${Date.now()}`,
       type,
       position,
-      data: { ...(config.defaultData || {}), ...(defaultData[type] || {}) },
+      data: { ...(config.defaultData || {}), ...(defaultData[type] || {}), ...(blackboardKey && type.startsWith('level_variable_') ? { variableKey: blackboardKey } : {}) },
       inputs: config.inputs || [],
       outputs: config.outputs || []
     };
@@ -473,6 +504,7 @@ export default function UnifiedGraphEditorPage() {
           onSelectNode={(id) => setEditingNodeId(id)}
           onSelectConnection={(id) => setSelectedConnectionId(id)}
           onPaneContextMenu={setNodeMenu}
+          variableNodeTypes={currentGraph.graph_type === 'level' ? { read: 'level_variable_read', write: 'level_variable_write' } : undefined}
           />
 
         {nodeMenu && (
@@ -493,7 +525,7 @@ export default function UnifiedGraphEditorPage() {
 
         {showBlackboard && (
           <FloatingPanel
-            title={currentGraph.graph_type === 'query' ? '查询模拟' : '黑板变量'}
+            title={currentGraph.graph_type === 'query' ? '查询模拟' : currentGraph.graph_type === 'level' ? '关卡变量' : '黑板变量'}
             icon={Database}
             onClose={() => setShowBlackboard(false)}
             className="right-4 top-4"
@@ -501,7 +533,7 @@ export default function UnifiedGraphEditorPage() {
             {currentGraph.graph_type === 'query' ? (
               <QuerySimulationPanel nodes={nodes} connections={connections} />
             ) : (
-              <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} />
+              <BlackboardPanel blackboard={blackboard} onChange={setBlackboard} terminology={currentGraph.graph_type === 'level' ? '关卡变量' : '黑板变量'} />
             )}
           </FloatingPanel>
         )}
@@ -566,6 +598,7 @@ export default function UnifiedGraphEditorPage() {
                     <SelectItem value="query" className="text-[#e5e5e5] hover:bg-[#1E2128]">Entity Query (实体查询)</SelectItem>
                     <SelectItem value="function" className="text-[#e5e5e5] hover:bg-[#1E2128]">Pure Function Graph (纯函数图)</SelectItem>
                     <SelectItem value="action" className="text-[#e5e5e5] hover:bg-[#1E2128]">Action Graph (动作图)</SelectItem>
+                    <SelectItem value="level" className="text-[#e5e5e5] hover:bg-[#1E2128]">Level Blueprint (关卡蓝图)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -86,7 +86,8 @@ function GraphCanvasInner({
   onSelectNode,
   onSelectConnection,
   onPaneContextMenu,
-  NodeComponent
+  NodeComponent,
+  variableNodeTypes = { read: 'blackboard_get', write: 'blackboard_set' }
 }) {
   const { screenToFlowPosition } = useReactFlow();
   const [rfNodes, setRfNodes] = useState([]);
@@ -226,12 +227,12 @@ function GraphCanvasInner({
 
   const handleContextMenuSelect = useCallback((value) => {
     if (pendingDrop) {
-      const nodeType = value === 'get' ? 'blackboard_get' : 'blackboard_set';
+      const nodeType = value === 'get' ? variableNodeTypes.read : variableNodeTypes.write;
       onAddNodeAtPosition?.(nodeType, pendingDrop.position, pendingDrop.blackboardKey);
       setPendingDrop(null);
     }
     setContextMenu(null);
-  }, [pendingDrop, onAddNodeAtPosition]);
+  }, [pendingDrop, onAddNodeAtPosition, variableNodeTypes]);
 
   return (
     <div

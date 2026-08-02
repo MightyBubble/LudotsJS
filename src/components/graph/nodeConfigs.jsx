@@ -4,6 +4,7 @@ import { ACTION_NODE_TYPES } from './actionNodes';
 import { PURE_NODE_TYPES } from './pureNodes';
 import { EFFECT_ACTION_NODE_TYPES } from './effectActionNodes';
 import { LUDOTS_GRAPH_NODE_TYPES } from './ludotsGraphNodes';
+import { LEVEL_BLUEPRINT_NODE_TYPES } from './levelBlueprintNodes';
 
 // 类型颜色映射
 export const TYPE_COLORS = {
@@ -782,7 +783,8 @@ export const NODE_TYPES = {
   ...PURE_NODE_TYPES,
   ...ACTION_NODE_TYPES,
   ...EFFECT_ACTION_NODE_TYPES,
-  ...LUDOTS_GRAPH_NODE_TYPES
+  ...LUDOTS_GRAPH_NODE_TYPES,
+  ...LEVEL_BLUEPRINT_NODE_TYPES
 };
 
 // 根据graphType获取可用节点（graphType: data / query / function / action）

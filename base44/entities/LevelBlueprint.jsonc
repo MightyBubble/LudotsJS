@@ -19,6 +19,10 @@
       "type": "string",
       "description": "\u5bfc\u51fa\u5230 MapConfig.TriggerTypes \u7684 C# Trigger \u7c7b\u578b\u540d"
     },
+    "graph_definition": {
+      "type": "string",
+      "description": "\u72ec\u7acb level_blueprint \u9886\u57df\u56fe\u5b9a\u4e49\uff1b\u5305\u542b schemaVersion\u3001\u4e8b\u4ef6\u76d1\u542c\u3001ActionGraph \u8c03\u7528\u548c\u5173\u5361\u53d8\u91cf"
+    },
     "scope_type": {
       "type": "string",
       "enum": [

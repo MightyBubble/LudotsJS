@@ -62,6 +62,7 @@ export const NAV_GROUPS = [
     key: 'logic',
     label: '逻辑图',
     items: [
+      { page: 'UnifiedGraphEditor', search: '?type=level', label: '关卡蓝图', icon: BookOpen },
       { page: 'UnifiedGraphEditor', search: '?type=action', label: 'ActionGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=data', label: 'DataGraph', icon: Globe },
       { page: 'UnifiedGraphEditor', search: '?type=function', label: 'FunctionGraph', icon: Globe },

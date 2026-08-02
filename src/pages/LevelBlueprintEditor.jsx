@@ -3,12 +3,13 @@ import useProjectScope from '@/lib/projectScope';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import LevelBlueprintDetails from '@/components/level/LevelBlueprintDetails';
+import { serializeLevelBlueprintGraph } from '@/lib/levelBlueprint/levelBlueprintGraphContract';
 
 export default function LevelBlueprintEditor() {
   const scope = useProjectScope();
   const [error, setError] = useState('');
   const editor = useRecordEditor('LevelBlueprint', 'level-blueprints', () => ({
-    blueprint_id: `Level.${Date.now()}`, label: '新关卡蓝图', description: '', trigger_type_name: '', ...scope.newScopeFields(),
+    blueprint_id: `Level.${Date.now()}`, label: '新关卡蓝图', description: '', trigger_type_name: '', graph_definition: serializeLevelBlueprintGraph(), ...scope.newScopeFields(),
   }));
   const records = editor.records.filter(scope.inScope);
   const save = () => {
