@@ -8,6 +8,7 @@ import ProjectSwitcher from "@/components/layout/ProjectSwitcher";
 import useProjectScope from "@/lib/projectScope";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import { useI18n } from "@/i18n/I18nProvider";
+import AgentSidebar from "@/components/agent/AgentSidebar";
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -77,7 +78,10 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
+      <div className="flex-1 min-h-0 overflow-hidden flex">
+        <div className="flex-1 min-w-0 min-h-0 overflow-hidden">{children}</div>
+        <AgentSidebar />
+      </div>
     </div>
     </PageActionsProvider>
   );

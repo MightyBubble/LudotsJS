@@ -73,19 +73,84 @@
                 "compositeParts": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/$defs/bindingPart"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "actionId": {
+                        "type": "string"
+                      },
+                      "path": {
+                        "type": "string"
+                      }
+                    }
                   }
                 },
                 "processors": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/$defs/modifier"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "parameters": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "value"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
                   }
                 },
                 "interactions": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/$defs/modifier"
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "parameters": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "value"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
                   }
                 }
               },
@@ -99,54 +164,6 @@
           "id",
           "bindings"
         ]
-      }
-    }
-  },
-  "$defs": {
-    "parameter": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "value": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "name",
-        "value"
-      ]
-    },
-    "modifier": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "type": "string"
-        },
-        "parameters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/parameter"
-          }
-        }
-      },
-      "required": [
-        "type"
-      ]
-    },
-    "bindingPart": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "actionId": {
-          "type": "string"
-        },
-        "path": {
-          "type": "string"
-        }
       }
     }
   },
