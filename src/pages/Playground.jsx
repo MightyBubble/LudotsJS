@@ -1,21 +1,39 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import useProjectScope from '@/lib/projectScope';
 import EntityTemplateList from '@/components/playground/EntityTemplateList';
 import PlaygroundToolbar from '@/components/playground/PlaygroundToolbar';
 import PlaygroundViewport from '@/components/playground/PlaygroundViewport';
 import useLevelLifecycleRuntime from '@/components/playground/useLevelLifecycleRuntime';
+import SelectionInteractionOverlay from '@/components/playground/SelectionInteractionOverlay';
+import PlaygroundPanelHost from '@/components/playground/PlaygroundPanelHost';
+import RuntimeConsole from '@/components/runtime/RuntimeConsole';
+import { createRuntimeLog } from '@/lib/runtime/runtimeLog';
 
 export default function PlaygroundPage() {
   const scope = useProjectScope();
   const [templates, setTemplates] = useState([]), [topologies, setTopologies] = useState([]), [maps, setMaps] = useState([]);
   const [blueprints, setBlueprints] = useState([]), [actionGraphs, setActionGraphs] = useState([]);
+  const [commandProfiles, setCommandProfiles] = useState([]), [entityProfiles, setEntityProfiles] = useState([]), [controlProfiles, setControlProfiles] = useState([]);
+  const [abilities, setAbilities] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
   const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
-  const [placed, setPlaced] = useState([]), [elapsed, setElapsed] = useState(0);
+  const [placed, setPlaced] = useState([]), [elapsed, setElapsed] = useState(0), [selectionMode, setSelectionMode] = useState('screen_box');
+  const viewportRef = useRef(null);
+  const log = useMemo(() => createRuntimeLog(), []);
 
-  useEffect(() => { Promise.all([base44.entities.EntityPrototype.list('name', 200), base44.entities.ParticipantTopology.list('-updated_date', 100), base44.entities.MapConfig.list('-updated_date', 100), base44.entities.LevelBlueprint.list('-updated_date', 100), base44.entities.ActionGraph.list('-updated_date', 200)]).then(([p, t, m, b, a]) => { const scopedMaps = m.filter(scope.inScope); setTemplates(p); setTopologies(t.filter(scope.inScope)); setMaps(scopedMaps); setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setMapId(scopedMaps[0]?.id || ''); }); }, [scope.projectId]);
+  useEffect(() => { Promise.all([
+    base44.entities.EntityPrototype.list('name', 200), base44.entities.ParticipantTopology.list('-updated_date', 100),
+    base44.entities.MapConfig.list('-updated_date', 100), base44.entities.LevelBlueprint.list('-updated_date', 100),
+    base44.entities.ActionGraph.list('-updated_date', 200), base44.entities.CommandPanelProfile.list('panel_id', 100),
+    base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
+    base44.entities.Ability.list('name', 300),
+  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords]) => {
+    const scopedMaps = m.filter(scope.inScope); setTemplates(p); setTopologies(t.filter(scope.inScope)); setMaps(scopedMaps);
+    setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
+    setControlProfiles(controls); setAbilities(abilityRecords); setMapId(scopedMaps[0]?.id || '');
+  }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
   const availableTopologies = useMemo(() => topologies.filter((item) => item.map_id === map?.map_id), [topologies, map?.map_id]);
   const topology = availableTopologies.find((item) => item.id === topologyId) || null;
@@ -24,6 +42,8 @@ export default function PlaygroundPage() {
   const binding = viewMode === 'Players' ? { owner_player_id: player?.player_id || null, team_id: player?.team_id || null } : { owner_player_id: null, team_id: viewId || null };
   const view = topology && viewId ? { mode: viewMode, id: viewId } : null;
   const lifecycle = useLevelLifecycleRuntime({ map, blueprints, actionGraphs });
+  useEffect(() => { if (map?.selection_interaction?.default_mode) setSelectionMode(map.selection_interaction.default_mode); }, [map?.id]);
+  useEffect(() => { lifecycle.lastLogs.forEach(message => log.info('blueprint', message)); lifecycle.lastVariableWrites.forEach(key => log.info('variable', `写入 ${key}`)); }, [lifecycle.revision]);
   useEffect(() => {
     const onLevelEvent = (event) => lifecycle.dispatch(event.detail?.eventId, event.detail?.payload);
     window.addEventListener('ludots:level-event', onLevelEvent);
@@ -35,12 +55,18 @@ export default function PlaygroundPage() {
   const participantView = useMemo(() => ({ topologies: availableTopologies, topologyId, onTopology: (id) => { const next = availableTopologies.find((item) => item.id === id); setTopologyId(id); setViewMode('Players'); setViewId(next?.players[0]?.player_id || 0); }, mode: viewMode, onMode: (mode) => { setViewMode(mode); setViewId(mode === 'Players' ? topology?.players[0]?.player_id || 0 : topology?.teams[0]?.team_id || 0); }, viewId, onView: setViewId }), [availableTopologies, topologyId, topology, viewMode, viewId]);
   const onPlace = useCallback((entity) => setPlaced((list) => [...list, entity]), []);
   const clear = () => { setPlaced([]); setClearToken((token) => token + 1); };
+  const onSelection = (eventId, entities) => log.info('selection', `${eventId} → ${entities.length} entities`, entities);
 
   return <div className="flex h-full min-h-0 bg-[#0D0F14] text-gray-200">
     <EntityTemplateList templates={templates} selectedId={selectedId} onSelect={setSelectedId} />
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-      <PlaygroundToolbar maps={maps} mapId={mapId} onMap={chooseMap} mapEntityCount={map?.entities?.length || 0} paused={paused} onToggle={togglePlayback} onEnd={endLevel} onClear={clear} count={placed.length} elapsed={elapsed} templateName={template?.name || template?.prototype_id || ''} participantView={participantView} lifecycle={lifecycle} />
-      <PlaygroundViewport map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
+      <PlaygroundToolbar maps={maps} mapId={mapId} onMap={chooseMap} mapEntityCount={map?.entities?.length || 0} paused={paused} onToggle={togglePlayback} onEnd={endLevel} onClear={clear} count={placed.length} elapsed={elapsed} templateName={template?.name || template?.prototype_id || ''} participantView={participantView} lifecycle={lifecycle} selectionConfig={map?.selection_interaction} selectionMode={selectionMode} onSelectionMode={setSelectionMode} />
+      <div className="relative flex-1 min-h-0">
+        <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
+        <SelectionInteractionOverlay config={map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
+        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} abilities={abilities} prototypes={templates} log={log} />
+      </div>
+      <div className="h-40 shrink-0 border-t border-[#2A2E37] p-2"><RuntimeConsole log={log} /></div>
     </div>
   </div>;
 }

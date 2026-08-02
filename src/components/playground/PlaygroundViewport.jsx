@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { createPlaygroundScene } from '@/lib/playground/playgroundScene';
 
-export default function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick }) {
+const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick }, ref) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
 
@@ -18,6 +18,9 @@ export default function PlaygroundViewport({ map, template, binding, view, pause
   useEffect(() => { sceneRef.current?.setView(view || null); }, [view]);
   useEffect(() => { sceneRef.current?.setPaused(paused); }, [paused]);
   useEffect(() => { if (clearToken) sceneRef.current?.clear(); }, [clearToken]);
+  useImperativeHandle(ref, () => ({ selectByScreenShape: (points, shape) => sceneRef.current?.selectByScreenShape(points, shape) || [] }), []);
 
-  return <div ref={mountRef} className="flex-1 min-h-0 min-w-0" data-testid="playground-viewport" />;
-}
+  return <div ref={mountRef} className="absolute inset-0" data-testid="playground-viewport" />;
+});
+
+export default PlaygroundViewport;

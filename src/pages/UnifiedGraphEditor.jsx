@@ -118,12 +118,20 @@ export default function UnifiedGraphEditorPage() {
     queryFn: () => base44.entities.GameEvent.list(),
     initialData: [],
   });
+  const { data: controlPlanes = [] } = useQuery({ queryKey: ['control-plane-profiles'], queryFn: () => base44.entities.ControlPlaneProfile.list(), initialData: [] });
+  const { data: commandPanels = [] } = useQuery({ queryKey: ['command-panel-profiles'], queryFn: () => base44.entities.CommandPanelProfile.list(), initialData: [] });
+  const { data: entityPanels = [] } = useQuery({ queryKey: ['entity-panel-profiles'], queryFn: () => base44.entities.EntityPanelProfile.list(), initialData: [] });
+  const { data: entityCollections = [] } = useQuery({ queryKey: ['entity-collections'], queryFn: () => base44.entities.EntityCollection.list(), initialData: [] });
 
   const levelNodeOptions = useMemo(() => ({
     levelVariables: Object.entries(blackboard).map(([key, spec]) => ({ value: key, label: `${key} · ${spec.type || 'any'}` })),
     gameEvents: gameEvents.map(event => ({ value: event.event_id, label: `${event.name} · ${event.event_id}` })),
     actionGraphs: actionGraphs.map(action => ({ value: action.action_id, label: `${action.name || action.action_id} · ${action.action_id}` })),
-  }), [blackboard, gameEvents, actionGraphs]);
+    controlPlanes: controlPlanes.map(profile => ({ value: profile.control_plane_id, label: profile.control_plane_id })),
+    commandPanels: commandPanels.map(profile => ({ value: profile.panel_id, label: `${profile.label || profile.panel_id} · ${profile.panel_id}` })),
+    entityPanels: entityPanels.map(profile => ({ value: profile.panel_id, label: `${profile.label || profile.panel_id} · ${profile.panel_id}` })),
+    entityCollections: entityCollections.map(collection => ({ value: collection.collection_key, label: `${collection.label || collection.collection_key} · ${collection.collection_key}` })),
+  }), [blackboard, gameEvents, actionGraphs, controlPlanes, commandPanels, entityPanels, entityCollections]);
 
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({

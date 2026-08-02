@@ -5,6 +5,7 @@ import MapBoardEditor from './MapBoardEditor';
 import MapAssetsEditor from './MapAssetsEditor';
 import MapTriggerEditor from './MapTriggerEditor';
 import MapCameraEditor from './MapCameraEditor';
+import MapSelectionInteractionEditor from './MapSelectionInteractionEditor';
 
 const TABS = [{ key: 'scene', label: '地图编辑' }, { key: 'config', label: '地图配置' }];
 
@@ -29,6 +30,7 @@ export default function MapConfigDetails({ draft, patch, prototypes, blueprints,
         <MapTriggerEditor triggerTypes={draft.trigger_types} blueprints={blueprints} onChange={trigger_types => patch({ trigger_types })} />
         <MapAssetsEditor value={draft} patch={patch} />
         <MapCameraEditor camera={draft.default_camera} onChange={default_camera => patch({ default_camera })} />
+        <MapSelectionInteractionEditor value={draft.selection_interaction} onChange={selection_interaction => patch({ selection_interaction })} />
       </div>}
   </div>;
 }

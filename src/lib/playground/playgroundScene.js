@@ -67,6 +67,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       const x = ((Number(entity.position?.x) + 0.5) / grid.width) * HALF_X * 2 - HALF_X;
       const z = ((Number(entity.position?.y) + 0.5) / grid.height) * HALF_Z * 2 - HALF_Z;
       marker.position.set(x, 0.55, z);
+      marker.userData.entity = { id: entity.instance_id, entity_id: entity.instance_id, prototype_id: entity.template, position: entity.position };
       scene.add(marker);
       mapMeshes.push(marker);
     });
@@ -157,6 +158,13 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     setView(next) {
       view = next;
       applyView();
+    },
+    selectByScreenShape(points, shape = 'box') {
+      if (!points?.length) return [];
+      const contains = shape === 'box'
+        ? point => { const a = points[0], b = points[points.length - 1]; return point.x >= Math.min(a.x, b.x) && point.x <= Math.max(a.x, b.x) && point.y >= Math.min(a.y, b.y) && point.y <= Math.max(a.y, b.y); }
+        : point => points.reduce((inside, current, index) => { const previous = points[(index + points.length - 1) % points.length]; const crosses = ((current.y > point.y) !== (previous.y > point.y)) && point.x < (previous.x - current.x) * (point.y - current.y) / (previous.y - current.y || 1) + current.x; return crosses ? !inside : inside; }, false);
+      return mapMeshes.filter(mesh => mesh.visible !== false && contains((() => { const projected = mesh.position.clone().project(camera); return { x: (projected.x + 1) * renderer.domElement.clientWidth / 2, y: (1 - projected.y) * renderer.domElement.clientHeight / 2 }; })())).map(mesh => mesh.userData.entity);
     },
     clear() {
       entities.forEach((e) => {

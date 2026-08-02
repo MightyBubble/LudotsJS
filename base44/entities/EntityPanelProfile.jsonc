@@ -1,0 +1,122 @@
+{
+  "name": "EntityPanelProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "panel_id": {
+      "type": "string",
+      "description": "\u5b9e\u4f53\u9762\u677f Profile \u6807\u8bc6"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collection_key": {
+          "type": "string",
+          "description": "\u6d88\u8d39\u7684 EntityCollection.collection_key"
+        }
+      },
+      "required": [
+        "collection_key"
+      ]
+    },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prototype_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_ability_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_role_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "prototype_ids",
+        "required_ability_ids",
+        "required_role_ids"
+      ]
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "aggregate"
+          ],
+          "default": "flat"
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 4
+        },
+        "visible_rows": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "aggregate_by": {
+          "type": "string",
+          "enum": [
+            "prototype",
+            "semantic_profile"
+          ],
+          "default": "prototype"
+        }
+      },
+      "required": [
+        "mode",
+        "columns",
+        "aggregate_by"
+      ]
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "single",
+            "multiple"
+          ],
+          "default": "multiple"
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    }
+  },
+  "required": [
+    "panel_id",
+    "source",
+    "filter",
+    "layout",
+    "selection"
+  ]
+}
