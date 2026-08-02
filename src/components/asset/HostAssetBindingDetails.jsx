@@ -3,12 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Section, TextField, SelectField, ListField } from '@/components/ludots/ui';
 import ModelPreview from './ModelPreview';
+import ReferenceSelect from '@/components/presentation/ReferenceSelect';
+import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 
 const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline'];
 
 export default function HostAssetBindingDetails({ draft, patch }) {
   const { data: assets = [] } = useQuery({ queryKey: ['assets'], queryFn: () => base44.entities.Asset.list() });
   const linked = assets.find(a => a.asset_id === draft.editor_asset_id);
+  const refs = usePresentationRefs();
 
   return <div className="space-y-4 max-w-3xl">
     <Section title="宿主资源绑定">
@@ -16,7 +19,7 @@ export default function HostAssetBindingDetails({ draft, patch }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <TextField label="Binding ID" value={draft.binding_id} onChange={binding_id => patch({ binding_id })} />
         <SelectField label="Asset Kind" value={draft.asset_kind} options={KINDS.map(value => ({ value, label: value }))} onChange={asset_kind => patch({ asset_kind })} />
-        <TextField label="Asset ID" hint="mesh_assets / animation_clips 等表中的逻辑 id" value={draft.asset_id} onChange={asset_id => patch({ asset_id })} />
+        <ReferenceSelect label="Asset ID" hint="mesh_assets / animation_clips / prefabs 等逻辑 id" value={draft.asset_id} options={refs.logicalAssets} onChange={asset_id => patch({ asset_id })} />
         <TextField label="Backend ID" hint="raylib / browser" value={draft.backend_id} onChange={backend_id => patch({ backend_id })} />
       </div>
       <ListField label="Source URIs" value={draft.source_uris} onChange={source_uris => patch({ source_uris })} />

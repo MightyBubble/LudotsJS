@@ -1,0 +1,61 @@
+{
+  "name": "AnimationProfileDefinition",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "animation_profiles.json id"
+    },
+    "animator_controller_id": {
+      "type": "string",
+      "description": "AnimatorControllerDefinition.controller_id"
+    },
+    "state_clips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "packed_state_index": {
+            "type": "integer"
+          },
+          "clip_asset_id": {
+            "type": "string",
+            "description": "AnimationClipAsset.asset_id"
+          }
+        },
+        "required": [
+          "packed_state_index",
+          "clip_asset_id"
+        ]
+      }
+    },
+    "builtin_clips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "builtin_clip_id": {
+            "type": "string"
+          },
+          "clip_asset_id": {
+            "type": "string",
+            "description": "AnimationClipAsset.asset_id"
+          }
+        },
+        "required": [
+          "builtin_clip_id",
+          "clip_asset_id"
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "animator_controller_id",
+    "state_clips",
+    "builtin_clips"
+  ]
+}

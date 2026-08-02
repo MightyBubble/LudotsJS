@@ -1,0 +1,101 @@
+{
+  "name": "PresentationPrefab",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "prefab_id": {
+      "type": "string",
+      "description": "prefabs.json id"
+    },
+    "mesh_asset_id": {
+      "type": "string",
+      "description": "PresentationMeshAsset.asset_id"
+    },
+    "base_scale": {
+      "type": "number"
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "Mesh",
+              "Surface",
+              "Decal",
+              "Vfx"
+            ]
+          },
+          "mesh_asset_id": {
+            "type": "string"
+          },
+          "material_id": {
+            "type": "string"
+          },
+          "effect_asset_id": {
+            "type": "string"
+          },
+          "local_position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "local_rotation": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "local_scale": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "color_tint": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "tiling": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "align_to_surface": {
+            "type": "boolean"
+          },
+          "terrain_facing": {
+            "type": "boolean"
+          },
+          "vfx_spawn_mode": {
+            "type": "string"
+          },
+          "grounding": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      }
+    }
+  },
+  "required": [
+    "prefab_id",
+    "base_scale",
+    "parts"
+  ]
+}

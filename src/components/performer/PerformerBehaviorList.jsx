@@ -3,9 +3,10 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, SelectField, BoolField } from '@/components/ludots/ui';
 import VectorField from './VectorField';
+import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import { BEHAVIOR_KINDS, BEHAVIOR_SPECS, blankBehavior } from './performerBehaviorSpecs';
 
-export default function PerformerBehaviorList({ behaviors = [], onChange }) {
+export default function PerformerBehaviorList({ behaviors = [], refs = {}, onChange }) {
   const patch = (i, next) => onChange(behaviors.map((b, idx) => idx === i ? { ...b, ...next } : b));
   const patchPayload = (i, field, next) => patch(i, { [field]: { ...(behaviors[i][field] || {}), ...next } });
 
@@ -28,6 +29,7 @@ export default function PerformerBehaviorList({ behaviors = [], onChange }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {spec.fields.map(f => {
             const set = v => patchPayload(i, spec.field, { [f.k]: v });
+            if (f.ref) return <ReferenceSelect key={f.k} label={f.k} value={payload[f.k]} options={refs[f.ref]} onChange={set} />;
             if (f.t === 'vec3') return <VectorField key={f.k} label={f.k} value={payload[f.k]} length={3} onChange={set} />;
             if (f.t === 'vec4') return <VectorField key={f.k} label={f.k} value={payload[f.k]} length={4} onChange={set} />;
             if (f.t === 'number') return <NumberField key={f.k} label={f.k} value={payload[f.k]} onChange={set} />;

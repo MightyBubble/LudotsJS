@@ -1,0 +1,60 @@
+{
+  "name": "AnimationClipAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "animation_clips.json id"
+    },
+    "asset_kind": {
+      "type": "string",
+      "description": "Clip / BlendSpace1D / BlendSpace2D"
+    },
+    "locators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "backend_id": {
+            "type": "string"
+          },
+          "asset_ref": {
+            "type": "string"
+          },
+          "variant": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "backend_id",
+          "asset_ref"
+        ]
+      }
+    },
+    "blend_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "x"
+        ]
+      }
+    }
+  },
+  "required": [
+    "asset_id",
+    "asset_kind",
+    "locators"
+  ]
+}

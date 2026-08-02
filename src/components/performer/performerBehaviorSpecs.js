@@ -6,7 +6,7 @@ export const BEHAVIOR_SPECS = {
     field: 'assetBinding',
     fields: [
       { k: 'assetKind', t: 'text', hint: 'Mesh / SkinnedMesh / Decal / Vfx' },
-      { k: 'assetId', t: 'text' },
+      { k: 'assetId', t: 'text', ref: 'logicalAssets' },
       { k: 'renderPath', t: 'text', hint: 'StaticMesh / SkinnedMesh' },
       { k: 'mobility', t: 'text', hint: 'Static / Movable' },
       { k: 'localOffset', t: 'vec3' },
@@ -22,7 +22,7 @@ export const BEHAVIOR_SPECS = {
   AttributeBinding: {
     field: 'attributeBinding',
     fields: [
-      { k: 'attributeId', t: 'text' },
+      { k: 'attributeId', t: 'text', ref: 'attributes' },
       { k: 'targetParamKey', t: 'text' },
       { k: 'mode', t: 'text', hint: 'AttributeRatio / AttributeValue' },
     ],
@@ -30,7 +30,7 @@ export const BEHAVIOR_SPECS = {
   TagBinding: {
     field: 'tagBinding',
     fields: [
-      { k: 'tagId', t: 'text' },
+      { k: 'tagId', t: 'text', ref: 'tags' },
       { k: 'targetParamKey', t: 'text' },
       { k: 'invertLogic', t: 'bool' },
     ],
@@ -38,8 +38,8 @@ export const BEHAVIOR_SPECS = {
   Animator: {
     field: 'animator',
     fields: [
-      { k: 'animatorControllerId', t: 'text' },
-      { k: 'animationProfileId', t: 'text' },
+      { k: 'animatorControllerId', t: 'text', ref: 'controllers' },
+      { k: 'animationProfileId', t: 'text', ref: 'profiles' },
       { k: 'speedParamKey', t: 'text' },
       { k: 'stateParamKey', t: 'text' },
     ],
@@ -56,7 +56,7 @@ export const BEHAVIOR_SPECS = {
   Sound: {
     field: 'sound',
     fields: [
-      { k: 'soundAssetId', t: 'text' },
+      { k: 'soundAssetId', t: 'text', ref: 'hostAssets' },
       { k: 'volume', t: 'number' },
       { k: 'volumeParamKey', t: 'text' },
       { k: 'loop', t: 'bool' },
@@ -65,14 +65,14 @@ export const BEHAVIOR_SPECS = {
   Material: {
     field: 'material',
     fields: [
-      { k: 'baseMaterialId', t: 'text' },
+      { k: 'baseMaterialId', t: 'text', ref: 'materials' },
       { k: 'materialSwapParamKey', t: 'text' },
     ],
   },
   Spline: {
     field: 'spline',
     fields: [
-      { k: 'splineAssetId', t: 'text' },
+      { k: 'splineAssetId', t: 'text', ref: 'hostAssets' },
       { k: 'usage', t: 'text', hint: 'Patrol / Road ...' },
       { k: 'widthParamKey', t: 'text' },
       { k: 'colorParamKey', t: 'text' },

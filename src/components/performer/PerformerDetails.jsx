@@ -1,17 +1,22 @@
 import React from 'react';
-import { Section, TextField, NumberField, BoolField, ListField } from '@/components/ludots/ui';
+import { Section, TextField, NumberField, BoolField } from '@/components/ludots/ui';
+import ReferenceSelect from '@/components/presentation/ReferenceSelect';
+import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import VectorField from './VectorField';
 import PerformerBehaviorList from './PerformerBehaviorList';
 import PerformerParamsSection from './PerformerParamsSection';
 import PerformerRulesSection from './PerformerRulesSection';
+import PerformerChildrenSection from './PerformerChildrenSection';
+import JsonValueField from '@/components/ludots/JsonValueField';
 
 export default function PerformerDetails({ draft, patch }) {
+  const refs = usePresentationRefs();
   return <div className="space-y-4">
     <Section title="基础信息">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <TextField label="Performer ID" value={draft.performer_id} onChange={performer_id => patch({ performer_id })} />
         <TextField label="名称（不导出）" value={draft.label} onChange={label => patch({ label })} />
-        <TextField label="Extends" hint="继承的 performer id" value={draft.extends} onChange={v => patch({ extends: v })} />
+        <ReferenceSelect label="Extends" hint="继承的 performer id" value={draft.extends} options={refs.performers} onChange={extendsId => patch({ extends: extendsId })} />
       </div>
       <TextField label="说明（不导出）" value={draft.description} onChange={description => patch({ description })} />
     </Section>
@@ -32,16 +37,23 @@ export default function PerformerDetails({ draft, patch }) {
         <NumberField label="visibility.graphProgramId" value={draft.visibility_graph_program_id} onChange={visibility_graph_program_id => patch({ visibility_graph_program_id })} />
         <div className="pt-5"><BoolField label="alphaFadeOverLifetime" value={Boolean(draft.alpha_fade_over_lifetime)} onChange={alpha_fade_over_lifetime => patch({ alpha_fade_over_lifetime })} /></div>
       </div>
-      <ListField label="children（子 performer id）" value={draft.children} onChange={children => patch({ children })} />
     </Section>
 
-    <PerformerBehaviorList behaviors={draft.behaviors} onChange={behaviors => patch({ behaviors })} />
+    <Section title="C# Runtime 扩展块">
+      <ReferenceSelect label="Required Attribute" value={(draft.required_attribute_ids || [])[0]} options={refs.attributes} onChange={id => patch({ required_attribute_ids: id ? [id] : [] })} />
+      <JsonValueField label="Instanced Batches" value={draft.instanced_batches} onChange={instanced_batches => patch({ instanced_batches })} />
+      <JsonValueField label="Surface" value={draft.surface} onChange={surface => patch({ surface })} />
+    </Section>
+
+    <PerformerChildrenSection value={draft.children} performers={refs.performers} onChange={children => patch({ children })} />
+    <PerformerBehaviorList behaviors={draft.behaviors} refs={refs} onChange={behaviors => patch({ behaviors })} />
     <PerformerParamsSection
       paramDefaults={draft.paramDefaults}
       bindings={draft.bindings}
+      attributes={refs.attributes}
       onChangeParams={paramDefaults => patch({ paramDefaults })}
       onChangeBindings={bindings => patch({ bindings })}
     />
-    <PerformerRulesSection rules={draft.rules} onChange={rules => patch({ rules })} />
+    <PerformerRulesSection rules={draft.rules} eventKeys={refs.eventKeys} onChange={rules => patch({ rules })} />
   </div>;
 }

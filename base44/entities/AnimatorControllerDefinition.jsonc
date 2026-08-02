@@ -1,0 +1,101 @@
+{
+  "name": "AnimatorControllerDefinition",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "controller_id": {
+      "type": "string",
+      "description": "animator_controllers.json id"
+    },
+    "default_state_index": {
+      "type": "integer"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "packed_state_index": {
+            "type": "integer"
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "playback_speed": {
+            "type": "number"
+          },
+          "loop": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "packed_state_index",
+          "duration_seconds",
+          "playback_speed",
+          "loop"
+        ]
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "from_state_index": {
+            "type": "integer"
+          },
+          "to_state_index": {
+            "type": "integer"
+          },
+          "condition_kind": {
+            "type": "string"
+          },
+          "parameter_index": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "duration_seconds": {
+            "type": "number"
+          },
+          "duration_mode": {
+            "type": "string",
+            "enum": [
+              "Seconds",
+              "Normalized"
+            ]
+          },
+          "consume_trigger": {
+            "type": "boolean"
+          },
+          "has_exit_time": {
+            "type": "boolean"
+          },
+          "exit_time": {
+            "type": "number"
+          },
+          "interrupt_source": {
+            "type": "string"
+          },
+          "ordered_interruption": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "from_state_index",
+          "to_state_index",
+          "condition_kind"
+        ]
+      }
+    }
+  },
+  "required": [
+    "controller_id",
+    "default_state_index",
+    "states",
+    "transitions"
+  ]
+}

@@ -5,11 +5,11 @@
   "properties": {
     "performer_id": {
       "type": "string",
-      "description": "Ludots performers.json id"
+      "description": "Ludots performers.json id / PerformerDefinition.Key"
     },
     "label": {
       "type": "string",
-      "description": "\u7f16\u8f91\u5668\u663e\u793a\u540d\u79f0\uff0c\u4e0d\u5bfc\u51fa"
+      "description": "\u7f16\u8f91\u5668\u663e\u793a\u540d\uff0c\u4e0d\u5bfc\u51fa"
     },
     "description": {
       "type": "string",
@@ -17,42 +17,92 @@
     },
     "extends": {
       "type": "string",
-      "description": "\u7ee7\u627f\u7684 performer id"
+      "description": "PerformerDefinition.Extends"
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "definition_id": {
+            "type": "string",
+            "description": "Performer performer_id"
+          },
+          "scope_tag": {
+            "type": "integer"
+          },
+          "param_overrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "paramKey": {
+                  "type": "string"
+                },
+                "lane": {
+                  "type": "string",
+                  "enum": [
+                    "Float",
+                    "Int",
+                    "Vector"
+                  ]
+                },
+                "floatValue": {
+                  "type": "number"
+                },
+                "intValue": {
+                  "type": "integer"
+                },
+                "vectorValue": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "paramKey",
+                "lane"
+              ]
+            }
+          }
+        },
+        "required": [
+          "definition_id"
+        ]
+      }
     },
     "default_color": {
       "type": "array",
       "items": {
         "type": "number"
-      },
-      "description": "defaultColor RGBA"
+      }
     },
     "default_lifetime": {
       "type": [
         "number",
         "null"
-      ],
-      "description": "defaultLifetime \u79d2"
+      ]
     },
     "default_font_size": {
       "type": [
-        "number",
+        "integer",
         "null"
-      ],
-      "description": "defaultFontSize"
+      ]
     },
     "position_offset": {
       "type": "array",
       "items": {
         "type": "number"
-      },
-      "description": "positionOffset XYZ"
+      }
     },
     "position_y_drift_per_second": {
       "type": [
         "number",
         "null"
-      ],
-      "description": "positionYDriftPerSecond"
+      ]
     },
     "alpha_fade_over_lifetime": {
       "type": "boolean",
@@ -60,25 +110,22 @@
     },
     "world_text_mode": {
       "type": "string",
-      "description": "worldTextMode"
+      "description": "WorldHudValueMode"
     },
     "visibility_inline": {
-      "type": "string",
-      "description": "visibility.inline"
+      "type": "string"
     },
     "visibility_graph_program_id": {
       "type": [
         "integer",
         "null"
-      ],
-      "description": "visibility.graphProgramId"
+      ]
     },
-    "children": {
+    "required_attribute_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "\u5b50 performer id \u5217\u8868"
+      }
     },
     "behaviors": {
       "type": "array",
@@ -103,27 +150,13 @@
             ]
           },
           "activeByDefault": {
-            "type": "boolean",
-            "default": true
+            "type": "boolean"
           },
           "activationCondition": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "inline": {
-                "type": "string"
-              },
-              "graphProgramId": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              }
-            }
+            "type": "object"
           },
           "assetBinding": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "assetKind": {
                 "type": "string"
@@ -173,23 +206,13 @@
               "assetSwapTable": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "paramValue": {
-                      "type": "number"
-                    },
-                    "assetId": {
-                      "type": "string"
-                    }
-                  }
+                  "type": "object"
                 }
               }
             }
           },
           "attributeBinding": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "attributeId": {
                 "type": "string"
@@ -203,26 +226,13 @@
               "thresholds": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "threshold": {
-                      "type": "number"
-                    },
-                    "outputParamKey": {
-                      "type": "string"
-                    },
-                    "outputValue": {
-                      "type": "number"
-                    }
-                  }
+                  "type": "object"
                 }
               }
             }
           },
           "tagBinding": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "tagId": {
                 "type": "string"
@@ -231,14 +241,12 @@
                 "type": "string"
               },
               "invertLogic": {
-                "type": "boolean",
-                "default": false
+                "type": "boolean"
               }
             }
           },
           "animator": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "animatorControllerId": {
                 "type": "string"
@@ -256,13 +264,9 @@
           },
           "attachment": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "boneId": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": "integer"
               },
               "offset": {
                 "type": "array",
@@ -277,27 +281,21 @@
                 }
               },
               "inheritScale": {
-                "type": "boolean",
-                "default": true
+                "type": "boolean"
               }
             }
           },
           "sound": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "soundAssetId": {
                 "type": "string"
               },
               "loop": {
-                "type": "boolean",
-                "default": false
+                "type": "boolean"
               },
               "volume": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": "number"
               },
               "volumeParamKey": {
                 "type": "string"
@@ -306,7 +304,6 @@
           },
           "material": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "baseMaterialId": {
                 "type": "string"
@@ -317,23 +314,13 @@
               "swapTable": {
                 "type": "array",
                 "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "paramValue": {
-                      "type": "number"
-                    },
-                    "materialId": {
-                      "type": "string"
-                    }
-                  }
+                  "type": "object"
                 }
               }
             }
           },
           "spline": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "splineAssetId": {
                 "type": "string"
@@ -354,18 +341,13 @@
                 "type": "string"
               },
               "loop": {
-                "type": "boolean",
-                "default": false
+                "type": "boolean"
               },
               "pingPong": {
-                "type": "boolean",
-                "default": false
+                "type": "boolean"
               },
               "waypointEventId": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
+                "type": "integer"
               }
             }
           }
@@ -391,20 +373,13 @@
               "Float",
               "Int",
               "Vector"
-            ],
-            "default": "Float"
+            ]
           },
           "floatValue": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": "number"
           },
           "intValue": {
-            "type": [
-              "integer",
-              "null"
-            ]
+            "type": "integer"
           },
           "vectorValue": {
             "type": "array",
@@ -435,10 +410,7 @@
             "type": "string"
           },
           "constantValue": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": "number"
           }
         },
         "required": [
@@ -454,46 +426,30 @@
         "additionalProperties": false,
         "properties": {
           "event": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "type": "string"
-              },
-              "keyId": {
-                "type": "string"
-              },
-              "gained": {
-                "type": "boolean"
-              }
-            }
+            "type": "object"
+          },
+          "condition": {
+            "type": "object"
           },
           "command": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "type": "string"
-              },
-              "paramKey": {
-                "type": "string"
-              },
-              "paramLane": {
-                "type": "string"
-              },
-              "valueSource": {
-                "type": "string"
-              },
-              "paramValue": {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              }
-            }
+            "type": "object"
           }
         }
       }
+    },
+    "instanced_batches": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "PerformerDefinition.InstancedBatches"
+    },
+    "surface": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "PerformerDefinition.Surface"
     }
   },
   "required": [

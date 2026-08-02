@@ -1,0 +1,26 @@
+{
+  "name": "PresentationTextToken",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "token_id": {
+      "type": "string",
+      "description": "text_tokens.json id"
+    },
+    "arg_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "default_locale": {
+      "type": "string"
+    },
+    "locales": {
+      "type": "object",
+      "description": "locale -> format string"
+    }
+  },
+  "required": [
+    "token_id",
+    "arg_count"
+  ]
+}

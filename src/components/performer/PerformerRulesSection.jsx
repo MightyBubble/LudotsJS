@@ -2,13 +2,14 @@ import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, BoolField } from '@/components/ludots/ui';
+import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 
 const blankRule = () => ({
   event: { kind: 'TagEffectiveChanged', keyId: '', gained: true },
   command: { kind: 'SetParam', paramKey: '', paramLane: 'Float', valueSource: 'Fixed', paramValue: 1 },
 });
 
-export default function PerformerRulesSection({ rules = [], onChange }) {
+export default function PerformerRulesSection({ rules = [], eventKeys = [], onChange }) {
   const patch = (i, part, next) => onChange(rules.map((r, idx) => idx === i ? { ...r, [part]: { ...(r[part] || {}), ...next } } : r));
   return <Section title="Rules" right={
     <Button size="sm" onClick={() => onChange([...rules, blankRule()])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加规则</Button>
@@ -17,7 +18,7 @@ export default function PerformerRulesSection({ rules = [], onChange }) {
     {rules.map((r, i) => <div key={i} className="rounded border border-[#2A2E37] bg-[#0D0F14] p-3 space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <TextField label="Event Kind" hint="TagEffectiveChanged ..." value={r.event?.kind} onChange={kind => patch(i, 'event', { kind })} />
-        <TextField label="Event Key Id" value={r.event?.keyId} onChange={keyId => patch(i, 'event', { keyId })} />
+        <ReferenceSelect label="Event Key Id" value={r.event?.keyId} options={eventKeys} onChange={keyId => patch(i, 'event', { keyId })} />
         <div className="pt-5"><BoolField label="Gained" value={Boolean(r.event?.gained)} onChange={gained => patch(i, 'event', { gained })} /></div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3">

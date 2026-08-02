@@ -3,10 +3,11 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, SelectField } from '@/components/ludots/ui';
 import VectorField from './VectorField';
+import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 
 const LANES = ['Float', 'Int', 'Vector'];
 
-export default function PerformerParamsSection({ paramDefaults = [], bindings = [], onChangeParams, onChangeBindings }) {
+export default function PerformerParamsSection({ paramDefaults = [], bindings = [], attributes = [], onChangeParams, onChangeBindings }) {
   const patchParam = (i, next) => onChangeParams(paramDefaults.map((p, idx) => idx === i ? { ...p, ...next } : p));
   const patchBinding = (i, next) => onChangeBindings(bindings.map((b, idx) => idx === i ? { ...b, ...next } : b));
 
@@ -34,7 +35,7 @@ export default function PerformerParamsSection({ paramDefaults = [], bindings = 
       {bindings.map((b, i) => <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_160px_1fr_140px_auto] gap-3 items-end rounded border border-[#2A2E37] bg-[#0D0F14] p-3">
         <TextField label="Param Key" value={b.paramKey} onChange={paramKey => patchBinding(i, { paramKey })} />
         <TextField label="Source" hint="attributeRatio / constant" value={b.source} onChange={source => patchBinding(i, { source })} />
-        <TextField label="Attribute Id" value={b.attributeId} onChange={attributeId => patchBinding(i, { attributeId })} />
+        <ReferenceSelect label="Attribute Id" value={b.attributeId} options={attributes} onChange={attributeId => patchBinding(i, { attributeId })} />
         <NumberField label="Constant Value" value={b.constantValue} onChange={constantValue => patchBinding(i, { constantValue })} />
         <Button size="sm" variant="ghost" onClick={() => onChangeBindings(bindings.filter((_, idx) => idx !== i))} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button>
       </div>)}

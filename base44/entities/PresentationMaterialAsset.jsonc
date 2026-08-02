@@ -1,0 +1,30 @@
+{
+  "name": "PresentationMaterialAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "material_assets.json id"
+    },
+    "source_uris": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "domain": {
+      "type": "string",
+      "description": "Surface / Decal / UI"
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "asset_id"
+  ]
+}

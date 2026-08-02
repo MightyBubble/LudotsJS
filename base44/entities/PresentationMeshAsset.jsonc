@@ -1,0 +1,43 @@
+{
+  "name": "PresentationMeshAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "mesh_assets.json id"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Primitive",
+        "Source",
+        "Procedural"
+      ]
+    },
+    "primitive_kind": {
+      "type": "string",
+      "enum": [
+        "Cube",
+        "Sphere",
+        "Plane",
+        "Cylinder",
+        "Capsule",
+        "Cone"
+      ]
+    },
+    "source_uris": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "procedural_data": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "asset_id",
+    "type"
+  ]
+}

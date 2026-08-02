@@ -110,6 +110,13 @@ export const NAV_GROUPS = [
     items: [
       { page: 'PerformerEditor', label: 'Performers', icon: Sparkles },
       { page: 'HostAssetBindingEditor', label: 'Host Asset Bindings', icon: LinkIcon },
+      { page: 'PresentationConfigEditor', search: '?type=mesh', label: 'Mesh Assets', icon: Box },
+      { page: 'PresentationConfigEditor', search: '?type=material', label: 'Material Assets', icon: ImageIcon },
+      { page: 'PresentationConfigEditor', search: '?type=clip', label: 'Animation Clips', icon: Film },
+      { page: 'PresentationConfigEditor', search: '?type=controller', label: 'Animator Controllers', icon: Activity },
+      { page: 'PresentationConfigEditor', search: '?type=profile', label: 'Animation Profiles', icon: GitBranch },
+      { page: 'PresentationConfigEditor', search: '?type=prefab', label: 'Prefabs', icon: Box },
+      { page: 'PresentationConfigEditor', search: '?type=text', label: 'Text Tokens', icon: BookOpen },
       { page: 'AssetLibrary', label: '全部资源', icon: Box },
       { page: 'AssetLibrary', search: '?type=model', label: '模型', icon: Box },
       { page: 'AssetLibrary', search: '?type=animation', label: '动画', icon: Film },
