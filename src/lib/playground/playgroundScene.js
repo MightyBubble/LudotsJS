@@ -99,7 +99,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     const fillColor = style.fill_color?.slice(0, 7) || '#38BDF8';
     const alpha = style.fill_color?.length === 9 ? parseInt(style.fill_color.slice(7), 16) / 255 : 0.2;
     const fillMesh = new THREE.Mesh(new THREE.ShapeGeometry(fill), new THREE.MeshBasicMaterial({ color: fillColor, transparent: true, opacity: alpha, side: THREE.DoubleSide, depthWrite: false }));
-    fillMesh.rotation.x = -Math.PI / 2; fillMesh.position.y = 0.025;
+    fillMesh.rotation.x = Math.PI / 2; fillMesh.position.y = 0.025;
     const lineGeometry = new THREE.BufferGeometry().setFromPoints(polygon.map(point => new THREE.Vector3(point.x, 0.04, point.z)));
     const line = new THREE.LineLoop(lineGeometry, new THREE.LineBasicMaterial({ color: style.stroke_color || '#7DD3FC', linewidth: style.line_width || 2 }));
     scene.add(fillMesh, line); selectionVisuals.push(fillMesh, line);
