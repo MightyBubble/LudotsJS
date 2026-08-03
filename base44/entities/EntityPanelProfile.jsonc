@@ -30,30 +30,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "prototype_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "required_ability_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "required_role_ids": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "entity_query_graph_ref": {
+          "type": "string",
+          "description": "\u5728\u6765\u6e90\u96c6\u5408\u5185\u6267\u884c\u7684 EntityQuery.query_name\uff1b\u7559\u7a7a\u8868\u793a\u4e0d\u8fc7\u6ee4"
         }
-      },
-      "required": [
-        "prototype_ids",
-        "required_ability_ids",
-        "required_role_ids"
-      ]
+      }
     },
     "layout": {
       "type": "object",
@@ -78,20 +59,11 @@
             "null"
           ],
           "minimum": 1
-        },
-        "aggregate_by": {
-          "type": "string",
-          "enum": [
-            "prototype",
-            "semantic_profile"
-          ],
-          "default": "prototype"
         }
       },
       "required": [
         "mode",
-        "columns",
-        "aggregate_by"
+        "columns"
       ]
     },
     "selection": {

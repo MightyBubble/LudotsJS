@@ -1,8 +1,8 @@
 import React from 'react';
-import { Section, ListField, NumberField, SelectField, TextField } from '@/components/ludots/ui';
+import { Section, NumberField, SelectField, TextField } from '@/components/ludots/ui';
 import { normalizeEntityPanelProfile } from '@/lib/runtime/entityPanelRuntime';
 
-export default function EntityPanelProfileDetails({ draft, patch, collections = [] }) {
+export default function EntityPanelProfileDetails({ draft, patch, collections = [], queryGraphs = [] }) {
   const panel = normalizeEntityPanelProfile(draft);
   const patchPart = (key, update) => patch({ [key]: { ...panel[key], ...update } });
   return <div className="max-w-4xl mx-auto grid gap-3 lg:grid-cols-2 items-start">
@@ -15,14 +15,16 @@ export default function EntityPanelProfileDetails({ draft, patch, collections = 
           onChange={collection_key => patchPart('source', { collection_key })} hint="Panel 只消费集合，不负责产生集合。" />
       </Section>
       <Section title="集合内过滤">
-        <ListField label="Prototype IDs" value={panel.filter.prototype_ids} onChange={prototype_ids => patchPart('filter', { prototype_ids })} />
-        <ListField label="必须拥有的 Ability IDs" value={panel.filter.required_ability_ids} onChange={required_ability_ids => patchPart('filter', { required_ability_ids })} />
-        <ListField label="必须绑定的 Role IDs" value={panel.filter.required_role_ids} onChange={required_role_ids => patchPart('filter', { required_role_ids })} />
+        <SelectField label="Entity Query Graph" value={panel.filter.entity_query_graph_ref}
+          options={queryGraphs.map(query => ({ value: query.query_name, label: query.query_name }))}
+          onChange={entity_query_graph_ref => patchPart('filter', { entity_query_graph_ref })}
+          hint="查询图只在来源集合内执行；留空表示不过滤。技能、Buff、标签、属性与关系筛选统一在图中组合。" />
+        {!queryGraphs.length && <p className="text-[10px] text-gray-500">请先在实体查询图中创建过滤查询。</p>}
       </Section>
     </div>
     <Section title="卡片投影">
       <SelectField label="模式" value={panel.layout.mode} options={[{ value: 'flat', label: '平铺实体' }, { value: 'aggregate', label: '聚合兵牌' }]} onChange={mode => patchPart('layout', { mode })} />
-      {panel.layout.mode === 'aggregate' && <SelectField label="聚合维度" value={panel.layout.aggregate_by} options={[{ value: 'prototype', label: '实体原型' }, { value: 'semantic_profile', label: '技能语义 Profile' }]} onChange={aggregate_by => patchPart('layout', { aggregate_by })} />}
+      {panel.layout.mode === 'aggregate' && <p className="text-[10px] text-gray-500">聚合固定按 Prototype ID 合并同类实体。</p>}
       <NumberField label="列数" value={panel.layout.columns} onChange={columns => patchPart('layout', { columns })} />
       <NumberField label="可视行数" value={panel.layout.visible_rows} onChange={visible_rows => patchPart('layout', { visible_rows })} />
       <SelectField label="选择模式" value={panel.selection.mode} options={[{ value: 'single', label: '单选' }, { value: 'multiple', label: '多选' }]} onChange={mode => patchPart('selection', { mode })} />

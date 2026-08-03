@@ -15,7 +15,7 @@ export default function PlaygroundPage() {
   const [templates, setTemplates] = useState([]), [topologies, setTopologies] = useState([]), [maps, setMaps] = useState([]);
   const [blueprints, setBlueprints] = useState([]), [actionGraphs, setActionGraphs] = useState([]);
   const [commandProfiles, setCommandProfiles] = useState([]), [entityProfiles, setEntityProfiles] = useState([]), [controlProfiles, setControlProfiles] = useState([]);
-  const [abilities, setAbilities] = useState([]);
+  const [abilities, setAbilities] = useState([]), [queryGraphs, setQueryGraphs] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
   const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
@@ -28,11 +28,11 @@ export default function PlaygroundPage() {
     base44.entities.MapConfig.list('-updated_date', 100), base44.entities.LevelBlueprint.list('-updated_date', 100),
     base44.entities.ActionGraph.list('-updated_date', 200), base44.entities.CommandPanelProfile.list('panel_id', 100),
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
-    base44.entities.Ability.list('name', 300),
-  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords]) => {
+    base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
+  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords]) => {
     const scopedMaps = m.filter(scope.inScope); setTemplates(p); setTopologies(t.filter(scope.inScope)); setMaps(scopedMaps);
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
-    setControlProfiles(controls); setAbilities(abilityRecords); setMapId(scopedMaps[0]?.id || '');
+    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setMapId(scopedMaps[0]?.id || '');
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
   const availableTopologies = useMemo(() => topologies.filter((item) => item.map_id === map?.map_id), [topologies, map?.map_id]);
@@ -64,7 +64,7 @@ export default function PlaygroundPage() {
       <div className="relative flex-1 min-h-0">
         <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
         <SelectionInteractionOverlay config={map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
-        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} abilities={abilities} prototypes={templates} log={log} />
+        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} log={log} />
       </div>
       <div className="h-40 shrink-0 border-t border-[#2A2E37] p-2"><RuntimeConsole log={log} /></div>
     </div>

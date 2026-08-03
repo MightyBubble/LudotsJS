@@ -4,7 +4,7 @@ import { createCommandPanelRuntime } from '@/lib/runtime/commandPanelRuntime';
 import { resolveEntityPanel } from '@/lib/runtime/entityPanelRuntime';
 import RuntimeAnchoredPanel from '@/components/runtime/RuntimeAnchoredPanel';
 
-export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, abilities, prototypes, log }) {
+export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, queryGraphs, abilities, prototypes, log }) {
   const [panels, setPanels] = useState([]), [collections, setCollections] = useState({}), [controls, setControls] = useState([]);
   const handledRevision = useRef(-1);
   useEffect(() => {
@@ -29,7 +29,8 @@ export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entity
     {panels.map(panel => {
       const profile = panel.kind === 'command' ? commandProfiles.find(item => item.panel_id === panel.profileId) : entityProfiles.find(item => item.panel_id === panel.profileId);
       const entities = enrich(collections[profile?.source?.collection_key]);
-      const result = panel.kind === 'command' && profile ? createCommandPanelRuntime({ panelProfile: profile, abilityProvider, log }).setEntities(entities).resolve() : profile ? resolveEntityPanel(profile, entities) : null;
+      const queryGraph = panel.kind === 'entity' ? queryGraphs.find(item => item.query_name === profile?.filter?.entity_query_graph_ref) : null;
+      const result = panel.kind === 'command' && profile ? createCommandPanelRuntime({ panelProfile: profile, abilityProvider, log }).setEntities(entities).resolve() : profile ? resolveEntityPanel(profile, entities, queryGraph) : null;
       return <RuntimeAnchoredPanel key={panel.instanceKey} panel={panel} profile={profile} result={result} log={log} />;
     })}
   </div>;
