@@ -54,7 +54,7 @@ const tagMatch = (holder, tagPath, mode) =>
   mode === 'not_has' ? tagCount(holder, tagPath) === 0 : tagCount(holder, tagPath) > 0;
 
 // 单节点求值：输入实体集 -> 输出实体集
-function evaluateQueryNode(node, inputs, allEntities) {
+function evaluateQueryNode(node, inputs, allEntities, context) {
   const d = node.data || {};
   const list = inputs.entities || [];
   const a = inputs.a || [];
@@ -66,6 +66,11 @@ function evaluateQueryNode(node, inputs, allEntities) {
 
     case 'filter_prototype':
       return list.filter(e => !d.prototypeId || e.prototype_id === d.prototypeId);
+
+    case 'filter_control_context':
+      return context?.mode === 'Teams'
+        ? list.filter(e => Number(e.team_id) === Number(context.viewId))
+        : list.filter(e => Number(e.owner_player_id) === Number(context?.viewId));
 
     case 'filter_attribute':
       return list.filter(e => compare(attrValue(e, d.attributeId, d.key), d.operator, Number(d.threshold ?? 0)));
@@ -150,7 +155,7 @@ function evaluateQueryNode(node, inputs, allEntities) {
 }
 
 // 执行整张查询图
-export function executeQueryGraph({ nodes = [], connections = [] }, entities = []) {
+export function executeQueryGraph({ nodes = [], connections = [] }, entities = [], context = {}) {
   const results = {};
   const visiting = new Set();
 
@@ -167,7 +172,7 @@ export function executeQueryGraph({ nodes = [], connections = [] }, entities = [
       inputs[c.toPort] = resolve(c.fromNode);
     });
 
-    const out = evaluateQueryNode(node, inputs, entities);
+    const out = evaluateQueryNode(node, inputs, entities, context);
     visiting.delete(nodeId);
     results[nodeId] = out;
     return out;

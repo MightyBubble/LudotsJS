@@ -1,4 +1,4 @@
-import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat, Table } from 'lucide-react';
+import { Database, Filter, Tag, Link, MapPin, Box, GitMerge, ArrowUpDown, Hash, Percent, Network, Plus, Minus, Divide, Sigma, TrendingUp, Move, Palette, Download, Upload, X, Eye, CircleDot, CheckCircle, XCircle, Equal, ChevronRight, ChevronLeft, Layers, GitBranch, Repeat, Table, Crosshair } from 'lucide-react';
 
 import { ACTION_NODE_TYPES } from './actionNodes';
 import { PURE_NODE_TYPES } from './pureNodes';
@@ -256,6 +256,14 @@ export const NODE_TYPES = {
   filter_prototype: { 
     label: '原型过滤', 
     icon: Filter, 
+    category: '过滤',
+    graphTypes: ['query'],
+    inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],
+    outputs: [{ id: 'filtered', label: '过滤结果', type: 'entities' }]
+  },
+  filter_control_context: {
+    label: '控制上下文过滤',
+    icon: Crosshair,
     category: '过滤',
     graphTypes: ['query'],
     inputs: [{ id: 'entities', label: '实体集', type: 'entities' }],

@@ -9,6 +9,7 @@ import { base44 } from '@/api/base44Client';
 const nodeAccentColors = {
   entity_source: '#0e639c',
   filter_prototype: '#70ad47',
+  filter_control_context: '#38bdf8',
   filter_attribute: '#9b6bb3',
   filter_tag: '#ffc000',
   filter_relation: '#e67e22',
@@ -34,6 +35,7 @@ const nodeAccentColors = {
 const nodeLabels = {
   entity_source: '实体源',
   filter_prototype: '原型过滤',
+  filter_control_context: '控制上下文过滤',
   filter_attribute: '属性过滤',
   filter_tag: '标签过滤',
   filter_relation: '关系过滤',
@@ -179,6 +181,9 @@ export default function QueryNode({
             </Select>
           </div>
         );
+
+      case 'filter_control_context':
+        return <div className="text-xs text-white/60">匹配当前 Player / Team</div>;
 
       case 'filter_attribute':
         const attrKeys = getAttributeKeys(data.attributeId);

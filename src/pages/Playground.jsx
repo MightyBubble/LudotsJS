@@ -72,7 +72,7 @@ export default function PlaygroundPage() {
       <div className="relative flex-1 min-h-0">
         <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
         <SelectionInteractionOverlay config={template ? null : map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
-        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} systemCollections={systemCollections} log={log} />
+        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} />
       </div>
       <div className="h-40 shrink-0 border-t border-[#2A2E37] p-2"><RuntimeConsole log={log} /></div>
     </div>
