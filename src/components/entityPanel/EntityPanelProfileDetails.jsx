@@ -16,8 +16,8 @@ export default function EntityPanelProfileDetails({ draft, patch, collections = 
       </Section>
       <Section title="集合内过滤">
         <SelectField label="Entity Query Graph" value={panel.filter.entity_query_graph_ref}
-          options={queryGraphs.map(query => ({ value: query.query_name, label: query.query_name }))}
-          onChange={entity_query_graph_ref => patchPart('filter', { entity_query_graph_ref })}
+          options={[{ value: '__none__', label: '不使用查询图' }, ...queryGraphs.map(query => ({ value: query.query_name, label: query.query_name }))]}
+          onChange={value => patchPart('filter', { entity_query_graph_ref: value === '__none__' ? '' : value })}
           hint="查询图只在来源集合内执行；留空表示不过滤。技能、Buff、标签、属性与关系筛选统一在图中组合。" />
         {!queryGraphs.length && <p className="text-[10px] text-gray-500">请先在实体查询图中创建过滤查询。</p>}
       </Section>
