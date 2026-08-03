@@ -30,9 +30,14 @@ export default function PlaygroundPage() {
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
     base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
   ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords]) => {
-    const scopedMaps = m.filter(scope.inScope); setTemplates(p); setTopologies(t.filter(scope.inScope)); setMaps(scopedMaps);
+    const scopedMaps = m.filter(scope.inScope);
+    const scopedTopologies = t.filter(scope.inScope);
+    const initialMap = scopedMaps[0] || null;
+    const initialTopology = scopedTopologies.find(item => item.map_id === initialMap?.map_id) || null;
+    setTemplates(p); setTopologies(scopedTopologies); setMaps(scopedMaps);
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
-    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setMapId(scopedMaps[0]?.id || '');
+    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setMapId(initialMap?.id || '');
+    setTopologyId(initialTopology?.id || ''); setViewMode('Players'); setViewId(initialTopology?.players?.[0]?.player_id || 0);
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
   const availableTopologies = useMemo(() => topologies.filter((item) => item.map_id === map?.map_id), [topologies, map?.map_id]);
