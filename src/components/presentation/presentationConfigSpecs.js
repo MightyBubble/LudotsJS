@@ -11,4 +11,6 @@ export const PRESENTATION_CONFIGS = {
     blank: () => ({ profile_id: `profile_${Date.now()}`, animator_controller_id: '', state_clips: [], builtin_clips: [] }) },
   text: { entity: 'PresentationTextToken', key: 'token_id', title: 'Text Tokens', query: 'presentation_text_tokens',
     blank: () => ({ token_id: `text_${Date.now()}`, arg_count: 0, locales: {} }) },
+  uiItem: { entity: 'UIItemPresentationProfile', key: 'profile_id', title: 'UI Item Presenters', query: 'ui_item_presenters',
+    blank: () => ({ profile_id: `ui_item_${Date.now()}`, item_kind: 'entity', label: '', description: '', items: [], attribute_text_bindings: [], tag_text_bindings: [] }) },
 };

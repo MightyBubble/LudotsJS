@@ -6,7 +6,7 @@ import PanelFixedSlotsEditor from './PanelFixedSlotsEditor';
 import PanelDynamicLayoutEditor from './PanelDynamicLayoutEditor';
 import { normalizePanelProfile } from './panelProfileModel';
 
-export default function CommandPanelProfileDetails({ draft, patch, tags = [], roles = [], actions = [], collections = [] }) {
+export default function CommandPanelProfileDetails({ draft, patch, tags = [], roles = [], actions = [], collections = [], itemProfiles = [] }) {
   const panel = normalizePanelProfile(draft);
   const patchSection = (key, update) => patch({ [key]: { ...panel[key], ...update } });
   const layout = panel.layout;
@@ -22,6 +22,7 @@ export default function CommandPanelProfileDetails({ draft, patch, tags = [], ro
             <TextField label="显示名" value={panel.label} onChange={label => patch({ label })} />
           </div>
           <TextField label="说明" value={panel.description} onChange={description => patch({ description })} />
+          <SelectField label="Ability Item Presenter" value={panel.item_presentation_profile_ref} options={itemProfiles.map(item => ({ value: item.profile_id, label: item.label ? `${item.label} · ${item.profile_id}` : item.profile_id }))} onChange={item_presentation_profile_ref => patch({ item_presentation_profile_ref })} />
         </Section>
 
         <Section title="来源">

@@ -6,11 +6,12 @@ export function normalizeEntityPanelProfile(profile = {}) {
     source: profile.source || { collection_key: '' },
     filter: { entity_query_graph_ref: '', ...(profile.filter || {}) },
     layout: { mode: 'flat', columns: 4, visible_rows: null, ...(profile.layout || {}) },
+    item_presentation_profile_ref: profile.item_presentation_profile_ref || '',
     selection: { mode: 'multiple', ...(profile.selection || {}) },
   };
 }
 
-export function resolveEntityPanel(profileRecord, entities = [], queryGraph = null) {
+export function resolveEntityPanel(profileRecord, entities = [], queryGraph = null, itemPresenter = null) {
   const profile = normalizeEntityPanelProfile(profileRecord);
   const runtimeEntities = entities.map(entity => ({ ...entity, id: entity.id || entity.entity_id || entity.instance_id }));
   const filtered = queryGraph
@@ -26,5 +27,6 @@ export function resolveEntityPanel(profileRecord, entities = [], queryGraph = nu
         groups.set(key, current);
         return groups;
       }, new Map()).values()];
-  return { profile, cards, entityCount: filtered.length };
+  const presentedCards = cards.map(card => ({ ...card, display: itemPresenter?.resolve(card.entities[0], 'entity', profile.item_presentation_profile_ref) || { title: card.label } }));
+  return { profile, cards: presentedCards, entityCount: filtered.length };
 }

@@ -25,7 +25,7 @@ export function normalizePanelProfile(record = {}) {
     },
     dynamic: rawLayout.dynamic || { buckets: [], hotkey_action_ids: [] },
   };
-  return { ...record, source, filter, grouping, layout };
+  return { ...record, item_presentation_profile_ref: record.item_presentation_profile_ref || '', source, filter, grouping, layout };
 }
 
 export function preparePanelProfileSave(record) {
@@ -34,6 +34,7 @@ export function preparePanelProfileSave(record) {
     panel_id: panel.panel_id,
     label: panel.label || '',
     description: panel.description || '',
+    item_presentation_profile_ref: panel.item_presentation_profile_ref || '',
     source: panel.source,
     filter: panel.filter,
     grouping: panel.grouping,

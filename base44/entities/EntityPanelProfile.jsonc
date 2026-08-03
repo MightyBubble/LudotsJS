@@ -13,6 +13,10 @@
     "description": {
       "type": "string"
     },
+    "item_presentation_profile_ref": {
+      "type": "string",
+      "description": "UIItemPresentationProfile.profile_id\uff08item_kind=entity\uff09"
+    },
     "source": {
       "type": "object",
       "additionalProperties": false,
@@ -32,7 +36,7 @@
       "properties": {
         "entity_query_graph_ref": {
           "type": "string",
-          "description": "\u5728\u6765\u6e90\u96c6\u5408\u5185\u6267\u884c\u7684 EntityQuery.query_name\uff1b\u7559\u7a7a\u8868\u793a\u4e0d\u8fc7\u6ee4"
+          "description": "EntityQuery.query_name\uff1b\u7559\u7a7a\u8868\u793a\u4e0d\u8fc7\u6ee4"
         }
       }
     },

@@ -1,0 +1,154 @@
+{
+  "name": "UIItemPresentationProfile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "description": "UI \u57df Item Presenter \u7684\u7a33\u5b9a\u6807\u8bc6"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "item_kind": {
+      "type": "string",
+      "enum": [
+        "entity",
+        "ability"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "description": "EntityPrototype.prototype_id\u3001Ability.ability_id \u6216 *"
+          },
+          "icon_glyph": {
+            "type": "string"
+          },
+          "accent_color": {
+            "type": "string"
+          },
+          "text": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title_token_ref": {
+                "type": "string"
+              },
+              "subtitle_token_ref": {
+                "type": "string"
+              },
+              "body_token_ref": {
+                "type": "string"
+              },
+              "tooltip_token_ref": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "target_id",
+          "text"
+        ]
+      }
+    },
+    "attribute_text_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "attribute_id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string",
+            "enum": [
+              "stat",
+              "badge",
+              "body",
+              "tooltip"
+            ],
+            "default": "stat"
+          },
+          "label_token_ref": {
+            "type": "string"
+          },
+          "value_token_ref": {
+            "type": "string"
+          },
+          "display_mode": {
+            "type": "string",
+            "enum": [
+              "current",
+              "current_over_base",
+              "integer",
+              "decimal"
+            ],
+            "default": "current"
+          },
+          "priority": {
+            "type": "integer",
+            "default": 0
+          }
+        },
+        "required": [
+          "attribute_id",
+          "slot",
+          "display_mode"
+        ]
+      }
+    },
+    "tag_text_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tag_id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string",
+            "enum": [
+              "title",
+              "subtitle",
+              "body",
+              "badge",
+              "tooltip"
+            ],
+            "default": "badge"
+          },
+          "text_token_ref": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "default": 0
+          }
+        },
+        "required": [
+          "tag_id",
+          "slot",
+          "text_token_ref"
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "item_kind",
+    "items",
+    "attribute_text_bindings",
+    "tag_text_bindings"
+  ]
+}

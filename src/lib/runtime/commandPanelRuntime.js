@@ -39,7 +39,7 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log, 
           return;
         }
       }
-      const ability = abilityProvider.get(abilityId);
+      const ability = abilityProvider.get(abilityId, panel.item_presentation_profile_ref);
       if (!ability) {
         errors.push({ slot_id: slot.slot_id, reason: 'ability_not_found', role_id: roleId, ability_id: abilityId });
         return;
@@ -63,7 +63,7 @@ export function createCommandPanelRuntime({ panelProfile, abilityProvider, log, 
     const errors = [];
     const groups = new Map();
     for (const entity of entities) {
-      for (const { ability_id, ability } of abilityProvider.listForEntity(entity)) {
+      for (const { ability_id, ability } of abilityProvider.listForEntity(entity, panel.item_presentation_profile_ref)) {
         if (!ability) { errors.push({ entity_id: entity.entity_id, reason: 'ability_not_found', ability_id }); continue; }
         const tags = ability.catalogTags;
         if (!hasAll(tags, panel.filter.required_all_tags || []) || hasAny(tags, panel.filter.blocked_any_tags || [])) continue;

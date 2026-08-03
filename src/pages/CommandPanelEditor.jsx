@@ -27,6 +27,11 @@ export default function CommandPanelEditorPage() {
     queryFn: () => base44.entities.AbilitySemanticProfile.list('profile_id'),
     initialData: [],
   });
+  const { data: itemProfiles = [] } = useQuery({
+    queryKey: ['ui-item-profiles', 'ability'],
+    queryFn: () => base44.entities.UIItemPresentationProfile.filter({ item_kind: 'ability' }, 'profile_id'),
+    initialData: [],
+  });
 
   const actions = [...new Map(inputConfigs.flatMap(c => c.actions || []).map(action => [action.id, action])).values()];
   const roles = [...new Map(semanticProfiles.flatMap(profile => profile.roles || []).map(role => [role.role_id, role])).values()];
@@ -66,6 +71,6 @@ export default function CommandPanelEditorPage() {
     onDelete={record => window.confirm(`确定删除「${record.panel_id}」吗？`) && editor.remove(record.id)}
     onSave={editor.save} dirty={editor.dirty}>
     {editor.draft && <CommandPanelProfileDetails draft={editor.draft} patch={editor.patch} tags={tags} roles={roles} actions={actions}
-      collections={collections} />}
+      collections={collections} itemProfiles={itemProfiles} />}
   </RecordWorkspace>;
 }

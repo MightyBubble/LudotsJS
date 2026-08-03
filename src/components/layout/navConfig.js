@@ -1,7 +1,7 @@
 import {
   Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Gamepad2,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
-  Image as ImageIcon, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon,
+  Image as ImageIcon, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon, PanelsTopLeft,
 } from 'lucide-react';
 
 /**
@@ -115,6 +115,7 @@ export const NAV_GROUPS = [
       { page: 'PresentationRenderAssetEditor', label: '渲染资产', icon: ImageIcon },
       { page: 'PresentationHostResourceEditor', label: '宿主资源', icon: LinkIcon },
       { page: 'PresentationTextEditor', label: '文本', icon: BookOpen },
+      { page: 'PresentationConfigEditor', search: '?type=uiItem', label: 'UI Item Presenter', icon: PanelsTopLeft },
     ],
   },
   {

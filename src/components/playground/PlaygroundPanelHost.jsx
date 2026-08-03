@@ -3,9 +3,10 @@ import { createAbilityProvider } from '@/lib/runtime/abilityProvider';
 import { createCommandPanelRuntime } from '@/lib/runtime/commandPanelRuntime';
 import { resolveEntityPanel } from '@/lib/runtime/entityPanelRuntime';
 import { executeQueryGraph } from '@/lib/queryRuntime';
+import { createUIItemPresenter } from '@/lib/runtime/uiItemPresentationRuntime';
 import RuntimeAnchoredPanel from '@/components/runtime/RuntimeAnchoredPanel';
 
-export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, queryGraphs, abilities, prototypes, systemCollections = {}, controlContext, log }) {
+export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, queryGraphs, abilities, prototypes, uiItemProfiles = [], textTokens = [], systemCollections = {}, controlContext, log }) {
   const [panels, setPanels] = useState([]), [collections, setCollections] = useState({}), [controls, setControls] = useState([]);
   const handledRevision = useRef(-1);
   useEffect(() => {
@@ -24,7 +25,8 @@ export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entity
     lifecycle.panelOperations.forEach(operation => log.info('panel', `${operation.action} ${operation.instanceKey || operation.tabGroup}`, operation));
     lifecycle.collectionUpdates.forEach(update => log.info('collection', `${update.collectionKey} ← ${update.entities?.length || 0} entities`));
   }, [lifecycle.revision]);
-  const abilityProvider = useMemo(() => createAbilityProvider(abilities), [abilities]);
+  const itemPresenter = useMemo(() => createUIItemPresenter(uiItemProfiles, textTokens), [uiItemProfiles, textTokens]);
+  const abilityProvider = useMemo(() => createAbilityProvider(abilities, itemPresenter), [abilities, itemPresenter]);
   const controlCollections = useMemo(() => Object.fromEntries(controls.flatMap(operation => {
     const profile = controlProfiles.find(item => item.control_plane_id === operation.profileId);
     const query = queryGraphs.find(item => item.query_name === profile?.entity_query_graph_ref);
@@ -41,7 +43,7 @@ export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entity
       const sourceEntities = Object.prototype.hasOwnProperty.call(systemCollections, collectionKey) ? systemCollections[collectionKey] : controlCollections[collectionKey] || collections[collectionKey];
       const entities = enrich(sourceEntities);
       const queryGraph = panel.kind === 'entity' ? queryGraphs.find(item => item.query_name === profile?.filter?.entity_query_graph_ref) : null;
-      const result = panel.kind === 'command' && profile ? createCommandPanelRuntime({ panelProfile: profile, abilityProvider, log }).setEntities(entities).resolve() : profile ? resolveEntityPanel(profile, entities, queryGraph) : null;
+      const result = panel.kind === 'command' && profile ? createCommandPanelRuntime({ panelProfile: profile, abilityProvider, log }).setEntities(entities).resolve() : profile ? resolveEntityPanel(profile, entities, queryGraph, itemPresenter) : null;
       return <RuntimeAnchoredPanel key={panel.instanceKey} panel={panel} profile={profile} result={result} log={log} />;
     })}
   </div>;

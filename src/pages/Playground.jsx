@@ -17,6 +17,7 @@ export default function PlaygroundPage() {
   const [blueprints, setBlueprints] = useState([]), [actionGraphs, setActionGraphs] = useState([]);
   const [commandProfiles, setCommandProfiles] = useState([]), [entityProfiles, setEntityProfiles] = useState([]), [controlProfiles, setControlProfiles] = useState([]);
   const [abilities, setAbilities] = useState([]), [queryGraphs, setQueryGraphs] = useState([]);
+  const [uiItemProfiles, setUiItemProfiles] = useState([]), [textTokens, setTextTokens] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
   const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
@@ -30,14 +31,15 @@ export default function PlaygroundPage() {
     base44.entities.ActionGraph.list('-updated_date', 200), base44.entities.CommandPanelProfile.list('panel_id', 100),
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
     base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
-  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords]) => {
+    base44.entities.UIItemPresentationProfile.list('profile_id', 200), base44.entities.PresentationTextToken.list('token_id', 500),
+  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens]) => {
     const scopedMaps = m.filter(scope.inScope);
     const scopedTopologies = t.filter(scope.inScope);
     const initialMap = scopedMaps[0] || null;
     const initialTopology = scopedTopologies.find(item => item.map_id === initialMap?.map_id) || null;
     setTemplates(p); setTopologies(scopedTopologies); setMaps(scopedMaps);
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
-    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setMapId(initialMap?.id || '');
+    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setUiItemProfiles(itemProfiles); setTextTokens(tokens); setMapId(initialMap?.id || '');
     setTopologyId(initialTopology?.id || ''); setViewMode('Players'); setViewId(initialTopology?.players?.[0]?.player_id || 0);
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
@@ -72,7 +74,7 @@ export default function PlaygroundPage() {
       <div className="relative flex-1 min-h-0">
         <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
         <SelectionInteractionOverlay config={template ? null : map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
-        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} />
+        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} uiItemProfiles={uiItemProfiles} textTokens={textTokens} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} />
       </div>
       <div className="h-40 shrink-0 border-t border-[#2A2E37] p-2"><RuntimeConsole log={log} /></div>
     </div>
