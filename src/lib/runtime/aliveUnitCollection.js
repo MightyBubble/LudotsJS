@@ -2,6 +2,7 @@ const isAlive = entity => entity?.is_alive !== false && entity?.alive !== false 
 
 const normalizeMapEntity = entity => ({
   ...entity,
+  ...(entity.overrides || {}),
   id: entity.instance_id,
   entity_id: entity.instance_id,
   prototype_id: entity.template,
