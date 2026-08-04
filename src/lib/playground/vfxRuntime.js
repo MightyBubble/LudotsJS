@@ -1,6 +1,25 @@
 import { BatchedRenderer, QuarksLoader, QuarksUtil } from 'three.quarks';
 
 const scripts = new Map();
+
+const linkQuarksSubEmitters = (root) => {
+  const emitters = new Map();
+  root.traverse((child) => {
+    if (child.system) emitters.set(child.uuid, child);
+  });
+  root.traverse((child) => {
+    for (const behavior of child.system?.behaviors || []) {
+      if (behavior.type !== 'EmitSubParticleSystem') continue;
+      const reference = behavior.subParticleSystem;
+      const emitter = typeof reference === 'string'
+        ? emitters.get(reference)
+        : reference?.system ? reference : emitters.get(reference?.uuid);
+      behavior.subParticleSystem = emitter?.system ? emitter : undefined;
+    }
+  });
+  return root;
+};
+
 const loadScript = (uri) => {
   if (scripts.has(uri)) return scripts.get(uri);
   const pending = new Promise((resolve, reject) => {
@@ -18,7 +37,10 @@ export function createVfxRuntime(scene, renderer, camera) {
   const loaded = new Map();
   let effekseerReady = false;
   const load = async (asset) => {
-    if (asset.backend === 'quarks') return new QuarksLoader().loadAsync(asset.source_uris[0]);
+    if (asset.backend === 'quarks') {
+      const effect = await new QuarksLoader().loadAsync(asset.source_uris[0]);
+      return linkQuarksSubEmitters(effect);
+    }
     if (loaded.has(asset.asset_id)) return loaded.get(asset.asset_id);
     await loadScript(asset.runtime?.script_uri);
     if (!effekseerReady) {
