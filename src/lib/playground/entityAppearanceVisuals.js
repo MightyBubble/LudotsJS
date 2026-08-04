@@ -12,15 +12,39 @@ export function createMissingAssetBillboard() {
   return sprite;
 }
 
-export async function createEntityAppearanceVisual(appearance) {
-  if (appearance?.kind !== 'model') return createMissingAssetBillboard();
-  try {
-    const acquired = await acquireModelAsset(appearance);
+const applyTransform = (object, binding = {}) => {
+  const offset = binding.localOffset || [0, 0, 0];
+  const rotation = binding.localRotation || [0, 0, 0, 1];
+  const scale = binding.localScale || [1, 1, 1];
+  object.position.fromArray(offset);
+  object.quaternion.fromArray(rotation);
+  object.scale.multiply(new THREE.Vector3(...scale));
+};
+
+const buildPerformerNode = async (node) => {
+  const group = new THREE.Group();
+  group.name = node.definitionId || 'performer';
+  const assetBehaviors = (node.behaviors || []).filter(item => item.kind === 'AssetBinding' && item.resolvedAsset?.uri);
+  for (const behavior of assetBehaviors) {
+    const acquired = await acquireModelAsset(behavior.resolvedAsset);
     const object = acquired.object;
     const box = new THREE.Box3().setFromObject(object); const size = box.getSize(new THREE.Vector3());
-    const fit = 1.8 / Math.max(size.x, size.y, size.z, 0.001); const configured = Number(appearance.scale?.[0]) || 1;
-    object.scale.setScalar(fit * configured); object.position.y = -box.min.y * fit * configured;
-    object.userData.visualKind = 'model'; object.userData.releaseModel = acquired.release;
+    const fit = 1.8 / Math.max(size.x, size.y, size.z, 0.001);
+    object.scale.setScalar(fit); object.position.y = -box.min.y * fit;
+    applyTransform(object, behavior.assetBinding);
+    object.userData.releaseModel = acquired.release;
+    group.add(object);
+  }
+  for (const child of node.children || []) group.add(await buildPerformerNode(child));
+  group.userData.visualKind = assetBehaviors.length || group.children.length ? 'model' : 'empty';
+  return group;
+};
+
+export async function createEntityAppearanceVisual(appearance) {
+  if (appearance?.kind !== 'performer') return createMissingAssetBillboard();
+  try {
+    const object = await buildPerformerNode(appearance.tree);
+    if (!object.children.length) return createMissingAssetBillboard();
     return object;
   } catch { return createMissingAssetBillboard(); }
 }
@@ -44,6 +68,6 @@ export function disposeAppearanceVisual(object) {
     if (!child.material || (!child.isSprite && !child.userData.ownsGhostMaterial)) return;
     (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => { if (child.isSprite) material.map?.dispose(); material.dispose(); });
   });
-  object.userData.releaseModel?.();
+  object.traverse(child => child.userData.releaseModel?.());
   object.parent?.remove(object);
 }
