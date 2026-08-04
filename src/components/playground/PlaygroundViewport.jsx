@@ -1,12 +1,12 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { createPlaygroundScene } from '@/lib/playground/playgroundScene';
 
-const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick }, ref) {
+const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick, onCancelPlacement }, ref) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
 
   useEffect(() => {
-    const scene = createPlaygroundScene(mountRef.current, { onPlace, onTick });
+    const scene = createPlaygroundScene(mountRef.current, { onPlace, onTick, onCancelPlacement });
     sceneRef.current = scene;
     return () => scene.dispose();
     // eslint-disable-next-line react-hooks/exhaustive-deps

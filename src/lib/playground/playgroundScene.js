@@ -5,7 +5,7 @@ const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 let HALF_X = 10, HALF_Z = 7;
 
 // 干净的 playground 场景：地面 + 模板放置 + 播放/暂停时钟。
-export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
+export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacement } = {}) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0c0f13);
   const camera = new THREE.PerspectiveCamera(48, mount.clientWidth / mount.clientHeight, 0.1, 200);
@@ -136,9 +136,16 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
     applyView();
     onPlace?.({ id: entity.id, prototype_id: entity.prototype_id, name: entity.name, owner_player_id: entity.owner_player_id, team_id: entity.team_id, position: entity.position });
   };
+  const handleContextMenu = (event) => {
+    if (!template) return;
+    event.preventDefault();
+    ghost.visible = false;
+    onCancelPlacement?.();
+  };
 
   renderer.domElement.addEventListener('pointermove', handleMove);
   renderer.domElement.addEventListener('click', handleClick);
+  renderer.domElement.addEventListener('contextmenu', handleContextMenu);
 
   const clock = new THREE.Clock();
   const frame = () => {
@@ -209,6 +216,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick } = {}) {
       window.removeEventListener('resize', resize);
       renderer.domElement.removeEventListener('pointermove', handleMove);
       renderer.domElement.removeEventListener('click', handleClick);
+      renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
       mapMeshes.splice(0).forEach(disposeMesh);
       clearWorldSelection();
       renderer.dispose();

@@ -62,6 +62,7 @@ export default function PlaygroundPage() {
   const chooseMap = (id) => { const next = maps.find((item) => item.id === id); const nextTopology = topologies.find((item) => item.map_id === next?.map_id); setMapId(id); setTopologyId(nextTopology?.id || ''); setViewMode('Players'); setViewId(nextTopology?.players[0]?.player_id || 0); setPlaced([]); setClearToken((token) => token + 1); };
   const participantView = useMemo(() => ({ topologies: availableTopologies, topologyId, onTopology: (id) => { const next = availableTopologies.find((item) => item.id === id); setTopologyId(id); setViewMode('Players'); setViewId(next?.players[0]?.player_id || 0); }, mode: viewMode, onMode: (mode) => { setViewMode(mode); setViewId(mode === 'Players' ? topology?.players[0]?.player_id || 0 : topology?.teams[0]?.team_id || 0); }, viewId, onView: setViewId }), [availableTopologies, topologyId, topology, viewMode, viewId]);
   const onPlace = useCallback((entity) => setPlaced((list) => [...list, entity]), []);
+  const cancelPlacement = useCallback(() => setSelectedId(''), []);
   const clear = () => { setPlaced([]); setClearToken((token) => token + 1); };
   const onSelection = (eventId, entities) => log.info('selection', `${eventId} → ${entities.length} entities`, entities);
 
@@ -69,7 +70,7 @@ export default function PlaygroundPage() {
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
       <PlaygroundToolbar maps={maps} mapId={mapId} onMap={chooseMap} mapEntityCount={map?.entities?.length || 0} paused={paused} onToggle={togglePlayback} onEnd={endLevel} onClear={clear} count={placed.length} elapsed={elapsed} templateName={template?.name || template?.prototype_id || ''} participantView={participantView} lifecycle={lifecycle} selectionConfig={map?.selection_interaction} selectionMode={selectionMode} onSelectionMode={setSelectionMode} />
       <div className="relative flex-1 min-h-0">
-        <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
+        <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} onCancelPlacement={cancelPlacement} />
         <SelectionInteractionOverlay config={template ? null : map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
         <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} uiItemProfiles={uiItemProfiles} textTokens={textTokens} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} selectedTemplateId={selectedId} onSelectTemplate={setSelectedId} />
       </div>
