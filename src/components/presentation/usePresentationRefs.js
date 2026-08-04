@@ -5,6 +5,7 @@ const defs = [
   ['performers', 'Performer', 'performer_id', 'label'],
   ['meshes', 'PresentationMeshAsset', 'asset_id'],
   ['materials', 'PresentationMaterialAsset', 'asset_id'],
+  ['vfxAssets', 'PresentationEffectAsset', 'asset_id'],
   ['clips', 'AnimationClipAsset', 'asset_id'],
   ['controllers', 'AnimatorControllerDefinition', 'controller_id'],
   ['profiles', 'AnimationProfileDefinition', 'profile_id'],
@@ -24,7 +25,7 @@ export default function usePresentationRefs() {
   defs.forEach(([name,, key, label], i) => {
     refs[name] = (results[i].data || []).map(r => ({ value: r[key], label: label && r[label] ? `${r[label]} · ${r[key]}` : r[key] })).filter(o => o.value);
   });
-  refs.logicalAssets = [...refs.meshes, ...refs.materials, ...refs.clips, ...refs.hostAssets]
+  refs.logicalAssets = [...refs.meshes, ...refs.materials, ...refs.vfxAssets, ...refs.clips, ...refs.hostAssets]
     .filter((o, i, all) => all.findIndex(x => x.value === o.value) === i);
   refs.eventKeys = [...refs.tags, ...refs.attributes];
   return refs;

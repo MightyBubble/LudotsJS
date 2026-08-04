@@ -7,7 +7,7 @@ import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
-const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline'];
+const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline', 'Vfx'];
 
 export default function HostAssetBindingDetails({ draft, patch }) {
   const { data: assets = [] } = useQuery({ queryKey: ['assets'], queryFn: () => base44.entities.Asset.list() });
