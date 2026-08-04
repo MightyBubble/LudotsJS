@@ -8,6 +8,7 @@ export default function VfxPreview({ asset }) {
   const hostRef = useRef(null);
   const playRef = useRef(null);
   const [status, setStatus] = useState('ready');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const host = hostRef.current;
@@ -16,7 +17,11 @@ export default function VfxPreview({ asset }) {
     const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(host.clientWidth, 320); host.appendChild(renderer.domElement);
     scene.add(new THREE.GridHelper(8, 8, 0x475569, 0x1f2937));
     const runtime = createVfxRuntime(scene, renderer, camera);
-    const play = async () => { setStatus('loading'); try { await runtime.play(asset, { x: 0, y: 0.5, z: 0 }); setStatus('playing'); } catch { setStatus('error'); } };
+    const play = async () => {
+      setStatus('loading'); setError('');
+      try { await runtime.play(asset, { x: 0, y: 0.5, z: 0 }); setStatus('playing'); }
+      catch (reason) { setError(reason?.message || '未知错误'); setStatus('error'); }
+    };
     playRef.current = play;
     const clock = new THREE.Clock(); let raf;
     const tick = () => { raf = requestAnimationFrame(tick); runtime.update(clock.getDelta()); renderer.render(scene, camera); runtime.draw(); };
@@ -29,6 +34,6 @@ export default function VfxPreview({ asset }) {
       <Button size="sm" onClick={() => playRef.current?.()} disabled={status === 'loading'} className="h-7 gap-1 bg-[#1E2128]"><RotateCcw className="h-3 w-3" />重新播放</Button></div>
     <div ref={hostRef} data-testid="vfx-preview" className="overflow-hidden rounded border border-[#2A2E37]" />
     {status === 'loading' && <p className="text-[11px] text-gray-500"><Play className="mr-1 inline h-3 w-3" />正在加载特效…</p>}
-    {status === 'error' && <p className="text-[11px] text-red-400">特效加载失败，请检查源文件与运行时资源。</p>}
+    {status === 'error' && <p className="text-[11px] text-red-400">{error}</p>}
   </div>;
 }
