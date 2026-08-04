@@ -4,6 +4,8 @@ import { usePageActionsSlot } from "@/components/shell/PageActions";
 import { useI18n } from "@/i18n/I18nProvider";
 
 const itemPath = (item) => `/${item.page}${item.search || ""}`;
+const itemIsActive = (item, currentPageName, search) =>
+  item.page === currentPageName && (item.searchPrefix ? search.startsWith(item.searchPrefix) : (item.search || "") === search);
 
 export default function NavTabsBar({ groups, currentPageName, leading = null }) {
   const location = useLocation();
@@ -22,7 +24,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
   useEffect(() => {
     if (!currentGroup) return;
     const match = currentGroup.items.find(
-      i => i.page === currentPageName && (i.search || "") === (location.search || "")
+      i => itemIsActive(i, currentPageName, location.search || "")
     ) || currentGroup.items.find(i => i.page === currentPageName);
     if (match) lastVisited.current[currentGroup.key] = itemPath(match);
   }, [currentGroup?.key, currentPageName, location.search]);
@@ -59,9 +61,7 @@ export default function NavTabsBar({ groups, currentPageName, leading = null }) 
       {/* 二级：当前模块的条目（即页面标题） + 右侧当前页操作区 */}
       <div className="min-h-9 h-auto bg-[#0D0F14] border-b border-[#2A2E37] flex flex-wrap items-center gap-1 px-2 py-1 overflow-visible">
         {active?.items.map(item => {
-          const isActive =
-            item.page === currentPageName &&
-            (item.search || "") === (location.search || "");
+          const isActive = itemIsActive(item, currentPageName, location.search || "");
           return (
             <Link
               key={item.page + (item.search || "")}

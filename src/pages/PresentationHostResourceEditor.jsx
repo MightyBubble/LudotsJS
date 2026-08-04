@@ -4,17 +4,24 @@ import PresentationDomainEditor from '@/components/presentation/PresentationDoma
 import HostAssetBindingEditor from '@/pages/HostAssetBindingEditor';
 import AssetLibrary from '@/pages/AssetLibrary';
 
-const tabs = [
-  { value: 'bindings', label: '宿主绑定', to: '/PresentationHostResourceEditor?view=bindings' },
-  { value: 'library', label: '源资源库', to: '/PresentationHostResourceEditor?view=library' },
+const resourceTypes = [
+  ['image', '图像'], ['model', '模型'], ['animation', '动画'], ['audio', '音效'],
+  ['material', '材质'], ['particle', '粒子'], ['prefab', '预制体'], ['data', '数据'],
+  ['script', '脚本'], ['other', '其他'],
 ];
 
+const typeTabs = resourceTypes.map(([value, label]) => ({
+  value, label, to: `/PresentationHostResourceEditor?view=library&type=${value}`,
+}));
+
 export default function PresentationHostResourceEditor() {
-  const requested = new URLSearchParams(useLocation().search).get('view');
-  const view = requested === 'library' ? 'library' : 'bindings';
+  const params = new URLSearchParams(useLocation().search);
+  if (params.get('view') !== 'library') return <HostAssetBindingEditor />;
+  const requestedType = params.get('type');
+  const type = resourceTypes.some(([value]) => value === requestedType) ? requestedType : 'image';
   return (
-    <PresentationDomainEditor tabs={tabs} active={view}>
-      {view === 'library' ? <AssetLibrary /> : <HostAssetBindingEditor />}
+    <PresentationDomainEditor tabs={typeTabs} active={type}>
+      <AssetLibrary />
     </PresentationDomainEditor>
   );
 }
