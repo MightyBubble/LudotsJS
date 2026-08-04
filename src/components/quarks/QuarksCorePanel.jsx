@@ -1,5 +1,6 @@
 import React from 'react';
 import QuarksValueField from '@/components/quarks/QuarksValueField';
+import QuarksColorField from '@/components/quarks/QuarksColorField';
 
 const Toggle = ({ label, value, onChange }) => <label className="flex items-center gap-2 text-xs text-gray-300"><input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} />{label}</label>;
 export default function QuarksCorePanel({ ps, patch }) {
@@ -10,5 +11,6 @@ export default function QuarksCorePanel({ ps, patch }) {
     <QuarksValueField label="初始速度" value={ps.startSpeed} onChange={startSpeed => patch({ startSpeed })}/>
     <QuarksValueField label="初始尺寸" value={ps.startSize} onChange={startSize => patch({ startSize })}/>
     <QuarksValueField label="初始旋转" value={ps.startRotation} onChange={startRotation => patch({ startRotation })}/>
+    <QuarksColorField value={ps.startColor} onChange={startColor => patch({ startColor })}/>
   </div>;
 }

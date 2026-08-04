@@ -8,7 +8,6 @@ import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section } from '@/components/ludots/ui';
 import AssetGenerationPanel from '@/components/asset/AssetGenerationPanel';
 import ModelPreview from '@/components/asset/ModelPreview';
-import VfxPreview from '@/components/asset/VfxPreview';
 import QuarksEditor from '@/components/quarks/QuarksEditor';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
@@ -67,7 +66,6 @@ export default function AssetLibraryPage() {
           <Section title={getSourceFileName(draft)}>
             {draft.asset_type === 'audio' && draft.uri && <audio controls src={draft.uri} className="w-full h-8" />}
             {draft.asset_type === 'model' && <ModelPreview uri={draft.uri} resourceMap={draft.metadata?.resource_map} />}
-            {draft.asset_type === 'particle' && linkedEffect && <VfxPreview asset={linkedEffect} />}
             {draft.asset_type === 'particle' && !draft.uri && <p className="text-xs text-gray-500">上传 Quarks JSON 后即可编辑与预览。</p>}
             {(draft.preview_uri || (draft.asset_type === 'image' && draft.uri)) && (
               <img src={draft.preview_uri || draft.uri} alt={getSourceFileName(draft)} className="max-h-48 rounded border border-[#2A2E37]" />
