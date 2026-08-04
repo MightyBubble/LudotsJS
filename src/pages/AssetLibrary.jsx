@@ -10,6 +10,7 @@ import AssetGenerationPanel from '@/components/asset/AssetGenerationPanel';
 import ModelPreview from '@/components/asset/ModelPreview';
 import QuarksEditor from '@/components/quarks/QuarksEditor';
 import QuarksGeneratorPanel from '@/components/quarks/QuarksGeneratorPanel';
+import UnityPackageImport from '@/components/asset/UnityPackageImport';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
 const TYPE_LABELS = { model: '模型', animation: '动画', audio: '音效', image: '图像' };
@@ -62,6 +63,7 @@ export default function AssetLibraryPage() {
       })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create} onDelete={handleDelete} onSave={save} dirty={dirty}
+      headerRight={<UnityPackageImport />}
     >
       {draft && (
         <div className={draft.asset_type === 'particle' ? 'w-full' : 'max-w-2xl'}>
