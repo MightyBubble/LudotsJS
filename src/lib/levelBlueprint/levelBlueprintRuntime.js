@@ -53,6 +53,12 @@ export function createLevelBlueprintRuntime({ blueprint, actionGraphs = [], onAc
           profileId: node.data?.profileId, instanceKey: node.data?.instanceKey,
           anchor: { horizontal: node.data?.anchorHorizontal, vertical: node.data?.anchorVertical, offsetX: node.data?.offsetX, offsetY: node.data?.offsetY },
         });
+      } else if (node.type === 'level_create_runtime_console' || node.type === 'level_create_entity_palette') {
+        result.panelOperations.push({
+          action: 'create', kind: node.type === 'level_create_runtime_console' ? 'console' : 'entity_palette',
+          instanceKey: node.data?.instanceKey,
+          anchor: { horizontal: node.data?.anchorHorizontal, vertical: node.data?.anchorVertical, offsetX: node.data?.offsetX, offsetY: node.data?.offsetY },
+        });
       } else if (node.type === 'level_close_runtime_profile') {
         result.panelOperations.push({ action: 'close', instanceKey: node.data?.instanceKey });
         result.controlPlaneOperations.push({ action: 'close', instanceKey: node.data?.instanceKey });

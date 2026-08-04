@@ -1,4 +1,4 @@
-import { Radio, Play, Download, Upload, ListTree, GitBranch, ScrollText, PanelsTopLeft, XCircle, Crosshair, Network } from 'lucide-react';
+import { Radio, Play, Download, Upload, ListTree, GitBranch, ScrollText, PanelsTopLeft, XCircle, Crosshair, Network, Terminal, Boxes } from 'lucide-react';
 import { LEVEL_LIFECYCLE_EVENTS, levelBuiltinEventNodeType } from '@/lib/levelBlueprint/levelLifecycle';
 
 const eventOutputs = [
@@ -85,6 +85,28 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
       { key: 'offsetX', type: 'number', defaultValue: 12 }, { key: 'offsetY', type: 'number', defaultValue: 12 },
     ],
     defaultData: { profileId: '', instanceKey: 'entity-panel', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
+    inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
+  },
+  level_create_runtime_console: {
+    label: '创建 Runtime Console', icon: Terminal, category: '关卡 UI · 工具', graphTypes: ['level'],
+    configFields: [
+      { key: 'instanceKey', type: 'text', defaultValue: 'runtime-console' },
+      { key: 'anchorHorizontal', type: 'select', options: [{ value: 'left', label: '左' }, { value: 'center', label: '中' }, { value: 'right', label: '右' }] },
+      { key: 'anchorVertical', type: 'select', options: [{ value: 'top', label: '上' }, { value: 'center', label: '中' }, { value: 'bottom', label: '下' }] },
+      { key: 'offsetX', type: 'number', defaultValue: 0 }, { key: 'offsetY', type: 'number', defaultValue: 16 },
+    ],
+    defaultData: { instanceKey: 'runtime-console', anchorHorizontal: 'center', anchorVertical: 'top', offsetX: 0, offsetY: 16 },
+    inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
+  },
+  level_create_entity_palette: {
+    label: '创建实体放置 Palette', icon: Boxes, category: '关卡 UI · 工具', graphTypes: ['level'],
+    configFields: [
+      { key: 'instanceKey', type: 'text', defaultValue: 'entity-palette' },
+      { key: 'anchorHorizontal', type: 'select', options: [{ value: 'left', label: '左' }, { value: 'center', label: '中' }, { value: 'right', label: '右' }] },
+      { key: 'anchorVertical', type: 'select', options: [{ value: 'top', label: '上' }, { value: 'center', label: '中' }, { value: 'bottom', label: '下' }] },
+      { key: 'offsetX', type: 'number', defaultValue: 16 }, { key: 'offsetY', type: 'number', defaultValue: 0 },
+    ],
+    defaultData: { instanceKey: 'entity-palette', anchorHorizontal: 'left', anchorVertical: 'center', offsetX: 16, offsetY: 0 },
     inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
   level_close_runtime_profile: {

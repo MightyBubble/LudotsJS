@@ -5,8 +5,9 @@ import { resolveEntityPanel } from '@/lib/runtime/entityPanelRuntime';
 import { executeQueryGraph } from '@/lib/queryRuntime';
 import { createUIItemPresenter } from '@/lib/runtime/uiItemPresentationRuntime';
 import RuntimeAnchoredPanel from '@/components/runtime/RuntimeAnchoredPanel';
+import RuntimeUtilityPanel from '@/components/runtime/RuntimeUtilityPanel';
 
-export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, queryGraphs, abilities, prototypes, uiItemProfiles = [], textTokens = [], systemCollections = {}, controlContext, log }) {
+export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entityProfiles, controlProfiles, queryGraphs, abilities, prototypes, uiItemProfiles = [], textTokens = [], systemCollections = {}, controlContext, log, selectedTemplateId, onSelectTemplate }) {
   const [panels, setPanels] = useState([]), [collections, setCollections] = useState({}), [controls, setControls] = useState([]);
   const handledRevision = useRef(-1);
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function PlaygroundPanelHost({ lifecycle, commandProfiles, entity
   const enrich = list => (list || []).map(entity => { const prototypeId = entity.prototype_id || entity.template; const prototype = prototypes.find(item => item.prototype_id === prototypeId) || {}; return { ...prototype, ...entity, entity_id: entity.entity_id || entity.id || entity.instance_id, prototype_id: prototypeId, name: entity.name || prototype.name || prototypeId }; });
   return <div className="pointer-events-none absolute inset-0 z-20" data-control-plane-count={controls.length}>
     {panels.map(panel => {
+      if (panel.kind === 'console' || panel.kind === 'entity_palette') return <RuntimeUtilityPanel key={panel.instanceKey} panel={panel} templates={prototypes} selectedId={selectedTemplateId} onSelect={onSelectTemplate} log={log} />;
       const profile = panel.kind === 'command' ? commandProfiles.find(item => item.panel_id === panel.profileId) : entityProfiles.find(item => item.panel_id === panel.profileId);
       const collectionKey = profile?.source?.collection_key;
       const sourceEntities = Object.prototype.hasOwnProperty.call(systemCollections, collectionKey) ? systemCollections[collectionKey] : controlCollections[collectionKey] || collections[collectionKey];

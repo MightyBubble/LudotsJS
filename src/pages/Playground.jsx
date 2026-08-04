@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import useProjectScope from '@/lib/projectScope';
-import EntityTemplateList from '@/components/playground/EntityTemplateList';
 import PlaygroundToolbar from '@/components/playground/PlaygroundToolbar';
 import PlaygroundViewport from '@/components/playground/PlaygroundViewport';
 import useLevelLifecycleRuntime from '@/components/playground/useLevelLifecycleRuntime';
 import SelectionInteractionOverlay from '@/components/playground/SelectionInteractionOverlay';
 import PlaygroundPanelHost from '@/components/playground/PlaygroundPanelHost';
-import RuntimeConsole from '@/components/runtime/RuntimeConsole';
 import { createRuntimeLog } from '@/lib/runtime/runtimeLog';
 import { buildAliveUnitCollection } from '@/lib/runtime/aliveUnitCollection';
 
@@ -68,15 +66,13 @@ export default function PlaygroundPage() {
   const onSelection = (eventId, entities) => log.info('selection', `${eventId} → ${entities.length} entities`, entities);
 
   return <div className="flex h-full min-h-0 bg-[#0D0F14] text-gray-200">
-    <EntityTemplateList templates={templates} selectedId={selectedId} onSelect={setSelectedId} />
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
       <PlaygroundToolbar maps={maps} mapId={mapId} onMap={chooseMap} mapEntityCount={map?.entities?.length || 0} paused={paused} onToggle={togglePlayback} onEnd={endLevel} onClear={clear} count={placed.length} elapsed={elapsed} templateName={template?.name || template?.prototype_id || ''} participantView={participantView} lifecycle={lifecycle} selectionConfig={map?.selection_interaction} selectionMode={selectionMode} onSelectionMode={setSelectionMode} />
       <div className="relative flex-1 min-h-0">
         <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} />
         <SelectionInteractionOverlay config={template ? null : map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
-        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} uiItemProfiles={uiItemProfiles} textTokens={textTokens} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} />
+        <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} uiItemProfiles={uiItemProfiles} textTokens={textTokens} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} selectedTemplateId={selectedId} onSelectTemplate={setSelectedId} />
       </div>
-      <div className="h-40 shrink-0 border-t border-[#2A2E37] p-2"><RuntimeConsole log={log} /></div>
     </div>
   </div>;
 }

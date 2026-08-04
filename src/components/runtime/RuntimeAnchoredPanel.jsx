@@ -2,7 +2,7 @@ import React from 'react';
 import RuntimePanelView from '@/components/runtime/RuntimePanelView';
 import RuntimeEntityPanelView from '@/components/runtime/RuntimeEntityPanelView';
 
-const positionStyle = anchor => {
+export const positionStyle = anchor => {
   const horizontal = anchor?.horizontal || 'right', vertical = anchor?.vertical || 'bottom';
   const x = Number(anchor?.offsetX) || 0, y = Number(anchor?.offsetY) || 0;
   return {
