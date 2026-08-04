@@ -23,7 +23,7 @@ export default function AssetBrowserPanel({
         return {
           ...base,
           record: r,
-          categoryPath: getCategory(r.id),
+          categoryPath: base.categoryPath || getCategory(r.id),
           isFavorite: !!metaByRecord[r.id]?.is_favorite,
         };
       })

@@ -66,7 +66,7 @@ function TreeLevel({ node, path, depth, selectedId, onSelect, onOpen, onSetCateg
           >
             <Star className="w-3 h-3" />
           </button>
-          <button
+          {!item.categoryLocked && <button
             title="移动到虚拟目录"
             onClick={(e) => {
               e.stopPropagation();
@@ -76,7 +76,7 @@ function TreeLevel({ node, path, depth, selectedId, onSelect, onOpen, onSetCateg
             className="opacity-0 group-hover:opacity-100 hover:text-white flex-shrink-0"
           >
             <FolderInput className="w-3 h-3" />
-          </button>
+          </button>}
           {onDelete && (
             <button
               title="删除"

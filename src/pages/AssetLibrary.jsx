@@ -9,6 +9,16 @@ import ModelPreview from '@/components/asset/ModelPreview';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
 const TYPE_LABELS = { model: '模型', animation: '动画', audio: '音效', image: '图像' };
+const CATEGORY_LABELS = {
+  model: '模型', animation: '动画', audio: '音频', image: '图像', material: '材质',
+  particle: '粒子', prefab: '预制体', data: '数据', script: '脚本', other: '其他',
+};
+
+function getAssetCategoryPath(asset) {
+  const packageName = asset.metadata?.package_label || asset.metadata?.package_slug || '未分包';
+  const category = asset.tags?.includes('texture') ? '纹理' : (CATEGORY_LABELS[asset.asset_type] || '其他');
+  return `${packageName}/${category}`;
+}
 
 export default function AssetLibraryPage() {
   const filterType = new URLSearchParams(useLocation().search).get('type') || '';
@@ -37,7 +47,12 @@ export default function AssetLibraryPage() {
       columns={[
         { key: 'name', label: '文件名', render: getSourceFileName },
       ]}
-      toItem={(r) => ({ id: r.id, name: getSourceFileName(r) })}
+      toItem={(r) => ({
+        id: r.id,
+        name: getSourceFileName(r),
+        categoryPath: getAssetCategoryPath(r),
+        categoryLocked: true,
+      })}
       selectedId={selectedId} onSelect={(r) => setSelectedId(r.id)}
       onCreate={create} onDelete={handleDelete} onSave={save} dirty={dirty}
     >
