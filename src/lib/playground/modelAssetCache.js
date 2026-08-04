@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { normalizeModelMaterials } from '@/lib/playground/normalizeModelMaterials';
 
 const entries = new Map();
 const queue = [];
@@ -37,7 +38,7 @@ const scheduleLoad = (appearance, entry) => new Promise((resolve, reject) => {
       manager.setURLModifier(url => Object.entries(appearance.resourceMap || {}).find(([path]) => decodeURI(url).endsWith(path))?.[1] || url);
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       const loaded = await new GLTFLoader(manager).loadAsync(appearance.uri);
-      entry.scene = loaded.scene;
+      entry.scene = normalizeModelMaterials(loaded.scene);
       entry.animations = loaded.animations || [];
       resolve(entry);
     } catch (error) {
