@@ -3,6 +3,8 @@ export const PRESENTATION_CONFIGS = {
     blank: () => ({ asset_id: `mesh_${Date.now()}`, type: 'Primitive', primitive_kind: 'Cube', source_uris: [] }) },
   material: { entity: 'PresentationMaterialAsset', key: 'asset_id', title: 'Material Assets', query: 'presentation_material_assets',
     blank: () => ({ asset_id: `material_${Date.now()}`, source_uris: [], domain: 'Surface', flags: [] }) },
+  effect: { entity: 'PresentationEffectAsset', key: 'asset_id', title: 'Effect Assets', query: 'presentation_effect_assets',
+    blank: () => ({ asset_id: `effect_${Date.now()}`, backend: 'quarks', source_uris: [], runtime: {}, config: {}, loop: false, scale: 1 }) },
   clip: { entity: 'AnimationClipAsset', key: 'asset_id', title: 'Animation Clips', query: 'animation_clip_assets',
     blank: () => ({ asset_id: `clip_${Date.now()}`, asset_kind: 'Clip', locators: [], blend_inputs: [] }) },
   controller: { entity: 'AnimatorControllerDefinition', key: 'controller_id', title: 'Animator Controllers', query: 'animator_controllers',

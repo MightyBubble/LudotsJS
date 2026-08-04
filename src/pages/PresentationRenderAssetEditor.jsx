@@ -6,6 +6,7 @@ import { ConfigWorkspace } from '@/pages/PresentationConfigEditor';
 const tabs = [
   { value: 'mesh', label: '网格资产', to: '/PresentationRenderAssetEditor?type=mesh' },
   { value: 'material', label: '材质资产', to: '/PresentationRenderAssetEditor?type=material' },
+  { value: 'effect', label: '特效资产', to: '/PresentationRenderAssetEditor?type=effect' },
 ];
 
 export default function PresentationRenderAssetEditor() {

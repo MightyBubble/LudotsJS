@@ -1,0 +1,57 @@
+{
+  "name": "PresentationEffectAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "effects.json id"
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "quarks",
+        "effekseer"
+      ],
+      "description": "\u7279\u6548\u8fd0\u884c\u540e\u7aef"
+    },
+    "source_uris": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Quarks JSON \u6216 Effekseer .efk \u5730\u5740"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "script_uri": {
+          "type": "string",
+          "description": "Effekseer \u5b98\u65b9 effekseer.js \u5730\u5740"
+        },
+        "wasm_uri": {
+          "type": "string",
+          "description": "Effekseer \u5b98\u65b9 effekseer.wasm \u5730\u5740"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "\u540e\u7aef\u539f\u751f\u914d\u7f6e\u4e0e\u8d44\u6e90\u6620\u5c04"
+    },
+    "loop": {
+      "type": "boolean",
+      "default": false
+    },
+    "scale": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "asset_id",
+    "backend",
+    "source_uris"
+  ]
+}

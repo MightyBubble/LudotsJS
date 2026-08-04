@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { boardCellGrid } from '@/lib/map/spatialScale';
 import { applyGhostAppearance, createEntityAppearanceVisual, disposeAppearanceVisual } from '@/lib/playground/entityAppearanceVisuals';
+import { createPostProcessingRuntime } from '@/lib/playground/postProcessingRuntime';
+import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 let HALF_X = 10, HALF_Z = 7;
@@ -17,6 +19,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(mount.clientWidth, mount.clientHeight);
   mount.appendChild(renderer.domElement);
+  const postProcessing = createPostProcessingRuntime(renderer, scene, camera);
+  const vfx = createVfxRuntime(scene, renderer, camera);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.75));
   const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -177,7 +181,9 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
       elapsed += dt;
       onTick?.(elapsed);
     }
-    renderer.render(scene, camera);
+    vfx.update(dt);
+    postProcessing.render(dt);
+    vfx.draw();
   };
   frame();
 
@@ -186,6 +192,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
+    postProcessing.resize(w, h);
   };
   window.addEventListener('resize', resize);
 
@@ -227,6 +234,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     },
     updateWorldSelection,
     clearWorldSelection,
+    playEffect(effectAsset, position) { return vfx.play(effectAsset, position); },
+    setPostProcessing(config) { postProcessing.configure(config); },
     clear() {
       entities.splice(0).forEach(entity => disposeAppearanceVisual(entity.mesh));
       elapsed = 0; updateVisualStats(); onTick?.(0);
@@ -240,6 +249,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
       mapMeshes.splice(0).forEach(disposeMesh);
       ghost.children.slice().forEach(disposeAppearanceVisual);
       clearWorldSelection();
+      vfx.dispose();
+      postProcessing.dispose();
       renderer.dispose();
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     },

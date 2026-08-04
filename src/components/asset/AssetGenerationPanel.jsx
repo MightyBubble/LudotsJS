@@ -3,6 +3,7 @@ import { Image as ImageIcon, Music, Upload, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, SelectField } from '@/components/ludots/ui';
+import AudioLibraryImportPanel from '@/components/asset/AudioLibraryImportPanel';
 
 const VOICES = ['river', 'honey', 'sunny', 'storm', 'spark'];
 
@@ -49,7 +50,7 @@ export default function AssetGenerationPanel({ draft, patch }) {
     setBusy('');
   };
 
-  return <Section title="生成与导入">
+  return <><Section title="生成与导入">
     <TextField label={draft.asset_type === 'audio' ? '语音文本' : '生成提示词'} value={prompt} onChange={setPrompt} />
     <div className="flex flex-wrap items-end gap-3">
       <Button size="sm" disabled={!prompt || Boolean(busy)} onClick={() => run('image')} className="h-8 bg-[#1E2128] hover:bg-[#2A2E37]">
@@ -66,5 +67,5 @@ export default function AssetGenerationPanel({ draft, patch }) {
     </div>
     <p className="text-[11px] text-gray-500">生成或上传后会自动填入资源地址与来源类型；模型文件会切换为 model 类型并在下方预览。</p>
     {error && <p className="text-[11px] text-red-400">{error}</p>}
-  </Section>;
+  </Section><AudioLibraryImportPanel /></>;
 }
