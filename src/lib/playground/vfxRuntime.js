@@ -18,11 +18,8 @@ export function createVfxRuntime(scene, renderer, camera) {
   const loaded = new Map();
   let effekseerReady = false;
   const load = async (asset) => {
+    if (asset.backend === 'quarks') return new QuarksLoader().loadAsync(asset.source_uris[0]);
     if (loaded.has(asset.asset_id)) return loaded.get(asset.asset_id);
-    if (asset.backend === 'quarks') {
-      const effect = await new QuarksLoader().loadAsync(asset.source_uris[0]);
-      loaded.set(asset.asset_id, effect); return effect;
-    }
     await loadScript(asset.runtime?.script_uri);
     if (!effekseerReady) {
       await new Promise((resolve, reject) => window.effekseer.initRuntime(asset.runtime?.wasm_uri, resolve, reject));
@@ -35,7 +32,7 @@ export function createVfxRuntime(scene, renderer, camera) {
     async play(asset, position = { x: 0, y: 0, z: 0 }) {
       const effect = await load(asset);
       if (asset.backend === 'quarks') {
-        const instance = effect.clone(); scene.add(instance);
+        const instance = effect; scene.add(instance);
         QuarksUtil.addToBatchRenderer(instance, batch); QuarksUtil.setAutoDestroy(instance, true); QuarksUtil.play(instance);
         instance.position.set(position.x, position.y, position.z); return instance;
       }

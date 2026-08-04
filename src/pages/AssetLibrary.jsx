@@ -1,11 +1,14 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import useCoreRefs from '@/components/ludots/useCoreRefs';
 import { Section } from '@/components/ludots/ui';
 import AssetGenerationPanel from '@/components/asset/AssetGenerationPanel';
 import ModelPreview from '@/components/asset/ModelPreview';
+import VfxPreview from '@/components/asset/VfxPreview';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
 const TYPE_LABELS = { model: '模型', animation: '动画', audio: '音效', image: '图像' };
@@ -29,6 +32,8 @@ export default function AssetLibraryPage() {
     2000
   );
   const visibleRecords = filterType ? records.filter(r => r.asset_type === filterType) : records;
+  const { data: effects = [] } = useQuery({ queryKey: ['presentation-effects'], queryFn: () => base44.entities.PresentationEffectAsset.list() });
+  const linkedEffect = effects.find(effect => effect.asset_id === draft?.asset_id);
   const { abilities } = useCoreRefs();
 
   const handleDelete = (rec) => {
@@ -61,10 +66,12 @@ export default function AssetLibraryPage() {
           <Section title={getSourceFileName(draft)}>
             {draft.asset_type === 'audio' && draft.uri && <audio controls src={draft.uri} className="w-full h-8" />}
             {draft.asset_type === 'model' && <ModelPreview uri={draft.uri} resourceMap={draft.metadata?.resource_map} />}
+            {draft.asset_type === 'particle' && linkedEffect && <VfxPreview asset={linkedEffect} />}
+            {draft.asset_type === 'particle' && !linkedEffect && <p className="text-xs text-gray-500">该源文件尚未关联特效资产，关联后可在此播放。</p>}
             {(draft.preview_uri || (draft.asset_type === 'image' && draft.uri)) && (
               <img src={draft.preview_uri || draft.uri} alt={getSourceFileName(draft)} className="max-h-48 rounded border border-[#2A2E37]" />
             )}
-            {!draft.uri && <p className="text-xs text-gray-500">尚未选择文件</p>}
+            {!draft.uri && draft.asset_type !== 'particle' && <p className="text-xs text-gray-500">尚未选择文件</p>}
           </Section>
           <AssetGenerationPanel draft={draft} patch={patch} />
         </div>
