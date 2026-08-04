@@ -18,10 +18,10 @@ export default function AssetGenerationPanel({ draft, patch }) {
     try {
       if (mode === 'image') {
         const { url } = await base44.integrations.Core.GenerateImage({ prompt });
-        patch({ uri: url, preview_uri: url, source_type: 'generated', asset_type: 'image' });
+        patch({ name: 'generated-image.png', uri: url, preview_uri: url, source_type: 'generated', asset_type: 'image' });
       } else {
         const { url } = await base44.integrations.Core.GenerateSpeech({ text: prompt, voice });
-        patch({ uri: url, source_type: 'generated', asset_type: 'audio' });
+        patch({ name: 'generated-audio.mp3', uri: url, source_type: 'generated', asset_type: 'audio' });
       }
     } catch (e) {
       setError(e?.message || '生成失败，请稍后重试');
@@ -36,7 +36,13 @@ export default function AssetGenerationPanel({ draft, patch }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       const ext = (file.name.split('.').pop() || '').toLowerCase();
       const type = ['fbx', 'glb', 'gltf'].includes(ext) ? 'model' : ['mp3', 'wav', 'ogg'].includes(ext) ? 'audio' : draft.asset_type;
-      patch({ uri: file_url, source_type: 'uploaded', asset_type: type });
+      patch({
+        name: file.name,
+        uri: file_url,
+        source_type: 'uploaded',
+        asset_type: type,
+        metadata: { ...(draft.metadata || {}), source_path: file.name },
+      });
     } catch (e) {
       setError(e?.message || '上传失败');
     }

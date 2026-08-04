@@ -5,6 +5,7 @@ import { Section, TextField, SelectField, ListField } from '@/components/ludots/
 import ModelPreview from './ModelPreview';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
+import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
 const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline'];
 
@@ -27,7 +28,7 @@ export default function HostAssetBindingDetails({ draft, patch }) {
 
     <Section title="编辑器预览资源（不导出）">
       <ReferenceSelect label="关联 Asset" value={draft.editor_asset_id}
-        options={assets.map(a => ({ value: a.asset_id, label: `${a.name} · ${a.asset_type}` }))}
+        options={assets.map(a => ({ value: a.asset_id, label: getSourceFileName(a) }))}
         onChange={editor_asset_id => patch({ editor_asset_id })} />
       {linked?.asset_type === 'audio' && linked.uri && <audio controls src={linked.uri} className="w-full h-8" />}
       {linked?.asset_type === 'model' && <ModelPreview uri={linked.uri} />}
