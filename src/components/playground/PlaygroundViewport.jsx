@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { createPlaygroundScene } from '@/lib/playground/playgroundScene';
 
-const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick, onCancelPlacement }, ref) {
+const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, template, binding, view, paused, clearToken, onPlace, onTick, onCancelPlacement, appearanceResolver }, ref) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
 
@@ -12,7 +12,7 @@ const PlaygroundViewport = forwardRef(function PlaygroundViewport({ map, templat
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { sceneRef.current?.setMap(map || null); }, [map]);
+  useEffect(() => { sceneRef.current?.setAppearanceResolver(appearanceResolver); sceneRef.current?.setMap(map || null); }, [map, appearanceResolver]);
   useEffect(() => { sceneRef.current?.setTemplate(template || null); }, [template]);
   useEffect(() => { sceneRef.current?.setBinding(binding || null); }, [binding]);
   useEffect(() => { sceneRef.current?.setView(view || null); }, [view]);

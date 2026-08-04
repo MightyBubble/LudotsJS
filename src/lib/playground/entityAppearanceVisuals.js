@@ -1,0 +1,37 @@
+import * as THREE from 'three';
+
+const modelCache = new Map();
+
+export function createMissingAssetBillboard() {
+  const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 96;
+  const context = canvas.getContext('2d'); context.fillStyle = 'rgba(13,15,20,.92)'; context.fillRect(0, 0, 256, 96);
+  context.strokeStyle = '#ef4444'; context.lineWidth = 5; context.strokeRect(3, 3, 250, 90);
+  context.fillStyle = '#fecaca'; context.font = 'bold 30px sans-serif'; context.textAlign = 'center'; context.fillText('无 asset', 128, 59);
+  const texture = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false }));
+  sprite.scale.set(2.4, 0.9, 1); sprite.position.y = 1.15; sprite.userData.visualKind = 'missing';
+  return sprite;
+}
+
+export async function createEntityAppearanceVisual(appearance) {
+  if (appearance?.kind !== 'model') return createMissingAssetBillboard();
+  try {
+    if (!modelCache.has(appearance.uri)) modelCache.set(appearance.uri, (async () => {
+      const manager = new THREE.LoadingManager();
+      manager.setURLModifier(url => Object.entries(appearance.resourceMap || {}).find(([path]) => url.endsWith(path))?.[1] || url);
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      return (await new GLTFLoader(manager).loadAsync(appearance.uri)).scene;
+    })());
+    const object = (await modelCache.get(appearance.uri)).clone(true);
+    object.traverse(child => { if (child.isMesh) { child.geometry = child.geometry.clone(); child.material = Array.isArray(child.material) ? child.material.map(item => item.clone()) : child.material.clone(); } });
+    const box = new THREE.Box3().setFromObject(object); const size = box.getSize(new THREE.Vector3());
+    const fit = 1.8 / Math.max(size.x, size.y, size.z, 0.001); const configured = Number(appearance.scale?.[0]) || 1;
+    object.scale.setScalar(fit * configured); object.position.y = -box.min.y * fit * configured; object.userData.visualKind = 'model';
+    return object;
+  } catch { return createMissingAssetBillboard(); }
+}
+
+export function disposeAppearanceVisual(object) {
+  object.traverse(child => { if (child.geometry) child.geometry.dispose(); if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => { if (child.isSprite) material.map?.dispose(); material.dispose(); }); });
+  object.parent?.remove(object);
+}

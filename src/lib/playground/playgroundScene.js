@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { boardCellGrid } from '@/lib/map/spatialScale';
+import { createEntityAppearanceVisual, disposeAppearanceVisual } from '@/lib/playground/entityAppearanceVisuals';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 let HALF_X = 10, HALF_Z = 7;
@@ -41,7 +42,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   const entities = [];
   const mapMeshes = [];
   const selectionVisuals = [];
-  let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0;
+  let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0, mapRevision = 0;
+  let appearanceResolver = () => ({ kind: 'missing', label: '无 asset' });
   const applyView = () => entities.forEach((entity) => {
     if (!view?.id) entity.mesh.visible = true;
     else entity.mesh.visible = view.mode === 'Players'
@@ -49,7 +51,12 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
       : entity.team_id === view.id;
   });
   const disposeMaterial = (material) => Array.isArray(material) ? material.forEach((item) => item.dispose()) : material.dispose();
-  const disposeMesh = (mesh) => { scene.remove(mesh); mesh.geometry.dispose(); disposeMaterial(mesh.material); };
+  const updateVisualStats = () => {
+    const visuals = [...mapMeshes, ...entities.map(item => item.mesh)];
+    mount.dataset.modelCount = String(visuals.filter(item => item.userData.visualKind === 'model').length);
+    mount.dataset.missingAssetCount = String(visuals.filter(item => item.userData.visualKind === 'missing').length);
+  };
+  const disposeMesh = (mesh) => disposeAppearanceVisual(mesh);
   const loadMap = (map) => {
     const grid = boardCellGrid(map?.boards?.[0] || {});
     HALF_X = 10;
@@ -63,15 +70,17 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     gridHelper.scale.z = HALF_Z / HALF_X;
     scene.add(gridHelper);
     mapMeshes.splice(0).forEach(disposeMesh);
-    (map?.entities || []).forEach((entity) => {
-      const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.1, 12), new THREE.MeshStandardMaterial({ color: 0x7f8b99, emissive: 0x1b2027, emissiveIntensity: 0.4 }));
+    const revision = ++mapRevision;
+    (map?.entities || []).forEach(async (entity) => {
+      const visual = await createEntityAppearanceVisual(appearanceResolver(entity.template));
+      if (disposed || revision !== mapRevision) { disposeAppearanceVisual(visual); return; }
       const x = ((Number(entity.position?.x) + 0.5) / grid.width) * HALF_X * 2 - HALF_X;
       const z = ((Number(entity.position?.y) + 0.5) / grid.height) * HALF_Z * 2 - HALF_Z;
-      marker.position.set(x, 0.55, z);
-      marker.userData.entity = { id: entity.instance_id, entity_id: entity.instance_id, prototype_id: entity.template, position: entity.position };
-      scene.add(marker);
-      mapMeshes.push(marker);
+      visual.position.x = x; visual.position.z = z;
+      visual.userData.entity = { id: entity.instance_id, entity_id: entity.instance_id, prototype_id: entity.template, position: entity.position, ...(entity.overrides || {}) };
+      scene.add(visual); mapMeshes.push(visual); updateVisualStats();
     });
+    updateVisualStats();
   };
 
   const pickScreenPoint = (point) => {
@@ -113,27 +122,26 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     ghost.position.set(point.x, 0.85, point.z);
   };
 
-  const handleClick = (event) => {
+  const handleClick = async (event) => {
     if (!template) return;
     const point = pick(event);
     if (!point) return;
-    const mesh = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.45, 0.8, 5, 12),
-      new THREE.MeshStandardMaterial({ color: 0xb9c2cc, emissive: 0x22262c, emissiveIntensity: 0.5 })
-    );
-    mesh.position.set(point.x, 0.85, point.z);
+    const selectedTemplate = template;
+    const mesh = await createEntityAppearanceVisual(appearanceResolver(selectedTemplate.prototype_id));
+    if (disposed) { disposeAppearanceVisual(mesh); return; }
+    mesh.position.x = point.x; mesh.position.z = point.z;
     scene.add(mesh);
     const entity = {
-      id: `${template.prototype_id || 'entity'}-${entities.length + 1}`,
-      prototype_id: template.prototype_id,
-      name: template.name,
+      id: `${selectedTemplate.prototype_id || 'entity'}-${entities.length + 1}`,
+      prototype_id: selectedTemplate.prototype_id,
+      name: selectedTemplate.name,
       owner_player_id: binding?.owner_player_id || null,
       team_id: binding?.team_id || null,
       position: { x: Number(point.x.toFixed(2)), z: Number(point.z.toFixed(2)) },
       mesh,
     };
     entities.push(entity);
-    applyView();
+    applyView(); updateVisualStats();
     onPlace?.({ id: entity.id, prototype_id: entity.prototype_id, name: entity.name, owner_player_id: entity.owner_player_id, team_id: entity.team_id, position: entity.position });
   };
   const handleContextMenu = (event) => {
@@ -169,6 +177,9 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   window.addEventListener('resize', resize);
 
   return {
+    setAppearanceResolver(next) {
+      appearanceResolver = next || (() => ({ kind: 'missing', label: '无 asset' }));
+    },
     setMap(next) {
       loadMap(next);
     },
@@ -202,14 +213,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     updateWorldSelection,
     clearWorldSelection,
     clear() {
-      entities.forEach((e) => {
-        scene.remove(e.mesh);
-        e.mesh.geometry.dispose();
-        e.mesh.material.dispose();
-      });
-      entities.length = 0;
-      elapsed = 0;
-      onTick?.(0);
+      entities.splice(0).forEach(entity => disposeAppearanceVisual(entity.mesh));
+      elapsed = 0; updateVisualStats(); onTick?.(0);
     },
     dispose() {
       disposed = true;

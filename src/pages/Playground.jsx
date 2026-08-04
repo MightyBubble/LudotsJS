@@ -8,6 +8,7 @@ import SelectionInteractionOverlay from '@/components/playground/SelectionIntera
 import PlaygroundPanelHost from '@/components/playground/PlaygroundPanelHost';
 import { createRuntimeLog } from '@/lib/runtime/runtimeLog';
 import { buildAliveUnitCollection } from '@/lib/runtime/aliveUnitCollection';
+import { createEntityAppearanceResolver } from '@/lib/playground/entityAppearanceResolver';
 
 export default function PlaygroundPage() {
   const scope = useProjectScope();
@@ -16,6 +17,7 @@ export default function PlaygroundPage() {
   const [commandProfiles, setCommandProfiles] = useState([]), [entityProfiles, setEntityProfiles] = useState([]), [controlProfiles, setControlProfiles] = useState([]);
   const [abilities, setAbilities] = useState([]), [queryGraphs, setQueryGraphs] = useState([]);
   const [uiItemProfiles, setUiItemProfiles] = useState([]), [textTokens, setTextTokens] = useState([]);
+  const [performers, setPerformers] = useState([]), [hostBindings, setHostBindings] = useState([]), [assets, setAssets] = useState([]), [meshAssets, setMeshAssets] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
   const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
@@ -30,14 +32,17 @@ export default function PlaygroundPage() {
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
     base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
     base44.entities.UIItemPresentationProfile.list('profile_id', 200), base44.entities.PresentationTextToken.list('token_id', 500),
-  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens]) => {
+    base44.entities.Performer.list('performer_id', 200), base44.entities.HostAssetBinding.list('binding_id', 200),
+    base44.entities.Asset.list('asset_id', 200), base44.entities.PresentationMeshAsset.list('asset_id', 200),
+  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens, performerRecords, hostRecords, assetRecords, meshRecords]) => {
     const scopedMaps = m.filter(scope.inScope);
     const scopedTopologies = t.filter(scope.inScope);
     const initialMap = scopedMaps[0] || null;
     const initialTopology = scopedTopologies.find(item => item.map_id === initialMap?.map_id) || null;
     setTemplates(p); setTopologies(scopedTopologies); setMaps(scopedMaps);
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
-    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setUiItemProfiles(itemProfiles); setTextTokens(tokens); setMapId(initialMap?.id || '');
+    setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setUiItemProfiles(itemProfiles); setTextTokens(tokens);
+    setPerformers(performerRecords); setHostBindings(hostRecords); setAssets(assetRecords); setMeshAssets(meshRecords); setMapId(initialMap?.id || '');
     setTopologyId(initialTopology?.id || ''); setViewMode('Players'); setViewId(initialTopology?.players?.[0]?.player_id || 0);
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
@@ -46,6 +51,7 @@ export default function PlaygroundPage() {
   const availableTopologies = useMemo(() => topologies.filter((item) => item.map_id === map?.map_id), [topologies, map?.map_id]);
   const topology = availableTopologies.find((item) => item.id === topologyId) || null;
   const template = templates.find((item) => item.id === selectedId) || null;
+  const appearanceResolver = useMemo(() => createEntityAppearanceResolver({ prototypes: templates, performers, hostBindings, assets, meshAssets }), [templates, performers, hostBindings, assets, meshAssets]);
   const player = topology?.players.find((item) => item.player_id === viewId);
   const binding = viewMode === 'Players' ? { owner_player_id: player?.player_id || null, team_id: player?.team_id || null } : { owner_player_id: null, team_id: viewId || null };
   const view = topology && viewId ? { mode: viewMode, id: viewId } : null;
@@ -70,7 +76,7 @@ export default function PlaygroundPage() {
     <div className="flex-1 min-w-0 min-h-0 flex flex-col">
       <PlaygroundToolbar maps={maps} mapId={mapId} onMap={chooseMap} mapEntityCount={map?.entities?.length || 0} paused={paused} onToggle={togglePlayback} onEnd={endLevel} onClear={clear} count={placed.length} elapsed={elapsed} templateName={template?.name || template?.prototype_id || ''} participantView={participantView} lifecycle={lifecycle} selectionConfig={map?.selection_interaction} selectionMode={selectionMode} onSelectionMode={setSelectionMode} />
       <div className="relative flex-1 min-h-0">
-        <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} onCancelPlacement={cancelPlacement} />
+        <PlaygroundViewport ref={viewportRef} map={map} template={template} binding={binding} view={view} paused={paused} clearToken={clearToken} onPlace={onPlace} onTick={setElapsed} onCancelPlacement={cancelPlacement} appearanceResolver={appearanceResolver} />
         <SelectionInteractionOverlay config={template ? null : map?.selection_interaction} mode={selectionMode} viewportRef={viewportRef} onSelection={onSelection} />
         <PlaygroundPanelHost lifecycle={lifecycle} commandProfiles={commandProfiles} entityProfiles={entityProfiles} controlProfiles={controlProfiles} queryGraphs={queryGraphs} abilities={abilities} prototypes={templates} uiItemProfiles={uiItemProfiles} textTokens={textTokens} systemCollections={systemCollections} controlContext={{ mode: viewMode, viewId }} log={log} selectedTemplateId={selectedId} onSelectTemplate={setSelectedId} />
       </div>
