@@ -1,143 +1,33 @@
 import { BatchedRenderer, QuarksLoader, QuarksUtil } from 'three.quarks';
 
-const scripts = new Map();
-const effekseerRuntimes = new Map();
-
 const linkQuarksSubEmitters = (root) => {
   const emitters = new Map();
-  root.traverse((child) => {
-    if (child.system) emitters.set(child.uuid, child);
-  });
-  root.traverse((child) => {
+  root.traverse(child => { if (child.system) emitters.set(child.uuid, child); });
+  root.traverse(child => {
     for (const behavior of child.system?.behaviors || []) {
       if (behavior.type !== 'EmitSubParticleSystem') continue;
       const reference = behavior.subParticleSystem;
-      const emitter = typeof reference === 'string'
-        ? emitters.get(reference)
-        : reference?.system ? reference : emitters.get(reference?.uuid);
+      const emitter = typeof reference === 'string' ? emitters.get(reference) : reference?.system ? reference : emitters.get(reference?.uuid);
       behavior.subParticleSystem = emitter?.system ? emitter : undefined;
     }
   });
   return root;
 };
 
-const loadScript = (uri) => {
-  if (!uri) return Promise.reject(new Error('缺少 Effekseer 运行时脚本地址'));
-  if (scripts.has(uri)) return scripts.get(uri);
-  const pending = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = uri; script.onload = resolve; script.onerror = () => reject(new Error(`Effekseer 脚本加载失败：${uri}`));
-    document.head.appendChild(script);
-  });
-  scripts.set(uri, pending);
-  return pending;
-};
-
-const initializeEffekseer = async (runtime) => {
-  await loadScript(runtime?.script_uri);
-  if (!window.effekseer) throw new Error('Effekseer 运行时未注册');
-  const wasmUri = runtime?.wasm_uri;
-  if (!wasmUri) throw new Error('缺少 Effekseer WASM 地址');
-  if (!effekseerRuntimes.has(wasmUri)) {
-    effekseerRuntimes.set(wasmUri, new Promise((resolve, reject) => {
-      window.effekseer.initRuntime(wasmUri, resolve, () => reject(new Error(`Effekseer WASM 初始化失败：${wasmUri}`)));
-    }));
-  }
-  await effekseerRuntimes.get(wasmUri);
-};
-
-export function createVfxRuntime(scene, renderer, camera) {
-  const batch = new BatchedRenderer();
-  scene.add(batch);
-  const loaded = new Map();
-  let effekseerContext = null;
-  let pendingEffekseerLoads = 0;
-  let disposed = false;
-  let disposeScheduled = false;
-  const finalizeEffekseerDispose = () => {
-    if (!disposed || pendingEffekseerLoads > 0 || !effekseerContext || disposeScheduled) return;
-    disposeScheduled = true;
-    setTimeout(() => {
-      disposeScheduled = false;
-      if (!disposed || pendingEffekseerLoads > 0 || !effekseerContext) return;
-      const context = effekseerContext;
-      effekseerContext = null;
-      context.stopAll();
-      loaded.forEach(effect => context.releaseEffect(effect));
-      loaded.clear();
-      window.effekseer.releaseContext(context);
-    }, 0);
-  };
-  const load = async (asset) => {
-    if (asset.backend === 'quarks') {
-      const effect = await new QuarksLoader().loadAsync(asset.source_uris[0]);
-      return linkQuarksSubEmitters(effect);
-    }
-    if (loaded.has(asset.asset_id)) return loaded.get(asset.asset_id);
-    await initializeEffekseer(asset.runtime);
-    if (disposed) throw new Error('特效预览已关闭');
-    if (!effekseerContext) {
-      effekseerContext = window.effekseer.createContext();
-      if (!effekseerContext) throw new Error('Effekseer 渲染上下文创建失败');
-      effekseerContext.init(renderer.getContext());
-    }
-    const sourceUri = asset.source_uris?.[0];
-    if (!sourceUri) throw new Error('缺少 Effekseer 特效文件地址');
-    const context = effekseerContext;
-    pendingEffekseerLoads += 1;
-    const effect = await new Promise((resolve, reject) => {
-      let pending;
-      pending = context.loadEffect(
-        sourceUri,
-        asset.scale || 1,
-        () => {
-          pendingEffekseerLoads -= 1;
-          if (disposed) {
-            loaded.set(asset.asset_id, pending);
-            reject(new Error('特效预览已关闭'));
-            finalizeEffekseerDispose();
-            return;
-          }
-          resolve(pending);
-        },
-        (message, resourceUrl) => {
-          pendingEffekseerLoads -= 1;
-          reject(new Error(`Effekseer 特效加载失败：${message || resourceUrl || sourceUri}`));
-          finalizeEffekseerDispose();
-        }
-      );
-    });
-    loaded.set(asset.asset_id, effect); return effect;
-  };
+export function createVfxRuntime(scene) {
+  const batch = new BatchedRenderer(); scene.add(batch); let disposed = false;
   return {
     async play(asset, position = { x: 0, y: 0, z: 0 }) {
       if (disposed) throw new Error('特效预览已关闭');
-      const effect = await load(asset);
+      const loader = new QuarksLoader();
+      const effect = asset.source_json ? await Promise.resolve(loader.parse(asset.source_json)) : await loader.loadAsync(asset.source_uris[0]);
       if (disposed) throw new Error('特效预览已关闭');
-      if (asset.backend === 'quarks') {
-        const instance = effect; scene.add(instance);
-        QuarksUtil.addToBatchRenderer(instance, batch); QuarksUtil.setAutoDestroy(instance, true); QuarksUtil.play(instance);
-        instance.position.set(position.x, position.y, position.z); return instance;
-      }
-      return effekseerContext.play(effect, position.x, position.y, position.z);
+      const instance = linkQuarksSubEmitters(effect); scene.add(instance);
+      QuarksUtil.addToBatchRenderer(instance, batch); QuarksUtil.setAutoDestroy(instance, true); QuarksUtil.play(instance);
+      instance.position.set(position.x, position.y, position.z); return instance;
     },
-    update(delta) {
-      if (disposed) return;
-      batch.update(Math.min(delta, 0.1));
-      if (effekseerContext?.nativeptr != null) effekseerContext.update(Math.min(delta * 60, 4));
-    },
-    draw() {
-      if (disposed || effekseerContext?.nativeptr == null) return;
-      effekseerContext.setProjectionMatrix(camera.projectionMatrix.elements);
-      effekseerContext.setCameraMatrix(camera.matrixWorldInverse.elements);
-      effekseerContext.draw(); renderer.resetState();
-    },
-    dispose() {
-      if (disposed) return;
-      disposed = true;
-      scene.remove(batch); batch.dispose?.();
-      if (effekseerContext?.nativeptr != null) effekseerContext.stopAll();
-      finalizeEffekseerDispose();
-    },
+    update(delta) { if (!disposed) batch.update(Math.min(delta, 0.1)); },
+    draw() {},
+    dispose() { if (disposed) return; disposed = true; scene.remove(batch); batch.dispose?.(); },
   };
 }

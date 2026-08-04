@@ -10,35 +10,21 @@
     "backend": {
       "type": "string",
       "enum": [
-        "quarks",
-        "effekseer"
+        "quarks"
       ],
-      "description": "\u7279\u6548\u8fd0\u884c\u540e\u7aef"
+      "default": "quarks",
+      "description": "\u56fa\u5b9a\u4f7f\u7528 three.quarks \u7279\u6548\u8fd0\u884c\u65f6"
     },
     "source_uris": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Quarks JSON \u6216 Effekseer .efk \u5730\u5740"
-    },
-    "runtime": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "script_uri": {
-          "type": "string",
-          "description": "Effekseer \u5b98\u65b9 effekseer.js \u5730\u5740"
-        },
-        "wasm_uri": {
-          "type": "string",
-          "description": "Effekseer \u5b98\u65b9 effekseer.wasm \u5730\u5740"
-        }
-      }
+      "description": "Quarks \u539f\u751f JSON \u5730\u5740"
     },
     "config": {
       "type": "object",
-      "description": "\u540e\u7aef\u539f\u751f\u914d\u7f6e\u4e0e\u8d44\u6e90\u6620\u5c04"
+      "description": "Quarks \u8d44\u6e90\u6620\u5c04\u4e0e\u7f16\u8f91\u5668\u6269\u5c55\u914d\u7f6e"
     },
     "loop": {
       "type": "boolean",

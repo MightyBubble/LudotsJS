@@ -11,7 +11,7 @@ const UPLOAD_CONFIG = {
   audio: { title: '音频生成与导入', label: '上传音频', accept: 'audio/*' },
   model: { title: '模型文件上传', label: '上传模型（FBX / GLB / GLTF）', accept: '.fbx,.glb,.gltf' },
   animation: { title: '动画文件上传', label: '上传动画（FBX / GLB / GLTF）', accept: '.fbx,.glb,.gltf' },
-  particle: { title: '特效源文件', label: '上传特效（Quarks JSON / Effekseer EFK）', accept: '.json,.efk' },
+  particle: { title: 'Quarks 特效源文件', label: '上传 Quarks JSON', accept: '.json,application/json' },
 };
 
 /** 资源库内联生成：AI 图像 / 语音音效，以及本地文件（含 FBX / GLB）上传。 */
@@ -73,7 +73,7 @@ export default function AssetGenerationPanel({ draft, patch }) {
         <input type="file" className="hidden" accept={uploadConfig.accept} onChange={e => upload(e.target.files?.[0])} />
       </label>
     </div>
-    {draft.asset_type === 'particle' && <p className="text-[11px] text-gray-500">上传仅替换源文件；运行后端由关联的特效资产配置决定。</p>}
+    {draft.asset_type === 'particle' && <p className="text-[11px] text-gray-500">上传 three.quarks 原生 JSON 后，可在下方模块化编辑并实时预览。</p>}
     {error && <p className="text-[11px] text-red-400">{error}</p>}
   </Section>{draft.asset_type === 'audio' && <AudioLibraryImportPanel />}</>;
 }

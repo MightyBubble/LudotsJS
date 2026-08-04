@@ -1,0 +1,9 @@
+import React, { useState } from 'react';
+import QuarksCorePanel from '@/components/quarks/QuarksCorePanel'; import QuarksEmissionPanel from '@/components/quarks/QuarksEmissionPanel'; import QuarksShapePanel from '@/components/quarks/QuarksShapePanel'; import QuarksRenderingPanel from '@/components/quarks/QuarksRenderingPanel'; import QuarksBehaviorsPanel from '@/components/quarks/QuarksBehaviorsPanel'; import QuarksRawPanel from '@/components/quarks/QuarksRawPanel';
+const TABS = [['core','核心'],['emission','发射'],['shape','形状'],['render','渲染'],['behaviors','行为'],['raw','JSON']];
+export default function QuarksInspector({ editor, material, patchMaterial }) {
+  const [tab, setTab] = useState('core'); const ps = editor.selected.ps;
+  return <section className="min-w-0 flex-1"><div className="flex overflow-x-auto border-b border-[#2A2E37] bg-[#15171C] px-2">{TABS.map(([value,label]) => <button key={value} onClick={() => setTab(value)} className={`border-b-2 px-3 py-2 text-xs ${tab === value ? 'border-[#CBD3DC] text-white' : 'border-transparent text-gray-500'}`}>{label}</button>)}</div><div className="max-h-[560px] overflow-y-auto p-3">
+    {tab === 'core' && <QuarksCorePanel ps={ps} patch={editor.patchSystem}/>} {tab === 'emission' && <QuarksEmissionPanel ps={ps} patch={editor.patchSystem}/>} {tab === 'shape' && <QuarksShapePanel ps={ps} patch={editor.patchSystem}/>} {tab === 'render' && <QuarksRenderingPanel ps={ps} material={material} patch={editor.patchSystem} patchMaterial={patchMaterial}/>} {tab === 'behaviors' && <QuarksBehaviorsPanel value={ps.behaviors} onChange={behaviors => editor.patchSystem({ behaviors })} onError={editor.setError}/>} {tab === 'raw' && <QuarksRawPanel document={editor.document} onChange={editor.changeDocument} onError={editor.setError}/>} 
+  </div></section>;
+}
