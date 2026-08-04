@@ -10,7 +10,7 @@ export function ConfigWorkspace({ type }) {
   const spec = PRESENTATION_CONFIGS[type] || PRESENTATION_CONFIGS.mesh;
   const refs = usePresentationRefs();
   const editor = useRecordEditor(spec.entity, spec.query, spec.blank);
-  return <RecordWorkspace entityName={spec.entity} records={editor.records}
+  return <RecordWorkspace entityName={spec.entity} records={editor.records} hideBrowserOnMobile
     columns={[{key:spec.key,label:'ID',render:r=><span className="font-mono text-[#E2D8B3]">{r[spec.key]}</span>}]} 
     toItem={r=>({id:r.id,name:r[spec.key],subtitle:spec.title})}
     selectedId={editor.selectedId} onSelect={r=>editor.setSelectedId(r.id)} onCreate={editor.create} onSave={editor.save} dirty={editor.dirty}
