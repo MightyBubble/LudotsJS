@@ -51,6 +51,23 @@ export function createVfxRuntime(scene, renderer, camera) {
   scene.add(batch);
   const loaded = new Map();
   let effekseerContext = null;
+  let pendingEffekseerLoads = 0;
+  let disposed = false;
+  let disposeScheduled = false;
+  const finalizeEffekseerDispose = () => {
+    if (!disposed || pendingEffekseerLoads > 0 || !effekseerContext || disposeScheduled) return;
+    disposeScheduled = true;
+    setTimeout(() => {
+      disposeScheduled = false;
+      if (!disposed || pendingEffekseerLoads > 0 || !effekseerContext) return;
+      const context = effekseerContext;
+      effekseerContext = null;
+      context.stopAll();
+      loaded.forEach(effect => context.releaseEffect(effect));
+      loaded.clear();
+      window.effekseer.releaseContext(context);
+    }, 0);
+  };
   const load = async (asset) => {
     if (asset.backend === 'quarks') {
       const effect = await new QuarksLoader().loadAsync(asset.source_uris[0]);
@@ -58,6 +75,7 @@ export function createVfxRuntime(scene, renderer, camera) {
     }
     if (loaded.has(asset.asset_id)) return loaded.get(asset.asset_id);
     await initializeEffekseer(asset.runtime);
+    if (disposed) throw new Error('特效预览已关闭');
     if (!effekseerContext) {
       effekseerContext = window.effekseer.createContext();
       if (!effekseerContext) throw new Error('Effekseer 渲染上下文创建失败');
@@ -65,20 +83,37 @@ export function createVfxRuntime(scene, renderer, camera) {
     }
     const sourceUri = asset.source_uris?.[0];
     if (!sourceUri) throw new Error('缺少 Effekseer 特效文件地址');
+    const context = effekseerContext;
+    pendingEffekseerLoads += 1;
     const effect = await new Promise((resolve, reject) => {
       let pending;
-      pending = effekseerContext.loadEffect(
+      pending = context.loadEffect(
         sourceUri,
         asset.scale || 1,
-        () => resolve(pending),
-        (message, resourceUrl) => reject(new Error(`Effekseer 特效加载失败：${message || resourceUrl || sourceUri}`))
+        () => {
+          pendingEffekseerLoads -= 1;
+          if (disposed) {
+            loaded.set(asset.asset_id, pending);
+            reject(new Error('特效预览已关闭'));
+            finalizeEffekseerDispose();
+            return;
+          }
+          resolve(pending);
+        },
+        (message, resourceUrl) => {
+          pendingEffekseerLoads -= 1;
+          reject(new Error(`Effekseer 特效加载失败：${message || resourceUrl || sourceUri}`));
+          finalizeEffekseerDispose();
+        }
       );
     });
     loaded.set(asset.asset_id, effect); return effect;
   };
   return {
     async play(asset, position = { x: 0, y: 0, z: 0 }) {
+      if (disposed) throw new Error('特效预览已关闭');
       const effect = await load(asset);
+      if (disposed) throw new Error('特效预览已关闭');
       if (asset.backend === 'quarks') {
         const instance = effect; scene.add(instance);
         QuarksUtil.addToBatchRenderer(instance, batch); QuarksUtil.setAutoDestroy(instance, true); QuarksUtil.play(instance);
@@ -86,22 +121,23 @@ export function createVfxRuntime(scene, renderer, camera) {
       }
       return effekseerContext.play(effect, position.x, position.y, position.z);
     },
-    update(delta) { batch.update(delta); effekseerContext?.update(delta * 60); },
+    update(delta) {
+      if (disposed) return;
+      batch.update(Math.min(delta, 0.1));
+      if (effekseerContext?.nativeptr != null) effekseerContext.update(Math.min(delta * 60, 4));
+    },
     draw() {
-      if (!effekseerContext) return;
+      if (disposed || effekseerContext?.nativeptr == null) return;
       effekseerContext.setProjectionMatrix(camera.projectionMatrix.elements);
       effekseerContext.setCameraMatrix(camera.matrixWorldInverse.elements);
       effekseerContext.draw(); renderer.resetState();
     },
     dispose() {
+      if (disposed) return;
+      disposed = true;
       scene.remove(batch); batch.dispose?.();
-      if (effekseerContext) {
-        effekseerContext.stopAll();
-        loaded.forEach(effect => effekseerContext.releaseEffect(effect));
-        window.effekseer.releaseContext(effekseerContext);
-        effekseerContext = null;
-      }
-      loaded.clear();
+      if (effekseerContext?.nativeptr != null) effekseerContext.stopAll();
+      finalizeEffekseerDispose();
     },
   };
 }

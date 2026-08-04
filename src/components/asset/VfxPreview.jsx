@@ -11,6 +11,7 @@ export default function VfxPreview({ asset }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let active = true;
     const host = hostRef.current;
     const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0d0f13);
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100); camera.position.set(3, 2, 5); camera.lookAt(0, 0.7, 0);
@@ -19,14 +20,18 @@ export default function VfxPreview({ asset }) {
     const runtime = createVfxRuntime(scene, renderer, camera);
     const play = async () => {
       setStatus('loading'); setError('');
-      try { await runtime.play(asset, { x: 0, y: 0.5, z: 0 }); setStatus('playing'); }
-      catch (reason) { setError(reason?.message || '未知错误'); setStatus('error'); }
+      try {
+        await runtime.play(asset, { x: 0, y: 0.5, z: 0 });
+        if (active) setStatus('playing');
+      } catch (reason) {
+        if (active) { setError(reason?.message || '未知错误'); setStatus('error'); }
+      }
     };
     playRef.current = play;
     const clock = new THREE.Clock(); let raf;
     const tick = () => { raf = requestAnimationFrame(tick); runtime.update(clock.getDelta()); renderer.render(scene, camera); runtime.draw(); };
     camera.aspect = host.clientWidth / 320; camera.updateProjectionMatrix(); tick(); play();
-    return () => { cancelAnimationFrame(raf); playRef.current = null; runtime.dispose(); renderer.dispose(); renderer.domElement.remove(); };
+    return () => { active = false; cancelAnimationFrame(raf); playRef.current = null; runtime.dispose(); renderer.dispose(); renderer.domElement.remove(); };
   }, [asset]);
 
   return <div className="space-y-2">
