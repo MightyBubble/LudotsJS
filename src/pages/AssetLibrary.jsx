@@ -9,6 +9,7 @@ import { Section } from '@/components/ludots/ui';
 import AssetGenerationPanel from '@/components/asset/AssetGenerationPanel';
 import ModelPreview from '@/components/asset/ModelPreview';
 import QuarksEditor from '@/components/quarks/QuarksEditor';
+import QuarksGeneratorPanel from '@/components/quarks/QuarksGeneratorPanel';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
 const TYPE_LABELS = { model: '模型', animation: '动画', audio: '音效', image: '图像' };
@@ -32,6 +33,7 @@ export default function AssetLibraryPage() {
     2000
   );
   const visibleRecords = filterType ? records.filter(r => r.asset_type === filterType) : records;
+  const quarksTemplate = records.find(record => record.asset_id === 'Vfx.Quarks.Sample.ParticleSystem');
   const { data: effects = [] } = useQuery({ queryKey: ['presentation-effects'], queryFn: () => base44.entities.PresentationEffectAsset.list() });
   const linkedEffect = effects.find(effect => effect.asset_id === draft?.asset_id);
   const { abilities } = useCoreRefs();
@@ -73,6 +75,7 @@ export default function AssetLibraryPage() {
             {!draft.uri && draft.asset_type !== 'particle' && <p className="text-xs text-gray-500">尚未选择文件</p>}
           </Section>
           <AssetGenerationPanel draft={draft} patch={patch} />
+          {draft.asset_type === 'particle' && <QuarksGeneratorPanel asset={draft} templateUri={quarksTemplate?.uri} patch={patch} />}
           {draft.asset_type === 'particle' && draft.uri && <QuarksEditor asset={draft} effect={linkedEffect} />}
         </div>
       )}
