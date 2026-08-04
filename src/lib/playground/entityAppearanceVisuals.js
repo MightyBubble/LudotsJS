@@ -31,6 +31,18 @@ export async function createEntityAppearanceVisual(appearance) {
   } catch { return createMissingAssetBillboard(); }
 }
 
+export function applyGhostAppearance(object) {
+  object.traverse(child => {
+    if (!child.material) return;
+    (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => {
+      material.transparent = true;
+      material.opacity = 0.4;
+      material.depthWrite = false;
+    });
+  });
+  return object;
+}
+
 export function disposeAppearanceVisual(object) {
   object.traverse(child => { if (child.geometry) child.geometry.dispose(); if (child.material) (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => { if (child.isSprite) material.map?.dispose(); material.dispose(); }); });
   object.parent?.remove(object);

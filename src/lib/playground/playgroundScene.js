@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { boardCellGrid } from '@/lib/map/spatialScale';
-import { createEntityAppearanceVisual, disposeAppearanceVisual } from '@/lib/playground/entityAppearanceVisuals';
+import { applyGhostAppearance, createEntityAppearanceVisual, disposeAppearanceVisual } from '@/lib/playground/entityAppearanceVisuals';
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 let HALF_X = 10, HALF_Z = 7;
@@ -32,8 +32,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   let gridHelper = new THREE.GridHelper(HALF_X * 2, HALF_X * 2, 0x4b5563, 0x242a32);
   scene.add(gridHelper);
 
-  const ghostMaterial = new THREE.MeshBasicMaterial({ color: 0xcbd3dc, transparent: true, opacity: 0.35 });
-  const ghost = new THREE.Mesh(new THREE.CapsuleGeometry(0.45, 0.8, 5, 12), ghostMaterial);
+  const ghost = new THREE.Group();
   ghost.visible = false;
   scene.add(ghost);
 
@@ -42,7 +41,8 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   const entities = [];
   const mapMeshes = [];
   const selectionVisuals = [];
-  let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0, mapRevision = 0;
+  let template = null, binding = null, view = null, paused = false, disposed = false, elapsed = 0, mapRevision = 0, ghostRevision = 0;
+  let ghostPoint = null;
   let appearanceResolver = () => ({ kind: 'missing', label: '无 asset' });
   const applyView = () => entities.forEach((entity) => {
     if (!view?.id) entity.mesh.visible = true;
@@ -57,6 +57,18 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
     mount.dataset.missingAssetCount = String(visuals.filter(item => item.userData.visualKind === 'missing').length);
   };
   const disposeMesh = (mesh) => disposeAppearanceVisual(mesh);
+  const refreshGhost = async () => {
+    const revision = ++ghostRevision;
+    ghost.visible = false;
+    ghost.children.slice().forEach(disposeAppearanceVisual);
+    mount.dataset.ghostVisualKind = 'none';
+    if (!template?.prototype_id) return;
+    const visual = applyGhostAppearance(await createEntityAppearanceVisual(appearanceResolver(template.prototype_id)));
+    if (disposed || revision !== ghostRevision) { disposeAppearanceVisual(visual); return; }
+    ghost.add(visual);
+    mount.dataset.ghostVisualKind = visual.userData.visualKind || 'missing';
+    ghost.visible = Boolean(ghostPoint);
+  };
   const loadMap = (map) => {
     const grid = boardCellGrid(map?.boards?.[0] || {});
     HALF_X = 10;
@@ -115,11 +127,12 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   };
 
   const handleMove = (event) => {
-    if (!template) { ghost.visible = false; return; }
+    if (!template) { ghostPoint = null; ghost.visible = false; return; }
     const point = pick(event);
-    if (!point) { ghost.visible = false; return; }
-    ghost.visible = true;
-    ghost.position.set(point.x, 0.85, point.z);
+    if (!point) { ghostPoint = null; ghost.visible = false; return; }
+    ghostPoint = point;
+    ghost.visible = ghost.children.length > 0;
+    ghost.position.set(point.x, 0, point.z);
   };
 
   const handleClick = async (event) => {
@@ -179,13 +192,15 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
   return {
     setAppearanceResolver(next) {
       appearanceResolver = next || (() => ({ kind: 'missing', label: '无 asset' }));
+      refreshGhost();
     },
     setMap(next) {
       loadMap(next);
     },
     setTemplate(next) {
       template = next;
-      ghost.visible = false;
+      ghostPoint = null;
+      refreshGhost();
     },
     setPaused(next) {
       paused = next;
@@ -223,6 +238,7 @@ export function createPlaygroundScene(mount, { onPlace, onTick, onCancelPlacemen
       renderer.domElement.removeEventListener('click', handleClick);
       renderer.domElement.removeEventListener('contextmenu', handleContextMenu);
       mapMeshes.splice(0).forEach(disposeMesh);
+      ghost.children.slice().forEach(disposeAppearanceVisual);
       clearWorldSelection();
       renderer.dispose();
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
