@@ -9,6 +9,7 @@ import PlaygroundPanelHost from '@/components/playground/PlaygroundPanelHost';
 import { createRuntimeLog } from '@/lib/runtime/runtimeLog';
 import { buildAliveUnitCollection } from '@/lib/runtime/aliveUnitCollection';
 import { createEntityAppearanceResolver } from '@/lib/playground/entityAppearanceResolver';
+import { loadRuntimeAppearanceCatalog } from '@/lib/playground/appearanceCatalog';
 
 export default function PlaygroundPage() {
   const scope = useProjectScope();
@@ -32,9 +33,8 @@ export default function PlaygroundPage() {
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
     base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
     base44.entities.UIItemPresentationProfile.list('profile_id', 200), base44.entities.PresentationTextToken.list('token_id', 500),
-    base44.entities.Performer.list('performer_id', 200), base44.entities.HostAssetBinding.list('binding_id', 200),
-    base44.entities.Asset.list('asset_id', 200), base44.entities.PresentationMeshAsset.list('asset_id', 200),
-  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens, performerRecords, hostRecords, assetRecords, meshRecords]) => {
+    loadRuntimeAppearanceCatalog(),
+  ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens, appearanceCatalog]) => {
     const scopedMaps = m.filter(scope.inScope);
     const scopedTopologies = t.filter(scope.inScope);
     const initialMap = scopedMaps[0] || null;
@@ -42,7 +42,7 @@ export default function PlaygroundPage() {
     setTemplates(p); setTopologies(scopedTopologies); setMaps(scopedMaps);
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
     setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setUiItemProfiles(itemProfiles); setTextTokens(tokens);
-    setPerformers(performerRecords); setHostBindings(hostRecords); setAssets(assetRecords); setMeshAssets(meshRecords); setMapId(initialMap?.id || '');
+    setPerformers(appearanceCatalog.performers); setHostBindings(appearanceCatalog.hostBindings); setAssets(appearanceCatalog.assets); setMeshAssets(appearanceCatalog.meshAssets); setMapId(initialMap?.id || '');
     setTopologyId(initialTopology?.id || ''); setViewMode('Players'); setViewId(initialTopology?.players?.[0]?.player_id || 0);
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
 
 /** FBX / GLTF / GLB 模型预览，带动画剪辑播放。 */
-export default function ModelPreview({ uri }) {
+export default function ModelPreview({ uri, resourceMap }) {
   const hostRef = useRef(null);
   const [status, setStatus] = useState('loading');
   const [clips, setClips] = useState([]);
@@ -21,6 +22,7 @@ export default function ModelPreview({ uri }) {
     scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2));
     scene.add(new THREE.GridHelper(10, 10, 0x334155, 0x1f2937));
     let mixer = null;
+    let releaseModel = null;
     const clock = new THREE.Clock();
 
     const fit = (object) => {
@@ -35,26 +37,25 @@ export default function ModelPreview({ uri }) {
 
     (async () => {
       const ext = (uri.split('?')[0].split('.').pop() || '').toLowerCase();
-      const loader = ext === 'fbx'
-        ? new (await import('three/examples/jsm/loaders/FBXLoader.js')).FBXLoader()
-        : new (await import('three/examples/jsm/loaders/GLTFLoader.js')).GLTFLoader();
-      loader.load(uri, (loaded) => {
+      try {
+        let object, animations;
+        if (ext === 'fbx') {
+          const loader = new (await import('three/examples/jsm/loaders/FBXLoader.js')).FBXLoader();
+          object = await loader.loadAsync(uri); animations = object.animations || [];
+        } else {
+          const acquired = await acquireModelAsset({ uri, resourceMap });
+          if (disposed) { acquired.release(); return; }
+          object = acquired.object; animations = acquired.animations; releaseModel = acquired.release;
+        }
         if (disposed) return;
-        const object = loaded.scene || loaded;
-        const animations = loaded.animations || object.animations || [];
-        scene.add(object);
-        fit(object);
+        scene.add(object); fit(object);
         setClips(animations.map((a, i) => a.name || `clip_${i}`));
         if (animations.length) {
-          mixer = new THREE.AnimationMixer(object);
-          mixer.clipAction(animations[0]).play();
-          controlRef.current.play = (index) => {
-            mixer.stopAllAction();
-            mixer.clipAction(animations[index]).play();
-          };
+          mixer = new THREE.AnimationMixer(object); mixer.clipAction(animations[0]).play();
+          controlRef.current.play = (index) => { mixer.stopAllAction(); mixer.clipAction(animations[index]).play(); };
         }
         setStatus('ready');
-      }, undefined, () => setStatus('error'));
+      } catch { if (!disposed) setStatus('error'); }
     })();
 
     let raf;
@@ -70,10 +71,11 @@ export default function ModelPreview({ uri }) {
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      releaseModel?.();
       renderer.dispose();
       if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
     };
-  }, [uri]);
+  }, [uri, resourceMap]);
 
   if (!uri) return null;
   return <div className="space-y-2">

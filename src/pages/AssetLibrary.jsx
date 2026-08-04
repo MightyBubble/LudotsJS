@@ -17,7 +17,9 @@ export default function AssetLibraryPage() {
   const filterType = new URLSearchParams(useLocation().search).get('type') || '';
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Asset', 'assets',
-    () => ({ asset_id: `asset_${Date.now()}`, name: `新${TYPE_LABELS[filterType] || '资源'}`, asset_type: filterType || 'image', source_type: 'url', version: 1, is_active: true, tags: [] })
+    () => ({ asset_id: `asset_${Date.now()}`, name: `新${TYPE_LABELS[filterType] || '资源'}`, asset_type: filterType || 'image', source_type: 'url', version: 1, is_active: true, tags: [] }),
+    data => data,
+    2000
   );
   const visibleRecords = filterType ? records.filter(r => r.asset_type === filterType) : records;
   const { abilities } = useCoreRefs();
@@ -73,7 +75,7 @@ export default function AssetLibraryPage() {
             <TextField label="资源地址 (uri)" value={draft.uri} onChange={(v) => patch({ uri: v })} />
             <TextField label="预览地址 (preview_uri)" value={draft.preview_uri} onChange={(v) => patch({ preview_uri: v })} />
             {draft.asset_type === 'audio' && draft.uri && <audio controls src={draft.uri} className="w-full h-8" />}
-            {draft.asset_type === 'model' && <ModelPreview uri={draft.uri} />}
+            {draft.asset_type === 'model' && <ModelPreview uri={draft.uri} resourceMap={draft.metadata?.resource_map} />}
             {(draft.preview_uri || (draft.asset_type === 'image' && draft.uri)) && (
               <img src={draft.preview_uri || draft.uri} alt={draft.name} className="max-h-48 rounded border border-[#2A2E37]" />
             )}

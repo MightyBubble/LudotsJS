@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 /** 通用记录编辑：列表 + 草稿 + 保存 / 新建 / 删除 */
-export default function useRecordEditor(entityName, queryKey, buildNew, prepareSave = data => data) {
+export default function useRecordEditor(entityName, queryKey, buildNew, prepareSave = data => data, listLimit = 500) {
   const entity = base44.entities[entityName];
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState(null);
@@ -12,7 +12,7 @@ export default function useRecordEditor(entityName, queryKey, buildNew, prepareS
 
   const { data: records = [] } = useQuery({
     queryKey: [queryKey],
-    queryFn: () => entity.list('-updated_date'),
+    queryFn: () => entity.list('-updated_date', listLimit),
     initialData: [],
   });
 
