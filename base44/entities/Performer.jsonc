@@ -123,7 +123,7 @@
           "runtime_behaviors": {
             "type": "array",
             "items": {
-              "$ref": "#/$defs/behavior"
+              "type": "object"
             }
           },
           "children": {
@@ -141,7 +141,7 @@
     "behaviors": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/behavior"
+        "type": "object"
       }
     },
     "paramDefaults": {
@@ -197,156 +197,6 @@
           }
         }
       }
-    }
-  },
-  "$defs": {
-    "behavior": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "slot": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string",
-          "enum": [
-            "AssetBinding",
-            "AttributeBinding",
-            "TagBinding",
-            "Animator",
-            "Attachment",
-            "Sound",
-            "Material",
-            "Spline",
-            "Grounding",
-            "MinimapMarker",
-            "WorldText",
-            "SurfaceSource",
-            "InstancedBatch"
-          ]
-        },
-        "activeByDefault": {
-          "type": "boolean"
-        },
-        "activationCondition": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "assetBinding": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "attributeBinding": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "tagBinding": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "animator": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "attachment": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "sound": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "material": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "spline": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "grounding": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "minimapMarker": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "worldText": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "surfaceSource": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "instancedBatch": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "style": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "properties": {
-            "color": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "minItems": 4,
-              "maxItems": 4
-            },
-            "alphaPolicy": {
-              "type": "string"
-            }
-          }
-        },
-        "motion": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "properties": {
-            "yDriftPerSecond": {
-              "type": "number"
-            }
-          }
-        }
-      },
-      "required": [
-        "slot",
-        "kind"
-      ]
     }
   },
   "required": [

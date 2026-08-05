@@ -13,17 +13,21 @@ const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform) {
   const releases = useRef([]);
   const cameraState = useRef(null);
-  const animationRef = useRef({ actions: new Map(), active: null });
+  const animationRef = useRef({ players: [] });
   const activeStateRef = useRef(activeStateIndex);
   const [status, setStatus] = useState('准备预览');
   useEffect(() => {
     activeStateRef.current = activeStateIndex;
-    const next = animationRef.current.actions.get(activeStateIndex);
-    if (!next || next === animationRef.current.active) return;
-    next.reset().fadeIn(0.18).play();
-    animationRef.current.active?.fadeOut(0.18);
-    animationRef.current.active = next;
-    setStatus(`动画状态 ${activeStateIndex}`);
+    let switched = 0;
+    animationRef.current.players.forEach(player => {
+      const next = player.actions.get(activeStateIndex);
+      if (!next || next === player.active) return;
+      next.reset().fadeIn(0.18).play();
+      player.active?.fadeOut(0.18);
+      player.active = next;
+      switched += 1;
+    });
+    if (switched) setStatus(`动画状态 ${activeStateIndex} · ${switched} 个 Animator`);
   }, [activeStateIndex]);
 
   useEffect(() => {
@@ -82,7 +86,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       nodeGroups.push({ path, group });
       if (path === selectedInstancePath) selectedGroup = group;
       let primaryModel = null;
-      for (const behavior of definition.behaviors || []) {
+      const behaviors = [...(definition.behaviors || []), ...(instance.runtime_behaviors || [])];
+      for (const behavior of behaviors) {
         if (behavior.kind !== 'AssetBinding' || behavior.activeByDefault === false) continue;
         const asset = behavior.assetBinding || {};
         let object;
@@ -105,8 +110,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         group.add(object);
         if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
-      const animator = (definition.behaviors || []).find(behavior => behavior.kind === 'Animator' && behavior.activeByDefault !== false)?.animator;
-      if (path === 'root' && animator && primaryModel) {
+      const animator = behaviors.find(behavior => behavior.kind === 'Animator' && behavior.activeByDefault !== false)?.animator;
+      if (animator && primaryModel) {
         const controller = controllerById.get(animator.animatorControllerId);
         const profile = profileById.get(animator.animationProfileId);
         const mixer = new THREE.AnimationMixer(primaryModel.object);
@@ -127,9 +132,10 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
           const clip = animations.find(item => item.name === clipName) || animations[0];
           if (clip) actions.set(mapping.packed_state_index, mixer.clipAction(clip));
         }
-        animationRef.current = { actions, active: null, controller };
+        const player = { actions, active: null, controller, path };
+        animationRef.current.players.push(player);
         const initial = actions.get(activeStateRef.current) || actions.values().next().value;
-        if (initial) { initial.play(); animationRef.current.active = initial; }
+        if (initial) { initial.play(); player.active = initial; }
       }
       await Promise.all(resolvePerformerChildren(definition, instance).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
     };
@@ -189,7 +195,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         controls.target.copy(center);
         camera.position.copy(center).add(new THREE.Vector3(size * 1.2, size * 0.8, size * 1.5));
       }
-      setStatus('点击包围盒选择 · 拖动旋转 · 滚轮缩放');
+      const animatorCount = animationRef.current.players.length;
+      setStatus(`${animatorCount ? `${animatorCount} 个 Animator · ` : ''}点击包围盒选择 · 拖动旋转 · 滚轮缩放`);
     });
     const observer = new ResizeObserver(resize);
     observer.observe(host);
@@ -210,7 +217,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       controls.dispose();
       renderer.dispose();
       releases.current.splice(0).forEach(release => release());
-      animationRef.current = { actions: new Map(), active: null };
+      animationRef.current = { players: [] };
       host.replaceChildren();
     };
   }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform]);
