@@ -24,7 +24,7 @@ export default function useControllerPreviewMachine(layer, values, playing) {
     setActiveTransitionId('');
     enteredAt.current = performance.now();
     busy.current = false;
-  }, [layer?.id, layer?.default_state_id, playing]);
+  }, [layer?.id, layer?.default_state_id]);
 
   useEffect(() => {
     if (!playing || !activeStateId) return;

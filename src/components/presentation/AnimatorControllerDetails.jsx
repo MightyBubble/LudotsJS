@@ -907,7 +907,7 @@ function StateFlowCanvasInner({
     setNodes(current => current.map(node => ({
       ...node,
       selected: selectedStateId === node.id,
-      data: { ...node.data, isPlaying, isActive: isPlaying && activeStateId === node.id },
+      data: { ...node.data, isPlaying, isActive: Boolean(activeStateId) && activeStateId === node.id },
     })));
   }, [activeStateId, isPlaying, selectedStateId]);
 
