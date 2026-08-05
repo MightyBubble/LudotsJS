@@ -1,4 +1,3 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Section, TextField, SelectField, ListField } from '@/components/ludots/ui';
@@ -7,7 +6,7 @@ import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import { getSourceFileName } from '@/lib/assets/sourceFileName';
 
-const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline', 'Vfx'];
+const KINDS = ['Mesh', 'SkinnedMesh', 'Decal', 'Sound', 'Material', 'Spline', 'Vfx', 'AnimationClip'];
 
 export default function HostAssetBindingDetails({ draft, patch }) {
   const { data: assets = [] } = useQuery({ queryKey: ['assets'], queryFn: () => base44.entities.Asset.list() });
