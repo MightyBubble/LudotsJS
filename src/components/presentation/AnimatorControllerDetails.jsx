@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -368,7 +368,7 @@ export default function AnimatorControllerDetails({ draft, patch }) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span>State {transition.from_state_index} -> State {transition.to_state_index}</span>
+                    <span>State {transition.from_state_index} to State {transition.to_state_index}</span>
                     <span className="font-mono">{transition.duration_seconds}s</span>
                   </div>
                   <div className="mt-1 truncate text-[10px] text-gray-500">{transitionLabel(transition)}</div>
