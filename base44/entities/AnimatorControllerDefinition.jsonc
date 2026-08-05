@@ -65,7 +65,7 @@
             "type": "string",
             "enum": [
               "Seconds",
-              "Normalized"
+              "NormalizedSourceState"
             ]
           },
           "consume_trigger": {
