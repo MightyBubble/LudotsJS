@@ -10,7 +10,7 @@ import { breakHierarchyInstance, findHierarchyNode, moveHierarchyNode, updateHie
 export default function PerformerEditorPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
     'Performer', 'performers',
-    () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], rules: [], children: [], required_attribute_ids: [], instanced_batches: [] })
+    () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], rules: [], children: [] })
   );
   const [hierarchyRootId, setHierarchyRootId] = useState(null);
   const [selectedInstance, setSelectedInstance] = useState(null);
