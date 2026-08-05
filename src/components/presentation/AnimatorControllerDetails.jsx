@@ -458,11 +458,11 @@ function Panel({ title, icon: Icon, right, children }) {
   return (
     <div className="flex h-full min-h-0 flex-col border border-[#2A2E37] bg-[#15171C]">
       <div className="flex h-10 items-center justify-between border-b border-[#2A2E37] px-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#E2D8B3]">
-          {Icon && <Icon className="h-3.5 w-3.5" />}
-          <span>{title}</span>
+        <div className="flex min-w-0 flex-1 items-center gap-2 text-xs font-semibold text-[#E2D8B3]">
+          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+          <span className="truncate">{title}</span>
         </div>
-        {right}
+        {right && <div className="shrink-0">{right}</div>}
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
     </div>
@@ -1405,7 +1405,7 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
           title={currentLayer?.name || 'State Flow'}
           icon={GitBranch}
           right={(
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">states {compiled.states.length}</Badge>
               <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">transitions {compiled.transitions.length}</Badge>
               <Button
