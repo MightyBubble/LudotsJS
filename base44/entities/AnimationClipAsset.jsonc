@@ -19,7 +19,7 @@
     },
     "locators": {
       "type": "array",
-      "description": "Runtime locator rows. The editor derives these from AnimationClip host bindings.",
+      "description": "Animation host bindings persisted directly as runtime locators.",
       "items": {
         "type": "object",
         "additionalProperties": false,

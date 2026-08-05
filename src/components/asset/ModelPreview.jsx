@@ -3,11 +3,16 @@ import * as THREE from 'three';
 import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
 
 /** FBX / GLTF / GLB 模型预览，带动画剪辑播放。 */
-export default function ModelPreview({ uri, resourceMap }) {
+export default function ModelPreview({ uri, resourceMap, selectedClip, onClipsChange }) {
   const hostRef = useRef(null);
   const [status, setStatus] = useState('loading');
   const [clips, setClips] = useState([]);
   const controlRef = useRef({});
+
+  useEffect(() => {
+    const index = clips.indexOf(selectedClip);
+    if (index >= 0) controlRef.current.play?.(index);
+  }, [clips, selectedClip]);
 
   useEffect(() => {
     if (!uri) return;
@@ -49,7 +54,9 @@ export default function ModelPreview({ uri, resourceMap }) {
         }
         if (disposed) return;
         scene.add(object); fit(object);
-        setClips(animations.map((a, i) => a.name || `clip_${i}`));
+        const clipNames = animations.map((a, i) => a.name || `clip_${i}`);
+        setClips(clipNames);
+        onClipsChange?.(clipNames);
         if (animations.length) {
           mixer = new THREE.AnimationMixer(object); mixer.clipAction(animations[0]).play();
           controlRef.current.play = (index) => { mixer.stopAllAction(); mixer.clipAction(animations[index]).play(); };
@@ -84,7 +91,7 @@ export default function ModelPreview({ uri, resourceMap }) {
     {status === 'error' && <p className="text-[11px] text-red-400">模型加载失败，请确认地址可访问且为 FBX / GLTF / GLB。</p>}
     {clips.length > 0 && <div className="flex flex-wrap gap-2">
       {clips.map((name, i) => <button key={name + i} onClick={() => controlRef.current.play?.(i)}
-        className="px-2 py-1 rounded border border-[#2A2E37] bg-[#1E2128] text-[11px] text-gray-300">{name}</button>)}
+        className={`px-2 py-1 rounded border text-[11px] ${selectedClip === name ? 'border-primary bg-primary text-primary-foreground' : 'border-[#2A2E37] bg-[#1E2128] text-gray-300'}`}>{name}</button>)}
     </div>}
   </div>;
 }
