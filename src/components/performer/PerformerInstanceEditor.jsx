@@ -1,5 +1,5 @@
 import React from 'react';
-import { NumberField } from '@/components/ludots/ui';
+import { TextField } from '@/components/ludots/ui';
 import JsonValueField from '@/components/ludots/JsonValueField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import VectorField from './VectorField';
@@ -20,7 +20,7 @@ export default function PerformerInstanceEditor({ node, performers, onChange }) 
     </div>
     {onChange ? <>
       <ReferenceSelect label="Definition ID" value={instance.definition_id} options={performers} onChange={definition_id => onChange({ ...instance, definition_id })} />
-      <NumberField label="Scope Tag" value={instance.scope_tag} onChange={scope_tag => onChange({ ...instance, scope_tag })} />
+      <TextField label="Scope Tag" value={instance.scope_tag} onChange={scope_tag => onChange({ ...instance, scope_tag })} hint="命名作用域，例如 structure / working；C# 运行时通过 PerformerScopeTagRegistry 解析为整数 ID" />
       <div className="rounded border border-[#424a55] bg-[#0D0F14] p-3 space-y-3">
         <p className="text-[10px] font-semibold text-[#cbd3dc]">实例 Transform Override · JS Runtime · C# 待对齐</p>
         <VectorField label="Local Position" value={overrides.transform.local_position} onChange={local_position => patchTransform({ local_position })} />

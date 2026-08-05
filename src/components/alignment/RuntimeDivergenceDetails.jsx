@@ -4,7 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 const DOMAINS = ['performer', 'presentation', 'gameplay', 'input', 'map', 'other'].map(value => ({ value, label: value }));
 const STATUSES = [
-  ['js_only', '仅 JS'], ['csharp_planned', 'C# 待接入'], ['csharp_in_progress', 'C# 接入中'],
+  ['js_only', '仅 JS'], ['js_planned', 'JS 待接入'], ['csharp_planned', 'C# 待接入'], ['csharp_in_progress', 'C# 接入中'],
   ['aligned', '已对齐'], ['wont_fix', '不对齐'],
 ].map(([value, label]) => ({ value, label }));
 

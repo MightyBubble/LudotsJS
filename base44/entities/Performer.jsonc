@@ -25,7 +25,8 @@
             "type": "string"
           },
           "scope_tag": {
-            "type": "integer"
+            "type": "string",
+            "description": "\u547d\u540d\u4f5c\u7528\u57df\u6807\u7b7e\uff1b\u5bfc\u51fa\u5230 Ludots \u540e\u7531 PerformerScopeTagRegistry \u89e3\u6790\u4e3a\u6574\u6570 ID"
           },
           "overrides": {
             "type": "object",

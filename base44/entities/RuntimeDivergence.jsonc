@@ -26,6 +26,7 @@
       "type": "string",
       "enum": [
         "js_only",
+        "js_planned",
         "csharp_planned",
         "csharp_in_progress",
         "aligned",
@@ -39,7 +40,7 @@
     },
     "csharp_gap": {
       "type": "string",
-      "description": "C# \u5c1a\u672a\u5bf9\u9f50\u7684\u884c\u4e3a"
+      "description": "C# \u4e0e JS \u5c1a\u672a\u5bf9\u9f50\u7684\u884c\u4e3a\u5dee\u5f02"
     },
     "migration_notes": {
       "type": "string"
