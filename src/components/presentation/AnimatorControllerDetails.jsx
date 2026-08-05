@@ -715,7 +715,7 @@ function AnimatorStateNode({ data, selected }) {
   return (
     <div
       data-runtime-active={isActive ? 'true' : 'false'}
-      className={`relative w-[176px] border bg-[#15171C] shadow-sm transition ${isActive ? 'border-emerald-400 ring-2 ring-emerald-500/40' : selected ? 'border-[#E2D8B3] ring-1 ring-[#E2D8B3]' : 'border-[#424a55] hover:border-[#6f7a86]'}`}
+      className={`relative w-[176px] border bg-[#15171C] shadow-sm transition ${isActive ? 'animator-state-active border-emerald-400 ring-2 ring-emerald-500/40' : selected ? 'border-[#E2D8B3] ring-1 ring-[#E2D8B3]' : 'border-[#424a55] hover:border-[#6f7a86]'}`}
       onDoubleClick={() => {
         if (readOnly) return;
         if (state.type === 'BlendTree' || state.type === 'SubStateMachine') onOpenNested();
@@ -785,6 +785,7 @@ function TransitionEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition
         id={id}
         path={path}
         markerEnd={markerEnd}
+        className={data.active ? 'animator-transition-active' : ''}
         style={{
           stroke: data.active ? '#34d399' : selected ? '#E2D8B3' : 'rgba(130, 145, 165, 0.55)',
           strokeWidth: highlighted ? 3 : 1.5,
@@ -793,7 +794,7 @@ function TransitionEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition
       <EdgeLabelRenderer>
         <div
           data-runtime-transition={data.active ? 'true' : 'false'}
-          className={`flex h-6 min-w-6 items-center justify-center border px-1.5 text-[10px] font-semibold ${data.active ? 'border-emerald-400 bg-emerald-900 text-emerald-200' : selected ? 'border-[#E2D8B3] bg-[#242a32] text-[#E2D8B3]' : 'border-[#424a55] bg-[#15171C] text-gray-400'}`}
+          className={`flex h-6 min-w-6 items-center justify-center border px-1.5 text-[10px] font-semibold ${data.active ? 'animate-pulse border-emerald-400 bg-emerald-900 text-emerald-200' : selected ? 'border-[#E2D8B3] bg-[#242a32] text-[#E2D8B3]' : 'border-[#424a55] bg-[#15171C] text-gray-400'}`}
           style={{ position: 'absolute', transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`, pointerEvents: 'all' }}
         >
           {data.label}
@@ -912,19 +913,24 @@ function StateFlowCanvasInner({
 
   useEffect(() => {
     if (!states.length) return undefined;
-    const frame = requestAnimationFrame(() => fitView({ padding: 0.18, minZoom: 0.35, maxZoom: 1 }));
+    const frame = requestAnimationFrame(() => fitView(compact
+      ? { padding: 0.12, minZoom: 0.1, maxZoom: 0.8 }
+      : { padding: 0.18, minZoom: 0.35, maxZoom: 1 }));
     return () => cancelAnimationFrame(frame);
-  }, [fitView, layer?.id, states.length]);
+  }, [compact, fitView, layer?.id, states.length]);
 
-  const edges = useMemo(() => transitions.map(transition => ({
-    id: transition.id,
-    source: transition.from_state_id,
-    target: transition.to_state_id,
-    type: 'transition',
-    selected: transition.id === selectedTransitionId,
-    markerEnd: { type: MarkerType.ArrowClosed, color: transition.id === selectedTransitionId ? '#E2D8B3' : '#7b8798' },
-    data: { label: transitionConditionLabel(transition), active: isPlaying && transition.id === activeTransitionId },
-  })), [activeTransitionId, isPlaying, selectedTransitionId, transitions]);
+  const edges = useMemo(() => transitions.map(transition => {
+    const active = isPlaying && transition.id === activeTransitionId;
+    return {
+      id: transition.id,
+      source: transition.from_state_id,
+      target: transition.to_state_id,
+      type: 'transition',
+      selected: transition.id === selectedTransitionId,
+      markerEnd: { type: MarkerType.ArrowClosed, color: active ? '#34d399' : transition.id === selectedTransitionId ? '#E2D8B3' : '#7b8798' },
+      data: { label: transitionConditionLabel(transition), active },
+    };
+  }), [activeTransitionId, isPlaying, selectedTransitionId, transitions]);
 
   const onNodesChange = useCallback(changes => setNodes(current => applyNodeChanges(changes, current)), []);
 
@@ -999,7 +1005,7 @@ function StateFlowCanvasInner({
         onNodesDelete={deleted => deleted.forEach(node => deleteState(node.id))}
         onEdgesDelete={deleted => deleted.forEach(edge => deleteTransition(edge.id))}
         fitView
-        fitViewOptions={{ padding: 0.2, minZoom: 0.7, maxZoom: 1 }}
+        fitViewOptions={compact ? { padding: 0.12, minZoom: 0.1, maxZoom: 0.8 } : { padding: 0.2, minZoom: 0.7, maxZoom: 1 }}
         minZoom={0.25}
         maxZoom={2.5}
         proOptions={{ hideAttribution: true }}

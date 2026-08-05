@@ -190,3 +190,22 @@ button:focus-visible {
 .silver-editor [class*="border-[#D97706]"] { border-color: #cbd3dc !important; }
 .silver-editor [class*="text-[#D97706]"] { color: #cbd3dc !important; }
 .silver-editor [class*="text-[#E2D8B3]"] { color: #dce2e8 !important; }
+
+@keyframes animator-state-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.35), 0 0 8px rgba(52, 211, 153, 0.16); }
+  50% { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12), 0 0 20px rgba(52, 211, 153, 0.42); }
+}
+
+@keyframes animator-flow-dash {
+  to { stroke-dashoffset: -34; }
+}
+
+.animator-state-active {
+  animation: animator-state-glow 1.15s ease-in-out infinite;
+}
+
+.react-flow__edge-path.animator-transition-active {
+  stroke-dasharray: 10 7;
+  animation: animator-flow-dash 0.55s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.8));
+}

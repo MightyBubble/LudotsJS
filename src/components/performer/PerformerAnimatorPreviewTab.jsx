@@ -30,7 +30,7 @@ export default function PerformerAnimatorPreviewTab({ root, performers, controll
       <span className="min-w-0 truncate text-xs font-semibold text-[#dce2e8]" title={controller.controller_id}>{controller.controller_id}</span>
       <Button size="sm" onClick={() => setPlaying(value => !value)} className={`h-7 shrink-0 text-xs ${playing ? 'bg-emerald-600' : 'bg-[#242a32]'}`}>{playing ? 'Stop' : 'Play'}</Button>
     </div>
-    <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_190px]">
+    <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(104px,35%)]">
       <div className="h-[420px] min-w-0 overflow-hidden rounded border border-[#424a55]"><StateFlowCanvas key={controller.controller_id} layer={layer} defaultStateId={layer.default_state_id} selectedStateId="" selectedTransitionId={runtime.activeTransitionId} onSelectState={selectState} onSelectTransition={noop} onUpdateLayer={noop} onOpenNested={noop} isPlaying activeStateId={activeState?.id} activeTransitionId={runtime.activeTransitionId} readOnly compact /></div>
       <aside className="flex h-[420px] min-w-0 flex-col overflow-hidden rounded border border-[#424a55] bg-[#171b21]">
         <div className="border-b border-[#424a55] px-3 py-2 text-[11px] font-semibold text-[#dce2e8]">Parameters</div>
