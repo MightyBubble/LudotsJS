@@ -5,7 +5,8 @@ import { Section } from '@/components/ludots/ui';
 import PerformerPreviewViewport from './PerformerPreviewViewport';
 import PerformerTransformEditor from './PerformerTransformEditor';
 import PerformerInstanceEditor from './PerformerInstanceEditor';
-import PerformerAnimationPreviewControls from './PerformerAnimationPreviewControls';
+import PerformerAnimatorPreviewTab from './PerformerAnimatorPreviewTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { writeInstanceTransform } from '@/lib/runtime/performerOverrides';
 
 export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onSelectInstancePath, onChangeInstance, onRequestInheritedEdit, details }) {
@@ -48,9 +49,19 @@ export default function PerformerPreviewEditor({ root, draft, records, patch, se
     <Section title="3D Prefab 预览">
       {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} controllers={controllers} profiles={profiles} clips={clips} activeStateIndex={previewStateIndex} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onSelectPath={onSelectInstancePath} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
     </Section>
-    <div className="min-w-0 space-y-3">
-      {!selectedInstance && <PerformerAnimationPreviewControls draft={draft} controllers={controllers} profiles={profiles} stateIndex={previewStateIndex} onStateIndex={setPreviewStateIndex} />}
-      {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} onRequestInheritedEdit={onRequestInheritedEdit} /> : <Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>}
+    <div className="min-w-0">
+      <Tabs defaultValue="settings" className="min-w-0">
+        <TabsList className="grid h-9 w-full grid-cols-2 rounded bg-[#0D0F14] p-0.5">
+          <TabsTrigger value="settings" className="h-8 text-[11px]">{selectedInstance ? '实例设置' : '根节点设置'}</TabsTrigger>
+          <TabsTrigger value="animator" className="h-8 text-[11px]">Animator 预览</TabsTrigger>
+        </TabsList>
+        <TabsContent value="settings" className="mt-3">
+          {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} onRequestInheritedEdit={onRequestInheritedEdit} /> : <Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>}
+        </TabsContent>
+        <TabsContent value="animator" className="mt-3">
+          <PerformerAnimatorPreviewTab root={root} performers={records} controllers={controllers} profiles={profiles} stateIndex={previewStateIndex} onStateIndex={setPreviewStateIndex} />
+        </TabsContent>
+      </Tabs>
     </div>
     {!selectedInstance && <div className="xl:col-span-3 min-w-0">{details}</div>}
   </>;

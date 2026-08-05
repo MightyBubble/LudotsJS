@@ -4,15 +4,13 @@ import { Button } from '@/components/ui/button';
 import AnimatorPreviewParameters from '@/components/presentation/AnimatorPreviewParameters';
 import useControllerPreviewMachine from '@/hooks/useControllerPreviewMachine';
 import PerformerMiniStateMachine from './PerformerMiniStateMachine';
-
-const modeFor = kind => kind?.includes('Less') ? 'Less' : kind?.includes('Bool') ? 'If' : kind?.includes('Trigger') ? 'Trigger' : 'Greater';
-const runtimeLayer = controller => controller?.authoring_layers?.[0] || { id: 'runtime', default_state_id: `state-${controller?.default_state_index ?? 0}`, states: (controller?.states || []).map(state => ({ ...state, id: `state-${state.packed_state_index}`, name: `State ${state.packed_state_index}`, type: 'Normal' })), transitions: (controller?.transitions || []).map((transition, index) => ({ ...transition, id: `transition-${index}`, from_state_id: `state-${transition.from_state_index}`, to_state_id: `state-${transition.to_state_index}`, conditions: [{ parameter: transition.parameter_index, mode: modeFor(transition.condition_kind), threshold: transition.threshold }] })) };
+import { buildAnimatorPreviewLayer } from '@/lib/runtime/animatorPreview';
 
 export default function PerformerAnimationPreviewControls({ draft, controllers, profiles, stateIndex, onStateIndex }) {
   const animator = (draft.behaviors || []).find(behavior => behavior.kind === 'Animator')?.animator;
   const controller = controllers.find(item => item.controller_id === animator?.animatorControllerId);
   const profile = profiles.find(item => item.profile_id === animator?.animationProfileId);
-  const layer = useMemo(() => runtimeLayer(controller), [controller]);
+  const layer = useMemo(() => buildAnimatorPreviewLayer(controller), [controller]);
   const parameters = useMemo(() => controller?.authoring_parameters || [], [controller]);
   const [values, setValues] = useState({});
   const [playing, setPlaying] = useState(false);

@@ -697,7 +697,7 @@ function ParameterPanel({ parameters, onAddParameter, onUpdateParameters }) {
 }
 
 function AnimatorStateNode({ data, selected }) {
-  const { state, isDefault, outgoingCount, isPlaying, isActive, onRename, onDelete, onOpenNested } = data;
+  const { state, isDefault, outgoingCount, isPlaying, isActive, readOnly, onRename, onDelete, onOpenNested } = data;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(state.name);
   const special = SPECIAL_STATE_TYPES.has(state.type);
@@ -717,6 +717,7 @@ function AnimatorStateNode({ data, selected }) {
       data-runtime-active={isActive ? 'true' : 'false'}
       className={`relative w-[176px] border bg-[#15171C] shadow-sm transition ${isActive ? 'border-emerald-400 ring-2 ring-emerald-500/40' : selected ? 'border-[#E2D8B3] ring-1 ring-[#E2D8B3]' : 'border-[#424a55] hover:border-[#6f7a86]'}`}
       onDoubleClick={() => {
+        if (readOnly) return;
         if (state.type === 'BlendTree' || state.type === 'SubStateMachine') onOpenNested();
         else if (!special) setEditing(true);
       }}
@@ -749,7 +750,7 @@ function AnimatorStateNode({ data, selected }) {
           ) : (
             <div className="min-w-0 flex-1 truncate text-sm font-semibold text-[#dce2e8]">{state.name}</div>
           )}
-          {!special && (
+          {!special && !readOnly && (
             <button type="button" className="nodrag text-gray-500 hover:text-red-400" onClick={event => { event.stopPropagation(); onDelete(); }}>
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -843,6 +844,7 @@ function StateFlowCanvasInner({
   isPlaying,
   activeStateId,
   activeTransitionId,
+  readOnly = false,
 }) {
   const { screenToFlowPosition } = useReactFlow();
   const [nodes, setNodes] = useState([]);
@@ -891,6 +893,7 @@ function StateFlowCanvasInner({
         outgoingCount: transitions.filter(transition => transition.from_state_id === state.id).length,
         isPlaying,
         isActive: isPlaying && activeStateId === state.id,
+        readOnly,
         onRename: name => updateState(state.id, { name }),
         onDelete: () => deleteState(state.id),
         onOpenNested: () => onOpenNested(state.id),
@@ -944,9 +947,11 @@ function StateFlowCanvasInner({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
-        onNodeDragStop={onNodeDragStop}
+        onNodeDragStop={readOnly ? undefined : onNodeDragStop}
+        nodesDraggable={!readOnly}
+        nodesConnectable={!readOnly}
         onConnect={connection => {
-          if (!connection.source || !connection.target || connection.source === connection.target) return;
+          if (readOnly || !connection.source || !connection.target || connection.source === connection.target) return;
           const exists = transitions.some(transition => transition.from_state_id === connection.source && transition.to_state_id === connection.target);
           if (exists) return;
           const nextTransition = makeAuthoringTransition(connection.source, connection.target);
@@ -967,15 +972,15 @@ function StateFlowCanvasInner({
           onSelectTransition(null);
           setMenu(null);
         }}
-        onPaneContextMenu={event => {
+        onPaneContextMenu={readOnly ? undefined : event => {
           event.preventDefault();
           setMenu({ x: event.clientX, y: event.clientY });
         }}
-        onNodeContextMenu={(event, node) => {
+        onNodeContextMenu={readOnly ? undefined : (event, node) => {
           event.preventDefault();
           setMenu({ x: event.clientX, y: event.clientY, stateId: node.id });
         }}
-        deleteKeyCode={['Delete', 'Backspace']}
+        deleteKeyCode={readOnly ? null : ['Delete', 'Backspace']}
         onNodesDelete={deleted => deleted.forEach(node => deleteState(node.id))}
         onEdgesDelete={deleted => deleted.forEach(edge => deleteTransition(edge.id))}
         fitView
@@ -1004,7 +1009,7 @@ function StateFlowCanvasInner({
   );
 }
 
-function StateFlowCanvas(props) {
+export function StateFlowCanvas(props) {
   return (
     <ReactFlowProvider>
       <StateFlowCanvasInner {...props} />

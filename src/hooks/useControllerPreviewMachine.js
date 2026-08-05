@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const passes = (transition, values, elapsed, stateDuration, consumed) => {
   const condition = transition.conditions?.[0];
@@ -52,5 +52,12 @@ export default function useControllerPreviewMachine(layer, values, playing) {
     return () => window.clearInterval(timer);
   }, [activeStateId, layer, playing, values]);
 
-  return { activeStateId, activeTransitionId };
+  const selectState = useCallback((stateId) => {
+    setActiveStateId(stateId);
+    setActiveTransitionId('');
+    enteredAt.current = performance.now();
+    busy.current = false;
+  }, []);
+
+  return { activeStateId, activeTransitionId, selectState };
 }
