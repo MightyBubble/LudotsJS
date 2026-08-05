@@ -9,7 +9,7 @@
     },
     "asset_kind": {
       "type": "string",
-      "description": "assetKind\uff0c\u4f8b\u5982 Mesh / SkinnedMesh / Sound / Decal"
+      "description": "assetKind, for example Mesh / SkinnedMesh / Sound / Decal / AnimationClip"
     },
     "asset_id": {
       "type": "string",
