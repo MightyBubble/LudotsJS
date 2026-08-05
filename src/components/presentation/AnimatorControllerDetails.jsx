@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -15,13 +15,13 @@ import { Button } from '@/components/ui/button';
 import { BoolField, NumberField, Section, SelectField, TextField } from '@/components/ludots/ui';
 
 const CONDITION_OPTIONS = [
-  { value: 'None', label: '???' },
+  { value: 'None', label: '无条件' },
   { value: 'Trigger', label: 'Trigger' },
   { value: 'BoolTrue', label: 'Bool True' },
   { value: 'BoolFalse', label: 'Bool False' },
   { value: 'FloatGreaterOrEqual', label: 'Float >=' },
   { value: 'FloatLessOrEqual', label: 'Float <=' },
-  { value: 'AutoOnNormalizedTime', label: '?????' },
+  { value: 'AutoOnNormalizedTime', label: '按归一时间' },
 ];
 
 const DURATION_MODE_OPTIONS = [
@@ -110,7 +110,7 @@ function StateNode({ data, selected }) {
       <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !bg-[#9aa5b1]" />
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-[#dce2e8]">State {index}</span>
-        {isDefault && <span className="rounded bg-[#303845] px-1.5 py-0.5 text-[9px] text-[#dce2e8]">??</span>}
+        {isDefault && <span className="rounded bg-[#303845] px-1.5 py-0.5 text-[9px] text-[#dce2e8]">默认</span>}
       </div>
       <div className="mt-1 font-mono text-[11px] text-[#E2D8B3]">packed {state.packed_state_index}</div>
       <div className="mt-1 flex items-center gap-2 text-[10px] text-gray-400">
@@ -158,7 +158,7 @@ export default function AnimatorControllerDetails({ draft, patch }) {
 
   const stateOptions = states.map((state, index) => ({
     value: String(index),
-    label: `State ${index} ? packed ${state.packed_state_index}`,
+    label: `State ${index} · packed ${state.packed_state_index}`,
   }));
 
   const patchStates = nextStates => patch({
@@ -268,10 +268,10 @@ export default function AnimatorControllerDetails({ draft, patch }) {
           <div className="flex h-10 items-center justify-between border-b border-[#2A2E37] px-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#E2D8B3]">
               <GitBranch className="h-3.5 w-3.5" />
-              ???
+              状态机
             </div>
             <Button size="sm" onClick={addState} className="h-7 bg-[#1E2128]">
-              <Plus className="h-3 w-3" />??
+              <Plus className="h-3 w-3" />状态
             </Button>
           </div>
           <div className="h-[480px]">
@@ -304,7 +304,7 @@ export default function AnimatorControllerDetails({ draft, patch }) {
         <div className="space-y-3">
           <Section
             title="States"
-            right={<Button size="sm" onClick={addState} className="h-7 bg-[#1E2128]"><Plus className="h-3 w-3" />??</Button>}
+            right={<Button size="sm" onClick={addState} className="h-7 bg-[#1E2128]"><Plus className="h-3 w-3" />添加</Button>}
           >
             <div className="space-y-2">
               {states.map((state, index) => (
@@ -339,14 +339,14 @@ export default function AnimatorControllerDetails({ draft, patch }) {
               <NumberField label="Playback Speed" value={selectedState.playback_speed} onChange={playback_speed => updateState(selectedStateIndex, { playback_speed })} />
               <BoolField label="Loop" value={selectedState.loop} onChange={loop => updateState(selectedStateIndex, { loop })} />
               <Button size="sm" onClick={() => patch({ default_state_index: selectedStateIndex })} className="h-7 bg-[#1E2128]">
-                ??????
+                设为默认状态
               </Button>
             </Section>
           )}
 
           <Section
             title="Transitions"
-            right={<Button size="sm" onClick={() => addTransition()} disabled={states.length < 2} className="h-7 bg-[#1E2128]"><Plus className="h-3 w-3" />??</Button>}
+            right={<Button size="sm" onClick={() => addTransition()} disabled={states.length < 2} className="h-7 bg-[#1E2128]"><Plus className="h-3 w-3" />添加</Button>}
           >
             <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
               <SelectField label="From" value={String(newTransition.from)} options={stateOptions} onChange={value => setNewTransition(current => ({ ...current, from: Number(value) }))} />
@@ -415,4 +415,3 @@ export default function AnimatorControllerDetails({ draft, patch }) {
     </div>
   );
 }
-
