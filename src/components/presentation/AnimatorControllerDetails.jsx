@@ -845,8 +845,9 @@ function StateFlowCanvasInner({
   activeStateId,
   activeTransitionId,
   readOnly = false,
+  compact = false,
 }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [menu, setMenu] = useState(null);
   const states = layer?.states || [];
@@ -899,7 +900,13 @@ function StateFlowCanvasInner({
         onOpenNested: () => onOpenNested(state.id),
       },
     })));
-  }, [activeStateId, defaultStateId, deleteState, isPlaying, onOpenNested, selectedStateId, states, transitions, updateState]);
+  }, [activeStateId, defaultStateId, deleteState, isPlaying, onOpenNested, readOnly, selectedStateId, states, transitions, updateState]);
+
+  useEffect(() => {
+    if (!states.length) return undefined;
+    const frame = requestAnimationFrame(() => fitView({ padding: 0.18, minZoom: 0.35, maxZoom: 1 }));
+    return () => cancelAnimationFrame(frame);
+  }, [fitView, layer?.id, states.length]);
 
   const edges = useMemo(() => transitions.map(transition => ({
     id: transition.id,
@@ -940,7 +947,7 @@ function StateFlowCanvasInner({
   };
 
   return (
-    <div className="relative min-h-[560px] flex-1 bg-[#0D0F14]" style={{ height: '100%', width: '100%' }}>
+    <div className={`relative flex-1 bg-[#0D0F14] ${compact ? 'min-h-[360px]' : 'min-h-[560px]'}`} style={{ height: '100%', width: '100%' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
