@@ -51,6 +51,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     let cancelled = false;
 
     let selectedGroup = null;
+    let selectionBox = null;
     const nodeGroups = [];
     const addDefinition = async (definition, parent, path = 'root', visited = new Set(), instance = {}) => {
       if (!definition || visited.has(definition.performer_id)) return;
@@ -98,7 +99,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
-    const animate = () => { frame = requestAnimationFrame(animate); controls.update(); vfx.update(clock.getDelta()); renderer.render(scene, camera); };
+    const animate = () => { frame = requestAnimationFrame(animate); controls.update(); selectionBox?.update(); vfx.update(clock.getDelta()); renderer.render(scene, camera); };
     const commitTransform = () => {
       const object = transform.object;
       if (!object) return;
@@ -133,7 +134,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     addDefinition(root, content).then(() => {
       if (cancelled) return;
       if (selectedGroup && selectedInstancePath !== 'root') {
-        scene.add(new THREE.BoxHelper(selectedGroup, 0xcbd3dc));
+        selectionBox = new THREE.BoxHelper(selectedGroup, 0xcbd3dc);
+        scene.add(selectionBox);
         transform.attach(selectedGroup);
       }
       const box = new THREE.Box3().setFromObject(content);
@@ -158,6 +160,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       renderer.domElement.removeEventListener('pointerup', pointerUp);
       transform.detach();
       transform.dispose();
+      selectionBox?.geometry.dispose();
+      selectionBox?.material.dispose();
       vfx.dispose();
       controls.dispose();
       renderer.dispose();

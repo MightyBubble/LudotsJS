@@ -41,7 +41,8 @@ export default function PerformerPreviewEditor({ root, draft, records, patch, se
       {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onSelectPath={onSelectInstancePath} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
     </Section>
     <div className="min-w-0 space-y-3">
-      {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} onRequestInheritedEdit={onRequestInheritedEdit} /> : <><Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>{details}</>}
+      {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} onRequestInheritedEdit={onRequestInheritedEdit} /> : <Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>}
     </div>
+    {!selectedInstance && <div className="xl:col-span-3 min-w-0">{details}</div>}
   </>;
 }
