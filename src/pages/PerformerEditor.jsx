@@ -51,13 +51,12 @@ export default function PerformerEditorPage() {
       onCreate={create} onSave={save} dirty={dirty}
       onDelete={rec => { if (window.confirm(`确定删除「${rec.label || rec.performer_id}」吗？`)) remove(rec.id); }}
     >
-      {draft && <>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(260px,0.8fr)_minmax(0,2.2fr)] xl:items-start">
+      {draft && (
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(220px,0.65fr)_minmax(360px,1.5fr)_minmax(300px,1fr)] xl:items-start">
           <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedPath={selectedInstance?.path || 'root'} onSelect={selectHierarchyNode} onMove={moveHierarchy} />
-          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} selectedInstance={selectedInstance} onSelectInstancePath={selectHierarchyPath} onChangeInstance={updateSelectedInstance} />
+          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} selectedInstance={selectedInstance} onSelectInstancePath={selectHierarchyPath} onChangeInstance={updateSelectedInstance} details={<PerformerDetails draft={draft} patch={patch} compact />} />
         </div>
-        <PerformerDetails draft={draft} patch={patch} />
-      </>}
+      )}
     </RecordWorkspace>
   );
 }
