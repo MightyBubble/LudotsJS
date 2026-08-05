@@ -120,6 +120,13 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    key: 'alignment',
+    label: '运行时对齐',
+    items: [
+      { page: 'RuntimeDivergenceEditor', label: '分叉台账', icon: GitBranch },
+    ],
+  },
+  {
     key: 'simulation',
     label: '模拟与诊断',
     items: [
@@ -137,11 +144,12 @@ export const ALL_MODULE_KEYS = NAV_GROUPS.map(g => g.key);
 /** 按项目的 enabled_modules / navigation_profile 过滤与排序顶层模块 */
 export function getVisibleNavGroups(project) {
   const configured = project?.enabled_modules?.length ? project.enabled_modules : ALL_MODULE_KEYS;
-  const enabled = configured.includes('participants') ? configured : [...configured, 'participants'];
+  const required = ['participants', 'alignment'];
+  const enabled = [...configured, ...required.filter(key => !configured.includes(key))];
   const configuredOrder = project?.navigation_profile?.tab_order?.length
     ? project.navigation_profile.tab_order
     : enabled;
-  const order = configuredOrder.includes('participants') ? configuredOrder : [...configuredOrder.slice(0, 1), 'participants', ...configuredOrder.slice(1)];
+  const order = [...configuredOrder, ...required.filter(key => !configuredOrder.includes(key))];
   const labels = project?.navigation_profile?.tab_labels || {};
   return order
     .map(key => NAV_GROUPS.find(g => g.key === key))

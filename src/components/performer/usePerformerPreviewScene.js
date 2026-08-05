@@ -4,11 +4,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
 import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
+import { readInstanceOverrides } from '@/lib/runtime/performerOverrides';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
 export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform) {
   const releases = useRef([]);
+  const cameraState = useRef(null);
   const [status, setStatus] = useState('准备预览');
 
   useEffect(() => {
@@ -22,6 +24,10 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     host.replaceChildren(renderer.domElement);
     const controls = new OrbitControls(camera, renderer.domElement);
+    if (cameraState.current) {
+      camera.position.fromArray(cameraState.current.position);
+      controls.target.fromArray(cameraState.current.target);
+    }
     const transform = new TransformControls(camera, renderer.domElement);
     transform.setMode(mode);
     transform.addEventListener('dragging-changed', event => { controls.enabled = !event.value; });
@@ -44,11 +50,15 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     let cancelled = false;
 
     let selectedGroup = null;
-    const addDefinition = async (definition, parent, path = 'root', visited = new Set()) => {
+    const addDefinition = async (definition, parent, path = 'root', visited = new Set(), instance = {}) => {
       if (!definition || visited.has(definition.performer_id)) return;
       const nextVisited = new Set(visited).add(definition.performer_id);
       const group = new THREE.Group();
+      const instanceTransform = readInstanceOverrides(instance).transform;
       group.name = path;
+      group.position.fromArray(instanceTransform.local_position);
+      group.rotation.set(...instanceTransform.local_rotation.map(THREE.MathUtils.degToRad));
+      group.scale.fromArray(instanceTransform.local_scale);
       parent.add(group);
       if (path === selectedInstancePath) selectedGroup = group;
       for (const behavior of definition.behaviors || []) {
@@ -73,7 +83,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         group.add(object);
         if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
-      await Promise.all((definition.children || []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited)));
+      await Promise.all((definition.children || []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
     };
 
     let frame = 0;
@@ -89,19 +99,23 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     const commitTransform = () => {
       const object = transform.object;
       if (!object) return;
-      onTransform({
-        localOffset: object.position.toArray(),
-        localRotation: [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg),
-        localScale: object.scale.toArray(),
+      const rotation = [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg);
+      onTransform(selectedInstancePath === 'root' ? {
+        localOffset: object.position.toArray(), localRotation: rotation, localScale: object.scale.toArray(),
+      } : {
+        local_position: object.position.toArray(), local_rotation: rotation, local_scale: object.scale.toArray(),
       });
     };
     transform.addEventListener('mouseUp', commitTransform);
     resize();
     addDefinition(root, content).then(() => {
       if (cancelled) return;
-      if (selectedGroup && selectedInstancePath !== 'root') scene.add(new THREE.BoxHelper(selectedGroup, 0xcbd3dc));
+      if (selectedGroup && selectedInstancePath !== 'root') {
+        scene.add(new THREE.BoxHelper(selectedGroup, 0xcbd3dc));
+        transform.attach(selectedGroup);
+      }
       const box = new THREE.Box3().setFromObject(content);
-      if (!box.isEmpty()) {
+      if (!cameraState.current && !box.isEmpty()) {
         const center = box.getCenter(new THREE.Vector3());
         const size = Math.max(...box.getSize(new THREE.Vector3()).toArray(), 1);
         controls.target.copy(center);
@@ -116,6 +130,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       cancelled = true;
       observer.disconnect();
       cancelAnimationFrame(frame);
+      cameraState.current = { position: camera.position.toArray(), target: controls.target.toArray() };
       transform.removeEventListener('mouseUp', commitTransform);
       transform.detach();
       transform.dispose();

@@ -37,6 +37,7 @@ import PresentationRenderAssetEditor from './pages/PresentationRenderAssetEditor
 import PresentationHostResourceEditor from './pages/PresentationHostResourceEditor';
 import PresentationTextEditor from './pages/PresentationTextEditor';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
+import RuntimeDivergenceEditor from './pages/RuntimeDivergenceEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
 
@@ -118,6 +119,7 @@ const AuthenticatedApp = () => {
       <Route path="/PresentationRenderAssetEditor" element={<LayoutWrapper currentPageName="PresentationRenderAssetEditor"><PresentationRenderAssetEditor /></LayoutWrapper>} />
       <Route path="/PresentationHostResourceEditor" element={<LayoutWrapper currentPageName="PresentationHostResourceEditor"><PresentationHostResourceEditor /></LayoutWrapper>} />
       <Route path="/PresentationTextEditor" element={<LayoutWrapper currentPageName="PresentationTextEditor"><PresentationTextEditor /></LayoutWrapper>} />
+      <Route path="/RuntimeDivergenceEditor" element={<LayoutWrapper currentPageName="RuntimeDivergenceEditor"><RuntimeDivergenceEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,3 +1,5 @@
+import { readInstanceOverrides } from './performerOverrides';
+
 const valueOf = (entry) => entry?.lane === 'Int' ? entry.intValue : entry?.lane === 'Vector' ? entry.vectorValue : entry?.floatValue;
 
 const mergeDefinition = (definition, definitions, trail = new Set()) => {
@@ -33,13 +35,15 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = []) => 
   const raw = context.definitions.get(definitionId);
   if (!raw) return { definitionId, error: 'missing', children: [] };
   const definition = mergeDefinition(raw, context.definitions);
-  const params = buildParams(definition, context.params, childConfig.param_overrides);
+  const overrides = readInstanceOverrides(childConfig);
+  const params = buildParams(definition, context.params, overrides.params);
   const activeSlots = new Set((definition.behaviors || []).filter(item => item.activeByDefault !== false).map(item => item.slot));
   const node = {
     definitionId,
     scopeTag: childConfig.scope_tag ?? null,
     definition,
     params,
+    transform: overrides.transform,
     activeSlots,
     children: [],
   };
@@ -57,6 +61,7 @@ const snapshotNode = (node) => ({
   scopeTag: node.scopeTag,
   error: node.error,
   params: Object.fromEntries(node.params || []),
+  transform: node.transform,
   behaviors: (node.definition?.behaviors || []).filter(item => node.activeSlots?.has(item.slot)),
   children: (node.children || []).map(snapshotNode),
 });
