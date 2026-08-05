@@ -15,7 +15,13 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
   const cameraState = useRef(null);
   const animationRef = useRef({ players: [] });
   const activeStateRef = useRef(activeStateIndex);
+  const transformRef = useRef(null);
+  const onSelectPathRef = useRef(onSelectPath);
+  const onTransformRef = useRef(onTransform);
   const [status, setStatus] = useState('准备预览');
+  useEffect(() => { onSelectPathRef.current = onSelectPath; }, [onSelectPath]);
+  useEffect(() => { onTransformRef.current = onTransform; }, [onTransform]);
+  useEffect(() => { transformRef.current?.setMode(mode); }, [mode]);
   useEffect(() => {
     activeStateRef.current = activeStateIndex;
     let switched = 0;
@@ -45,9 +51,12 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       camera.position.fromArray(cameraState.current.position);
       controls.target.fromArray(cameraState.current.target);
     }
+    let transforming = false;
     const transform = new TransformControls(camera, renderer.domElement);
+    transformRef.current = transform;
     transform.setMode(mode);
-    transform.addEventListener('dragging-changed', event => { controls.enabled = !event.value; });
+    const handleDraggingChanged = event => { controls.enabled = !event.value; transforming = event.value; };
+    transform.addEventListener('dragging-changed', handleDraggingChanged);
     scene.add(transform.getHelper());
     scene.add(new THREE.HemisphereLight(0xffffff, 0x303845, 2.2));
     const key = new THREE.DirectionalLight(0xffffff, 2.5);
@@ -154,7 +163,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       const object = transform.object;
       if (!object) return;
       const rotation = [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg);
-      onTransform(selectedInstancePath === 'root' ? {
+      onTransformRef.current?.(selectedInstancePath === 'root' ? {
         localOffset: object.position.toArray(), localRotation: rotation, localScale: object.scale.toArray(),
       } : {
         local_position: object.position.toArray(), local_rotation: rotation, local_scale: object.scale.toArray(),
@@ -163,8 +172,6 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     transform.addEventListener('mouseUp', commitTransform);
     const raycaster = new THREE.Raycaster();
     const pointerStart = new THREE.Vector2();
-    let transforming = false;
-    transform.addEventListener('dragging-changed', event => { transforming = event.value; });
     const pointerDown = event => pointerStart.set(event.clientX, event.clientY);
     const pointerUp = event => {
       if (transforming || Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4) return;
@@ -176,7 +183,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         if (box.isEmpty()) box.setFromCenterAndSize(item.group.getWorldPosition(new THREE.Vector3()), new THREE.Vector3(1, 1, 1));
         return { ...item, point: raycaster.ray.intersectBox(box, point.clone()) };
       }).filter(item => item.point).sort((a, b) => b.path.split('/').length - a.path.split('/').length || a.point.distanceTo(camera.position) - b.point.distanceTo(camera.position));
-      if (hits[0]) onSelectPath?.(hits[0].path);
+      if (hits[0]) onSelectPathRef.current?.(hits[0].path);
     };
     renderer.domElement.addEventListener('pointerdown', pointerDown);
     renderer.domElement.addEventListener('pointerup', pointerUp);
@@ -207,20 +214,28 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       cancelAnimationFrame(frame);
       cameraState.current = { position: camera.position.toArray(), target: controls.target.toArray() };
       transform.removeEventListener('mouseUp', commitTransform);
+      transform.removeEventListener('dragging-changed', handleDraggingChanged);
       renderer.domElement.removeEventListener('pointerdown', pointerDown);
       renderer.domElement.removeEventListener('pointerup', pointerUp);
       transform.detach();
       transform.dispose();
+      transformRef.current = null;
+      mixers.forEach(mixer => {
+        mixer.stopAllAction();
+        mixer.uncacheRoot(mixer.getRoot());
+      });
       selectionBox?.geometry.dispose();
       selectionBox?.material.dispose();
       vfx.dispose();
       controls.dispose();
+      renderer.renderLists.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       releases.current.splice(0).forEach(release => release());
       animationRef.current = { players: [] };
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform]);
+  }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath, targetSlot]);
 
   return status;
 }
