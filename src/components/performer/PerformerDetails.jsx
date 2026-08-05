@@ -6,7 +6,6 @@ import VectorField from './VectorField';
 import PerformerBehaviorList from './PerformerBehaviorList';
 import PerformerParamsSection from './PerformerParamsSection';
 import PerformerRulesSection from './PerformerRulesSection';
-import PerformerChildrenSection from './PerformerChildrenSection';
 import JsonValueField from '@/components/ludots/JsonValueField';
 
 export default function PerformerDetails({ draft, patch }) {
@@ -42,7 +41,6 @@ export default function PerformerDetails({ draft, patch }) {
       <JsonValueField label="Surface" value={draft.surface} onChange={surface => patch({ surface })} />
     </Section>
 
-    <PerformerChildrenSection value={draft.children} performers={refs.performers} onChange={children => patch({ children })} />
     <PerformerBehaviorList behaviors={draft.behaviors} refs={refs} onChange={behaviors => patch({ behaviors })} />
     <PerformerParamsSection
       paramDefaults={draft.paramDefaults}
