@@ -26,10 +26,10 @@ export default function PerformerInstanceTabs({ instance, performers, onChange }
         <VectorField label="Local Rotation (deg)" value={overrides.transform.local_rotation} onChange={local_rotation => patchTransform({ local_rotation })} />
         <VectorField label="Local Scale" value={overrides.transform.local_scale} onChange={local_scale => patchTransform({ local_scale })} />
       </div>
-      <PerformerBehaviorList title="Instance Runtime Behaviors" description="仅属于当前 Child 实例；不修改被引用的 Performer 模板。" behaviors={instance.runtime_behaviors || []} refs={refs} onChange={runtime_behaviors => onChange({ ...instance, runtime_behaviors })} />
     </TabsContent>
-    <TabsContent value="params" className="mt-3">
+    <TabsContent value="params" className="mt-3 space-y-3">
       <JsonValueField label="Param Overrides" value={overrides.params} onChange={params => onChange(writeInstanceParams(instance, params))} />
+      <PerformerBehaviorList title="Instance Runtime Behaviors" description="仅属于当前 Child 实例；不修改被引用的 Performer 模板。" behaviors={instance.runtime_behaviors || []} refs={refs} onChange={runtime_behaviors => onChange({ ...instance, runtime_behaviors })} />
     </TabsContent>
   </Tabs>;
 }
