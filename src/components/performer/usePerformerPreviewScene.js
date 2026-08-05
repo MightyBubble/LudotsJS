@@ -111,13 +111,19 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     transform.addEventListener('mouseUp', commitTransform);
     const raycaster = new THREE.Raycaster();
     const pointerStart = new THREE.Vector2();
+    let transforming = false;
+    transform.addEventListener('dragging-changed', event => { transforming = event.value; });
     const pointerDown = event => pointerStart.set(event.clientX, event.clientY);
     const pointerUp = event => {
-      if (Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4 || transform.axis) return;
+      if (transforming || Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4) return;
       const rect = renderer.domElement.getBoundingClientRect();
       raycaster.setFromCamera(new THREE.Vector2(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1), camera);
       const point = new THREE.Vector3();
-      const hits = nodeGroups.map(item => ({ ...item, point: raycaster.ray.intersectBox(new THREE.Box3().setFromObject(item.group), point.clone()) })).filter(item => item.point).sort((a, b) => b.path.split('/').length - a.path.split('/').length || a.point.distanceTo(camera.position) - b.point.distanceTo(camera.position));
+      const hits = nodeGroups.map(item => {
+        const box = new THREE.Box3().setFromObject(item.group);
+        if (box.isEmpty()) box.setFromCenterAndSize(item.group.getWorldPosition(new THREE.Vector3()), new THREE.Vector3(1, 1, 1));
+        return { ...item, point: raycaster.ray.intersectBox(box, point.clone()) };
+      }).filter(item => item.point).sort((a, b) => b.path.split('/').length - a.path.split('/').length || a.point.distanceTo(camera.position) - b.point.distanceTo(camera.position));
       if (hits[0]) onSelectPath?.(hits[0].path);
     };
     renderer.domElement.addEventListener('pointerdown', pointerDown);
