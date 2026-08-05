@@ -11,6 +11,10 @@
       "type": "string",
       "description": "AnimatorControllerDefinition.controller_id"
     },
+    "preview_mesh_asset_id": {
+      "type": "string",
+      "description": "Editor-only explicit Asset.asset_id used by the profile preview; not exported."
+    },
     "state_clips": {
       "type": "array",
       "items": {

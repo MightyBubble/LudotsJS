@@ -1,6 +1,7 @@
 import React from 'react';
 import { Section, TextField, Field } from '@/components/ludots/ui';
 import ReferenceSelect from './ReferenceSelect';
+import ProfileAnimationPreview from './ProfileAnimationPreview';
 
 function controllerStates(controller) {
   const authored = (controller?.authoring_layers || []).flatMap(layer => layer.states || []);
@@ -39,5 +40,6 @@ export default function AnimationProfileDetails({ draft, patch, refs }) {
       <ReferenceSelect label="Animator Controller" value={draft.animator_controller_id} options={refs.controllers} onChange={selectController}/>
     </Section>
     <StateClipRows rows={draft.state_clips} controller={selected} clips={refs.clips} onChange={state_clips => patch({ state_clips })}/>
+    <ProfileAnimationPreview draft={draft} patch={patch} controller={selected} />
   </div>;
 }
