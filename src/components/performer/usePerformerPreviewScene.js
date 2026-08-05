@@ -5,6 +5,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
 import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
 import { readInstanceOverrides } from '@/lib/runtime/performerOverrides';
+import { resolvePerformerChildren } from '@/lib/runtime/performerComposition';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
@@ -85,7 +86,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         group.add(object);
         if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
-      await Promise.all((instance.children ?? definition.children ?? []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
+      await Promise.all(resolvePerformerChildren(definition, instance).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
     };
 
     let frame = 0;

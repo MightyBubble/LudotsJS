@@ -24,7 +24,7 @@ export default function PerformerEditorPage() {
   const updateSelectedInstance = selectedInstance ? (next) => {
     const children = updateHierarchyInstance(draft, visibleRecords, selectedInstance.path, next);
     patch({ children });
-    setSelectedInstance(current => ({ ...current, instance: next }));
+    setSelectedInstance(current => ({ ...current, instance: next, source: current.source === 'nested_template' ? 'nested_override' : current.source }));
   } : null;
   const moveHierarchy = useCallback((sourcePath, targetPath, placement) => {
     const moved = moveHierarchyNode(draft, visibleRecords, sourcePath, targetPath, placement);

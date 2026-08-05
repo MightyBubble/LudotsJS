@@ -1,4 +1,5 @@
 import { readInstanceOverrides } from './performerOverrides';
+import { resolvePerformerChildren, usesInstanceChildren } from './performerComposition';
 
 const valueOf = (entry) => entry?.lane === 'Int' ? entry.intValue : entry?.lane === 'Vector' ? entry.vectorValue : entry?.floatValue;
 
@@ -30,7 +31,7 @@ const matchesRule = (rule, event) => {
   return !condition || condition === 'None' || (condition === 'TagGained' && event.gained) || (condition === 'TagLost' && !event.gained);
 };
 
-const instantiateNode = (definitionId, context, childConfig = {}, path = []) => {
+const instantiateNode = (definitionId, context, childConfig = {}, path = [], source = 'definition') => {
   if (path.includes(definitionId)) return { definitionId, error: 'cycle', children: [] };
   const raw = context.definitions.get(definitionId);
   if (!raw) return { definitionId, error: 'missing', children: [] };
@@ -45,6 +46,7 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = []) => 
   const activeSlots = new Set(behaviors.filter(item => item.activeByDefault !== false).map(item => item.slot));
   const node = {
     definitionId,
+    compositionSource: source,
     scopeTag: childConfig.scope_tag ?? null,
     definition,
     params,
@@ -54,7 +56,8 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = []) => 
     activeSlots,
     children: [],
   };
-  node.children = (childConfig.children ?? definition.children ?? []).map(child => instantiateNode(child.definition_id, { ...context, params }, child, [...path, definitionId]));
+  const hasInstanceChildren = usesInstanceChildren(childConfig);
+  node.children = resolvePerformerChildren(definition, childConfig).map(child => instantiateNode(child.definition_id, { ...context, params }, child, [...path, definitionId], hasInstanceChildren ? 'instance_override' : 'template'));
   return node;
 };
 
@@ -65,6 +68,7 @@ const visit = (node, callback) => {
 
 const snapshotNode = (node) => ({
   definitionId: node.definitionId,
+  compositionSource: node.compositionSource,
   scopeTag: node.scopeTag,
   error: node.error,
   params: Object.fromEntries(node.params || []),

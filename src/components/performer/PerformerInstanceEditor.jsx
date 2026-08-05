@@ -17,6 +17,8 @@ export default function PerformerInstanceEditor({ node, performers, onChange }) 
     <div>
       <p className="text-xs font-semibold text-[#dce2e8]">子 Performer 实例</p>
       <p className="mt-1 font-mono text-[10px] text-gray-500">{node.path}</p>
+      {node.source === 'nested_template' && <p className="mt-2 rounded border border-amber-900/60 bg-amber-950/30 px-2 py-1.5 text-[10px] text-amber-200">来自嵌套 Performer 模板；首次修改会在当前根 Performer 中生成局部覆盖，不会修改原模板。</p>}
+      {node.source === 'nested_override' && <p className="mt-2 rounded border border-sky-900/60 bg-sky-950/30 px-2 py-1.5 text-[10px] text-sky-200">当前节点已由根 Performer 局部覆盖；运行时优先使用该实例数据。</p>}
     </div>
     {onChange ? <>
       <ReferenceSelect label="Definition ID" value={instance.definition_id} options={performers} onChange={definition_id => onChange({ ...instance, definition_id })} />

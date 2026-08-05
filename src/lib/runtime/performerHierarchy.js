@@ -1,21 +1,23 @@
-const childrenOf = (definition, instance) => instance?.children ?? definition?.children ?? [];
+import { resolvePerformerChildren, usesInstanceChildren } from './performerComposition';
+
 const indexMap = records => new Map(records.map(item => [item.performer_id, item]));
 
 export function findHierarchyNode(root, records, path) {
   if (!root) return null;
-  if (path === 'root') return { performer: root, instance: null, path: 'root', parentPath: null, index: -1 };
+  if (path === 'root') return { performer: root, instance: null, path: 'root', parentPath: null, index: -1, source: 'definition' };
   const byId = indexMap(records);
   const parts = path.split('/').slice(1).map(Number);
-  let performer = root, instance = null, currentPath = 'root';
+  let performer = root, instance = null, currentPath = 'root', source = 'definition';
   for (const index of parts) {
-    const child = childrenOf(performer, instance)[index];
+    source = instance ? (usesInstanceChildren(instance) ? 'nested_override' : 'nested_template') : 'definition';
+    const child = resolvePerformerChildren(performer, instance)[index];
     if (!child) return null;
     const parentPath = currentPath;
     currentPath += `/${index}`;
     performer = byId.get(child.definition_id);
     instance = child;
     if (!performer) return null;
-    if (currentPath === path) return { performer, instance, path, parentPath, index };
+    if (currentPath === path) return { performer, instance, path, parentPath, index, source };
   }
   return null;
 }
@@ -24,14 +26,14 @@ export function updateHierarchyInstance(root, records, path, nextInstance) {
   const byId = indexMap(records);
   const parts = path.split('/').slice(1).map(Number);
   const update = (definition, instance, depth) => {
-    const children = [...childrenOf(definition, instance)];
+    const children = [...resolvePerformerChildren(definition, instance)];
     const index = parts[depth];
     if (!children[index]) return children;
     if (depth === parts.length - 1) children[index] = nextInstance;
     else {
       const child = children[index];
       const childDefinition = byId.get(child.definition_id);
-      children[index] = { ...child, children: update(childDefinition, child, depth + 1) };
+      children[index] = { ...child, children_mode: 'override', children: update(childDefinition, child, depth + 1) };
     }
     return children;
   };
@@ -41,7 +43,7 @@ export function updateHierarchyInstance(root, records, path, nextInstance) {
 export function moveHierarchyNode(root, records, sourcePath, targetPath, placement) {
   if (sourcePath === 'root' || targetPath.startsWith(`${sourcePath}/`)) return null;
   const byId = indexMap(records);
-  const expand = (definition, instance, path, trail = new Set()) => childrenOf(definition, instance).map((child, index) => {
+  const expand = (definition, instance, path, trail = new Set()) => resolvePerformerChildren(definition, instance).map((child, index) => {
     const key = `${path}/${index}`;
     const childDefinition = byId.get(child.definition_id);
     const cycle = trail.has(child.definition_id);
@@ -67,7 +69,7 @@ export function moveHierarchyNode(root, records, sourcePath, targetPath, placeme
   const clean = (node, path) => {
     if (node.__key === moved.__key) movedPath = path;
     const { __key, ...value } = node;
-    return { ...value, children: (node.children || []).map((child, index) => clean(child, `${path}/${index}`)) };
+    return { ...value, children_mode: 'override', children: (node.children || []).map((child, index) => clean(child, `${path}/${index}`)) };
   };
   return { children: tree.children.map((child, index) => clean(child, `root/${index}`)), movedPath };
 }
