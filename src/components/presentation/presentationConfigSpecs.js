@@ -1,4 +1,4 @@
-export const PRESENTATION_CONFIGS = {
+﻿export const PRESENTATION_CONFIGS = {
   mesh: { entity: 'PresentationMeshAsset', key: 'asset_id', title: 'Mesh Assets', query: 'presentation_mesh_assets',
     blank: () => ({ asset_id: `mesh_${Date.now()}`, type: 'Primitive', primitive_kind: 'Cube', source_uris: [] }) },
   material: { entity: 'PresentationMaterialAsset', key: 'asset_id', title: 'Material Assets', query: 'presentation_material_assets',
@@ -8,7 +8,7 @@ export const PRESENTATION_CONFIGS = {
   clip: { entity: 'AnimationClipAsset', key: 'asset_id', title: 'Animation Clips', query: 'animation_clip_assets',
     blank: () => ({ asset_id: `clip_${Date.now()}`, asset_kind: 'Clip', locators: [], blend_inputs: [] }) },
   controller: { entity: 'AnimatorControllerDefinition', key: 'controller_id', title: 'Animator Controllers', query: 'animator_controllers',
-    blank: () => ({ controller_id: `controller_${Date.now()}`, default_state_index: 0, states: [], transitions: [] }) },
+    blank: () => ({ controller_id: `controller_${Date.now()}`, default_state_index: 0, states: [{ packed_state_index: 0, duration_seconds: 1, playback_speed: 1, loop: true }], transitions: [] }) },
   profile: { entity: 'AnimationProfileDefinition', key: 'profile_id', title: 'Animation Profiles', query: 'animation_profiles',
     blank: () => ({ profile_id: `profile_${Date.now()}`, animator_controller_id: '', state_clips: [], builtin_clips: [] }) },
   text: { entity: 'PresentationTextToken', key: 'token_id', title: 'Text Tokens', query: 'presentation_text_tokens',
@@ -16,3 +16,4 @@ export const PRESENTATION_CONFIGS = {
   uiItem: { entity: 'UIItemPresentationProfile', key: 'profile_id', title: 'UI Item Presenters', query: 'ui_item_presenters',
     blank: () => ({ profile_id: `ui_item_${Date.now()}`, item_kind: 'entity', label: '', description: '', items: [], attribute_text_bindings: [], tag_text_bindings: [] }) },
 };
+
