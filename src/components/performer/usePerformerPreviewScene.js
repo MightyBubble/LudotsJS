@@ -10,7 +10,7 @@ import { clipNameFromRef, findLocatorAsset } from '@/components/presentation/ani
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
-export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform) {
+export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, mode, onSelectPath, onTransform) {
   const releases = useRef([]);
   const cameraState = useRef(null);
   const animationRef = useRef({ players: [] });
@@ -85,15 +85,22 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     const addDefinition = async (definition, parent, path = 'root', visited = new Set(), instance = {}) => {
       if (!definition || visited.has(definition.performer_id)) return;
       const nextVisited = new Set(visited).add(definition.performer_id);
-      const group = new THREE.Group();
+      const instanceGroup = new THREE.Group();
       const instanceTransform = readInstanceOverrides(instance).transform;
-      group.name = path;
-      group.position.fromArray(instanceTransform.local_position);
-      group.rotation.set(...instanceTransform.local_rotation.map(THREE.MathUtils.degToRad));
-      group.scale.fromArray(instanceTransform.local_scale);
-      parent.add(group);
-      nodeGroups.push({ path, group });
-      if (path === selectedInstancePath) selectedGroup = group;
+      instanceGroup.name = path;
+      instanceGroup.position.fromArray(instanceTransform.local_position);
+      instanceGroup.rotation.set(...instanceTransform.local_rotation.map(THREE.MathUtils.degToRad));
+      instanceGroup.scale.fromArray(instanceTransform.local_scale);
+      parent.add(instanceGroup);
+      const group = new THREE.Group();
+      const rootTransform = definition.transform || {};
+      group.name = `${path}:root`;
+      group.position.fromArray(vector(rootTransform.local_position, [0, 0, 0]));
+      group.rotation.set(...vector(rootTransform.local_rotation, [0, 0, 0]).map(THREE.MathUtils.degToRad));
+      group.scale.fromArray(vector(rootTransform.local_scale, [1, 1, 1]));
+      instanceGroup.add(group);
+      nodeGroups.push({ path, group: instanceGroup });
+      if (path === selectedInstancePath) selectedGroup = path === 'root' ? group : instanceGroup;
       let primaryModel = null;
       const behaviors = [...(definition.behaviors || []), ...(instance.runtime_behaviors || [])];
       for (const behavior of behaviors) {
@@ -117,7 +124,6 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         object.rotation.set(...vector(asset.localRotation, [0, 0, 0]).map(THREE.MathUtils.degToRad));
         object.scale.fromArray(vector(asset.localScale, [1, 1, 1]));
         group.add(object);
-        if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
       const animator = behaviors.find(behavior => behavior.kind === 'Animator' && behavior.activeByDefault !== false)?.animator;
       if (animator && primaryModel) {
@@ -163,9 +169,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       const object = transform.object;
       if (!object) return;
       const rotation = [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg);
-      onTransformRef.current?.(selectedInstancePath === 'root' ? {
-        localOffset: object.position.toArray(), localRotation: rotation, localScale: object.scale.toArray(),
-      } : {
+      onTransformRef.current?.({
         local_position: object.position.toArray(), local_rotation: rotation, local_scale: object.scale.toArray(),
       });
     };
@@ -190,9 +194,11 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     resize();
     addDefinition(root, content).then(() => {
       if (cancelled) return;
-      if (selectedGroup && selectedInstancePath !== 'root') {
-        selectionBox = new THREE.BoxHelper(selectedGroup, 0xcbd3dc);
-        scene.add(selectionBox);
+      if (selectedGroup) {
+        if (selectedInstancePath !== 'root') {
+          selectionBox = new THREE.BoxHelper(selectedGroup, 0xcbd3dc);
+          scene.add(selectionBox);
+        }
         transform.attach(selectedGroup);
       }
       const box = new THREE.Box3().setFromObject(content);
@@ -235,7 +241,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       animationRef.current = { players: [] };
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath, targetSlot]);
+  }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath]);
 
   return status;
 }

@@ -15,6 +15,36 @@
     "extends": {
       "type": "string"
     },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "local_position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "local_rotation": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "local_scale": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
     "lifecycle": {
       "type": "object",
       "additionalProperties": false,
