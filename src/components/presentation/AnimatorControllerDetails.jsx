@@ -1357,28 +1357,12 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
 
   return (
     <div className="flex h-[calc(100vh-176px)] min-h-[720px] flex-col gap-3 overflow-hidden">
-      <div className="flex items-end gap-3 border border-[#2A2E37] bg-[#15171C] p-3">
-        <div className="min-w-[260px] flex-1">
-          <FieldLabel>Controller ID</FieldLabel>
-          <TextInput value={draft.controller_id} onChange={controller_id => patch({ controller_id })} />
-        </div>
-        <div className="flex items-center gap-2 pb-0.5">
-          <Badge variant="secondary" className="h-8 rounded-sm px-2">states {compiled.states.length}</Badge>
-          <Badge variant="secondary" className="h-8 rounded-sm px-2">transitions {compiled.transitions.length}</Badge>
-          <Button
-            size="sm"
-            variant={isPlaying ? 'default' : 'outline'}
-            onClick={() => setIsPlaying(value => !value)}
-            className={`h-8 ${isPlaying ? 'bg-emerald-600' : 'border-[#424a55] bg-[#1E2128]'}`}
-          >
-            {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {isPlaying ? 'Stop' : 'Play'}
-          </Button>
-        </div>
-      </div>
-
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[280px_minmax(560px,1fr)_360px]">
         <Panel title="Animator" icon={Layers}>
+          <div className="border-b border-[#2A2E37] p-3">
+            <FieldLabel>Controller ID</FieldLabel>
+            <TextInput value={draft.controller_id} onChange={controller_id => patch({ controller_id })} />
+          </div>
           <Tabs defaultValue="layers" className="flex min-h-0 flex-1 flex-col">
             <TabsList className="h-10 justify-start rounded-none border-b border-[#2A2E37] bg-transparent px-2">
               <TabsTrigger value="layers" className="h-7 text-xs data-[state=active]:bg-[#242a32] data-[state=active]:text-[#dce2e8]">
@@ -1420,7 +1404,21 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
         <Panel
           title={currentLayer?.name || 'State Flow'}
           icon={GitBranch}
-          right={<span className="text-[10px] uppercase text-gray-500">right click canvas</span>}
+          right={(
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">states {compiled.states.length}</Badge>
+              <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">transitions {compiled.transitions.length}</Badge>
+              <Button
+                size="sm"
+                variant={isPlaying ? 'default' : 'outline'}
+                onClick={() => setIsPlaying(value => !value)}
+                className={`h-7 px-2 text-xs ${isPlaying ? 'bg-emerald-600' : 'border-[#424a55] bg-[#1E2128]'}`}
+              >
+                {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                {isPlaying ? 'Stop' : 'Play'}
+              </Button>
+            </div>
+          )}
         >
           {currentLayer && (
             <StateFlowCanvas
