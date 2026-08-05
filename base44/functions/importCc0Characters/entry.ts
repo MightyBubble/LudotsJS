@@ -14,6 +14,19 @@ const cleanId = (value) => value.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9]+/
 const basename = (path) => path.split('/').pop();
 const dirname = (path) => path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
 const mimeType = (path) => /\.png$/i.test(path) ? 'image/png' : /\.jpe?g$/i.test(path) ? 'image/jpeg' : /\.gltf$/i.test(path) ? 'model/gltf+json' : /\.glb$/i.test(path) ? 'model/gltf-binary' : 'application/octet-stream';
+const modelReferences = async (file) => {
+  let document;
+  if (/\.gltf$/i.test(file.name)) document = JSON.parse(await file.async('text'));
+  if (/\.glb$/i.test(file.name)) {
+    const bytes = await file.async('uint8array');
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    if (view.getUint32(0, true) === 0x46546c67 && view.getUint32(16, true) === 0x4e4f534a) {
+      const length = view.getUint32(12, true);
+      document = JSON.parse(new TextDecoder().decode(bytes.slice(20, 20 + length)).replace(/\0/g, '').trim());
+    }
+  }
+  return [...(document?.buffers || []).map(item => item.uri), ...(document?.images || []).map(item => item.uri)].filter(uri => uri && !uri.startsWith('data:'));
+};
 const chunks = (items, size) => Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size));
 
 async function getItchArchive(slug) {
@@ -78,8 +91,13 @@ export default async function(req) {
     const bindingIds = new Set(bindings.map(item => item.binding_id));
     const clipIds = new Set(clips.map(item => item.asset_id));
     const remaining = candidates.filter(file => !assetIds.has(`Asset.CC0.${pack.namespace}.${cleanId(file.name)}`));
-    const selected = remaining.slice(0, limit);
+    const repairable = candidates.filter(file => {
+      const existing = assets.find(item => item.asset_id === `Asset.CC0.${pack.namespace}.${cleanId(file.name)}`);
+      return existing && !Object.keys(existing.metadata?.resource_map || {}).length;
+    });
+    const selected = (payload.repairExisting ? repairable : remaining).slice(0, limit);
     const createdAssets = [];
+    const updatedAssets = [];
     const createdMeshes = [];
     const createdBindings = [];
     const createdClips = [];
@@ -89,10 +107,10 @@ export default async function(req) {
       try {
         const sourceKey = cleanId(file.name);
         const assetId = `Asset.CC0.${pack.namespace}.${sourceKey}`;
+        const existingAsset = assets.find(item => item.asset_id === assetId);
         const resourceMap = {};
-        if (/\.gltf$/i.test(file.name)) {
-          const document = JSON.parse(await file.async('text'));
-          const references = [...(document.buffers || []).map(item => item.uri), ...(document.images || []).map(item => item.uri)].filter(uri => uri && !uri.startsWith('data:'));
+        const references = await modelReferences(file);
+        if (references.length) {
           for (const reference of [...new Set(references)]) {
             const decoded = decodeURIComponent(reference);
             const dependencyPath = `${dirname(file.name)}${decoded}`.replace(/\/\.\//g, '/');
@@ -108,9 +126,10 @@ export default async function(req) {
             resourceMap[decoded] = dependencyUri;
           }
         }
-        const upload = await uploadFile(base44, await file.async('uint8array'), `${payload.pack}-${basename(file.name)}`);
+        const upload = existingAsset ? { file_url: existingAsset.uri } : await uploadFile(base44, await file.async('uint8array'), `${payload.pack}-${basename(file.name)}`);
         const label = basename(file.name).replace(/\.[^.]+$/, '');
-        createdAssets.push({ asset_id: assetId, name: `${pack.label} · ${label}`, description: `${pack.label} CC0 ${pack.kind}`, asset_type: pack.kind, source_type: 'uploaded', uri: upload.file_url, tags: ['cc0', payload.pack, 'humanoid', pack.kind === 'animation' ? 'animation' : 'rigged'], metadata: { license: 'CC0-1.0', package_slug: payload.pack, package_label: pack.label, source_path: file.name, official_url: pack.page, resource_map: resourceMap }, import_settings: { preferred_format: file.name.split('.').pop().toLowerCase(), lazy_load: true }, version: 1, is_active: true });
+        if (existingAsset) updatedAssets.push({ id: existingAsset.id, metadata: { ...(existingAsset.metadata || {}), resource_map: resourceMap } });
+        else createdAssets.push({ asset_id: assetId, name: `${pack.label} · ${label}`, description: `${pack.label} CC0 ${pack.kind}`, asset_type: pack.kind, source_type: 'uploaded', uri: upload.file_url, tags: ['cc0', payload.pack, 'humanoid', pack.kind === 'animation' ? 'animation' : 'rigged'], metadata: { license: 'CC0-1.0', package_slug: payload.pack, package_label: pack.label, source_path: file.name, official_url: pack.page, resource_map: resourceMap }, import_settings: { preferred_format: file.name.split('.').pop().toLowerCase(), lazy_load: true }, version: 1, is_active: true });
         if (pack.kind === 'model') {
           const meshId = `Mesh.CC0.${pack.namespace}.${sourceKey}`;
           const bindingId = `Host.Browser.CC0.${pack.namespace}.${sourceKey}`;
@@ -125,10 +144,11 @@ export default async function(req) {
       }
     }
     for (const batch of chunks(createdAssets, 500)) if (batch.length) await base44.asServiceRole.entities.Asset.bulkCreate(batch);
+    for (const batch of chunks(updatedAssets, 500)) if (batch.length) await base44.asServiceRole.entities.Asset.bulkUpdate(batch);
     for (const batch of chunks(createdMeshes, 500)) if (batch.length) await base44.asServiceRole.entities.PresentationMeshAsset.bulkCreate(batch);
     for (const batch of chunks(createdBindings, 500)) if (batch.length) await base44.asServiceRole.entities.HostAssetBinding.bulkCreate(batch);
     for (const batch of chunks(createdClips, 500)) if (batch.length) await base44.asServiceRole.entities.AnimationClipAsset.bulkCreate(batch);
-    return Response.json({ pack: payload.pack, total: candidates.length, processed: selected.length, assetsCreated: createdAssets.length, modelsCreated: createdMeshes.length, animationsCreated: createdClips.length, failures, remaining: Math.max(0, remaining.length - selected.length) });
+    return Response.json({ pack: payload.pack, total: candidates.length, processed: selected.length, assetsCreated: createdAssets.length, assetsRepaired: updatedAssets.length, modelsCreated: createdMeshes.length, animationsCreated: createdClips.length, failures, remaining: Math.max(0, remaining.length - selected.length) });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

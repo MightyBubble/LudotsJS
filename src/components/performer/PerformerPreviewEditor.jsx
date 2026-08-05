@@ -5,11 +5,16 @@ import { Section } from '@/components/ludots/ui';
 import PerformerPreviewViewport from './PerformerPreviewViewport';
 import PerformerTransformEditor from './PerformerTransformEditor';
 
-export default function PerformerPreviewEditor({ draft, patch }) {
+export default function PerformerPreviewEditor({ root, draft, records, patch }) {
   const [selectedSlot, setSelectedSlot] = useState('0');
   const [mode, setMode] = useState('translate');
-  const performers = useQuery({ queryKey: ['performer-preview-records'], queryFn: () => base44.entities.Performer.list() }).data || [];
-  const bindings = useQuery({ queryKey: ['performer-preview-bindings'], queryFn: () => base44.entities.HostAssetBinding.list() }).data || [];
+  const bindingsQuery = useQuery({ queryKey: ['performer-preview-bindings'], queryFn: () => base44.entities.HostAssetBinding.list('-updated_date', 500) });
+  const assetsQuery = useQuery({ queryKey: ['performer-preview-assets'], queryFn: () => base44.entities.Asset.list('-updated_date', 500) });
+  const effectsQuery = useQuery({ queryKey: ['performer-preview-effects'], queryFn: () => base44.entities.PresentationEffectAsset.list('-updated_date', 500) });
+  const bindings = bindingsQuery.data || [];
+  const assets = assetsQuery.data || [];
+  const effects = effectsQuery.data || [];
+  const ready = bindingsQuery.isSuccess && assetsQuery.isSuccess && effectsQuery.isSuccess;
   const assetBehaviors = useMemo(() => (draft.behaviors || []).filter(behavior => behavior.kind === 'AssetBinding'), [draft.behaviors]);
   useEffect(() => setSelectedSlot('0'), [draft.performer_id]);
   const updateAssetBehaviors = useCallback(next => {
@@ -21,7 +26,7 @@ export default function PerformerPreviewEditor({ draft, patch }) {
     updateAssetBehaviors(assetBehaviors.map((behavior, itemIndex) => itemIndex === index ? { ...behavior, assetBinding: { ...(behavior.assetBinding || {}), ...next } } : behavior));
   }, [assetBehaviors, selectedSlot, updateAssetBehaviors]);
   return <Section title="3D Prefab 预览与变换">
-    <PerformerPreviewViewport draft={draft} performers={performers} bindings={bindings} targetSlot={assetBehaviors[Number(selectedSlot || 0)]?.slot} mode={mode} onModeChange={setMode} onTransform={applyTransform} />
+    {ready ? <PerformerPreviewViewport root={root} selectedPerformerId={draft.performer_id} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={assetBehaviors[Number(selectedSlot || 0)]?.slot} mode={mode} onModeChange={setMode} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
     <PerformerTransformEditor behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} />
   </Section>;
 }

@@ -31,7 +31,7 @@ const drain = () => {
   }
 };
 
-const scheduleLoad = (appearance, entry) => new Promise((resolve, reject) => {
+const scheduleLoad = (appearance, entry, cacheKey) => new Promise((resolve, reject) => {
   queue.push(async () => {
     try {
       const manager = new THREE.LoadingManager();
@@ -42,7 +42,7 @@ const scheduleLoad = (appearance, entry) => new Promise((resolve, reject) => {
       entry.animations = loaded.animations || [];
       resolve(entry);
     } catch (error) {
-      entries.delete(appearance.uri);
+      entries.delete(cacheKey);
       reject(error);
     }
   });
@@ -50,11 +50,12 @@ const scheduleLoad = (appearance, entry) => new Promise((resolve, reject) => {
 });
 
 export async function acquireModelAsset(appearance) {
-  let entry = entries.get(appearance.uri);
+  const cacheKey = `${appearance.uri}|${JSON.stringify(appearance.resourceMap || {})}`;
+  let entry = entries.get(cacheKey);
   if (!entry) {
     entry = { refs: 0, scene: null, animations: [], lastUsed: Date.now() };
-    entry.promise = scheduleLoad(appearance, entry);
-    entries.set(appearance.uri, entry);
+    entry.promise = scheduleLoad(appearance, entry, cacheKey);
+    entries.set(cacheKey, entry);
   }
   await entry.promise;
   entry.refs += 1;

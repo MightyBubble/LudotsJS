@@ -18,5 +18,5 @@ function TreeNode({ performer, byKey, selectedId, onSelect, depth = 0, trail = [
 
 export default function PerformerHierarchyPanel({ root, records, selectedId, onSelect }) {
   const byKey = new Map(records.map(item => [item.performer_id, item]));
-  return <Section title="Prefab 层级"><div className="rounded border border-[#2A2E37] overflow-hidden"><TreeNode performer={root} byKey={byKey} selectedId={selectedId} onSelect={onSelect} /></div><p className="mt-2 text-[11px] text-gray-500">选择任意子孙节点后，可在右侧直接编辑该 Performer；Children 决定实例层级。</p></Section>;
+  return <Section title="Prefab 层级"><div className="min-h-[480px] rounded border border-[#2A2E37] overflow-hidden"><TreeNode performer={root} byKey={byKey} selectedId={selectedId} onSelect={onSelect} /></div><p className="mt-2 text-[11px] text-gray-500">选择子孙节点，右侧预览保持完整 Prefab 并切换变换目标。</p></Section>;
 }

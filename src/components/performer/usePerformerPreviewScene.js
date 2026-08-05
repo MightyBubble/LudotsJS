@@ -3,10 +3,11 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
+import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
-export default function usePerformerPreviewScene(containerRef, root, performers, bindings, targetSlot, mode, onTransform) {
+export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedPerformerId, targetSlot, mode, onTransform) {
   const releases = useRef([]);
   const [status, setStatus] = useState('准备预览');
 
@@ -31,9 +32,15 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     scene.add(key, new THREE.GridHelper(12, 24, 0x566070, 0x242a32));
     const content = new THREE.Group();
     scene.add(content);
+    const vfx = createVfxRuntime(scene);
     const byId = new Map(performers.map(item => [item.performer_id, item]));
     byId.set(root.performer_id, root);
-    const uriByAsset = new Map(bindings.map(item => [item.asset_id, item.source_uris?.[0]]));
+    const assetById = new Map(assets.map(item => [item.asset_id, item]));
+    const effectById = new Map(effects.map(item => [item.asset_id, item]));
+    const appearanceByAsset = new Map(bindings.map(binding => {
+      const editorAsset = assetById.get(binding.editor_asset_id);
+      return [binding.asset_id, { uri: binding.source_uris?.[0] || editorAsset?.uri, resourceMap: editorAsset?.metadata?.resource_map || {} }];
+    }));
     let cancelled = false;
 
     const addDefinition = async (definition, parent, visited = new Set()) => {
@@ -45,22 +52,30 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       for (const behavior of definition.behaviors || []) {
         if (behavior.kind !== 'AssetBinding' || behavior.activeByDefault === false) continue;
         const asset = behavior.assetBinding || {};
-        const uri = uriByAsset.get(asset.assetId);
-        if (!uri || asset.assetKind === 'Vfx') continue;
-        const acquired = await acquireModelAsset({ uri });
-        if (cancelled) { acquired.release(); continue; }
-        releases.current.push(acquired.release);
-        const object = acquired.object;
+        let object;
+        if (asset.assetKind === 'Vfx') {
+          const effect = effectById.get(asset.assetId);
+          if (!effect) continue;
+          object = await vfx.play(effect);
+        } else {
+          const appearance = appearanceByAsset.get(asset.assetId);
+          if (!appearance?.uri) continue;
+          const acquired = await acquireModelAsset(appearance);
+          if (cancelled) { acquired.release(); continue; }
+          releases.current.push(acquired.release);
+          object = acquired.object;
+        }
         object.position.fromArray(vector(asset.localOffset, [0, 0, 0]));
         object.rotation.set(...vector(asset.localRotation, [0, 0, 0]).map(THREE.MathUtils.degToRad));
         object.scale.fromArray(vector(asset.localScale, [1, 1, 1]));
         group.add(object);
-        if (definition.performer_id === root.performer_id && behavior.slot === targetSlot) transform.attach(object);
+        if (definition.performer_id === selectedPerformerId && behavior.slot === targetSlot) transform.attach(object);
       }
       await Promise.all((definition.children || []).map(child => addDefinition(byId.get(child.definition_id), group, nextVisited)));
     };
 
     let frame = 0;
+    const clock = new THREE.Clock();
     const resize = () => {
       const width = host.clientWidth || 1;
       const height = host.clientHeight || 1;
@@ -68,7 +83,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
-    const animate = () => { frame = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
+    const animate = () => { frame = requestAnimationFrame(animate); controls.update(); vfx.update(clock.getDelta()); renderer.render(scene, camera); };
     const commitTransform = () => {
       const object = transform.object;
       if (!object) return;
@@ -101,12 +116,13 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       transform.removeEventListener('mouseUp', commitTransform);
       transform.detach();
       transform.dispose();
+      vfx.dispose();
       controls.dispose();
       renderer.dispose();
       releases.current.splice(0).forEach(release => release());
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, targetSlot, mode, onTransform]);
+  }, [containerRef, root, performers, bindings, assets, effects, selectedPerformerId, targetSlot, mode, onTransform]);
 
   return status;
 }

@@ -3,6 +3,7 @@ import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import PerformerDetails from '@/components/performer/PerformerDetails';
 import PerformerHierarchyPanel from '@/components/performer/PerformerHierarchyPanel';
+import PerformerPreviewEditor from '@/components/performer/PerformerPreviewEditor';
 
 export default function PerformerEditorPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
@@ -37,7 +38,10 @@ export default function PerformerEditorPage() {
       onDelete={rec => { if (window.confirm(`确定删除「${rec.label || rec.performer_id}」吗？`)) remove(rec.id); }}
     >
       {draft && <>
-        <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedId={selectedId} onSelect={selectHierarchyNode} />
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(260px,0.8fr)_minmax(0,2.2fr)] xl:items-start">
+          <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedId={selectedId} onSelect={selectHierarchyNode} />
+          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} />
+        </div>
         <PerformerDetails draft={draft} patch={patch} />
       </>}
     </RecordWorkspace>

@@ -7,7 +7,6 @@ import PerformerBehaviorList from './PerformerBehaviorList';
 import PerformerParamsSection from './PerformerParamsSection';
 import PerformerRulesSection from './PerformerRulesSection';
 import PerformerChildrenSection from './PerformerChildrenSection';
-import PerformerPreviewEditor from './PerformerPreviewEditor';
 import JsonValueField from '@/components/ludots/JsonValueField';
 
 export default function PerformerDetails({ draft, patch }) {
@@ -21,8 +20,6 @@ export default function PerformerDetails({ draft, patch }) {
       </div>
       <TextField label="说明（不导出）" value={draft.description} onChange={description => patch({ description })} />
     </Section>
-
-    <PerformerPreviewEditor draft={draft} patch={patch} />
 
     <Section title="默认表现参数">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
