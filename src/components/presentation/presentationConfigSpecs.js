@@ -6,7 +6,7 @@ export const PRESENTATION_CONFIGS = {
   effect: { entity: 'PresentationEffectAsset', key: 'asset_id', title: 'Effect Assets', query: 'presentation_effect_assets',
     blank: () => ({ asset_id: `effect_${Date.now()}`, backend: 'quarks', source_uris: [], config: {}, loop: false, scale: 1 }) },
   clip: { entity: 'AnimationClipAsset', key: 'asset_id', title: 'Animation Clips', query: 'animation_clip_assets',
-    blank: () => ({ asset_id: `clip_${Date.now()}`, asset_kind: 'Clip', locators: [], blend_inputs: [] }) },
+    blank: () => ({ asset_id: `clip_${Date.now()}`, asset_kind: 'Clip', locators: [], blend_inputs: { x: 'Scalar0', y: 'Scalar1' } }) },
   controller: { entity: 'AnimatorControllerDefinition', key: 'controller_id', title: 'Animator Controllers', query: 'animator_controllers',
     blank: () => ({ controller_id: `controller_${Date.now()}`, default_state_index: 0, states: [{ packed_state_index: 0, duration_seconds: 1, playback_speed: 1, loop: true }], transitions: [] }) },
   profile: { entity: 'AnimationProfileDefinition', key: 'profile_id', title: 'Animation Profiles', query: 'animation_profiles',
