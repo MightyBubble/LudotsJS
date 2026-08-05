@@ -887,20 +887,28 @@ function StateFlowCanvasInner({
       id: state.id,
       type: 'animatorState',
       position: state.position || { x: 0, y: 0 },
-      selected: selectedStateId === state.id,
+      selected: false,
       data: {
         state,
         isDefault: defaultStateId === state.id,
         outgoingCount: transitions.filter(transition => transition.from_state_id === state.id).length,
-        isPlaying,
-        isActive: isPlaying && activeStateId === state.id,
+        isPlaying: false,
+        isActive: false,
         readOnly,
         onRename: name => updateState(state.id, { name }),
         onDelete: () => deleteState(state.id),
         onOpenNested: () => onOpenNested(state.id),
       },
     })));
-  }, [activeStateId, defaultStateId, deleteState, isPlaying, onOpenNested, readOnly, selectedStateId, states, transitions, updateState]);
+  }, [defaultStateId, deleteState, onOpenNested, readOnly, states, transitions, updateState]);
+
+  useEffect(() => {
+    setNodes(current => current.map(node => ({
+      ...node,
+      selected: selectedStateId === node.id,
+      data: { ...node.data, isPlaying, isActive: isPlaying && activeStateId === node.id },
+    })));
+  }, [activeStateId, isPlaying, selectedStateId]);
 
   useEffect(() => {
     if (!states.length) return undefined;
