@@ -23,7 +23,7 @@ export default function usePresentationRefs() {
   const results = useQueries({ queries: defs.map(([, entity]) => ({ queryKey: ['presentation-ref', entity], queryFn: () => base44.entities[entity].list() })) });
   const refs = {};
   defs.forEach(([name,, key, label], i) => {
-    refs[name] = (results[i].data || []).map(r => ({ value: r[key], label: label && r[label] ? `${r[label]} · ${r[key]}` : r[key] })).filter(o => o.value);
+    refs[name] = (results[i].data || []).map(r => ({ value: r[key], label: label && r[label] ? `${r[label]} · ${r[key]}` : r[key], record: r })).filter(o => o.value);
   });
   refs.logicalAssets = [...refs.meshes, ...refs.materials, ...refs.vfxAssets, ...refs.clips, ...refs.hostAssets]
     .filter((o, i, all) => all.findIndex(x => x.value === o.value) === i);

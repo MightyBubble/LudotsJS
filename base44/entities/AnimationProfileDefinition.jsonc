@@ -30,32 +30,11 @@
           "clip_asset_id"
         ]
       }
-    },
-    "builtin_clips": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "builtin_clip_id": {
-            "type": "string"
-          },
-          "clip_asset_id": {
-            "type": "string",
-            "description": "AnimationClipAsset.asset_id"
-          }
-        },
-        "required": [
-          "builtin_clip_id",
-          "clip_asset_id"
-        ]
-      }
     }
   },
   "required": [
     "profile_id",
     "animator_controller_id",
-    "state_clips",
-    "builtin_clips"
+    "state_clips"
   ]
 }
