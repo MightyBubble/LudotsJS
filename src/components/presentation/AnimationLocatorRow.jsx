@@ -7,7 +7,7 @@ import { clipNameFromRef, findLocatorAsset, sourceBaseForBackend, withClipName }
 
 const BACKENDS = ['browser', 'raylib', 'ue5'].map(value => ({ value, label: value }));
 
-export default function AnimationLocatorRow({ locator, assets, assetOptions, onChange, onRemove }) {
+export default function AnimationLocatorRow({ locator, assets, assetOptions, previewMesh, onChange, onRemove }) {
   const linked = findLocatorAsset(locator, assets);
   const clipName = clipNameFromRef(locator.asset_ref);
   const selectAsset = assetId => {
@@ -22,6 +22,6 @@ export default function AnimationLocatorRow({ locator, assets, assetOptions, onC
       <Button size="sm" variant="ghost" onClick={onRemove} className="h-8 text-red-400"><Trash2 className="h-3.5 w-3.5" />删除</Button>
     </div>
     <Field label="Generated Asset Ref"><div className="min-h-8 break-all border border-[#2A2E37] bg-[#15171C] px-3 py-2 font-mono text-[11px] text-gray-300">{locator.asset_ref || '选择动画资源后自动生成'}</div></Field>
-    {linked && <AnimationSourcePreview asset={linked} clipName={clipName} onClipChange={name => onChange({ ...locator, asset_ref: withClipName(sourceBaseForBackend(linked, locator.backend_id), name) })} />}
+    {linked && <AnimationSourcePreview asset={linked} previewMesh={previewMesh} clipName={clipName} onClipChange={name => onChange({ ...locator, asset_ref: withClipName(sourceBaseForBackend(linked, locator.backend_id), name) })} />}
   </div>;
 }

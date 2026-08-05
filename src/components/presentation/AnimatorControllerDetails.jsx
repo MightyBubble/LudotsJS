@@ -38,6 +38,7 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import ReferenceSelect from './ReferenceSelect';
+import AnimatorControllerPreview from './AnimatorControllerPreview';
 
 const STATE_TYPES = ['Normal', 'BlendTree', 'SubStateMachine'];
 const SPECIAL_STATE_TYPES = new Set(['Entry', 'Exit', 'AnyState']);
@@ -458,11 +459,11 @@ function Panel({ title, icon: Icon, right, children }) {
   return (
     <div className="flex h-full min-h-0 flex-col border border-[#2A2E37] bg-[#15171C]">
       <div className="flex h-10 items-center justify-between border-b border-[#2A2E37] px-3">
-        <div className="flex min-w-0 flex-1 items-center gap-2 text-xs font-semibold text-[#E2D8B3]">
-          {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
-          <span className="truncate">{title}</span>
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#E2D8B3]">
+          {Icon && <Icon className="h-3.5 w-3.5" />}
+          <span>{title}</span>
         </div>
-        {right && <div className="shrink-0">{right}</div>}
+        {right}
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
     </div>
@@ -696,7 +697,7 @@ function ParameterPanel({ parameters, onAddParameter, onUpdateParameters }) {
 }
 
 function AnimatorStateNode({ data, selected }) {
-  const { state, isDefault, outgoingCount, isPlaying, onRename, onDelete, onOpenNested } = data;
+  const { state, isDefault, outgoingCount, isPlaying, isActive, onRename, onDelete, onOpenNested } = data;
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(state.name);
   const special = SPECIAL_STATE_TYPES.has(state.type);
@@ -713,7 +714,8 @@ function AnimatorStateNode({ data, selected }) {
 
   return (
     <div
-      className={`relative w-[176px] border bg-[#15171C] shadow-sm transition ${selected ? 'border-[#E2D8B3] ring-1 ring-[#E2D8B3]' : 'border-[#424a55] hover:border-[#6f7a86]'}`}
+      data-runtime-active={isActive ? 'true' : 'false'}
+      className={`relative w-[176px] border bg-[#15171C] shadow-sm transition ${isActive ? 'border-emerald-400 ring-2 ring-emerald-500/40' : selected ? 'border-[#E2D8B3] ring-1 ring-[#E2D8B3]' : 'border-[#424a55] hover:border-[#6f7a86]'}`}
       onDoubleClick={() => {
         if (state.type === 'BlendTree' || state.type === 'SubStateMachine') onOpenNested();
         else if (!special) setEditing(true);
@@ -756,7 +758,7 @@ function AnimatorStateNode({ data, selected }) {
         <div className="flex items-center gap-1.5">
           <Badge variant="secondary" className="h-5 rounded-sm px-1.5 text-[10px]">{state.type}</Badge>
           {isDefault && <Badge className="h-5 rounded-sm bg-[#E2D8B3] px-1.5 text-[10px] text-[#15171C]">Default</Badge>}
-          {isPlaying && selected && <Badge className="h-5 rounded-sm bg-emerald-600 px-1.5 text-[10px]">Playing</Badge>}
+          {isPlaying && isActive && <Badge className="h-5 rounded-sm bg-emerald-600 px-1.5 text-[10px]">Playing</Badge>}
         </div>
         {state.type === 'Normal' && (
           <div className="truncate font-mono text-[10px] text-gray-500">{state.animation_clip_asset_id || 'no clip'}</div>
@@ -775,6 +777,7 @@ function AnimatorStateNode({ data, selected }) {
 
 function TransitionEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, selected, data }) {
   const [path, labelX, labelY] = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
+  const highlighted = selected || data.active;
   return (
     <>
       <BaseEdge
@@ -782,13 +785,14 @@ function TransitionEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition
         path={path}
         markerEnd={markerEnd}
         style={{
-          stroke: selected ? '#E2D8B3' : 'rgba(130, 145, 165, 0.55)',
-          strokeWidth: selected ? 2.5 : 1.5,
+          stroke: data.active ? '#34d399' : selected ? '#E2D8B3' : 'rgba(130, 145, 165, 0.55)',
+          strokeWidth: highlighted ? 3 : 1.5,
         }}
       />
       <EdgeLabelRenderer>
         <div
-          className={`flex h-6 min-w-6 items-center justify-center border px-1.5 text-[10px] font-semibold ${selected ? 'border-[#E2D8B3] bg-[#242a32] text-[#E2D8B3]' : 'border-[#424a55] bg-[#15171C] text-gray-400'}`}
+          data-runtime-transition={data.active ? 'true' : 'false'}
+          className={`flex h-6 min-w-6 items-center justify-center border px-1.5 text-[10px] font-semibold ${data.active ? 'border-emerald-400 bg-emerald-900 text-emerald-200' : selected ? 'border-[#E2D8B3] bg-[#242a32] text-[#E2D8B3]' : 'border-[#424a55] bg-[#15171C] text-gray-400'}`}
           style={{ position: 'absolute', transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`, pointerEvents: 'all' }}
         >
           {data.label}
@@ -837,6 +841,8 @@ function StateFlowCanvasInner({
   onUpdateLayer,
   onOpenNested,
   isPlaying,
+  activeStateId,
+  activeTransitionId,
 }) {
   const { screenToFlowPosition } = useReactFlow();
   const [nodes, setNodes] = useState([]);
@@ -884,12 +890,13 @@ function StateFlowCanvasInner({
         isDefault: defaultStateId === state.id,
         outgoingCount: transitions.filter(transition => transition.from_state_id === state.id).length,
         isPlaying,
+        isActive: isPlaying && activeStateId === state.id,
         onRename: name => updateState(state.id, { name }),
         onDelete: () => deleteState(state.id),
         onOpenNested: () => onOpenNested(state.id),
       },
     })));
-  }, [defaultStateId, deleteState, isPlaying, onOpenNested, selectedStateId, states, transitions, updateState]);
+  }, [activeStateId, defaultStateId, deleteState, isPlaying, onOpenNested, selectedStateId, states, transitions, updateState]);
 
   const edges = useMemo(() => transitions.map(transition => ({
     id: transition.id,
@@ -898,8 +905,8 @@ function StateFlowCanvasInner({
     type: 'transition',
     selected: transition.id === selectedTransitionId,
     markerEnd: { type: MarkerType.ArrowClosed, color: transition.id === selectedTransitionId ? '#E2D8B3' : '#7b8798' },
-    data: { label: transitionConditionLabel(transition) },
-  })), [selectedTransitionId, transitions]);
+    data: { label: transitionConditionLabel(transition), active: isPlaying && transition.id === activeTransitionId },
+  })), [activeTransitionId, isPlaying, selectedTransitionId, transitions]);
 
   const onNodesChange = useCallback(changes => setNodes(current => applyNodeChanges(changes, current)), []);
 
@@ -1283,6 +1290,7 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
   const [selectedStateId, setSelectedStateId] = useState(null);
   const [selectedTransitionId, setSelectedTransitionId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [runtime, setRuntime] = useState({ activeStateId: '', activeTransitionId: '' });
 
   const layers = authoring.layers;
   const parameters = authoring.parameters;
@@ -1405,7 +1413,7 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
           title={currentLayer?.name || 'State Flow'}
           icon={GitBranch}
           right={(
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">states {compiled.states.length}</Badge>
               <Badge variant="secondary" className="h-6 rounded-sm px-2 text-[11px]">transitions {compiled.transitions.length}</Badge>
               <Button
@@ -1434,11 +1442,16 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
                 if (state?.type === 'BlendTree' || state?.type === 'SubStateMachine') setSelectedStateId(stateId);
               }}
               isPlaying={isPlaying}
+              activeStateId={runtime.activeStateId}
+              activeTransitionId={runtime.activeTransitionId}
             />
           )}
         </Panel>
 
         <Panel title="Inspector" icon={FileStack}>
+          <div className="shrink-0 border-b border-[#2A2E37] p-3">
+            <AnimatorControllerPreview draft={draft} patch={patch} layer={currentLayer} parameters={parameters} playing={isPlaying} onRuntimeChange={setRuntime} />
+          </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             {selectedState && (
               <StateInspector
