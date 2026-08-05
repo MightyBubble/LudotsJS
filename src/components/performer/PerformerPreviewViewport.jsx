@@ -8,9 +8,9 @@ const MODES = [
   { value: 'scale', label: '缩放', Icon: Scaling },
 ];
 
-export default function PerformerPreviewViewport({ root, selectedInstancePath, performers, bindings, assets, effects, targetSlot, mode, onModeChange, onTransform }) {
+export default function PerformerPreviewViewport({ root, selectedInstancePath, performers, bindings, assets, effects, targetSlot, mode, onModeChange, onSelectPath, onTransform }) {
   const containerRef = useRef(null);
-  const status = usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform);
+  const status = usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform);
   return <div className="relative h-[480px] overflow-hidden rounded border border-[#424a55] bg-[#0D0F14]">
     <div ref={containerRef} data-testid="performer-preview" className="h-full w-full" />
     <div className="absolute left-2 top-2 flex gap-1 rounded border border-[#424a55] bg-[#171b21] p-1">

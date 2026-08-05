@@ -8,7 +8,7 @@ import { readInstanceOverrides } from '@/lib/runtime/performerOverrides';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
-export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform) {
+export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform) {
   const releases = useRef([]);
   const cameraState = useRef(null);
   const [status, setStatus] = useState('准备预览');
@@ -50,6 +50,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     let cancelled = false;
 
     let selectedGroup = null;
+    const nodeGroups = [];
     const addDefinition = async (definition, parent, path = 'root', visited = new Set(), instance = {}) => {
       if (!definition || visited.has(definition.performer_id)) return;
       const nextVisited = new Set(visited).add(definition.performer_id);
@@ -60,6 +61,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       group.rotation.set(...instanceTransform.local_rotation.map(THREE.MathUtils.degToRad));
       group.scale.fromArray(instanceTransform.local_scale);
       parent.add(group);
+      nodeGroups.push({ path, group });
       if (path === selectedInstancePath) selectedGroup = group;
       for (const behavior of definition.behaviors || []) {
         if (behavior.kind !== 'AssetBinding' || behavior.activeByDefault === false) continue;
@@ -83,7 +85,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         group.add(object);
         if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
-      await Promise.all((definition.children || []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
+      await Promise.all((instance.children ?? definition.children ?? []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
     };
 
     let frame = 0;
@@ -107,6 +109,19 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       });
     };
     transform.addEventListener('mouseUp', commitTransform);
+    const raycaster = new THREE.Raycaster();
+    const pointerStart = new THREE.Vector2();
+    const pointerDown = event => pointerStart.set(event.clientX, event.clientY);
+    const pointerUp = event => {
+      if (Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4 || transform.axis) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      raycaster.setFromCamera(new THREE.Vector2(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1), camera);
+      const point = new THREE.Vector3();
+      const hits = nodeGroups.map(item => ({ ...item, point: raycaster.ray.intersectBox(new THREE.Box3().setFromObject(item.group), point.clone()) })).filter(item => item.point).sort((a, b) => b.path.split('/').length - a.path.split('/').length || a.point.distanceTo(camera.position) - b.point.distanceTo(camera.position));
+      if (hits[0]) onSelectPath?.(hits[0].path);
+    };
+    renderer.domElement.addEventListener('pointerdown', pointerDown);
+    renderer.domElement.addEventListener('pointerup', pointerUp);
     resize();
     addDefinition(root, content).then(() => {
       if (cancelled) return;
@@ -121,7 +136,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         controls.target.copy(center);
         camera.position.copy(center).add(new THREE.Vector3(size * 1.2, size * 0.8, size * 1.5));
       }
-      setStatus('拖动旋转 · 滚轮缩放');
+      setStatus('点击包围盒选择 · 拖动旋转 · 滚轮缩放');
     });
     const observer = new ResizeObserver(resize);
     observer.observe(host);
@@ -132,6 +147,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       cancelAnimationFrame(frame);
       cameraState.current = { position: camera.position.toArray(), target: controls.target.toArray() };
       transform.removeEventListener('mouseUp', commitTransform);
+      renderer.domElement.removeEventListener('pointerdown', pointerDown);
+      renderer.domElement.removeEventListener('pointerup', pointerUp);
       transform.detach();
       transform.dispose();
       vfx.dispose();
@@ -140,7 +157,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       releases.current.splice(0).forEach(release => release());
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform]);
+  }, [containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onSelectPath, onTransform]);
 
   return status;
 }

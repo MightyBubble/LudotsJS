@@ -47,7 +47,7 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = []) => 
     activeSlots,
     children: [],
   };
-  node.children = (definition.children || []).map(child => instantiateNode(child.definition_id, { ...context, params }, child, [...path, definitionId]));
+  node.children = (childConfig.children ?? definition.children ?? []).map(child => instantiateNode(child.definition_id, { ...context, params }, child, [...path, definitionId]));
   return node;
 };
 

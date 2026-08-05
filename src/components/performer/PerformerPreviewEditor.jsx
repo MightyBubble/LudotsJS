@@ -7,7 +7,7 @@ import PerformerTransformEditor from './PerformerTransformEditor';
 import PerformerInstanceEditor from './PerformerInstanceEditor';
 import { writeInstanceTransform } from '@/lib/runtime/performerOverrides';
 
-export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onChangeInstance }) {
+export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onSelectInstancePath, onChangeInstance }) {
   const [selectedSlot, setSelectedSlot] = useState('0');
   const [mode, setMode] = useState('translate');
   const bindingsQuery = useQuery({ queryKey: ['performer-preview-bindings'], queryFn: () => base44.entities.HostAssetBinding.list('-updated_date', 500) });
@@ -33,7 +33,7 @@ export default function PerformerPreviewEditor({ root, draft, records, patch, se
   }, [assetBehaviors, onChangeInstance, selectedInstance, selectedSlot, updateAssetBehaviors]);
   const performerOptions = records.map(item => ({ value: item.performer_id, label: item.label || item.performer_id }));
   return <Section title="3D Prefab 预览与变换">
-    {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
+    {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onSelectPath={onSelectInstancePath} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
     {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} /> : <PerformerTransformEditor behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} />}
   </Section>;
 }

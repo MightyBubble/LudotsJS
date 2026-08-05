@@ -76,6 +76,13 @@
               "$ref": "#/$defs/paramValue"
             },
             "description": "\u65e7\u7248\u517c\u5bb9\u5b57\u6bb5\uff1b\u65b0\u914d\u7f6e\u5199\u5165 overrides.params"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "\u5f53\u524d\u7236\u5b9e\u4f8b\u5185\u663e\u5f0f\u7269\u5316\u7684\u9012\u5f52\u5b50\u5b9e\u4f8b\u5c42\u7ea7\uff1b\u7528\u4e8e\u6392\u5e8f\u4e0e\u6362\u7236\u7ea7"
           }
         },
         "required": [
