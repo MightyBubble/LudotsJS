@@ -34,13 +34,11 @@ export default function HostAssetBindingDetails({ draft, patch }) {
       <div className="break-all border border-[#2A2E37] bg-[#0D0F14] px-3 py-2 font-mono text-[11px] text-gray-400">{draft.source_uris?.[0] || '选择源资源后自动生成 URI'}</div>
     </Section>
 
-    <Section title="编辑器预览资源（不导出）">
-      <ReferenceSelect label="关联 Asset" value={draft.editor_asset_id}
-        options={assets.map(a => ({ value: a.asset_id, label: getSourceFileName(a) }))}
-        onChange={editor_asset_id => patch({ editor_asset_id })} />
-      {linked?.asset_type === 'audio' && linked.uri && <audio controls src={linked.uri} className="w-full h-8" />}
-      {linked?.asset_type === 'model' && <ModelPreview uri={linked.uri} />}
+    <Section title="资源预览">
+      {linked?.asset_type === 'audio' && linked.uri && <audio controls src={linked.uri} className="h-8 w-full" />}
+      {linked?.asset_type === 'model' && <ModelPreview uri={linked.uri} resourceMap={linked.metadata?.resource_map} />}
       {linked?.asset_type === 'image' && linked.uri && <img src={linked.uri} alt={linked.name} className="max-h-48 rounded border border-[#2A2E37]" />}
+      {!linked && <p className="text-xs text-gray-500">选择 Source Asset 后显示预览。</p>}
     </Section>
   </div>;
 }
