@@ -1,4 +1,3 @@
-import React from 'react';
 import SimplePresentationDetails from './SimplePresentationDetails';
 import AnimatorControllerDetails from './AnimatorControllerDetails';
 import AnimationProfileDetails from './AnimationProfileDetails';
