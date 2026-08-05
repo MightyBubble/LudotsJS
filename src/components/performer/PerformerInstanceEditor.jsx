@@ -3,9 +3,12 @@ import { NumberField } from '@/components/ludots/ui';
 import JsonValueField from '@/components/ludots/JsonValueField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import VectorField from './VectorField';
+import PerformerBehaviorList from './PerformerBehaviorList';
+import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import { readInstanceOverrides, writeInstanceParams, writeInstanceTransform } from '@/lib/runtime/performerOverrides';
 
 export default function PerformerInstanceEditor({ node, performers, onChange }) {
+  const refs = usePresentationRefs();
   if (!node?.instance) return null;
   const instance = node.instance;
   const overrides = readInstanceOverrides(instance);
@@ -25,6 +28,13 @@ export default function PerformerInstanceEditor({ node, performers, onChange }) 
         <VectorField label="Local Scale" value={overrides.transform.local_scale} onChange={local_scale => patchTransform({ local_scale })} />
       </div>
       <JsonValueField label="Param Overrides" value={overrides.params} onChange={params => onChange(writeInstanceParams(instance, params))} />
+      <PerformerBehaviorList
+        title="Instance Runtime Behaviors"
+        description="仅属于当前 Child 实例；创建后自动激活，不修改被引用的 Performer 模板。"
+        behaviors={instance.runtime_behaviors || []}
+        refs={refs}
+        onChange={runtime_behaviors => onChange({ ...instance, runtime_behaviors })}
+      />
     </> : <p className="text-[11px] text-gray-500">该实例属于嵌套定义，此处仅选择与预览，不会切换当前父级数据。</p>}
   </div>;
 }

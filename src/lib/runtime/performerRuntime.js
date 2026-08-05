@@ -37,13 +37,20 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = []) => 
   const definition = mergeDefinition(raw, context.definitions);
   const overrides = readInstanceOverrides(childConfig);
   const params = buildParams(definition, context.params, overrides.params);
-  const activeSlots = new Set((definition.behaviors || []).filter(item => item.activeByDefault !== false).map(item => item.slot));
+  const instanceBehaviors = (childConfig.runtime_behaviors || []).map((behavior, index) => ({
+    ...behavior,
+    slot: behavior.slot || `instance_behavior_${index}`,
+  }));
+  const behaviors = [...(definition.behaviors || []), ...instanceBehaviors];
+  const activeSlots = new Set(behaviors.filter(item => item.activeByDefault !== false).map(item => item.slot));
   const node = {
     definitionId,
     scopeTag: childConfig.scope_tag ?? null,
     definition,
     params,
     transform: overrides.transform,
+    instanceBehaviors,
+    behaviors,
     activeSlots,
     children: [],
   };
@@ -62,7 +69,8 @@ const snapshotNode = (node) => ({
   error: node.error,
   params: Object.fromEntries(node.params || []),
   transform: node.transform,
-  behaviors: (node.definition?.behaviors || []).filter(item => node.activeSlots?.has(item.slot)),
+  instanceBehaviors: node.instanceBehaviors || [],
+  behaviors: (node.behaviors || []).filter(item => node.activeSlots?.has(item.slot)),
   children: (node.children || []).map(snapshotNode),
 });
 

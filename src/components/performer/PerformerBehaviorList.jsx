@@ -6,14 +6,14 @@ import VectorField from './VectorField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import { BEHAVIOR_KINDS, BEHAVIOR_SPECS, blankBehavior } from './performerBehaviorSpecs';
 
-export default function PerformerBehaviorList({ behaviors = [], refs = {}, onChange }) {
+export default function PerformerBehaviorList({ behaviors = [], refs = {}, onChange, title = 'Behaviors', description = '每个 behavior 占一个 slot；kind 决定运行时读取哪一组子配置。' }) {
   const patch = (i, next) => onChange(behaviors.map((b, idx) => idx === i ? { ...b, ...next } : b));
   const patchPayload = (i, field, next) => patch(i, { [field]: { ...(behaviors[i][field] || {}), ...next } });
 
-  return <Section title="Behaviors" right={
+  return <Section title={title} right={
     <Button size="sm" onClick={() => onChange([...behaviors, blankBehavior()])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加 Behavior</Button>
   }>
-    <p className="text-xs text-gray-500">每个 behavior 占一个 slot；kind 决定运行时读取哪一组子配置。</p>
+    <p className="text-xs text-gray-500">{description}</p>
     {behaviors.map((b, i) => {
       const spec = BEHAVIOR_SPECS[b.kind] || BEHAVIOR_SPECS.AssetBinding;
       const payload = b[spec.field] || {};
@@ -34,6 +34,7 @@ export default function PerformerBehaviorList({ behaviors = [], refs = {}, onCha
             if (f.t === 'vec4') return <VectorField key={f.k} label={f.k} value={payload[f.k]} length={4} onChange={set} />;
             if (f.t === 'number') return <NumberField key={f.k} label={f.k} value={payload[f.k]} onChange={set} />;
             if (f.t === 'bool') return <div key={f.k} className="pt-5"><BoolField label={f.k} value={Boolean(payload[f.k])} onChange={set} /></div>;
+            if (f.options) return <SelectField key={f.k} label={f.k} value={payload[f.k]} options={f.options.map(value => ({ value, label: value }))} onChange={set} />;
             return <TextField key={f.k} label={f.k} hint={f.hint} value={payload[f.k]} onChange={set} />;
           })}
         </div>

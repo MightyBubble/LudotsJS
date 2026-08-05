@@ -47,10 +47,20 @@ export const BEHAVIOR_SPECS = {
   Attachment: {
     field: 'attachment',
     fields: [
+      { k: 'target', t: 'text', options: ['Parent', 'Bone'] },
       { k: 'boneId', t: 'number' },
       { k: 'offset', t: 'vec3' },
       { k: 'rotationOffset', t: 'vec4' },
       { k: 'inheritScale', t: 'bool' },
+      { k: 'followPositionX', t: 'bool' },
+      { k: 'followPositionY', t: 'bool' },
+      { k: 'followPositionZ', t: 'bool' },
+      { k: 'followRotationX', t: 'bool' },
+      { k: 'followRotationY', t: 'bool' },
+      { k: 'followRotationZ', t: 'bool' },
+      { k: 'followScaleX', t: 'bool' },
+      { k: 'followScaleY', t: 'bool' },
+      { k: 'followScaleZ', t: 'bool' },
     ],
   },
   Sound: {
