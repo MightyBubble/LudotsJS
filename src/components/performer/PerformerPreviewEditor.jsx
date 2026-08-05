@@ -4,8 +4,9 @@ import { base44 } from '@/api/base44Client';
 import { Section } from '@/components/ludots/ui';
 import PerformerPreviewViewport from './PerformerPreviewViewport';
 import PerformerTransformEditor from './PerformerTransformEditor';
+import PerformerInstanceEditor from './PerformerInstanceEditor';
 
-export default function PerformerPreviewEditor({ root, draft, records, patch }) {
+export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onChangeInstance }) {
   const [selectedSlot, setSelectedSlot] = useState('0');
   const [mode, setMode] = useState('translate');
   const bindingsQuery = useQuery({ queryKey: ['performer-preview-bindings'], queryFn: () => base44.entities.HostAssetBinding.list('-updated_date', 500) });
@@ -25,8 +26,9 @@ export default function PerformerPreviewEditor({ root, draft, records, patch }) 
     const index = Number(selectedSlot || 0);
     updateAssetBehaviors(assetBehaviors.map((behavior, itemIndex) => itemIndex === index ? { ...behavior, assetBinding: { ...(behavior.assetBinding || {}), ...next } } : behavior));
   }, [assetBehaviors, selectedSlot, updateAssetBehaviors]);
+  const performerOptions = records.map(item => ({ value: item.performer_id, label: item.label || item.performer_id }));
   return <Section title="3D Prefab 预览与变换">
-    {ready ? <PerformerPreviewViewport root={root} selectedPerformerId={draft.performer_id} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={assetBehaviors[Number(selectedSlot || 0)]?.slot} mode={mode} onModeChange={setMode} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
-    <PerformerTransformEditor behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} />
+    {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
+    {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} /> : <PerformerTransformEditor behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} />}
   </Section>;
 }

@@ -7,7 +7,7 @@ import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
-export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedPerformerId, targetSlot, mode, onTransform) {
+export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform) {
   const releases = useRef([]);
   const [status, setStatus] = useState('准备预览');
 
@@ -43,12 +43,14 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     }));
     let cancelled = false;
 
-    const addDefinition = async (definition, parent, visited = new Set()) => {
+    let selectedGroup = null;
+    const addDefinition = async (definition, parent, path = 'root', visited = new Set()) => {
       if (!definition || visited.has(definition.performer_id)) return;
       const nextVisited = new Set(visited).add(definition.performer_id);
       const group = new THREE.Group();
-      group.name = definition.performer_id;
+      group.name = path;
       parent.add(group);
+      if (path === selectedInstancePath) selectedGroup = group;
       for (const behavior of definition.behaviors || []) {
         if (behavior.kind !== 'AssetBinding' || behavior.activeByDefault === false) continue;
         const asset = behavior.assetBinding || {};
@@ -69,9 +71,9 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         object.rotation.set(...vector(asset.localRotation, [0, 0, 0]).map(THREE.MathUtils.degToRad));
         object.scale.fromArray(vector(asset.localScale, [1, 1, 1]));
         group.add(object);
-        if (definition.performer_id === selectedPerformerId && behavior.slot === targetSlot) transform.attach(object);
+        if (path === 'root' && behavior.slot === targetSlot) transform.attach(object);
       }
-      await Promise.all((definition.children || []).map(child => addDefinition(byId.get(child.definition_id), group, nextVisited)));
+      await Promise.all((definition.children || []).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited)));
     };
 
     let frame = 0;
@@ -97,6 +99,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     resize();
     addDefinition(root, content).then(() => {
       if (cancelled) return;
+      if (selectedGroup && selectedInstancePath !== 'root') scene.add(new THREE.BoxHelper(selectedGroup, 0xcbd3dc));
       const box = new THREE.Box3().setFromObject(content);
       if (!box.isEmpty()) {
         const center = box.getCenter(new THREE.Vector3());
@@ -122,7 +125,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       releases.current.splice(0).forEach(release => release());
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, assets, effects, selectedPerformerId, targetSlot, mode, onTransform]);
+  }, [containerRef, root, performers, bindings, assets, effects, selectedInstancePath, targetSlot, mode, onTransform]);
 
   return status;
 }

@@ -11,14 +11,15 @@ export default function PerformerEditorPage() {
     () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], rules: [], children: [], required_attribute_ids: [], instanced_batches: [] })
   );
   const [hierarchyRootId, setHierarchyRootId] = useState(null);
+  const [selectedInstance, setSelectedInstance] = useState(null);
   const visibleRecords = draft ? records.map(item => item.id === draft.id ? draft : item) : records;
   const hierarchyRoot = visibleRecords.find(item => item.id === hierarchyRootId) || draft;
-  const selectRoot = (record) => { setHierarchyRootId(record.id); setSelectedId(record.id); };
-  const selectHierarchyNode = (record) => {
-    if (record.id === selectedId) return;
-    if (dirty && !window.confirm('当前 Performer 尚未保存，是否放弃修改并切换节点？')) return;
-    setSelectedId(record.id);
-  };
+  const selectRoot = (record) => { setHierarchyRootId(record.id); setSelectedInstance(null); setSelectedId(record.id); };
+  const selectHierarchyNode = (node) => setSelectedInstance(node.path === 'root' ? null : node);
+  const updateSelectedInstance = selectedInstance?.parentPath === 'root' ? (next) => {
+    patch({ children: (draft.children || []).map((child, index) => index === selectedInstance.index ? next : child) });
+    setSelectedInstance(current => ({ ...current, instance: next }));
+  } : null;
 
   return (
     <RecordWorkspace
@@ -39,8 +40,8 @@ export default function PerformerEditorPage() {
     >
       {draft && <>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(260px,0.8fr)_minmax(0,2.2fr)] xl:items-start">
-          <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedId={selectedId} onSelect={selectHierarchyNode} />
-          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} />
+          <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedPath={selectedInstance?.path || 'root'} onSelect={selectHierarchyNode} />
+          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} selectedInstance={selectedInstance} onChangeInstance={updateSelectedInstance} />
         </div>
         <PerformerDetails draft={draft} patch={patch} />
       </>}
