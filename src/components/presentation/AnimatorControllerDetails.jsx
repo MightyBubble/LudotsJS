@@ -1359,7 +1359,7 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
     <div className="flex h-[calc(100vh-176px)] min-h-[720px] flex-col gap-3 overflow-hidden">
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[280px_minmax(560px,1fr)_360px]">
         <Panel title="Animator" icon={Layers}>
-          <div className="border-b border-[#2A2E37] p-3">
+          <div className="shrink-0 border-b border-[#2A2E37] p-3">
             <FieldLabel>Controller ID</FieldLabel>
             <TextInput value={draft.controller_id} onChange={controller_id => patch({ controller_id })} />
           </div>
