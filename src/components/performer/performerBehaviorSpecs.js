@@ -1,5 +1,5 @@
 /** 与 Ludots performers.json behaviors 对齐的每种 kind 字段规格。 */
-export const BEHAVIOR_KINDS = ['AssetBinding', 'AttributeBinding', 'TagBinding', 'Animator', 'Attachment', 'Sound', 'Material', 'Spline'];
+export const BEHAVIOR_KINDS = ['AssetBinding', 'AttributeBinding', 'TagBinding', 'Animator', 'Attachment', 'Sound', 'Material', 'Spline', 'Grounding', 'MinimapMarker', 'WorldText', 'SurfaceSource', 'InstancedBatch'];
 
 export const BEHAVIOR_SPECS = {
   AssetBinding: {
@@ -18,6 +18,7 @@ export const BEHAVIOR_SPECS = {
       { k: 'assetSwapParamKey', t: 'text' },
       { k: 'visibilityParamKey', t: 'text' },
     ],
+    extras: ['style', 'motion'],
   },
   AttributeBinding: {
     field: 'attributeBinding',
@@ -93,6 +94,21 @@ export const BEHAVIOR_SPECS = {
       { k: 'pingPong', t: 'bool' },
     ],
   },
+  Grounding: { field: 'grounding', fields: [], raw: true },
+  MinimapMarker: { field: 'minimapMarker', fields: [], raw: true },
+  WorldText: {
+    field: 'worldText',
+    fields: [
+      { k: 'textToken', t: 'text', ref: 'textTokens' },
+      { k: 'mode', t: 'text' },
+      { k: 'valueParamKey', t: 'text' },
+      { k: 'secondaryValueParamKey', t: 'text' },
+      { k: 'fontSize', t: 'number' },
+    ],
+    extras: ['style', 'motion'],
+  },
+  SurfaceSource: { field: 'surfaceSource', fields: [], raw: true },
+  InstancedBatch: { field: 'instancedBatch', fields: [{ k: 'batchAssetId', t: 'text' }] },
 };
 
 export const blankBehavior = (kind = 'AssetBinding') => ({

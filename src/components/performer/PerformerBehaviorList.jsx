@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, SelectField, BoolField } from '@/components/ludots/ui';
+import JsonValueField from '@/components/ludots/JsonValueField';
 import VectorField from './VectorField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import { BEHAVIOR_KINDS, BEHAVIOR_SPECS, blankBehavior } from './performerBehaviorSpecs';
@@ -26,7 +27,7 @@ export default function PerformerBehaviorList({ behaviors = [], refs = {}, onCha
             onChange={inline => patch(i, { activationCondition: { ...(b.activationCondition || {}), inline } })} />
           <div className="pt-5"><BoolField label="Active By Default" value={b.activeByDefault !== false} onChange={activeByDefault => patch(i, { activeByDefault })} /></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {spec.raw ? <JsonValueField label={spec.field} value={payload} onChange={value => patch(i, { [spec.field]: value })} /> : <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {spec.fields.map(f => {
             const set = v => patchPayload(i, spec.field, { [f.k]: v });
             if (f.ref) return <ReferenceSelect key={f.k} label={f.k} value={payload[f.k]} options={refs[f.ref]} onChange={set} />;
@@ -37,7 +38,8 @@ export default function PerformerBehaviorList({ behaviors = [], refs = {}, onCha
             if (f.options) return <SelectField key={f.k} label={f.k} value={payload[f.k]} options={f.options.map(value => ({ value, label: value }))} onChange={set} />;
             return <TextField key={f.k} label={f.k} hint={f.hint} value={payload[f.k]} onChange={set} />;
           })}
-        </div>
+        </div>}
+        {(spec.extras || []).map(field => <JsonValueField key={field} label={field} value={b[field]} onChange={value => patch(i, { [field]: value })} />)}
         <div className="flex justify-end">
           <Button size="sm" variant="ghost" onClick={() => onChange(behaviors.filter((_, idx) => idx !== i))} className="h-7 text-red-400"><Trash2 className="w-3 h-3" />删除</Button>
         </div>

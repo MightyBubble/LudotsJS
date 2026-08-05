@@ -15,6 +15,48 @@
     "extends": {
       "type": "string"
     },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "durationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "persistence": {
+          "type": "string",
+          "enum": [
+            "Scoped"
+          ]
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "offset": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": [
+        "offset"
+      ]
+    },
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inline": {
+          "type": "string"
+        }
+      }
+    },
     "children": {
       "type": "array",
       "items": {
@@ -34,8 +76,7 @@
               "inherit",
               "override"
             ],
-            "default": "inherit",
-            "description": "inherit \u4f7f\u7528\u88ab\u5f15\u7528 Performer \u6a21\u677f\u7684 children\uff1boverride \u4f7f\u7528\u5f53\u524d\u5b9e\u4f8b\u7684 children"
+            "default": "inherit"
           },
           "overrides": {
             "type": "object",
@@ -81,127 +122,8 @@
           },
           "runtime_behaviors": {
             "type": "array",
-            "description": "\u4ec5\u5c5e\u4e8e\u8be5 Child \u5b9e\u4f8b\u3001\u5b9e\u4f8b\u5316\u540e\u81ea\u52a8\u6fc0\u6d3b\u7684\u8fd0\u884c\u65f6 Behavior\uff1b\u4e0d\u4fee\u6539\u5f15\u7528\u6a21\u677f",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "slot": {
-                  "type": "string"
-                },
-                "kind": {
-                  "type": "string",
-                  "enum": [
-                    "AssetBinding",
-                    "AttributeBinding",
-                    "TagBinding",
-                    "Animator",
-                    "Attachment",
-                    "Sound",
-                    "Material",
-                    "Spline"
-                  ]
-                },
-                "activeByDefault": {
-                  "type": "boolean"
-                },
-                "activationCondition": {
-                  "type": "object"
-                },
-                "assetBinding": {
-                  "type": "object"
-                },
-                "attributeBinding": {
-                  "type": "object"
-                },
-                "tagBinding": {
-                  "type": "object"
-                },
-                "animator": {
-                  "type": "object"
-                },
-                "attachment": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "target": {
-                      "type": "string",
-                      "enum": [
-                        "Parent",
-                        "Bone"
-                      ],
-                      "default": "Parent"
-                    },
-                    "boneId": {
-                      "type": "integer"
-                    },
-                    "offset": {
-                      "type": "array",
-                      "items": {
-                        "type": "number"
-                      }
-                    },
-                    "rotationOffset": {
-                      "type": "array",
-                      "items": {
-                        "type": "number"
-                      }
-                    },
-                    "inheritScale": {
-                      "type": "boolean"
-                    },
-                    "followPositionX": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followPositionY": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followPositionZ": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followRotationX": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followRotationY": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followRotationZ": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followScaleX": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followScaleY": {
-                      "type": "boolean",
-                      "default": true
-                    },
-                    "followScaleZ": {
-                      "type": "boolean",
-                      "default": true
-                    }
-                  }
-                },
-                "sound": {
-                  "type": "object"
-                },
-                "material": {
-                  "type": "object"
-                },
-                "spline": {
-                  "type": "object"
-                }
-              },
-              "required": [
-                "slot",
-                "kind"
-              ]
+              "$ref": "#/$defs/behavior"
             }
           },
           "children": {
@@ -216,115 +138,10 @@
         ]
       }
     },
-    "default_color": {
-      "type": "array",
-      "items": {
-        "type": "number"
-      }
-    },
-    "default_lifetime": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "default_font_size": {
-      "type": [
-        "integer",
-        "null"
-      ]
-    },
-    "position_offset": {
-      "type": "array",
-      "items": {
-        "type": "number"
-      }
-    },
-    "position_y_drift_per_second": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "alpha_fade_over_lifetime": {
-      "type": "boolean",
-      "default": false
-    },
-    "world_text_mode": {
-      "type": "string"
-    },
-    "visibility_inline": {
-      "type": "string"
-    },
-    "visibility_graph_program_id": {
-      "type": [
-        "integer",
-        "null"
-      ]
-    },
-    "required_attribute_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
     "behaviors": {
       "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "slot": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "AssetBinding",
-              "AttributeBinding",
-              "TagBinding",
-              "Animator",
-              "Attachment",
-              "Sound",
-              "Material",
-              "Spline"
-            ]
-          },
-          "activeByDefault": {
-            "type": "boolean"
-          },
-          "activationCondition": {
-            "type": "object"
-          },
-          "assetBinding": {
-            "type": "object"
-          },
-          "attributeBinding": {
-            "type": "object"
-          },
-          "tagBinding": {
-            "type": "object"
-          },
-          "animator": {
-            "type": "object"
-          },
-          "attachment": {
-            "type": "object"
-          },
-          "sound": {
-            "type": "object"
-          },
-          "material": {
-            "type": "object"
-          },
-          "spline": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "slot",
-          "kind"
-        ]
+        "$ref": "#/$defs/behavior"
       }
     },
     "paramDefaults": {
@@ -380,17 +197,155 @@
           }
         }
       }
-    },
-    "instanced_batches": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "surface": {
-      "type": [
-        "object",
-        "null"
+    }
+  },
+  "$defs": {
+    "behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slot": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "AssetBinding",
+            "AttributeBinding",
+            "TagBinding",
+            "Animator",
+            "Attachment",
+            "Sound",
+            "Material",
+            "Spline",
+            "Grounding",
+            "MinimapMarker",
+            "WorldText",
+            "SurfaceSource",
+            "InstancedBatch"
+          ]
+        },
+        "activeByDefault": {
+          "type": "boolean"
+        },
+        "activationCondition": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "assetBinding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "attributeBinding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "tagBinding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "animator": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "attachment": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "sound": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "material": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "spline": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "grounding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "minimapMarker": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "worldText": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "surfaceSource": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "instancedBatch": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "style": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "color": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "alphaPolicy": {
+              "type": "string"
+            }
+          }
+        },
+        "motion": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "yDriftPerSecond": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [
+        "slot",
+        "kind"
       ]
     }
   },
