@@ -90,6 +90,176 @@
           "condition_kind"
         ]
       }
+    },
+    "authoring_layers": {
+      "type": "array",
+      "description": "Editor workbench layers, nodes, positions, and transition authoring metadata. Runtime states/transitions remain the compiled source of truth for Ludots.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "blend_mode": {
+            "type": "string"
+          },
+          "ik_pass": {
+            "type": "boolean"
+          },
+          "default_state_id": {
+            "type": "string"
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "position": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "packed_state_index": {
+                  "type": "integer"
+                },
+                "duration_seconds": {
+                  "type": "number"
+                },
+                "playback_speed": {
+                  "type": "number"
+                },
+                "loop": {
+                  "type": "boolean"
+                },
+                "animation_clip_asset_id": {
+                  "type": "string"
+                },
+                "blend_tree": {
+                  "type": "object"
+                },
+                "sub_controller_id": {
+                  "type": "string"
+                },
+                "parameter_mapping": {
+                  "type": "object"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "comment": {
+                  "type": "string"
+                },
+                "excluded_state_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "from_state_id": {
+                  "type": "string"
+                },
+                "to_state_id": {
+                  "type": "string"
+                },
+                "duration_seconds": {
+                  "type": "number"
+                },
+                "duration_mode": {
+                  "type": "string"
+                },
+                "has_exit_time": {
+                  "type": "boolean"
+                },
+                "exit_time": {
+                  "type": "number"
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "parameter": {
+                        "type": "string"
+                      },
+                      "mode": {
+                        "type": "string"
+                      },
+                      "threshold": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                },
+                "consume_trigger": {
+                  "type": "boolean"
+                },
+                "interrupt_source": {
+                  "type": "string"
+                },
+                "ordered_interruption": {
+                  "type": "boolean"
+                },
+                "transition_curve": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "authoring_parameters": {
+      "type": "array",
+      "description": "Editor parameters referenced by transition conditions.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "default_value": {
+            "type": "number"
+          }
+        }
+      }
     }
   },
   "required": [
