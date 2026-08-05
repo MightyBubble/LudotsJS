@@ -7,7 +7,7 @@ import PerformerTransformEditor from './PerformerTransformEditor';
 import PerformerInstanceEditor from './PerformerInstanceEditor';
 import { writeInstanceTransform } from '@/lib/runtime/performerOverrides';
 
-export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onSelectInstancePath, onChangeInstance, details }) {
+export default function PerformerPreviewEditor({ root, draft, records, patch, selectedInstance, onSelectInstancePath, onChangeInstance, onRequestInheritedEdit, details }) {
   const [selectedSlot, setSelectedSlot] = useState('0');
   const [mode, setMode] = useState('translate');
   const bindingsQuery = useQuery({ queryKey: ['performer-preview-bindings'], queryFn: () => base44.entities.HostAssetBinding.list('-updated_date', 500) });
@@ -25,19 +25,23 @@ export default function PerformerPreviewEditor({ root, draft, records, patch, se
   }, [draft.behaviors, patch]);
   const applyTransform = useCallback(next => {
     if (selectedInstance) {
+      if (selectedInstance.source === 'nested_template') {
+        onRequestInheritedEdit?.();
+        return;
+      }
       onChangeInstance?.(writeInstanceTransform(selectedInstance.instance, next));
       return;
     }
     const index = Number(selectedSlot || 0);
     updateAssetBehaviors(assetBehaviors.map((behavior, itemIndex) => itemIndex === index ? { ...behavior, assetBinding: { ...(behavior.assetBinding || {}), ...next } } : behavior));
-  }, [assetBehaviors, onChangeInstance, selectedInstance, selectedSlot, updateAssetBehaviors]);
+  }, [assetBehaviors, onChangeInstance, onRequestInheritedEdit, selectedInstance, selectedSlot, updateAssetBehaviors]);
   const performerOptions = records.map(item => ({ value: item.performer_id, label: item.label || item.performer_id }));
   return <>
     <Section title="3D Prefab 预览">
       {ready ? <PerformerPreviewViewport root={root} selectedInstancePath={selectedInstance?.path || 'root'} performers={records} bindings={bindings} assets={assets} effects={effects} targetSlot={!selectedInstance ? assetBehaviors[Number(selectedSlot || 0)]?.slot : undefined} mode={mode} onModeChange={setMode} onSelectPath={onSelectInstancePath} onTransform={applyTransform} /> : <div className="flex h-[480px] items-center justify-center rounded border border-[#424a55] bg-[#0D0F14] text-xs text-gray-500">正在加载 Prefab 资源…</div>}
     </Section>
     <div className="min-w-0 space-y-3">
-      {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} /> : <><Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>{details}</>}
+      {selectedInstance ? <PerformerInstanceEditor node={selectedInstance} performers={performerOptions} onChange={onChangeInstance} onRequestInheritedEdit={onRequestInheritedEdit} /> : <><Section title="根节点 Transform"><PerformerTransformEditor compact behaviors={assetBehaviors} selectedSlot={selectedSlot} onSelectSlot={setSelectedSlot} onChange={updateAssetBehaviors} /></Section>{details}</>}
     </div>
   </>;
 }

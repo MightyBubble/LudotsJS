@@ -10,6 +10,8 @@ export function findHierarchyNode(root, records, path) {
   let performer = root, instance = null, currentPath = 'root', source = 'definition';
   for (const index of parts) {
     source = instance ? (usesInstanceChildren(instance) ? 'nested_override' : 'nested_template') : 'definition';
+    const templateOwnerId = source === 'nested_template' ? performer.performer_id : null;
+    const templatePath = source === 'nested_template' ? `root/${index}` : null;
     const child = resolvePerformerChildren(performer, instance)[index];
     if (!child) return null;
     const parentPath = currentPath;
@@ -17,7 +19,7 @@ export function findHierarchyNode(root, records, path) {
     performer = byId.get(child.definition_id);
     instance = child;
     if (!performer) return null;
-    if (currentPath === path) return { performer, instance, path, parentPath, index, source };
+    if (currentPath === path) return { performer, instance, path, parentPath, index, source, templateOwnerId, templatePath };
   }
   return null;
 }
@@ -38,6 +40,19 @@ export function updateHierarchyInstance(root, records, path, nextInstance) {
     return children;
   };
   return update(root, null, 0);
+}
+
+export function breakHierarchyInstance(root, records, path) {
+  const byId = indexMap(records);
+  const node = findHierarchyNode(root, records, path);
+  if (!node?.instance) return null;
+  const materialize = (definition, instance, trail = new Set()) => resolvePerformerChildren(definition, instance).map(child => {
+    const childDefinition = byId.get(child.definition_id);
+    if (!childDefinition || trail.has(child.definition_id)) return { ...child, children_mode: 'override', children: [] };
+    return { ...child, children_mode: 'override', children: materialize(childDefinition, child, new Set(trail).add(child.definition_id)) };
+  });
+  const broken = { ...node.instance, children_mode: 'override', children: materialize(node.performer, node.instance, new Set([node.performer.performer_id])) };
+  return updateHierarchyInstance(root, records, path, broken);
 }
 
 export function moveHierarchyNode(root, records, sourcePath, targetPath, placement) {

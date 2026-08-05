@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui/button';
 import { TextField } from '@/components/ludots/ui';
 import JsonValueField from '@/components/ludots/JsonValueField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
@@ -7,7 +8,7 @@ import PerformerBehaviorList from './PerformerBehaviorList';
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import { readInstanceOverrides, writeInstanceParams, writeInstanceTransform } from '@/lib/runtime/performerOverrides';
 
-export default function PerformerInstanceEditor({ node, performers, onChange }) {
+export default function PerformerInstanceEditor({ node, performers, onChange, onRequestInheritedEdit }) {
   const refs = usePresentationRefs();
   if (!node?.instance) return null;
   const instance = node.instance;
@@ -17,10 +18,10 @@ export default function PerformerInstanceEditor({ node, performers, onChange }) 
     <div>
       <p className="text-xs font-semibold text-[#dce2e8]">子 Performer 实例</p>
       <p className="mt-1 font-mono text-[10px] text-gray-500">{node.path}</p>
-      {node.source === 'nested_template' && <p className="mt-2 rounded border border-amber-900/60 bg-amber-950/30 px-2 py-1.5 text-[10px] text-amber-200">来自嵌套 Performer 模板；首次修改会在当前根 Performer 中生成局部覆盖，不会修改原模板。</p>}
-      {node.source === 'nested_override' && <p className="mt-2 rounded border border-sky-900/60 bg-sky-950/30 px-2 py-1.5 text-[10px] text-sky-200">当前节点已由根 Performer 局部覆盖；运行时优先使用该实例数据。</p>}
+      {node.source === 'nested_template' && <div className="mt-2 space-y-2 rounded border border-amber-900/60 bg-amber-950/30 px-2 py-2 text-[10px] text-amber-200"><p>该节点由嵌套模板拥有，不能直接创建跨模板覆盖。</p><Button size="sm" onClick={onRequestInheritedEdit} className="h-7">选择编辑方式</Button></div>}
+      {node.source === 'nested_override' && <p className="mt-2 rounded border border-sky-900/60 bg-sky-950/30 px-2 py-1.5 text-[10px] text-sky-200">当前子实例已 Break；运行时使用当前根 Performer 中的独立副本。</p>}
     </div>
-    {onChange ? <>
+    {onChange && node.source !== 'nested_template' ? <>
       <ReferenceSelect label="Definition ID" value={instance.definition_id} options={performers} onChange={definition_id => onChange({ ...instance, definition_id })} />
       <TextField label="Scope Tag" value={instance.scope_tag} onChange={scope_tag => onChange({ ...instance, scope_tag })} hint="命名作用域，例如 structure / working；C# 运行时通过 PerformerScopeTagRegistry 解析为整数 ID" />
       <div className="rounded border border-[#424a55] bg-[#0D0F14] p-3 space-y-3">
@@ -37,6 +38,6 @@ export default function PerformerInstanceEditor({ node, performers, onChange }) 
         refs={refs}
         onChange={runtime_behaviors => onChange({ ...instance, runtime_behaviors })}
       />
-    </> : <p className="text-[11px] text-gray-500">该实例属于嵌套定义，此处仅选择与预览，不会切换当前父级数据。</p>}
+    </> : node.source !== 'nested_template' && <p className="text-[11px] text-gray-500">该实例属于嵌套定义，此处仅选择与预览，不会切换当前父级数据。</p>}
   </div>;
 }
