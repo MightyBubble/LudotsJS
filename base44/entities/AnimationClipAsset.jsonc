@@ -17,13 +17,9 @@
       ],
       "description": "AnimationClipAssetKind"
     },
-    "preview_mesh_asset_id": {
-      "type": "string",
-      "description": "Editor-only Asset.asset_id used to preview this animation binding; not exported."
-    },
     "locators": {
       "type": "array",
-      "description": "Animation host bindings persisted directly as runtime locators.",
+      "description": "Runtime locator rows. The editor derives these from AnimationClip host bindings.",
       "items": {
         "type": "object",
         "additionalProperties": false,
