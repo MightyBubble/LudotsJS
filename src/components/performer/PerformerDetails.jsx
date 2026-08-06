@@ -1,8 +1,8 @@
-import React from 'react';
-import { Section, TextField } from '@/components/ludots/ui';
+﻿import { Section, TextField } from '@/components/ludots/ui';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
 import usePresentationRefs from '@/components/presentation/usePresentationRefs';
 import PerformerAuthoringSettings from './PerformerAuthoringSettings';
+import AnimatorParamContractSection from './AnimatorParamContractSection';
 import PerformerBehaviorList from './PerformerBehaviorList';
 import PerformerParamsSection from './PerformerParamsSection';
 import PerformerRulesSection from './PerformerRulesSection';
@@ -22,6 +22,7 @@ export default function PerformerDetails({ draft, patch, compact = false }) {
     <PerformerAuthoringSettings draft={draft} patch={patch} compact={compact} />
 
     <PerformerBehaviorList behaviors={draft.behaviors} refs={refs} onChange={behaviors => patch({ behaviors })} />
+    <AnimatorParamContractSection draft={draft} refs={refs} patch={patch} />
     <PerformerParamsSection
       paramDefaults={draft.paramDefaults}
       onChangeParams={paramDefaults => patch({ paramDefaults })}
@@ -29,3 +30,4 @@ export default function PerformerDetails({ draft, patch, compact = false }) {
     <PerformerRulesSection rules={draft.rules} refs={refs} onChange={rules => patch({ rules })} />
   </div>;
 }
+
