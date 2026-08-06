@@ -122,6 +122,8 @@ export default function UnifiedGraphEditorPage() {
   const { data: commandPanels = [] } = useQuery({ queryKey: ['command-panel-profiles'], queryFn: () => base44.entities.CommandPanelProfile.list(), initialData: [] });
   const { data: entityPanels = [] } = useQuery({ queryKey: ['entity-panel-profiles'], queryFn: () => base44.entities.EntityPanelProfile.list(), initialData: [] });
   const { data: entityCollections = [] } = useQuery({ queryKey: ['entity-collections'], queryFn: () => base44.entities.EntityCollection.list(), initialData: [] });
+  const { data: uiScreens = [] } = useQuery({ queryKey: ['ui-screen-profiles'], queryFn: () => base44.entities.UIScreenProfile.list(), initialData: [] });
+  const { data: uiSelectionRoutes = [] } = useQuery({ queryKey: ['ui-selection-route-profiles'], queryFn: () => base44.entities.UISelectionRouteProfile.list(), initialData: [] });
 
   const levelNodeOptions = useMemo(() => ({
     levelVariables: Object.entries(blackboard).map(([key, spec]) => ({ value: key, label: `${key} · ${spec.type || 'any'}` })),
@@ -131,7 +133,9 @@ export default function UnifiedGraphEditorPage() {
     commandPanels: commandPanels.map(profile => ({ value: profile.panel_id, label: `${profile.label || profile.panel_id} · ${profile.panel_id}` })),
     entityPanels: entityPanels.map(profile => ({ value: profile.panel_id, label: `${profile.label || profile.panel_id} · ${profile.panel_id}` })),
     entityCollections: entityCollections.map(collection => ({ value: collection.collection_key, label: `${collection.label || collection.collection_key} · ${collection.collection_key}` })),
-  }), [blackboard, gameEvents, actionGraphs, controlPlanes, commandPanels, entityPanels, entityCollections]);
+    uiScreens: uiScreens.map(profile => ({ value: profile.screen_id, label: `${profile.label || profile.screen_id} · ${profile.screen_id}` })),
+    uiSelectionRoutes: uiSelectionRoutes.map(profile => ({ value: profile.route_id, label: `${profile.label || profile.route_id} · ${profile.route_id}` })),
+  }), [blackboard, gameEvents, actionGraphs, controlPlanes, commandPanels, entityPanels, entityCollections, uiScreens, uiSelectionRoutes]);
 
   const allGraphs = useMemo(() => {
     const dataGraphEntities = dataGraphs.map(g => ({
