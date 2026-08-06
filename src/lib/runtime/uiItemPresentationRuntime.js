@@ -13,7 +13,7 @@ export function createTextTokenResolver(tokens = [], locale) {
   };
 }
 
-const getTags = item => item.catalogTags || item.tags || item.gameplay_tags || Object.keys(item.tag_counts || {}).filter(tag => item.tag_counts[tag] > 0);
+export const getItemTags = item => item.catalogTags || item.tags || item.gameplay_tags || Object.keys(item.tag_counts || {}).filter(tag => item.tag_counts[tag] > 0);
 const getAttribute = (item, attributeId) => {
   const buffer = item.attribute_buffer || item.attributes || {};
   const raw = Array.isArray(buffer) ? buffer.find(value => value.attribute_id === attributeId) : buffer[attributeId];
@@ -45,7 +45,7 @@ export function createUIItemPresenter(profiles = [], tokens = [], locale) {
         tooltip: resolveToken(text.tooltip_token_ref),
         iconGlyph: definition?.icon_glyph || '', accentColor: definition?.accent_color || '', badges: [], stats: [],
       };
-      const tags = getTags(item);
+      const tags = getItemTags(item);
       (profile.tag_text_bindings || []).filter(binding => tags.includes(binding.tag_id)).sort((a, b) => (a.priority || 0) - (b.priority || 0)).forEach(binding => {
         const value = resolveToken(binding.text_token_ref);
         if (!value) return;
