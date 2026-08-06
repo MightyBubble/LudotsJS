@@ -1,4 +1,4 @@
-/** 与 Ludots performers.json behaviors 对齐的每种 kind 字段规格。 */
+﻿/** 与 Ludots performers.json behaviors 对齐的每种 kind 字段规格。 */
 export const BEHAVIOR_KINDS = ['AssetBinding', 'AttributeBinding', 'TagBinding', 'Animator', 'Attachment', 'Sound', 'Material', 'Spline', 'Grounding', 'MinimapMarker', 'WorldText', 'SurfaceSource', 'InstancedBatch'];
 
 export const BEHAVIOR_SPECS = {
@@ -25,7 +25,7 @@ export const BEHAVIOR_SPECS = {
     fields: [
       { k: 'attributeId', t: 'text', ref: 'attributes' },
       { k: 'targetParamKey', t: 'text' },
-      { k: 'mode', t: 'text', hint: 'Attribute / AttributeRatio / AttributeBase' },
+      { k: 'mode', t: 'text', options: ['Attribute', 'AttributeRatio', 'AttributeBase'] },
     ],
   },
   TagBinding: {
@@ -41,8 +41,8 @@ export const BEHAVIOR_SPECS = {
     fields: [
       { k: 'animatorControllerId', t: 'text', ref: 'controllers' },
       { k: 'animationProfileId', t: 'text', ref: 'profiles' },
-      { k: 'speedParamKey', t: 'text', hint: '可选 Float 输入键。最终播放速度 = State playbackSpeed × 此 Blackboard 值；留空则仅使用 playbackSpeed。配置后需提供非负值，建议默认值为 1。' },
-      { k: 'stateParamKey', t: 'text', hint: '可选 Int 输出键。运行时每帧写入当前 Controller State 的数组索引，供 Performer Rule 或其他系统读取；留空则不写入，不能用于切换状态。' },
+      { k: 'speedParamKey', t: 'text' },
+      { k: 'stateParamKey', t: 'text' },
     ],
   },
   Attachment: {
@@ -117,3 +117,4 @@ export const blankBehavior = (kind = 'AssetBinding') => ({
   activeByDefault: true,
   [BEHAVIOR_SPECS[kind].field]: {},
 });
+
