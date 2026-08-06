@@ -1,5 +1,3 @@
-import React from 'react';
-
 /** 预设面板：选中信息。展示单个选中实体的图标、名称、属性数值与标签徽章（由 UIItemPresentationProfile 驱动）。 */
 export default function RuntimeSelectionInfoPanel({ entity, display }) {
   if (!entity) return <p className="p-2 text-[11px] text-gray-500">当前没有选中实体。</p>;
