@@ -1,4 +1,4 @@
-export const PRESENTATION_CONFIGS = {
+﻿export const PRESENTATION_CONFIGS = {
   mesh: { entity: 'PresentationMeshAsset', key: 'asset_id', title: 'Mesh Assets', query: 'presentation_mesh_assets',
     blank: () => ({ asset_id: `mesh_${Date.now()}`, type: 'Primitive', primitive_kind: 'Cube', source_uris: [] }) },
   material: { entity: 'PresentationMaterialAsset', key: 'asset_id', title: 'Material Assets', query: 'presentation_material_assets',
@@ -16,3 +16,4 @@ export const PRESENTATION_CONFIGS = {
   uiItem: { entity: 'UIItemPresentationProfile', key: 'profile_id', title: 'UI Item Presenters', query: 'ui_item_presenters',
     blank: () => ({ profile_id: `ui_item_${Date.now()}`, item_kind: 'entity', label: '', description: '', items: [], attribute_text_bindings: [], tag_text_bindings: [] }) },
 };
+
