@@ -87,6 +87,16 @@ export const LEVEL_BLUEPRINT_NODE_TYPES = {
     defaultData: { profileId: '', instanceKey: 'entity-panel', anchorHorizontal: 'right', anchorVertical: 'bottom', offsetX: 12, offsetY: 12 },
     inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
   },
+  level_mount_ui_screen: {
+    label: '挂载 UI Screen', icon: PanelsTopLeft, category: '关卡 UI · Panel', graphTypes: ['level'],
+    configFields: [
+      { key: 'screenProfileId', type: 'select', optionsSource: 'uiScreens', placeholder: '选择 UI Screen Profile' },
+      { key: 'routeProfileId', type: 'select', optionsSource: 'uiSelectionRoutes', placeholder: '选择选中路由 Profile' },
+      { key: 'instanceKey', type: 'text', defaultValue: 'ui-screen' },
+    ],
+    defaultData: { screenProfileId: '', routeProfileId: '', instanceKey: 'ui-screen' },
+    inputs: [{ id: 'exec', label: '执行', type: 'exec' }], outputs: [{ id: 'exec_out', label: '完成', type: 'exec' }],
+  },
   level_create_runtime_console: {
     label: '创建 Runtime Console', icon: Terminal, category: '关卡 UI · 工具', graphTypes: ['level'],
     configFields: [
