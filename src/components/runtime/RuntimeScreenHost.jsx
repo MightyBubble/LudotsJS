@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { positionStyle } from '@/components/runtime/RuntimeAnchoredPanel';
 import RuntimePanelView from '@/components/runtime/RuntimePanelView';
 import RuntimeEntityPanelView from '@/components/runtime/RuntimeEntityPanelView';
