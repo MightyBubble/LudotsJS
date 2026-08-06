@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+﻿import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import JSZip from 'npm:jszip@3.10.1';
 
 const packs = {
@@ -155,3 +155,4 @@ export default async function(req) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
+
