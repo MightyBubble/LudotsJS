@@ -91,19 +91,6 @@
         ]
       }
     },
-    "authoring_preview": {
-      "type": "object",
-      "description": "Editor-only controller preview selection; not exported.",
-      "additionalProperties": false,
-      "properties": {
-        "mesh_asset_id": {
-          "type": "string"
-        },
-        "profile_id": {
-          "type": "string"
-        }
-      }
-    },
     "authoring_layers": {
       "type": "array",
       "description": "Editor workbench layers, nodes, positions, and transition authoring metadata. Runtime states/transitions remain the compiled source of truth for Ludots.",
