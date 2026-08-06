@@ -997,7 +997,7 @@ function StateFlowCanvasInner({
   );
 }
 
-function StateFlowCanvas(props) {
+export function StateFlowCanvas(props) {
   return (
     <ReactFlowProvider>
       <StateFlowCanvasInner {...props} />
