@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
 import UIScreenProfileDetails from '@/components/uiScreen/UIScreenProfileDetails';
