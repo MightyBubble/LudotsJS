@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import { Section, SelectField, TextField, ListField } from '@/components/ludots/ui';
