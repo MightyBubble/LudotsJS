@@ -24,6 +24,19 @@ GlobalConstant / DataTable → 全局可引用`,
     questions: []
   },
   {
+    id: "generic-ui-panels",
+    title: "通用 UI 面板与世界空间指示器 (Generic UI & World Indicators)",
+    overview: "对齐 Nexus Flow 看板『Ludots通用面板』35 张子卡片：28 类 HUD 面板 + 7 类世界空间指示器，按选中上下文动态路由组合，皮肤与布局全部数据驱动、Mod 可覆盖。",
+    definition: "四层结构：UIScreenProfile（槽位布局+皮肤 token）→ UISelectionRouteProfile（选中数量/标签/原型 → 槽位面板路由，首条命中、未命中显式留空）→ 各类 PanelProfile（stat_strip / menu / tab_group / event_stream / order_queue / container_grid / node_tree / relation_graph / minimap / view_filter + 既有 command / entity / selection_info）→ WorldIndicatorProfile（selection_marker / nameplate / area_boundary / path_network / region_tint / offscreen_marker / relation_link）。",
+    intent: "35 类预设面板全部是数据记录而非代码；代码只维护两张注册表（UI_PANEL_KINDS 与 WORLD_INDICATOR_KINDS）和对应渲染器。集合键（EntityCollection）是面板与指示器唯一的数据入口：面板只消费集合，Global.Selection 由框选写入，唯一的生产者例外是 view_filter（显式声明 output_collection_key）。",
+    architecture: `已落地（增量1）：\n• UIScreenProfile / UISelectionRouteProfile 实体 + UI Screens / Selection Routes 编辑页\n• 蓝图节点 level_mount_ui_screen；Playground 框选写入 Global.Selection\n• RuntimeScreenHost（槽位×路由×皮肤）+ RuntimeSelectionInfoPanel\n\n待评审后落地：\n• 统一 action 结构：activate_ability / select_entities / open_panel / mount_screen / emit_event / time_scale / camera_focus / save_game / load_game / set_preference，经 uiActionRuntime 派发 ludots:level-event，不新建事件系统\n• 蓝图节点 level_mount_world_indicator、level_write_formation\n• Performer 新 behavior kind：CollectionBinding（实体∈集合→参数，选中圈/编队高亮统一驱动）\n• 场景级指示器为 viewport 图层（区域/染色/路网/屏外/关系连线），per-entity 指示器复用 WorldText / Spline / Material / MinimapMarker\n• 种子演示数据挂 Map.SelectionCaptureDemo：Screen.RTS.Default + Route.RTS.Selection + 各面板示例记录 + Level.UiShowcase 蓝图\n\n完整设计（含全部 schema 草案、35 卡映射表、Cucumber UAT）见评审文档 ludots_js_generic_ui_design.md；C# 落地路径见 ludots_csharp_generic_ui_issue.md。`,
+    questions: [
+      "路由规则匹配语义：多选时 required_all_tags 要求『每个选中实体都命中』，是否需要补充『任一命中』模式？",
+      "设置项与 tab 的用户偏好持久化：user scope 存 localStorage 还是新建 UserPreference 实体？",
+      "生产队列在 Playground 的模拟数据源用关卡变量还是给实体加 order_queue 字段？"
+    ]
+  },
+  {
     id: "command-control",
     title: "命令与控制 (Command & Control)",
     overview: "以客户端控制者化身为锚点，通过关系投影生成可控制 Actor 集合，再由输入意图向集合提交命令。",
