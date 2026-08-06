@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import AnimatorPreviewParameters from '@/components/presentation/AnimatorPreviewParameters';
-import { StateFlowCanvas } from '@/components/presentation/AnimatorControllerDetails';
+import * as AnimatorControllerModule from '@/components/presentation/AnimatorControllerDetails.jsx';
+import PerformerMiniStateMachine from '@/components/performer/PerformerMiniStateMachine';
 import useControllerPreviewMachine from '@/hooks/useControllerPreviewMachine';
+
+const StateFlowCanvas = AnimatorControllerModule.StateFlowCanvas;
 import { buildAnimatorPreviewLayer, buildAnimatorPreviewParameters, findPreviewAnimator } from '@/lib/runtime/animatorPreview';
 
 export default function PerformerAnimatorPreviewTab({ root, performers, controllers, profiles, stateIndex, onStateIndex }) {
@@ -33,7 +36,7 @@ export default function PerformerAnimatorPreviewTab({ root, performers, controll
       <Button size="sm" onClick={() => setPlaying(value => !value)} className={`h-7 shrink-0 text-xs ${playing ? 'bg-emerald-600' : 'bg-[#242a32]'}`}>{playing ? 'Stop' : 'Play'}</Button>
     </div>
     <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(104px,35%)]">
-      <div className="h-[420px] min-w-0 overflow-hidden rounded border border-[#424a55]"><StateFlowCanvas key={controller.controller_id} layer={layer} defaultStateId={layer.default_state_id} selectedStateId={activeStateId} selectedTransitionId={activeTransitionId} onSelectState={selectState} onSelectTransition={noop} onUpdateLayer={noop} onOpenNested={noop} isPlaying={playing} activeStateId={activeStateId} activeTransitionId={activeTransitionId} readOnly compact /></div>
+      <div className="h-[420px] min-w-0 overflow-hidden rounded border border-[#424a55]">{StateFlowCanvas ? <StateFlowCanvas key={controller.controller_id} layer={layer} defaultStateId={layer.default_state_id} selectedStateId={activeStateId} selectedTransitionId={activeTransitionId} onSelectState={selectState} onSelectTransition={noop} onUpdateLayer={noop} onOpenNested={noop} isPlaying={playing} activeStateId={activeStateId} activeTransitionId={activeTransitionId} readOnly compact /> : <PerformerMiniStateMachine layer={layer} activeStateId={activeStateId} activeTransitionId={activeTransitionId} onSelect={packedIndex => selectState(layer.states.find(state => state.packed_state_index === packedIndex)?.id)} />}</div>
       <aside className="flex h-[420px] min-w-0 flex-col overflow-hidden rounded border border-[#424a55] bg-[#171b21]">
         <div className="border-b border-[#424a55] px-3 py-2 text-[11px] font-semibold text-[#dce2e8]">Parameters</div>
         <div className="min-h-0 flex-1 overflow-y-auto p-2"><AnimatorPreviewParameters parameters={parameters} values={values} onChange={(name, value) => { setPlaying(true); setValues(current => ({ ...current, [name]: value })); }} /></div>
