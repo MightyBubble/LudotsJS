@@ -1,4 +1,4 @@
-import SimplePresentationDetails from './SimplePresentationDetails';
+﻿import SimplePresentationDetails from './SimplePresentationDetails';
 import AnimatorControllerDetails from './AnimatorControllerDetails';
 import AnimationClipAssetDetails from './AnimationClipAssetDetails';
 import AnimationProfileDetails from './AnimationProfileDetails';
@@ -11,3 +11,4 @@ export default function PresentationConfigDetails({ type, draft, patch, refs }) 
   if (type === 'uiItem') return <UIItemPresentationDetails draft={draft} patch={patch} refs={refs} />;
   return <SimplePresentationDetails type={type} draft={draft} patch={patch} />;
 }
+
