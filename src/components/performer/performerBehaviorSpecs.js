@@ -25,7 +25,7 @@ export const BEHAVIOR_SPECS = {
     fields: [
       { k: 'attributeId', t: 'text', ref: 'attributes' },
       { k: 'targetParamKey', t: 'text' },
-      { k: 'mode', t: 'text', hint: 'AttributeRatio / AttributeValue' },
+      { k: 'mode', t: 'text', hint: 'Attribute / AttributeRatio / AttributeBase' },
     ],
   },
   TagBinding: {

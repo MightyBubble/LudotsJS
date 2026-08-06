@@ -3,18 +3,19 @@ import { Button } from '@/components/ui/button';
 import AnimatorPreviewParameters from '@/components/presentation/AnimatorPreviewParameters';
 import { StateFlowCanvas } from '@/components/presentation/AnimatorControllerDetails';
 import useControllerPreviewMachine from '@/hooks/useControllerPreviewMachine';
-import { buildAnimatorPreviewLayer, findPreviewAnimator } from '@/lib/runtime/animatorPreview';
+import { buildAnimatorPreviewLayer, buildAnimatorPreviewParameters, findPreviewAnimator } from '@/lib/runtime/animatorPreview';
 
 export default function PerformerAnimatorPreviewTab({ root, performers, controllers, profiles, stateIndex, onStateIndex }) {
   const animator = useMemo(() => findPreviewAnimator(root, performers), [performers, root]);
   const controller = controllers.find(item => item.controller_id === animator?.animatorControllerId);
   const profile = profiles.find(item => item.profile_id === animator?.animationProfileId);
   const layer = useMemo(() => buildAnimatorPreviewLayer(controller), [controller]);
-  const parameters = useMemo(() => controller?.authoring_parameters || [], [controller]);
+  const parameters = useMemo(() => buildAnimatorPreviewParameters(controller, animator), [animator, controller]);
   const [values, setValues] = useState({});
   const [playing, setPlaying] = useState(true);
   useEffect(() => setValues(Object.fromEntries(parameters.map(item => [item.name, item.default_value ?? 0]))), [controller?.controller_id, parameters]);
-  const { activeStateId, activeTransitionId, selectState: selectRuntimeState } = useControllerPreviewMachine(layer, values, playing);
+  const speedMultiplier = animator?.speedParamKey && animator.speedParamKey !== 'none' ? values[animator.speedParamKey] : 1;
+  const { activeStateId, activeTransitionId, selectState: selectRuntimeState } = useControllerPreviewMachine(layer, values, playing, speedMultiplier);
   const activeState = layer.states.find(state => state.id === activeStateId);
   const noop = useCallback(() => {}, []);
   useEffect(() => { if (Number.isInteger(activeState?.packed_state_index)) onStateIndex(activeState.packed_state_index); }, [activeState?.packed_state_index, onStateIndex]);
