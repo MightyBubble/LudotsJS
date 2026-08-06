@@ -1,7 +1,7 @@
 import {
   Edit3, Zap, KeyRound, Sparkles, Layers, GitBranch, Calculator, Box, Gamepad2,
   Link as LinkIcon, Globe, Settings, Shield, CheckSquare, Table, Network, BookOpen, Wand2,
-  Image as ImageIcon, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon, PanelsTopLeft,
+  Image as ImageIcon, Film, FolderKanban, Users, Activity, Search, ListTree, Map as MapIcon, PanelsTopLeft, Crosshair,
 } from 'lucide-react';
 
 /**
@@ -78,6 +78,8 @@ export const NAV_GROUPS = [
       { page: 'EntityCollectionEditor', label: 'Entity Collections', icon: Search },
       { page: 'CommandPanelEditor', label: 'Command Panels', icon: ListTree },
       { page: 'EntityPanelEditor', label: 'Entity Panels', icon: Users },
+      { page: 'UIScreenEditor', label: 'UI Screens', icon: PanelsTopLeft },
+      { page: 'UISelectionRouteEditor', label: 'Selection Routes', icon: Crosshair },
       { page: 'CommandPanelRuntime', label: 'Panel Runtime', icon: Activity },
     ],
   },
