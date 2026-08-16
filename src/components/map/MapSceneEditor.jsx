@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import EntityTemplateList from '@/components/playground/EntityTemplateList';
-import { boardCellGrid, MACRO_TILE_CELLS } from '@/lib/map/spatialScale';
+import { boardCellGrid } from '@/lib/map/spatialScale';
+import { factValue } from '@/lib/editorFacts';
 import MapEditorViewport from './MapEditorViewport';
 import MapEntityInspector from './MapEntityInspector';
 
@@ -31,7 +32,7 @@ export default function MapSceneEditor({ entities = [], boards = [], prototypes 
   return <div className="flex flex-col min-h-0 h-[560px] rounded border border-[#2A2E37] bg-[#0D0F14] overflow-hidden">
     <div className="px-3 py-2 border-b border-[#2A2E37] flex items-center justify-between">
       <span className="text-xs font-semibold text-[#E2D8B3]">地图场景 · {board.name || 'default'} · {grid.macroX}×{grid.macroY} 宏块 = {grid.width}×{grid.height} cells · {grid.cellCm}cm/cell</span>
-      <span className="text-[10px] text-gray-500">{template ? `放置中：${template.name || template.prototype_id}` : `选择实体模板后点击场景放置 · 1 宏块 = ${MACRO_TILE_CELLS} cells`}</span>
+      <span className="text-[10px] text-gray-500">{template ? `放置中：${template.name || template.prototype_id}` : `选择实体模板后点击场景放置 · 1 宏块 = ${factValue('mapBoard.macroTileCells')} cells`}</span>
     </div>
     <div className="flex-1 min-h-0 flex">
       <EntityTemplateList templates={prototypes} selectedId={templateId} onSelect={setTemplateId} />

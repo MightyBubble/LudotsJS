@@ -1,5 +1,12 @@
 import { EFFECT_PRESET_TYPES } from './effectPresetTypes';
 import { EFFECT_PHASES, EFFECT_PRESETS } from './effectPresetDefinitions';
+import { factValue } from '@/lib/editorFacts';
+
+const EFFECT_TOP_LEVEL_TAGS_MAX = factValue('effect.topLevelTagsMax');
+const EXEC_ITEMS_MAX = factValue('ability.execItemsMax');
+const EXEC_CALLER_PARAMS_MAX = factValue('ability.execCallerParamsMax');
+const ON_ACTIVATE_EFFECTS_MAX = factValue('ability.onActivateEffectsMax');
+const TOGGLE_ACTIVE_EFFECTS_MAX = factValue('ability.toggleActiveEffectsMax');
 
 const issue = (severity, field_path, message, fix) => ({ severity, field_path, message, fix });
 
@@ -15,7 +22,7 @@ export function validateEffect(effect, refs = {}) {
   if (!preset.allowedLifetimes.includes(effect.lifetime)) out.push(issue('error', 'lifetime', '不符合 preset_types.json 的 allowedLifetimes', `选择 ${preset.allowedLifetimes.join(' / ')}`));
   (preset.fields || []).forEach(field => { if (field === 'modifiers' ? !(effect.modifiers || []).length : effect[field] == null) out.push(issue('error', field, `${effect.presetType} 需要 ${field}`, '配置 Preset 必需字段')); });
   if (effect.participatesInResponse === undefined) out.push(issue('error', 'participatesInResponse', '必须明确是否参与响应', '设置 true 或 false'));
-  if ((effect.tags || []).length > 1) out.push(issue('error', 'tags', 'C# Loader 最多允许一个顶层 tag', '只保留一个 tag'));
+  if ((effect.tags || []).length > EFFECT_TOP_LEVEL_TAGS_MAX) out.push(issue('error', 'tags', 'C# Loader 最多允许一个顶层 tag', '只保留一个 tag'));
   if (effect.lifetime === 'After' && (!Number.isInteger(effect.duration?.durationTicks) || effect.duration.durationTicks < 1)) out.push(issue('error', 'duration.durationTicks', 'After 需要正整数 durationTicks', '填写 tick 数'));
   if (effect.expireCondition && (!effect.expireCondition.kind || !effect.expireCondition.tag || !effect.expireCondition.sense)) out.push(issue('error', 'expireCondition', '到期条件不完整', '补全 kind、tag、sense'));
   if (effect.stack && (!Number.isInteger(effect.stack.limit) || effect.stack.limit < 1)) out.push(issue('error', 'stack.limit', '叠加上限必须为正整数', '填写 limit'));
@@ -50,8 +57,8 @@ export function validateAbility(ability, refs = {}) {
   if (!ability.ability_id) out.push(issue('error', 'ability_id', '缺少 GAS ability id', '填写唯一 id'));
   if (!ability.exec?.clockId) out.push(issue('error', 'exec.clockId', 'AbilityExecLoader 要求 clockId', '填写 FixedFrame 等有效时钟'));
   if (!Array.isArray(ability.exec?.items)) out.push(issue('error', 'exec.items', 'AbilityExecLoader 要求 items 数组', '至少添加 End item'));
-  if ((ability.exec?.items || []).length > 16) out.push(issue('error', 'exec.items', '超过 AbilityExecSpec.MAX_ITEMS 16', '减少 Exec Item'));
-  if ((ability.exec?.callerParams || []).length > 4) out.push(issue('error', 'exec.callerParams', '超过 AbilityExecCallerParamsPool.MAX_SETS 4', '减少调用参数组'));
+  if ((ability.exec?.items || []).length > EXEC_ITEMS_MAX) out.push(issue('error', 'exec.items', `超过 AbilityExecSpec.MAX_ITEMS ${EXEC_ITEMS_MAX}`, '减少 Exec Item'));
+  if ((ability.exec?.callerParams || []).length > EXEC_CALLER_PARAMS_MAX) out.push(issue('error', 'exec.callerParams', `超过 AbilityExecCallerParamsPool.MAX_SETS ${EXEC_CALLER_PARAMS_MAX}`, '减少调用参数组'));
   (ability.exec?.items || []).forEach((item, index) => {
     if (!item.kind) out.push(issue('error', `exec.items[${index}].kind`, '缺少 ExecItemKind', '选择原生 kind'));
     if (!Number.isInteger(item.tick)) out.push(issue('error', `exec.items[${index}].tick`, 'tick 必须是整数', '填写执行 tick'));
@@ -60,8 +67,8 @@ export function validateAbility(ability, refs = {}) {
     if (item.kind === 'InputGate' && item.payloadA === undefined) out.push(issue('error', `exec.items[${index}].payloadA`, 'InputGate 必须提供 payloadA', '填写输入门载荷'));
   });
   (ability.onActivateEffects || []).forEach((id, index) => { if (!effectIds.has(id)) out.push(issue('error', `onActivateEffects[${index}]`, `Effect 引用无效：${id}`, '选择现有 Effect')); });
-  if ((ability.onActivateEffects || []).length > 16) out.push(issue('error', 'onActivateEffects', '超过 C# 容量 16', '减少 Effect 数量'));
-  if ((ability.toggleSpec?.activeEffects || []).length > 4) out.push(issue('error', 'toggleSpec.activeEffects', '超过 C# 容量 4', '减少 activeEffects'));
+  if ((ability.onActivateEffects || []).length > ON_ACTIVATE_EFFECTS_MAX) out.push(issue('error', 'onActivateEffects', `超过 C# 容量 ${ON_ACTIVATE_EFFECTS_MAX}`, '减少 Effect 数量'));
+  if ((ability.toggleSpec?.activeEffects || []).length > TOGGLE_ACTIVE_EFFECTS_MAX) out.push(issue('error', 'toggleSpec.activeEffects', `超过 C# 容量 ${TOGGLE_ACTIVE_EFFECTS_MAX}`, '减少 activeEffects'));
   (ability.toggleSpec?.activeEffects || []).forEach((id, index) => { if (!effectIds.has(id)) out.push(issue('error', `toggleSpec.activeEffects[${index}]`, `Effect 引用无效：${id}`, '选择现有 Effect')); });
   if (ability.activationPrecondition?.validationGraph && !graphIds.has(ability.activationPrecondition.validationGraph)) out.push(issue('error', 'activationPrecondition.validationGraph', 'Graph 引用无效', '选择现有 Graph'));
   if (ability.targeting && (ability.targeting.castRangeCm === undefined || !ability.targeting.impactEffect)) out.push(issue('error', 'targeting', 'targeting 必须同时提供 castRangeCm 与 impactEffect', '补全目标字段'));
