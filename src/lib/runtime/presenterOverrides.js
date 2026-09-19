@@ -1,7 +1,7 @@
 export const EMPTY_INSTANCE_TRANSFORM = {
-  local_position: [0, 0, 0],
-  local_rotation: [0, 0, 0],
-  local_scale: [1, 1, 1],
+  localPosition: [0, 0, 0],
+  localRotation: [0, 0, 0],
+  localScale: [1, 1, 1],
 };
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
@@ -9,11 +9,11 @@ const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 export function readInstanceOverrides(instance = {}) {
   const transform = instance.overrides?.transform || {};
   return {
-    params: instance.overrides?.params ?? instance.param_overrides ?? [],
+    params: instance.overrides?.params || [],
     transform: {
-      local_position: vector(transform.local_position, EMPTY_INSTANCE_TRANSFORM.local_position),
-      local_rotation: vector(transform.local_rotation, EMPTY_INSTANCE_TRANSFORM.local_rotation),
-      local_scale: vector(transform.local_scale, EMPTY_INSTANCE_TRANSFORM.local_scale),
+      localPosition: vector(transform.localPosition, EMPTY_INSTANCE_TRANSFORM.localPosition),
+      localRotation: vector(transform.localRotation, EMPTY_INSTANCE_TRANSFORM.localRotation),
+      localScale: vector(transform.localScale, EMPTY_INSTANCE_TRANSFORM.localScale),
     },
   };
 }

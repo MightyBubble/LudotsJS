@@ -1,5 +1,5 @@
-import { resolvePerformerChildren } from '@/lib/runtime/performerComposition';
-import { readInstanceOverrides } from '@/lib/runtime/performerOverrides';
+import { resolvePresenterChildren } from '@/lib/runtime/presenterComposition';
+import { readInstanceOverrides } from '@/lib/runtime/presenterOverrides';
 
 const modeFor = kind => kind === 'AutoOnNormalizedTime' ? 'ExitTime' : kind?.includes('Less') ? 'Less' : kind?.includes('BoolFalse') ? 'IfNot' : kind?.includes('Bool') ? 'If' : kind?.includes('Trigger') ? 'Trigger' : 'Greater';
 
@@ -33,19 +33,19 @@ export function buildAnimatorPreviewLayer(controller) {
 
 const defaultValue = entry => entry?.lane === 'Int' ? entry.intValue : entry?.lane === 'Vector' ? entry.vectorValue : entry?.floatValue;
 
-export function findPreviewAnimator(root, performers) {
-  const byId = new Map((performers || []).map(item => [item.performer_id, item]));
+export function findPreviewAnimator(root, presenters) {
+  const byId = new Map((presenters || []).map(item => [item.presenter_id, item]));
   const visit = (definition, instance = {}, inherited = new Map(), seen = new Set()) => {
-    if (!definition || seen.has(definition.performer_id)) return null;
-    const nextSeen = new Set(seen).add(definition.performer_id);
+    if (!definition || seen.has(definition.presenter_id)) return null;
+    const nextSeen = new Set(seen).add(definition.presenter_id);
     const params = new Map(inherited);
     (definition.paramDefaults || []).forEach(entry => params.set(entry.paramKey, defaultValue(entry)));
     readInstanceOverrides(instance).params.forEach(entry => params.set(entry.paramKey, defaultValue(entry)));
-    const behaviors = [...(definition.behaviors || []), ...(instance.runtime_behaviors || [])];
+    const behaviors = [...(definition.behaviors || [])];
     const animator = behaviors.find(behavior => behavior.kind === 'Animator' && behavior.activeByDefault !== false)?.animator;
     if (animator) return { ...animator, previewParams: Object.fromEntries(params) };
-    for (const child of resolvePerformerChildren(definition, instance)) {
-      const found = visit(byId.get(child.definition_id), child, params, nextSeen);
+    for (const child of resolvePresenterChildren(definition, instance)) {
+      const found = visit(byId.get(child.definitionId), child, params, nextSeen);
       if (found) return found;
     }
     return null;

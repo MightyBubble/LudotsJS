@@ -1,9 +1,9 @@
 {
-  "name": "Performer",
+  "name": "Presenter",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "performer_id": {
+    "presenter_id": {
       "type": "string"
     },
     "label": {
@@ -14,36 +14,6 @@
     },
     "extends": {
       "type": "string"
-    },
-    "transform": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "local_position": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 3,
-          "maxItems": 3
-        },
-        "local_rotation": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 3,
-          "maxItems": 3
-        },
-        "local_scale": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 3,
-          "maxItems": 3
-        }
-      }
     },
     "lifecycle": {
       "type": "object",
@@ -93,20 +63,12 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "definition_id": {
+          "definitionId": {
             "type": "string"
           },
-          "scope_tag": {
+          "scopeTag": {
             "type": "string",
-            "description": "\u547d\u540d\u4f5c\u7528\u57df\u6807\u7b7e\uff1b\u5bfc\u51fa\u5230 Ludots \u540e\u7531 PerformerScopeTagRegistry \u89e3\u6790\u4e3a\u6574\u6570 ID"
-          },
-          "children_mode": {
-            "type": "string",
-            "enum": [
-              "inherit",
-              "override"
-            ],
-            "default": "inherit"
+            "description": "\u547d\u540d\u4f5c\u7528\u57df\u6807\u7b7e\uff1b\u5bfc\u51fa\u5230 Ludots \u540e\u7531 PresenterScopeTagRegistry \u89e3\u6790\u4e3a\u6574\u6570 ID"
           },
           "overrides": {
             "type": "object",
@@ -116,19 +78,19 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "local_position": {
+                  "localPosition": {
                     "type": "array",
                     "items": {
                       "type": "number"
                     }
                   },
-                  "local_rotation": {
+                  "localRotation": {
                     "type": "array",
                     "items": {
                       "type": "number"
                     }
                   },
-                  "local_scale": {
+                  "localScale": {
                     "type": "array",
                     "items": {
                       "type": "number"
@@ -144,11 +106,13 @@
               }
             }
           },
-          "param_overrides": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
+          "children_mode": {
+            "type": "string",
+            "enum": [
+              "inherit",
+              "override"
+            ],
+            "default": "inherit"
           },
           "runtime_behaviors": {
             "type": "array",
@@ -164,7 +128,7 @@
           }
         },
         "required": [
-          "definition_id"
+          "definitionId"
         ]
       }
     },
@@ -230,6 +194,6 @@
     }
   },
   "required": [
-    "performer_id"
+    "presenter_id"
   ]
 }

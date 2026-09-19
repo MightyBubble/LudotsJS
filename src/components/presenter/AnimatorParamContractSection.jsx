@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Section } from '@/components/ludots/ui';
 import {
   animatorControllerKey,
-  collectPerformerParamSupplies,
+  collectPresenterParamSupplies,
   defaultValueForRow,
   getAnimatorParamRequirements,
   getParamSupplyStatus,
@@ -65,7 +65,7 @@ function ContractRow({ row, status, canAddDefault, onAddDefault }) {
       <div className="text-xs text-gray-300">{row.lane}</div>
       <div>{statusBadge(status)}</div>
       <div className="min-w-0 text-[11px] text-gray-500">
-        {sources || (row.writeOnly ? 'Animator writes this key back to the Performer blackboard.' : 'No Performer value source is configured.')}
+        {sources || (row.writeOnly ? 'Animator writes this key back to the Presenter blackboard.' : 'No Presenter value source is configured.')}
       </div>
       <div className="flex justify-end">
         {canAddDefault && (
@@ -79,14 +79,14 @@ function ContractRow({ row, status, canAddDefault, onAddDefault }) {
   );
 }
 
-function analyzeAnimatorBehavior(behavior, index, controllerRows, performer, performerRows) {
+function analyzeAnimatorBehavior(behavior, index, controllerRows, presenter, presenterRows) {
   const animator = behavior?.animator || {};
   const controllerId = animatorControllerKey(animator);
   const controller = controllerRows.find(item => item.controller_id === controllerId);
   const requirements = controller
     ? getAnimatorParamRequirements(controller, animator)
     : [];
-  const supplies = collectPerformerParamSupplies(performer, performerRows);
+  const supplies = collectPresenterParamSupplies(presenter, presenterRows);
   const rows = requirements.map(row => ({
     row,
     status: getParamSupplyStatus(row, supplies),
@@ -107,10 +107,10 @@ export default function AnimatorParamContractSection({ draft, refs = {}, patch }
   const paramDefaults = draft.paramDefaults || [];
   const animatorBehaviors = (draft.behaviors || []).filter(behavior => behavior?.kind === 'Animator');
   const controllerRows = refs.raw?.controllers || [];
-  const performerRows = refs.raw?.performers || [];
+  const presenterRows = refs.raw?.presenters || [];
   const analyses = useMemo(
-    () => animatorBehaviors.map((behavior, index) => analyzeAnimatorBehavior(behavior, index, controllerRows, draft, performerRows)),
-    [animatorBehaviors, controllerRows, draft, performerRows],
+    () => animatorBehaviors.map((behavior, index) => analyzeAnimatorBehavior(behavior, index, controllerRows, draft, presenterRows)),
+    [animatorBehaviors, controllerRows, draft, presenterRows],
   );
 
   const addDefault = row => {
@@ -143,12 +143,12 @@ export default function AnimatorParamContractSection({ draft, refs = {}, patch }
       )}
     >
       <p className="text-xs text-gray-500">
-        Animator 只读取 Performer 黑板里同名参数。缺失的读取项，只应通过补 Performer 默认值，或手动配置一个已有供值来源来解决，不会自动新增 AttributeBinding。
+        Animator 只读取 Presenter 黑板里同名参数。缺失的读取项，只应通过补 Presenter 默认值，或手动配置一个已有供值来源来解决，不会自动新增 AttributeBinding。
       </p>
 
       {animatorBehaviors.length === 0 && (
         <div className="border border-dashed border-[#424a55] bg-[#0D0F14] p-4 text-center text-xs text-gray-500">
-          No Animator behavior on this Performer.
+          No Animator behavior on this Presenter.
         </div>
       )}
 

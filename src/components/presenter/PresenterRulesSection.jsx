@@ -3,7 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, TextField, NumberField, SelectField } from '@/components/ludots/ui';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
-import { EVENT_KIND_OPTIONS, INLINE_CONDITION_OPTIONS, getEventKeyOptions } from './performerRuleOptions';
+import { EVENT_KIND_OPTIONS, INLINE_CONDITION_OPTIONS, getEventKeyOptions } from './presenterRuleOptions';
 
 const blankRule = () => ({
   event: { kind: 'TagEffectiveChanged', keyId: '' },
@@ -11,12 +11,12 @@ const blankRule = () => ({
   command: { kind: 'SetParam', paramKey: '', paramLane: 'Float', valueSource: 'Fixed', paramValue: 1 },
 });
 
-export default function PerformerRulesSection({ rules = [], refs = {}, onChange }) {
+export default function PresenterRulesSection({ rules = [], refs = {}, onChange }) {
   const patch = (i, part, next) => onChange(rules.map((r, idx) => idx === i ? { ...r, [part]: { ...(r[part] || {}), ...next } } : r));
   return <Section title="Rules" right={
     <Button size="sm" onClick={() => onChange([...rules, blankRule()])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加规则</Button>
   }>
-    <p className="text-xs text-gray-500">运行时事件 → 可选条件 → 单个 Performer command；多个命令请新增相同事件的规则。</p>
+    <p className="text-xs text-gray-500">运行时事件 → 可选条件 → 单个 Presenter command；多个命令请新增相同事件的规则。</p>
     {rules.map((r, i) => <div key={i} className="rounded border border-[#2A2E37] bg-[#0D0F14] p-3 space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <SelectField label="Event Kind" value={r.event?.kind} options={EVENT_KIND_OPTIONS} onChange={kind => patch(i, 'event', { kind, keyId: '' })} />

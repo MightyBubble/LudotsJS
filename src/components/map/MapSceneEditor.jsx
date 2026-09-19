@@ -16,7 +16,7 @@ export default function MapSceneEditor({ entities = [], boards = [], prototypes 
     const base = template.prototype_id || 'entity';
     let instance_id = `${base}_1`;
     for (let i = 1; entities.some(e => e.instance_id === instance_id); i += 1) instance_id = `${base}_${i + 1}`;
-    onChange([...entities, { instance_id, template: base, position: cell, overrides: {}, performer_param_overrides: [] }]);
+    onChange([...entities, { instance_id, template: base, position: cell, overrides: {}, presenter_param_overrides: [] }]);
     setSelectedId(instance_id);
   };
   const patch = (id, next) => {

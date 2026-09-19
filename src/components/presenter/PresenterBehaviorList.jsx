@@ -5,9 +5,9 @@ import { Section, TextField, NumberField, SelectField, BoolField } from '@/compo
 import JsonValueField from '@/components/ludots/JsonValueField';
 import VectorField from './VectorField';
 import ReferenceSelect from '@/components/presentation/ReferenceSelect';
-import { BEHAVIOR_KINDS, BEHAVIOR_SPECS, blankBehavior } from './performerBehaviorSpecs';
+import { BEHAVIOR_KINDS, BEHAVIOR_SPECS, blankBehavior } from './presenterBehaviorSpecs';
 
-export default function PerformerBehaviorList({ behaviors = [], refs = {}, onChange, title = 'Behaviors', description = '每个 behavior 占一个 slot；kind 决定运行时读取哪一组子配置。' }) {
+export default function PresenterBehaviorList({ behaviors = [], refs = {}, onChange, title = 'Behaviors', description = '每个 behavior 占一个 slot；kind 决定运行时读取哪一组子配置。' }) {
   const patch = (i, next) => onChange(behaviors.map((b, idx) => idx === i ? { ...b, ...next } : b));
   const patchPayload = (i, field, next) => patch(i, { [field]: { ...(behaviors[i][field] || {}), ...next } });
 

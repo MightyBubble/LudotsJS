@@ -7,10 +7,10 @@ const lifecycleOptions = [
   { value: 'scoped', label: '作用域持续（Scoped）' },
 ];
 
-export default function PerformerAuthoringSettings({ draft, patch, compact }) {
+export default function PresenterAuthoringSettings({ draft, patch, compact }) {
   const lifecycleMode = draft.lifecycle?.durationSeconds != null ? 'duration' : draft.lifecycle?.persistence ? 'scoped' : '';
   const setLifecycleMode = mode => patch({ lifecycle: mode === 'duration' ? { durationSeconds: draft.lifecycle?.durationSeconds || 1 } : { persistence: 'Scoped' } });
-  return <Section title="Performer 作者契约">
+  return <Section title="Presenter 作者契约">
     <div className={`grid grid-cols-1 gap-3 ${compact ? '' : 'md:grid-cols-3'}`}>
       <SelectField label="Lifecycle" value={lifecycleMode} options={lifecycleOptions} onChange={setLifecycleMode} hint="durationSeconds 与 persistence 二选一" />
       {lifecycleMode === 'duration' && <NumberField label="Duration Seconds" value={draft.lifecycle?.durationSeconds} onChange={durationSeconds => patch({ lifecycle: { durationSeconds } })} />}

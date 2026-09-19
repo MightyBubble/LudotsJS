@@ -1,16 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import RecordWorkspace from '@/components/ludots/RecordWorkspace';
 import useRecordEditor from '@/components/ludots/useRecordEditor';
-import PerformerDetails from '@/components/performer/PerformerDetails';
-import PerformerHierarchyPanel from '@/components/performer/PerformerHierarchyPanel';
-import PerformerPreviewEditor from '@/components/performer/PerformerPreviewEditor';
-import PerformerEditDecisionDialog from '@/components/performer/PerformerEditDecisionDialog';
-import { breakHierarchyInstance, findHierarchyNode, moveHierarchyNode, updateHierarchyInstance } from '@/lib/runtime/performerHierarchy';
+import PresenterDetails from '@/components/presenter/PresenterDetails';
+import PresenterHierarchyPanel from '@/components/presenter/PresenterHierarchyPanel';
+import PresenterPreviewEditor from '@/components/presenter/PresenterPreviewEditor';
+import PresenterEditDecisionDialog from '@/components/presenter/PresenterEditDecisionDialog';
+import { breakHierarchyInstance, findHierarchyNode, moveHierarchyNode, updateHierarchyInstance } from '@/lib/runtime/presenterHierarchy';
 
-export default function PerformerEditorPage() {
+export default function PresenterEditorPage() {
   const { records, selectedId, setSelectedId, draft, patch, dirty, create, save, remove } = useRecordEditor(
-    'Performer', 'performers',
-    () => ({ performer_id: `performer_${Date.now()}`, label: '新 Performer', behaviors: [], paramDefaults: [], rules: [], children: [] })
+    'Presenter', 'presenters',
+    () => ({ presenter_id: `presenter_${Date.now()}`, label: '新 Presenter', behaviors: [], paramDefaults: [], rules: [], children: [], anchor: { offset: [0, 0, 0] } })
   );
   const [hierarchyRootId, setHierarchyRootId] = useState(null);
   const [selectedInstance, setSelectedInstance] = useState(null);
@@ -38,7 +38,7 @@ export default function PerformerEditorPage() {
     setSelectedInstance(findHierarchyNode(nextRoot, visibleRecords, moved.movedPath));
   }, [draft, patch, visibleRecords]);
   const editTemplate = () => {
-    const owner = records.find(item => item.performer_id === editDecision?.templateOwnerId);
+    const owner = records.find(item => item.presenter_id === editDecision?.templateOwnerId);
     if (!owner) return;
     setHierarchyRootId(owner.id);
     setSelectedId(owner.id);
@@ -46,38 +46,37 @@ export default function PerformerEditorPage() {
     setEditDecision(null);
   };
   const breakInstance = () => {
-    const children = breakHierarchyInstance(draft, visibleRecords, editDecision?.parentPath);
+    const children = breakHierarchyInstance(draft, visibleRecords, editDecision?.path);
     if (!children) return;
     const nextRoot = { ...draft, children };
     patch({ children });
     setSelectedInstance(findHierarchyNode(nextRoot, visibleRecords, editDecision.path));
     setEditDecision(null);
   };
-
   return (
     <RecordWorkspace
-      entityName="Performer"
+      entityName="Presenter"
       hideBrowserOnMobile
       records={records}
       columns={[
-        { key: 'performer_id', label: 'Performer ID', width: 240, render: r => <span className="font-mono text-[#E2D8B3]">{r.performer_id}</span> },
+        { key: 'presenter_id', label: 'Presenter ID', width: 240, render: r => <span className="font-mono text-[#E2D8B3]">{r.presenter_id}</span> },
         { key: 'label', label: '名称', width: 160 },
         { key: 'extends', label: 'Extends', width: 160 },
         { key: 'behaviors', label: 'Behaviors', width: 100, render: r => (r.behaviors || []).length },
         { key: 'rules', label: 'Rules', width: 80, render: r => (r.rules || []).length },
       ]}
-      toItem={r => ({ id: r.id, name: r.label || r.performer_id, subtitle: `${(r.behaviors || []).length} behaviors${r.extends ? ` · 继承 ${r.extends}` : ''}` })}
+      toItem={r => ({ id: r.id, name: r.label || r.presenter_id, subtitle: `${(r.behaviors || []).length} behaviors${r.extends ? ` · 继承 ${r.extends}` : ''}` })}
       selectedId={selectedId} onSelect={selectRoot}
       onCreate={create} onSave={save} dirty={dirty}
-      onDelete={rec => { if (window.confirm(`确定删除「${rec.label || rec.performer_id}」吗？`)) remove(rec.id); }}
+      onDelete={rec => { if (window.confirm(`确定删除「${rec.label || rec.presenter_id}」吗？`)) remove(rec.id); }}
     >
       {draft && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(220px,0.65fr)_minmax(360px,1.5fr)_minmax(300px,1fr)] xl:items-start">
-          <PerformerHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedPath={selectedInstance?.path || 'root'} onSelect={selectHierarchyNode} onMove={moveHierarchy} />
-          <PerformerPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} selectedInstance={selectedInstance} onSelectInstancePath={selectHierarchyPath} onChangeInstance={updateSelectedInstance} onRequestInheritedEdit={() => setEditDecision(selectedInstance)} details={<PerformerDetails draft={draft} patch={patch} compact />} />
+          <PresenterHierarchyPanel root={hierarchyRoot} records={visibleRecords} selectedPath={selectedInstance?.path || 'root'} onSelect={selectHierarchyNode} onMove={moveHierarchy} />
+          <PresenterPreviewEditor root={hierarchyRoot} draft={draft} records={visibleRecords} patch={patch} selectedInstance={selectedInstance} onSelectInstancePath={selectHierarchyPath} onChangeInstance={updateSelectedInstance} onRequestInheritedEdit={() => setEditDecision(selectedInstance)} details={<PresenterDetails draft={draft} patch={patch} compact />} />
         </div>
       )}
-      <PerformerEditDecisionDialog open={!!editDecision} node={editDecision} onOpenChange={open => !open && setEditDecision(null)} onEditTemplate={editTemplate} onBreak={breakInstance} />
+      <PresenterEditDecisionDialog open={!!editDecision} node={editDecision} onOpenChange={open => !open && setEditDecision(null)} onEditTemplate={editTemplate} onBreak={breakInstance} />
     </RecordWorkspace>
   );
 }

@@ -18,7 +18,7 @@ export default function PlaygroundPage() {
   const [commandProfiles, setCommandProfiles] = useState([]), [entityProfiles, setEntityProfiles] = useState([]), [controlProfiles, setControlProfiles] = useState([]);
   const [abilities, setAbilities] = useState([]), [queryGraphs, setQueryGraphs] = useState([]);
   const [uiItemProfiles, setUiItemProfiles] = useState([]), [textTokens, setTextTokens] = useState([]);
-  const [performers, setPerformers] = useState([]), [hostBindings, setHostBindings] = useState([]), [assets, setAssets] = useState([]), [meshAssets, setMeshAssets] = useState([]);
+  const [presenters, setPresenters] = useState([]), [hostBindings, setHostBindings] = useState([]), [assets, setAssets] = useState([]), [meshAssets, setMeshAssets] = useState([]);
   const [selectedId, setSelectedId] = useState(''), [topologyId, setTopologyId] = useState(''), [mapId, setMapId] = useState('');
   const [viewMode, setViewMode] = useState('Players'), [viewId, setViewId] = useState(0);
   const [paused, setPaused] = useState(true), [clearToken, setClearToken] = useState(0);
@@ -46,7 +46,7 @@ export default function PlaygroundPage() {
     setBlueprints(b.filter(scope.inScope)); setActionGraphs(a); setCommandProfiles(commands); setEntityProfiles(entities);
     setControlProfiles(controls); setAbilities(abilityRecords); setQueryGraphs(queryRecords); setUiItemProfiles(itemProfiles); setTextTokens(tokens);
     setScreenProfiles(screens); setRouteProfiles(routes);
-    setPerformers(appearanceCatalog.performers); setHostBindings(appearanceCatalog.hostBindings); setAssets(appearanceCatalog.assets); setMeshAssets(appearanceCatalog.meshAssets); setMapId(initialMap?.id || '');
+    setPresenters(appearanceCatalog.presenters); setHostBindings(appearanceCatalog.hostBindings); setAssets(appearanceCatalog.assets); setMeshAssets(appearanceCatalog.meshAssets); setMapId(initialMap?.id || '');
     setTopologyId(initialTopology?.id || ''); setViewMode('Players'); setViewId(initialTopology?.players?.[0]?.player_id || 0);
   }); }, [scope.projectId]);
   const map = maps.find((item) => item.id === mapId) || null;
@@ -55,7 +55,7 @@ export default function PlaygroundPage() {
   const availableTopologies = useMemo(() => topologies.filter((item) => item.map_id === map?.map_id), [topologies, map?.map_id]);
   const topology = availableTopologies.find((item) => item.id === topologyId) || null;
   const template = templates.find((item) => item.id === selectedId) || null;
-  const appearanceResolver = useMemo(() => createEntityAppearanceResolver({ prototypes: templates, performers, hostBindings, assets, meshAssets }), [templates, performers, hostBindings, assets, meshAssets]);
+  const appearanceResolver = useMemo(() => createEntityAppearanceResolver({ prototypes: templates, presenters, hostBindings, assets, meshAssets }), [templates, presenters, hostBindings, assets, meshAssets]);
   const player = topology?.players.find((item) => item.player_id === viewId);
   const binding = viewMode === 'Players' ? { owner_player_id: player?.player_id || null, team_id: player?.team_id || null } : { owner_player_id: null, team_id: viewId || null };
   const view = topology && viewId ? { mode: viewMode, id: viewId } : null;

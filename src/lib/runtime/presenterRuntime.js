@@ -1,13 +1,13 @@
-import { readInstanceOverrides } from './performerOverrides';
-import { resolvePerformerChildren, usesInstanceChildren } from './performerComposition';
+import { readInstanceOverrides } from './presenterOverrides';
+import { resolvePresenterChildren, usesInstanceChildren } from './presenterComposition';
 
 const valueOf = (entry) => entry?.lane === 'Int' ? entry.intValue : entry?.lane === 'Vector' ? entry.vectorValue : entry?.floatValue;
 
 const mergeDefinition = (definition, definitions, trail = new Set()) => {
-  if (!definition?.extends || trail.has(definition.performer_id)) return definition || {};
+  if (!definition?.extends || trail.has(definition.presenter_id)) return definition || {};
   const parent = definitions.get(definition.extends);
   if (!parent) return definition;
-  const nextTrail = new Set(trail).add(definition.performer_id);
+  const nextTrail = new Set(trail).add(definition.presenter_id);
   const base = mergeDefinition(parent, definitions, nextTrail);
   return {
     ...base,
@@ -47,7 +47,7 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = [], sou
   const node = {
     definitionId,
     compositionSource: source,
-    scopeTag: childConfig.scope_tag ?? null,
+    scopeTag: childConfig.scopeTag ?? null,
     definition,
     params,
     transform: overrides.transform,
@@ -57,7 +57,7 @@ const instantiateNode = (definitionId, context, childConfig = {}, path = [], sou
     children: [],
   };
   const hasInstanceChildren = usesInstanceChildren(childConfig);
-  node.children = resolvePerformerChildren(definition, childConfig).map(child => instantiateNode(child.definition_id, { ...context, params }, child, [...path, definitionId], hasInstanceChildren ? 'instance_override' : 'template'));
+  node.children = resolvePresenterChildren(definition, childConfig).map(child => instantiateNode(child.definitionId, { ...context, params }, child, [...path, definitionId], hasInstanceChildren ? 'instance_override' : 'template'));
   return node;
 };
 
@@ -78,11 +78,11 @@ const snapshotNode = (node) => ({
   children: (node.children || []).map(snapshotNode),
 });
 
-export function createPerformerRuntime(performers = []) {
-  const definitions = new Map(performers.map(item => [item.performer_id, item]));
+export function createPresenterRuntime(presenters = []) {
+  const definitions = new Map(presenters.map(item => [item.presenter_id, item]));
   return {
     instantiate(definitionId, overrides = []) {
-      const root = instantiateNode(definitionId, { definitions, params: new Map() }, { param_overrides: overrides });
+      const root = instantiateNode(definitionId, { definitions, params: new Map() }, { overrides: { params: overrides } });
       return {
         root,
         setTag(tag, gained) {

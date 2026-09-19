@@ -48,9 +48,9 @@ export default function EntityPrototypeEditorPage() {
     initialData: [],
   });
 
-  const { data: performers = [] } = useQuery({
-    queryKey: ['entity-prototype-performers'],
-    queryFn: () => base44.entities.Performer.list('performer_id'),
+  const { data: presenters = [] } = useQuery({
+    queryKey: ['entity-prototype-presenters'],
+    queryFn: () => base44.entities.Presenter.list('presenter_id'),
     initialData: [],
   });
 
@@ -91,7 +91,7 @@ export default function EntityPrototypeEditorPage() {
       prototype_id: "new_prototype",
       name: "新原型",
       description: "",
-      performer_ref: "",
+      presenter_ref: "",
       referenced_attributes: [],
       ability_ids: [],
       semantic_profile_ref: "",
@@ -106,7 +106,7 @@ export default function EntityPrototypeEditorPage() {
     setEditData({ 
       ...prototype, 
       referenced_attributes: prototype.referenced_attributes || [],
-      performer_ref: prototype.performer_ref || "",
+      presenter_ref: prototype.presenter_ref || "",
       ability_ids: prototype.ability_ids || [],
       semantic_profile_ref: prototype.semantic_profile_ref || "",
       role_bindings: prototype.role_bindings || [],
@@ -124,7 +124,7 @@ export default function EntityPrototypeEditorPage() {
       prototype_id: editData.prototype_id,
       name: editData.name,
       description: editData.description || "",
-      performer_ref: editData.performer_ref || "",
+      presenter_ref: editData.presenter_ref || "",
       referenced_attributes: editData.referenced_attributes || [],
       ability_ids: (editData.ability_ids || []).filter(Boolean),
       semantic_profile_ref: editData.semantic_profile_ref || "",
@@ -200,7 +200,7 @@ export default function EntityPrototypeEditorPage() {
               <div><label className="block text-xs text-gray-400 mb-1">名称</label><Input value={editData.name || ''} onChange={(e) => setEditData({ ...editData, name: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
             </div>
             <div><label className="block text-xs text-gray-400 mb-1">描述</label><Input value={editData.description || ''} onChange={(e) => setEditData({ ...editData, description: e.target.value })} className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white" /></div>
-            <ReferenceSelect label="外观 Performer" hint="留空时 Playground 显示“无 asset”Billboard" value={editData.performer_ref} options={performers.map(item => ({ value: item.performer_id, label: `${item.label || item.performer_id} · ${item.performer_id}` }))} onChange={performer_ref => setEditData({ ...editData, performer_ref })} />
+            <ReferenceSelect label="外观 Presenter" hint="留空时 Playground 显示“无 asset”Billboard" value={editData.presenter_ref} options={presenters.map(item => ({ value: item.presenter_id, label: `${item.label || item.presenter_id} · ${item.presenter_id}` }))} onChange={presenter_ref => setEditData({ ...editData, presenter_ref })} />
           </Section>
           <Section title="引用属性">
             <div className="space-y-2">{(editData.referenced_attributes || []).map((attributeId, index) => <div key={`${attributeId}-${index}`} className="flex gap-2"><Select value={attributeId} onValueChange={(value) => handleUpdateAttribute(index, value)}><SelectTrigger className="h-7 bg-[#0D0F14] border-[#2A2E37] text-xs text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#15171C] border-[#2A2E37]">{attributes.map((attribute) => <SelectItem key={attribute.id} value={attribute.attribute_id}>{attribute.name}</SelectItem>)}</SelectContent></Select><Button size="sm" variant="ghost" onClick={() => handleRemoveAttribute(index)} className="h-7 text-red-400"><Trash2 className="w-3 h-3" /></Button></div>)}</div>

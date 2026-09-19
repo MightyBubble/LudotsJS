@@ -112,7 +112,7 @@ export const NAV_GROUPS = [
     key: 'presentation',
     label: '表现',
     items: [
-      { page: 'PerformerEditor', label: '主体', icon: Sparkles },
+      { page: 'PresenterEditor', label: '主体', icon: Sparkles },
       { page: 'PresentationAnimationEditor', label: '动画', icon: Film },
       { page: 'PresentationRenderAssetEditor', label: '渲染资产', icon: ImageIcon },
       { page: 'PresentationHostResourceEditor', search: '?view=bindings', label: '宿主绑定', icon: LinkIcon },

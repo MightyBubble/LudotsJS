@@ -29,7 +29,7 @@ import Playground from './pages/Playground';
 import ParticipantEditor from './pages/ParticipantEditor';
 import MapConfigEditor from './pages/MapConfigEditor';
 import LevelBlueprintEditor from './pages/LevelBlueprintEditor';
-import PerformerEditor from './pages/PerformerEditor';
+import PresenterEditor from './pages/PresenterEditor';
 import HostAssetBindingEditor from './pages/HostAssetBindingEditor';
 import PresentationConfigEditor from './pages/PresentationConfigEditor';
 import PresentationAnimationEditor from './pages/PresentationAnimationEditor';
@@ -112,7 +112,7 @@ const AuthenticatedApp = () => {
       <Route path="/ParticipantEditor" element={<LayoutWrapper currentPageName="ParticipantEditor"><ParticipantEditor /></LayoutWrapper>} />
       <Route path="/MapConfigEditor" element={<LayoutWrapper currentPageName="MapConfigEditor"><MapConfigEditor /></LayoutWrapper>} />
       <Route path="/LevelBlueprintEditor" element={<LayoutWrapper currentPageName="LevelBlueprintEditor"><LevelBlueprintEditor /></LayoutWrapper>} />
-      <Route path="/PerformerEditor" element={<LayoutWrapper currentPageName="PerformerEditor"><PerformerEditor /></LayoutWrapper>} />
+      <Route path="/PresenterEditor" element={<LayoutWrapper currentPageName="PresenterEditor"><PresenterEditor /></LayoutWrapper>} />
       <Route path="/HostAssetBindingEditor" element={<LayoutWrapper currentPageName="HostAssetBindingEditor"><HostAssetBindingEditor /></LayoutWrapper>} />
       <Route path="/PresentationConfigEditor" element={<LayoutWrapper currentPageName="PresentationConfigEditor"><PresentationConfigEditor /></LayoutWrapper>} />
       <Route path="/PresentationAnimationEditor" element={<LayoutWrapper currentPageName="PresentationAnimationEditor"><PresentationAnimationEditor /></LayoutWrapper>} />

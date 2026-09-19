@@ -21,9 +21,9 @@ const applyTransform = (object, binding = {}) => {
   object.scale.multiply(new THREE.Vector3(...scale));
 };
 
-const buildPerformerNode = async (node) => {
+const buildPresenterNode = async (node) => {
   const group = new THREE.Group();
-  group.name = node.definitionId || 'performer';
+  group.name = node.definitionId || 'presenter';
   const assetBehaviors = (node.behaviors || []).filter(item => item.kind === 'AssetBinding' && item.resolvedAsset?.uri);
   for (const behavior of assetBehaviors) {
     const acquired = await acquireModelAsset(behavior.resolvedAsset);
@@ -35,15 +35,15 @@ const buildPerformerNode = async (node) => {
     object.userData.releaseModel = acquired.release;
     group.add(object);
   }
-  for (const child of node.children || []) group.add(await buildPerformerNode(child));
+  for (const child of node.children || []) group.add(await buildPresenterNode(child));
   group.userData.visualKind = assetBehaviors.length || group.children.length ? 'model' : 'empty';
   return group;
 };
 
 export async function createEntityAppearanceVisual(appearance) {
-  if (appearance?.kind !== 'performer') return createMissingAssetBillboard();
+  if (appearance?.kind !== 'presenter') return createMissingAssetBillboard();
   try {
-    const object = await buildPerformerNode(appearance.tree);
+    const object = await buildPresenterNode(appearance.tree);
     if (!object.children.length) return createMissingAssetBillboard();
     return object;
   } catch { return createMissingAssetBillboard(); }

@@ -9,8 +9,8 @@ const loadByValues = async (entityName, field, values) => {
 };
 
 export async function loadRuntimeAppearanceCatalog() {
-  const performers = await base44.entities.Performer.list('performer_id', 500);
-  const logicalIds = unique(performers.flatMap(performer => (performer.behaviors || [])
+  const presenters = await base44.entities.Presenter.list('presenter_id', 500);
+  const logicalIds = unique(presenters.flatMap(presenter => (presenter.behaviors || [])
     .filter(behavior => behavior.kind === 'AssetBinding' && behavior.activeByDefault !== false)
     .map(behavior => behavior.assetBinding?.assetId)));
   const [hostBindings, meshAssets] = await Promise.all([
@@ -19,5 +19,5 @@ export async function loadRuntimeAppearanceCatalog() {
   ]);
   const editorAssetIds = unique(hostBindings.map(binding => binding.editor_asset_id));
   const assets = await loadByValues('Asset', 'asset_id', editorAssetIds);
-  return { performers, hostBindings, assets, meshAssets };
+  return { presenters, hostBindings, assets, meshAssets };
 }

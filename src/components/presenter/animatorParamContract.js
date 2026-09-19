@@ -209,16 +209,12 @@ function bindingLane(binding) {
   return source === 'entityColorVector' ? 'Vector' : 'Float';
 }
 
-function collectFromPerformer(performer, supplies, scope) {
-  const paramDefaults = Array.isArray(performer?.paramDefaults)
-    ? performer.paramDefaults
-    : Array.isArray(performer?.param_defaults)
-      ? performer.param_defaults
-      : [];
+function collectFromPresenter(presenter, supplies, scope) {
+  const paramDefaults = Array.isArray(presenter?.paramDefaults) ? presenter.paramDefaults : [];
   paramDefaults.forEach((paramDefault, index) => {
     addSupply(
       supplies,
-      paramDefault?.paramKey ?? paramDefault?.param_key,
+      paramDefault?.paramKey,
       paramDefault?.lane || 'Float',
       'Default',
       `paramDefaults[${index}]`,
@@ -226,11 +222,11 @@ function collectFromPerformer(performer, supplies, scope) {
     );
   });
 
-  const bindings = Array.isArray(performer?.bindings) ? performer.bindings : [];
+  const bindings = Array.isArray(presenter?.bindings) ? presenter.bindings : [];
   bindings.forEach((binding, index) => {
     addSupply(
       supplies,
-      binding?.paramKey ?? binding?.param_key,
+      binding?.paramKey,
       bindingLane(binding),
       'Binding',
       `bindings[${index}]`,
@@ -238,25 +234,25 @@ function collectFromPerformer(performer, supplies, scope) {
     );
   });
 
-  const behaviors = Array.isArray(performer?.behaviors) ? performer.behaviors : [];
+  const behaviors = Array.isArray(presenter?.behaviors) ? presenter.behaviors : [];
   behaviors.forEach((behavior, index) => {
     const slot = behavior?.slot || `behavior[${index}]`;
     const activeByDefault = behavior?.activeByDefault !== false;
     if (behavior?.kind === 'AttributeBinding') {
-      const config = behavior.attributeBinding || behavior.attribute_binding || {};
+      const config = behavior.attributeBinding || {};
       addSupply(
         supplies,
-        config.targetParamKey ?? config.target_param_key,
+        config.targetParamKey,
         'Float',
         'AttributeBinding',
-        `${slot} -> ${config.attributeId || config.attribute_id || 'attribute'}`,
+        `${slot} -> ${config.attributeId || 'attribute'}`,
         scope,
         activeByDefault,
       );
 
       const thresholds = Array.isArray(config.thresholds) ? config.thresholds : [];
       thresholds.forEach((threshold, thresholdIndex) => {
-        const outputParamKey = threshold?.outputParamKey ?? threshold?.output_param_key;
+        const outputParamKey = threshold?.outputParamKey;
         addSupply(supplies, outputParamKey, 'Float', 'AttributeThreshold', `${slot}.thresholds[${thresholdIndex}]`, scope, activeByDefault);
         addSupply(supplies, outputParamKey, 'Int', 'AttributeThreshold', `${slot}.thresholds[${thresholdIndex}]`, scope, activeByDefault);
       });
@@ -264,20 +260,20 @@ function collectFromPerformer(performer, supplies, scope) {
     }
 
     if (behavior?.kind === 'TagBinding') {
-      const config = behavior.tagBinding || behavior.tag_binding || {};
+      const config = behavior.tagBinding || {};
       addSupply(
         supplies,
-        config.targetParamKey ?? config.target_param_key,
+        config.targetParamKey,
         'Int',
         'TagBinding',
-        `${slot} -> ${config.tagId || config.tag_id || 'tag'}`,
+        `${slot} -> ${config.tagId || 'tag'}`,
         scope,
         activeByDefault,
       );
     }
   });
 
-  const rules = Array.isArray(performer?.rules) ? performer.rules : [];
+  const rules = Array.isArray(presenter?.rules) ? presenter.rules : [];
   rules.forEach((rule, index) => {
     const command = rule?.command || {};
     const kind = command.kind || command.commandKind || command.command_kind;
@@ -285,8 +281,8 @@ function collectFromPerformer(performer, supplies, scope) {
 
     addSupply(
       supplies,
-      command.paramKey ?? command.param_key,
-      command.paramLane || command.param_lane || 'Float',
+      command.paramKey,
+      command.paramLane || 'Float',
       'Rule',
       `rules[${index}]`,
       scope,
@@ -294,29 +290,29 @@ function collectFromPerformer(performer, supplies, scope) {
   });
 }
 
-export function collectPerformerParamSupplies(performer, performers = []) {
-  const performerById = new Map(
-    performers
-      .filter(item => item?.performer_id)
-      .map(item => [item.performer_id, item]),
+export function collectPresenterParamSupplies(presenter, presenters = []) {
+  const presenterById = new Map(
+    presenters
+      .filter(item => item?.presenter_id)
+      .map(item => [item.presenter_id, item]),
   );
   const supplies = [];
   const visited = new Set();
 
   const visit = (item, scope) => {
     if (!item) return;
-    const id = item.performer_id || scope;
+    const id = item.presenter_id || scope;
     if (visited.has(id)) return;
     visited.add(id);
 
     if (item.extends) {
-      visit(performerById.get(item.extends), `extends ${item.extends}`);
+      visit(presenterById.get(item.extends), `extends ${item.extends}`);
     }
 
-    collectFromPerformer(item, supplies, scope);
+    collectFromPresenter(item, supplies, scope);
   };
 
-  visit(performer, 'current');
+  visit(presenter, 'current');
   return supplies;
 }
 

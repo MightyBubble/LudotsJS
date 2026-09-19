@@ -1,4 +1,4 @@
-export default function PerformerMiniStateMachine({ layer, activeStateId, activeTransitionId, onSelect }) {
+export default function PresenterMiniStateMachine({ layer, activeStateId, activeTransitionId, onSelect }) {
   const states = (layer?.states || []).filter(state => ['Normal', 'BlendTree'].includes(state.type));
   return <div className="overflow-x-auto border border-[#424a55] bg-[#0D0F14] p-3">
     <div className="flex min-w-max items-center gap-2">

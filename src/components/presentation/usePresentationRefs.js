@@ -2,7 +2,7 @@
 import { base44 } from '@/api/base44Client';
 
 const defs = [
-  ['performers', 'Performer', 'performer_id', 'label'],
+  ['presenters', 'Presenter', 'presenter_id', 'label'],
   ['meshes', 'PresentationMeshAsset', 'asset_id'],
   ['materials', 'PresentationMaterialAsset', 'asset_id'],
   ['vfxAssets', 'PresentationEffectAsset', 'asset_id'],

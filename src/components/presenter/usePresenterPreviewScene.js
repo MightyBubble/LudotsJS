@@ -4,13 +4,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { acquireModelAsset } from '@/lib/playground/modelAssetCache';
 import { createVfxRuntime } from '@/lib/playground/vfxRuntime';
-import { readInstanceOverrides } from '@/lib/runtime/performerOverrides';
-import { resolvePerformerChildren } from '@/lib/runtime/performerComposition';
+import { readInstanceOverrides } from '@/lib/runtime/presenterOverrides';
+import { resolvePresenterChildren } from '@/lib/runtime/presenterComposition';
 import { clipNameFromRef, findLocatorAsset } from '@/components/presentation/animationAssetOptions';
 
 const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 
-export default function usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, mode, onSelectPath, onTransform) {
+export default function usePresenterPreviewScene(containerRef, root, presenters, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, mode, onSelectPath, onTransform) {
   const releases = useRef([]);
   const cameraState = useRef(null);
   const animationRef = useRef({ players: [] });
@@ -65,8 +65,8 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     const content = new THREE.Group();
     scene.add(content);
     const vfx = createVfxRuntime(scene);
-    const byId = new Map(performers.map(item => [item.performer_id, item]));
-    byId.set(root.performer_id, root);
+    const byId = new Map(presenters.map(item => [item.presenter_id, item]));
+    byId.set(root.presenter_id, root);
     const assetById = new Map(assets.map(item => [item.asset_id, item]));
     const effectById = new Map(effects.map(item => [item.asset_id, item]));
     const controllerById = new Map(controllers.map(item => [item.controller_id, item]));
@@ -83,21 +83,18 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
     let selectionBox = null;
     const nodeGroups = [];
     const addDefinition = async (definition, parent, path = 'root', visited = new Set(), instance = {}) => {
-      if (!definition || visited.has(definition.performer_id)) return;
-      const nextVisited = new Set(visited).add(definition.performer_id);
+      if (!definition || visited.has(definition.presenter_id)) return;
+      const nextVisited = new Set(visited).add(definition.presenter_id);
       const instanceGroup = new THREE.Group();
       const instanceTransform = readInstanceOverrides(instance).transform;
       instanceGroup.name = path;
-      instanceGroup.position.fromArray(instanceTransform.local_position);
-      instanceGroup.rotation.set(...instanceTransform.local_rotation.map(THREE.MathUtils.degToRad));
-      instanceGroup.scale.fromArray(instanceTransform.local_scale);
+      instanceGroup.position.fromArray(instanceTransform.localPosition);
+      instanceGroup.rotation.set(...instanceTransform.localRotation.map(THREE.MathUtils.degToRad));
+      instanceGroup.scale.fromArray(instanceTransform.localScale);
       parent.add(instanceGroup);
       const group = new THREE.Group();
-      const rootTransform = definition.transform || {};
       group.name = `${path}:root`;
-      group.position.fromArray(vector(rootTransform.local_position, [0, 0, 0]));
-      group.rotation.set(...vector(rootTransform.local_rotation, [0, 0, 0]).map(THREE.MathUtils.degToRad));
-      group.scale.fromArray(vector(rootTransform.local_scale, [1, 1, 1]));
+      group.position.fromArray(vector(definition.anchor?.offset, [0, 0, 0]));
       instanceGroup.add(group);
       nodeGroups.push({ path, group: instanceGroup });
       if (path === selectedInstancePath) selectedGroup = path === 'root' ? group : instanceGroup;
@@ -107,7 +104,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         if (behavior.kind !== 'AssetBinding' || behavior.activeByDefault === false) continue;
         const asset = behavior.assetBinding || {};
         let object;
-        if (asset.assetKind === 'Vfx') {
+        if (asset.assetKind === 'VFX') {
           const effect = effectById.get(asset.assetId);
           if (!effect) continue;
           object = await vfx.play(effect);
@@ -152,7 +149,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
         const initial = actions.get(activeStateRef.current) || actions.values().next().value;
         if (initial) { initial.play(); player.active = initial; }
       }
-      await Promise.all(resolvePerformerChildren(definition, instance).map((child, index) => addDefinition(byId.get(child.definition_id), group, `${path}/${index}`, nextVisited, child)));
+      await Promise.all(resolvePresenterChildren(definition, instance).map((child, index) => addDefinition(byId.get(child.definitionId), group, `${path}/${index}`, nextVisited, child)));
     };
 
     let frame = 0;
@@ -170,7 +167,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       if (!object) return;
       const rotation = [object.rotation.x, object.rotation.y, object.rotation.z].map(THREE.MathUtils.radToDeg);
       onTransformRef.current?.({
-        local_position: object.position.toArray(), local_rotation: rotation, local_scale: object.scale.toArray(),
+        localPosition: object.position.toArray(), localRotation: rotation, localScale: object.scale.toArray(),
       });
     };
     transform.addEventListener('mouseUp', commitTransform);
@@ -241,7 +238,7 @@ export default function usePerformerPreviewScene(containerRef, root, performers,
       animationRef.current = { players: [] };
       host.replaceChildren();
     };
-  }, [containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath]);
+  }, [containerRef, root, presenters, bindings, assets, effects, controllers, profiles, clips, selectedInstancePath]);
 
   return status;
 }

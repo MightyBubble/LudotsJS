@@ -1,4 +1,4 @@
-﻿/** 与 Ludots performers.json behaviors 对齐的每种 kind 字段规格。 */
+﻿/** 与 Ludots presenters.json behaviors 对齐的每种 kind 字段规格。 */
 export const BEHAVIOR_KINDS = ['AssetBinding', 'AttributeBinding', 'TagBinding', 'Animator', 'Attachment', 'Sound', 'Material', 'Spline', 'Grounding', 'MinimapMarker', 'WorldText', 'SurfaceSource', 'InstancedBatch'];
 
 export const BEHAVIOR_SPECS = {

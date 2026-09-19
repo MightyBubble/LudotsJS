@@ -4,6 +4,6 @@ export function usesInstanceChildren(instance) {
   return Array.isArray(instance.children) && instance.children.length > 0;
 }
 
-export function resolvePerformerChildren(definition, instance) {
+export function resolvePresenterChildren(definition, instance) {
   return usesInstanceChildren(instance) ? (instance.children || []) : (definition?.children || []);
 }

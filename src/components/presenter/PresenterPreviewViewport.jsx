@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Move3D, Rotate3D, Scaling } from 'lucide-react';
-import usePerformerPreviewScene from './usePerformerPreviewScene';
+import usePresenterPreviewScene from './usePresenterPreviewScene';
 
 const MODES = [
   { value: 'translate', label: '移动', Icon: Move3D },
@@ -8,11 +8,11 @@ const MODES = [
   { value: 'scale', label: '缩放', Icon: Scaling },
 ];
 
-export default function PerformerPreviewViewport({ root, selectedInstancePath, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, mode, onModeChange, onSelectPath, onTransform }) {
+export default function PresenterPreviewViewport({ root, selectedInstancePath, presenters, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, mode, onModeChange, onSelectPath, onTransform }) {
   const containerRef = useRef(null);
-  const status = usePerformerPreviewScene(containerRef, root, performers, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, mode, onSelectPath, onTransform);
+  const status = usePresenterPreviewScene(containerRef, root, presenters, bindings, assets, effects, controllers, profiles, clips, activeStateIndex, selectedInstancePath, mode, onSelectPath, onTransform);
   return <div className="relative h-[480px] overflow-hidden rounded border border-[#424a55] bg-[#0D0F14]">
-    <div ref={containerRef} data-testid="performer-preview" className="h-full w-full" />
+    <div ref={containerRef} data-testid="presenter-preview" className="h-full w-full" />
     <div className="absolute left-2 top-2 flex gap-1 rounded border border-[#424a55] bg-[#171b21] p-1">
       {MODES.map(({ value, label, Icon }) => <button key={value} type="button" aria-label={label} onClick={() => onModeChange(value)} className={`flex h-7 items-center gap-1 rounded px-2 text-[11px] ${mode === value ? 'bg-primary text-primary-foreground' : 'text-gray-300 hover:bg-[#303845]'}`}><Icon className="h-3 w-3" />{label}</button>)}
     </div>

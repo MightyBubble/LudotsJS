@@ -13,7 +13,7 @@
     "domain": {
       "type": "string",
       "enum": [
-        "performer",
+        "presenter",
         "presentation",
         "gameplay",
         "input",

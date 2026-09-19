@@ -90,7 +90,7 @@
           "overrides": {
             "type": "object"
           },
-          "performer_param_overrides": {
+          "presenter_param_overrides": {
             "type": "array",
             "items": {
               "type": "object",
