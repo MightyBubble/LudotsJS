@@ -2,9 +2,10 @@ import React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Section, BoolField, NumberField, SelectField, TextField } from '@/components/ludots/ui';
+import { factValue } from '@/lib/editorFacts';
 import BoardScaleSummary from './BoardScaleSummary';
 
-const blankBoard = () => ({ name: 'default', spatial_type: 'Grid', width_in_macro_tiles: 64, height_in_macro_tiles: 64, grid_cell_size_cm: 100, hex_edge_length_cm: 400, chunk_size_cells: 64, loaded_chunk_capacity: 0, data_file: '', visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, navigation_enabled: false });
+const blankBoard = () => ({ name: 'default', spatial_type: 'Grid', width_in_macro_tiles: factValue('mapBoard.defaultMacroTilesX'), height_in_macro_tiles: factValue('mapBoard.defaultMacroTilesY'), grid_cell_size_cm: factValue('mapBoard.defaultCellCm'), hex_edge_length_cm: factValue('mapBoard.defaultHexEdgeCm'), chunk_size_cells: factValue('mapBoard.defaultChunkSizeCells'), loaded_chunk_capacity: 0, data_file: '', visual_heightmap_asset: '', structure_collision_asset: '', structure_aware_grounding: false, structure_aware_navigation: false, navigation_enabled: false });
 export default function MapBoardEditor({ boards = [], onChange }) {
   const patch = (i, next) => onChange(boards.map((board, index) => index === i ? { ...board, ...next } : board));
   return <Section title="Boards" right={<Button size="sm" onClick={() => onChange([...boards, blankBoard()])} className="h-7 bg-[#1E2128] hover:bg-[#2A2E37]"><Plus className="w-3 h-3" />添加 Board</Button>}>
