@@ -9,10 +9,17 @@
     },
     "asset_kind": {
       "type": "string",
-      "description": "Clip / BlendSpace1D / BlendSpace2D"
+      "enum": [
+        "Clip",
+        "BlendTree",
+        "Montage",
+        "PoseAsset"
+      ],
+      "description": "AnimationClipAssetKind"
     },
     "locators": {
       "type": "array",
+      "description": "Runtime locator rows. The editor derives these from AnimationClip host bindings.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -34,21 +41,30 @@
       }
     },
     "blend_inputs": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "x": {
-            "type": "number"
-          },
-          "y": {
-            "type": "number"
-          }
+      "type": "object",
+      "description": "AnimationBlendInputSource per axis",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "string",
+          "enum": [
+            "Zero",
+            "Scalar0",
+            "Scalar1",
+            "NormalizedTime",
+            "Weight01"
+          ]
         },
-        "required": [
-          "x"
-        ]
+        "y": {
+          "type": "string",
+          "enum": [
+            "Zero",
+            "Scalar0",
+            "Scalar1",
+            "NormalizedTime",
+            "Weight01"
+          ]
+        }
       }
     }
   },

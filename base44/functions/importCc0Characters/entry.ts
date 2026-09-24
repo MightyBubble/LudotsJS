@@ -137,7 +137,9 @@ export default async function(req) {
           if (!bindingIds.has(bindingId)) createdBindings.push({ binding_id: bindingId, asset_kind: 'SkinnedMesh', asset_id: meshId, backend_id: 'browser', source_uris: [upload.file_url], editor_asset_id: assetId });
         } else {
           const clipId = `Animation.CC0.${pack.namespace}.${sourceKey}`;
-          if (!clipIds.has(clipId)) createdClips.push({ asset_id: clipId, asset_kind: 'Clip', locators: [{ backend_id: 'browser', asset_ref: assetId }], blend_inputs: [] });
+          const bindingId = `Host.Browser.${clipId}`;
+          if (!clipIds.has(clipId)) createdClips.push({ asset_id: clipId, asset_kind: 'Clip', locators: [{ backend_id: 'browser', asset_ref: upload.file_url }], blend_inputs: { x: 'Scalar0', y: 'Scalar1' } });
+          if (!bindingIds.has(bindingId)) createdBindings.push({ binding_id: bindingId, asset_kind: 'AnimationClip', asset_id: clipId, backend_id: 'browser', source_uris: [upload.file_url], editor_asset_id: assetId });
         }
       } catch (error) {
         failures.push({ file: file.name, error: error.message });
