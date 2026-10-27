@@ -38,6 +38,8 @@ import PresentationHostResourceEditor from './pages/PresentationHostResourceEdit
 import PresentationTextEditor from './pages/PresentationTextEditor';
 import AbilitySemanticProfileEditor from './pages/AbilitySemanticProfileEditor';
 import RuntimeDivergenceEditor from './pages/RuntimeDivergenceEditor';
+import UIScreenEditor from './pages/UIScreenEditor';
+import UISelectionRouteEditor from './pages/UISelectionRouteEditor';
 import { ProjectScopeProvider } from '@/lib/projectScope';
 import I18nProvider from '@/i18n/I18nProvider';
 
@@ -120,6 +122,8 @@ const AuthenticatedApp = () => {
       <Route path="/PresentationHostResourceEditor" element={<LayoutWrapper currentPageName="PresentationHostResourceEditor"><PresentationHostResourceEditor /></LayoutWrapper>} />
       <Route path="/PresentationTextEditor" element={<LayoutWrapper currentPageName="PresentationTextEditor"><PresentationTextEditor /></LayoutWrapper>} />
       <Route path="/RuntimeDivergenceEditor" element={<LayoutWrapper currentPageName="RuntimeDivergenceEditor"><RuntimeDivergenceEditor /></LayoutWrapper>} />
+      <Route path="/UIScreenEditor" element={<LayoutWrapper currentPageName="UIScreenEditor"><UIScreenEditor /></LayoutWrapper>} />
+      <Route path="/UISelectionRouteEditor" element={<LayoutWrapper currentPageName="UISelectionRouteEditor"><UISelectionRouteEditor /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
