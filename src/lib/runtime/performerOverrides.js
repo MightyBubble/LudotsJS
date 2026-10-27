@@ -9,7 +9,7 @@ const vector = (value, fallback) => Array.isArray(value) ? value : fallback;
 export function readInstanceOverrides(instance = {}) {
   const transform = instance.overrides?.transform || {};
   return {
-    params: instance.overrides?.params ?? instance.param_overrides ?? [],
+    params: instance.overrides?.params ?? [],
     transform: {
       local_position: vector(transform.local_position, EMPTY_INSTANCE_TRANSFORM.local_position),
       local_rotation: vector(transform.local_rotation, EMPTY_INSTANCE_TRANSFORM.local_rotation),

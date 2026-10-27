@@ -144,12 +144,6 @@
               }
             }
           },
-          "param_overrides": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
           "runtime_behaviors": {
             "type": "array",
             "items": {

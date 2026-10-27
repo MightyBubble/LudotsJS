@@ -82,7 +82,7 @@ export function createPerformerRuntime(performers = []) {
   const definitions = new Map(performers.map(item => [item.performer_id, item]));
   return {
     instantiate(definitionId, overrides = []) {
-      const root = instantiateNode(definitionId, { definitions, params: new Map() }, { param_overrides: overrides });
+      const root = instantiateNode(definitionId, { definitions, params: new Map() }, { overrides: { params: overrides } });
       return {
         root,
         setTag(tag, gained) {
