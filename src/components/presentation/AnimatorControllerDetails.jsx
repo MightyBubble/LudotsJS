@@ -379,7 +379,7 @@ function compileAuthoring(layers, parameters) {
       if (RUNTIME_STATE_TYPES.has(state.type)) {
         stateIndexById.set(state.id, states.length);
         states.push(normalizeRuntimeState({
-          packed_state_index: state.packed_state_index,
+          packed_state_index: states.length,
           duration_seconds: state.duration_seconds,
           playback_speed: state.playback_speed,
           loop: state.loop,
@@ -1108,8 +1108,8 @@ function StateInspector({ state, layer, parameters, clips, controllers, onUpdate
       {RUNTIME_STATE_TYPES.has(state.type) && (
         <>
           <div className="grid grid-cols-2 gap-2">
-            <InspectorField label="Packed Index">
-              <NumberInput value={state.packed_state_index} onChange={packed_state_index => onUpdateState({ packed_state_index })} />
+            <InspectorField label="State Index">
+              <div className="flex h-8 items-center border border-[#2A2E37] bg-[#0D0F14] px-2 font-mono text-xs text-gray-400">{state.packed_state_index}</div>
             </InspectorField>
             <InspectorField label="Duration">
               <NumberInput value={state.duration_seconds} onChange={duration_seconds => onUpdateState({ duration_seconds })} step={0.1} min={0.01} />
@@ -1300,7 +1300,11 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
   }, [currentLayer, selectedStateId, selectedTransitionId]);
 
   const commit = useCallback((nextLayers, nextParameters = parameters) => {
-    const normalizedLayers = nextLayers.map(normalizeLayer);
+    let runtimeIndex = 0;
+    const normalizedLayers = nextLayers.map(normalizeLayer).map(layer => ({
+      ...layer,
+      states: layer.states.map(state => RUNTIME_STATE_TYPES.has(state.type) ? { ...state, packed_state_index: runtimeIndex++ } : state),
+    }));
     const normalizedParameters = nextParameters.map(normalizeParameter);
     const nextCompiled = compileAuthoring(normalizedLayers, normalizedParameters);
     patch({
@@ -1475,4 +1479,3 @@ export default function AnimatorControllerDetails({ draft, patch, refs = {} }) {
     </div>
   );
 }
-
