@@ -41,17 +41,12 @@ export default function ModelPreview({ uri, resourceMap, selectedClip, onClipsCh
     };
 
     (async () => {
-      const ext = (uri.split('?')[0].split('.').pop() || '').toLowerCase();
       try {
-        let object, animations;
-        if (ext === 'fbx') {
-          const loader = new (await import('three/examples/jsm/loaders/FBXLoader.js')).FBXLoader();
-          object = await loader.loadAsync(uri); animations = object.animations || [];
-        } else {
-          const acquired = await acquireModelAsset({ uri, resourceMap });
-          if (disposed) { acquired.release(); return; }
-          object = acquired.object; animations = acquired.animations; releaseModel = acquired.release;
-        }
+        const acquired = await acquireModelAsset({ uri, resourceMap });
+        if (disposed) { acquired.release(); return; }
+        const object = acquired.object;
+        const animations = acquired.animations;
+        releaseModel = acquired.release;
         if (disposed) return;
         scene.add(object); fit(object);
         const clipNames = animations.map((a, i) => a.name || `clip_${i}`);

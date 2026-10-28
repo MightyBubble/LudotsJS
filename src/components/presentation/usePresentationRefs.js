@@ -26,11 +26,10 @@ export default function usePresentationRefs() {
     const rows = results[i].data || [];
     refs.raw ??= {};
     refs.raw[name] = rows;
-    refs[name] = rows.map(r => ({ value: r[key], label: label && r[label] ? `${r[label]} · ${r[key]}` : r[key] })).filter(o => o.value);
+    refs[name] = rows.map(r => ({ value: r[key], label: label && r[label] ? `${r[label]} · ${r[key]}` : r[key], record: r })).filter(o => o.value);
   });
   refs.logicalAssets = [...refs.meshes, ...refs.materials, ...refs.vfxAssets, ...refs.clips, ...refs.hostAssets]
     .filter((o, i, all) => all.findIndex(x => x.value === o.value) === i);
   refs.eventKeys = [...refs.tags, ...refs.attributes];
   return refs;
 }
-

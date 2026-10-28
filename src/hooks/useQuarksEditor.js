@@ -27,7 +27,7 @@ export default function useQuarksEditor(asset, effect) {
       const file = new File([JSON.stringify(document)], `${asset.asset_id}.json`, { type: 'application/json' });
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       const payload = { asset_id: asset.asset_id, backend: 'quarks', source_uris: [file_url], config: effect?.config || {}, loop: selected?.ps?.looping ?? true, scale: effect?.scale || 1 };
-      await base44.entities.Asset.update(asset.id, { uri: file_url, tags: [...new Set([...(asset.tags || []).filter(tag => tag !== 'effekseer'), 'quarks'])] });
+      await base44.entities.Asset.update(asset.id, { uri: file_url, tags: [...new Set([...(asset.tags || []), 'quarks'])] });
       if (effect?.id) await base44.entities.PresentationEffectAsset.update(effect.id, payload); else await base44.entities.PresentationEffectAsset.create(payload);
       const bindings = await base44.entities.HostAssetBinding.filter({ asset_id: asset.asset_id });
       const binding = { binding_id: `Host.Browser.${asset.asset_id}`, asset_kind: 'Vfx', asset_id: asset.asset_id, backend_id: 'browser-quarks', source_uris: [file_url], editor_asset_id: asset.asset_id };

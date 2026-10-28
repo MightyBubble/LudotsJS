@@ -13,6 +13,6 @@ export default defineConfig({
     react(),
   ],
   optimizeDeps: {
-    exclude: ['three/examples/jsm/loaders/GLTFLoader.js'],
+    exclude: ['three/examples/jsm/loaders/GLTFLoader.js', 'three/examples/jsm/loaders/FBXLoader.js'],
   },
 });
