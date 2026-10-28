@@ -122,8 +122,8 @@ export default function UnifiedGraphEditorPage() {
   const { data: commandPanels = [] } = useQuery({ queryKey: ['command-panel-profiles'], queryFn: () => base44.entities.CommandPanelProfile.list(), initialData: [] });
   const { data: entityPanels = [] } = useQuery({ queryKey: ['entity-panel-profiles'], queryFn: () => base44.entities.EntityPanelProfile.list(), initialData: [] });
   const { data: entityCollections = [] } = useQuery({ queryKey: ['entity-collections'], queryFn: () => base44.entities.EntityCollection.list(), initialData: [] });
-  const { data: uiScreens = [] } = useQuery({ queryKey: ['ui-screen-profiles'], queryFn: () => base44.entities.UIScreenProfile.list(), initialData: [] });
-  const { data: uiSelectionRoutes = [] } = useQuery({ queryKey: ['ui-selection-route-profiles'], queryFn: () => base44.entities.UISelectionRouteProfile.list(), initialData: [] });
+  const { data: uiScreens = [] } = useQuery({ queryKey: ['ui-screen-profiles'], queryFn: () => base44.entities['ui-screen-profile'].list(), initialData: [] });
+  const { data: uiSelectionRoutes = [] } = useQuery({ queryKey: ['ui-selection-route-profiles'], queryFn: () => base44.entities['ui-selection-route-profile'].list(), initialData: [] });
 
   const levelNodeOptions = useMemo(() => ({
     levelVariables: Object.entries(blackboard).map(([key, spec]) => ({ value: key, label: `${key} · ${spec.type || 'any'}` })),

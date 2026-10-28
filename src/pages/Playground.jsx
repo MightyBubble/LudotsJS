@@ -35,7 +35,7 @@ export default function PlaygroundPage() {
     base44.entities.EntityPanelProfile.list('panel_id', 100), base44.entities.ControlPlaneProfile.list('control_plane_id', 100),
     base44.entities.Ability.list('name', 300), base44.entities.EntityQuery.list('query_name', 200),
     base44.entities.UIItemPresentationProfile.list('profile_id', 200), base44.entities.PresentationTextToken.list('token_id', 500),
-    base44.entities.UIScreenProfile.list('screen_id', 100), base44.entities.UISelectionRouteProfile.list('route_id', 100),
+    base44.entities['ui-screen-profile'].list('screen_id', 100), base44.entities['ui-selection-route-profile'].list('route_id', 100),
     loadRuntimeAppearanceCatalog(),
   ]).then(([p, t, m, b, a, commands, entities, controls, abilityRecords, queryRecords, itemProfiles, tokens, screens, routes, appearanceCatalog]) => {
     const scopedMaps = m.filter(scope.inScope);
