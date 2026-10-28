@@ -5,5 +5,5 @@ export function toAbilityContract(record) {
 }
 
 export function getAbilityDisplayName(record) {
-  return record.presentation?.displayName || record.presentation?.displayNameToken || record.ability_id || 'Ability';
+  return record.presentation?.displayName || record.ability_id || 'Ability';
 }

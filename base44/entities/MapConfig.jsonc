@@ -35,20 +35,6 @@
         "null"
       ]
     },
-    "visual_heightmap_asset": {
-      "type": "string"
-    },
-    "structure_collision_asset": {
-      "type": "string"
-    },
-    "structure_aware_grounding": {
-      "type": "boolean",
-      "default": false
-    },
-    "structure_aware_navigation": {
-      "type": "boolean",
-      "default": false
-    },
     "tags": {
       "type": "array",
       "items": {
@@ -211,29 +197,6 @@
         ]
       }
     },
-    "visual_heightmap": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "asset": {
-          "type": "string"
-        },
-        "board_name": {
-          "type": "string"
-        },
-        "default_layer_index": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "asset",
-        "board_name",
-        "default_layer_index"
-      ]
-    },
     "trigger_types": {
       "type": "array",
       "items": {
@@ -369,8 +332,6 @@
   },
   "required": [
     "map_id",
-    "structure_aware_grounding",
-    "structure_aware_navigation",
     "tags",
     "metadata",
     "entities",

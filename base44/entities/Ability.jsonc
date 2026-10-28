@@ -253,19 +253,10 @@
         "hintText": {
           "type": "string"
         },
-        "displayNameToken": {
-          "type": "string"
-        },
-        "hintTextToken": {
-          "type": "string"
-        },
         "modeIconGlyphs": {
           "type": "object"
         },
         "modeHints": {
-          "type": "object"
-        },
-        "modeHintTokens": {
           "type": "object"
         }
       }

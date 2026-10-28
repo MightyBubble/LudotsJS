@@ -49,7 +49,6 @@
  */
 import AttributeEditor from './pages/AttributeEditor';
 import AttributeModifiers from './pages/AttributeModifiers';
-import AttributeSimulator from './pages/AttributeSimulator';
 import ConditionEditor from './pages/ConditionEditor';
 import DataGraphEditor from './pages/DataGraphEditor';
 import DataTableEditor from './pages/DataTableEditor';
@@ -79,7 +78,6 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AttributeEditor": AttributeEditor,
     "AttributeModifiers": AttributeModifiers,
-    "AttributeSimulator": AttributeSimulator,
     "ConditionEditor": ConditionEditor,
     "DataGraphEditor": DataGraphEditor,
     "DataTableEditor": DataTableEditor,

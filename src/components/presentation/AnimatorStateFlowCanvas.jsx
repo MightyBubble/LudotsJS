@@ -180,11 +180,28 @@ function StateFlowCanvasInner({
   readOnly = false,
   compact = false,
 }) {
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [menu, setMenu] = useState(null);
   const states = layer?.states || [];
   const transitions = layer?.transitions || [];
+
+  useEffect(() => {
+    let cancelled = false;
+    const raf = requestAnimationFrame(() => {
+      if (!cancelled) {
+        try {
+          fitView({ padding: 0.2, minZoom: 0.4, maxZoom: 1, duration: 0 });
+        } catch {
+          // Ignore unmount race
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, [fitView, layer?.id]);
 
   const updateState = useCallback((stateId, updates) => {
     if (readOnly) return;
@@ -329,8 +346,6 @@ function StateFlowCanvasInner({
         deleteKeyCode={readOnly ? null : ['Delete', 'Backspace']}
         onNodesDelete={deleted => deleted.forEach(node => deleteState(node.id))}
         onEdgesDelete={deleted => deleted.forEach(edge => deleteTransition(edge.id))}
-        fitView
-        fitViewOptions={{ padding: 0.2, minZoom: 0.4, maxZoom: 1 }}
         minZoom={0.25}
         maxZoom={2.5}
         proOptions={{ hideAttribution: true }}
